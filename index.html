@@ -833,35 +833,503 @@ input{font-family:inherit;}
         <div class="resultBanner" id="fishResult">낚싯대를 던져서 물고기를 낚아보세요</div>
       </div>
 
-      <!-- 21 (블랙잭) -->
-      <div class="tabpane" data-pane="blackjack">
-        <div class="betRow">
-          <input type="number" id="bjBet" value="1" min="1">
-          <button class="chipbtn" data-bet="+1">+1</button>
-          <button class="chipbtn" data-bet="+10">+10</button>
-          <button class="chipbtn" data-bet="max">MAX</button>
-          <button class="playBtn" id="bjDeal">딜</button>
-        </div>
-        <div class="bjTable">
-          <div class="bjRow">
-            <div class="bjLabel">딜러 <span id="bjDealerScore"></span></div>
-            <div class="bjHand" id="bjDealerHand"></div>
-          </div>
-          <div class="bjRow">
-            <div class="bjLabel">플레이어 <span id="bjPlayerScore"></span></div>
-            <div class="bjHand" id="bjPlayerHand"></div>
-          </div>
-        </div>
-        <div class="bjActions" id="bjActions" style="display:none;">
-          <button class="chipbtn bjAct" id="bjHit">히트</button>
-          <button class="chipbtn bjAct" id="bjStand">스탠드</button>
-          <button class="chipbtn bjAct" id="bjDouble">더블다운</button>
-        </div>
-        <div class="resultBanner" id="bjResult">베팅하고 딜을 눌러 시작하세요 · 블랙잭 3:2 배당</div>
+      <!-- ============================ 통합 블랙잭 (싱글 & 멀티 모두 지원) ============================ -->
+<div class="tabpane" data-pane="blackjack">
+  <!-- 모드 선택 버튼 -->
+  <div style="display: flex; gap: 10px; margin-bottom: 15px; justify-content: center;">
+    <button id="btnSwitchSingle" style="flex: 1; padding: 10px; border-radius: 8px; border: none; background: #6c5ce7; color: #fff; font-weight: bold; cursor: pointer;">👤 싱글플레이 (딜러 대전)</button>
+    <button id="btnSwitchMulti" style="flex: 1; padding: 10px; border-radius: 8px; border: none; background: #3f3f4e; color: #aaa; font-weight: bold; cursor: pointer;">🎮 멀티플레이 (1:1 대전)</button>
+  </div>
+
+  <!-- [1] 싱글플레이 화면 (원래 있던 구조 그대로 보존!) -->
+  <div id="bjSingleArea">
+    <div class="betRow">
+      <input type="number" id="bjBet" value="1" min="1">
+      <button class="chipbtn" data-bet="+1">+1</button>
+      <button class="chipbtn" data-bet="+10">+10</button>
+      <button class="chipbtn" data-bet="max">MAX</button>
+      <button class="playBtn" id="bjDeal">딜</button>
+    </div>
+    <div class="bjTable">
+      <div class="bjRow">
+        <div class="bjLabel">딜러 <span id="bjDealerScore"></span></div>
+        <div class="bjHand" id="bjDealerHand"></div>
+      </div>
+      <div class="bjRow">
+        <div class="bjLabel">플레이어 <span id="bjPlayerScore"></span></div>
+        <div class="bjHand" id="bjPlayerHand"></div>
+      </div>
+    </div>
+    <div class="bjActions" id="bjActions" style="display:none;">
+      <button class="chipbtn bjAct" id="bjHit">히트</button>
+      <button class="chipbtn bjAct" id="bjStand">스탠드</button>
+      <button class="chipbtn bjAct" id="bjDouble">더블다운</button>
+    </div>
+    <div class="resultBanner" id="bjResult">베팅하고 딜을 눌러 시작하세요 · 블랙잭 3:2 배당</div>
+  </div>
+
+  <!-- [2] 멀티플레이 화면 (추가된 멀티 영역) -->
+  <div id="bjMultiArea" style="display: none;">
+    <div id="bjLobby" style="background: rgba(30,30,40,0.6); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);">
+      <h3 style="margin-top:0; color: #fff; font-size: 14px; margin-bottom: 8px;">🃏 실시간 1:1 멀티플레이 설정</h3>
+      <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+        <input type="text" id="bjRoomInput" placeholder="방 번호 입력 (예: 1234)" style="flex: 1; padding: 8px; border-radius: 6px; border: none; background: #222; color: #fff;">
+        <button class="playBtn" id="btnCreateRoom" style="background: #6c5ce7; font-weight: bold; width: 80px; font-size: 13px;">방 생성</button>
+        <button class="playBtn" id="btnJoinRoom" style="background: #00b894; font-weight: bold; width: 80px; font-size: 13px;">참가</button>
+      </div>
+      <div id="bjStatus" style="font-size: 12px; color: #aaa;">방을 생성하거나 기존 방 번호를 입력해 참여하세요.</div>
+    </div>
+
+    <div id="bjGameArea" style="display: none;">
+      <div class="betRow" style="margin-bottom: 15px;">
+        <span style="color: #ccc; font-size: 13px; margin-right: 5px;">내 배팅:</span>
+        <input type="number" id="bjMultiBetVal" value="1" min="1" style="width: 70px;">
+        <button class="chipbtn" onclick="adjustMultiBetVal(1)">+1</button>
+        <button class="chipbtn" onclick="adjustMultiBetVal(10)">+10</button>
+        <button class="playBtn" id="btnReady" style="background: #e17055; font-weight: bold;">준비하기</button>
       </div>
 
+      <div class="bjTable">
+        <div class="bjRow">
+          <div class="bjLabel"><span id="oppName">상대방</span> <span id="oppScore">0</span> <span id="oppStatus" style="color: #ff7675; margin-left: 10px;">(대기 중)</span></div>
+          <div class="bjHand" id="oppHand"></div>
+        </div>
+        <hr style="border: none; border-top: 1px dashed rgba(255,255,255,0.1); margin: 10px 0;">
+        <div class="bjRow">
+          <div class="bjLabel">나 <span id="myScore">0</span> <span id="myStatus" style="color: #74b9ff; margin-left: 10px;">(대기 중)</span></div>
+          <div class="bjHand" id="myHand"></div>
+        </div>
+      </div>
+
+      <div class="bjActions" id="bjMultiActions" style="display:none; margin-top: 15px; justify-content: center; gap: 10px;">
+        <button class="chipbtn bjAct" id="btnHit" style="background: #0984e3; color: white; padding: 10px 20px;">히트 (Card)</button>
+        <button class="chipbtn bjAct" id="btnStand" style="background: #d63031; color: white; padding: 10px 20px;">스탠드 (Stop)</button>
+      </div>
+      
+      <div class="resultBanner" id="bjMultiResult" style="margin-top: 15px; text-align: center; font-weight: bold; color: #ffd23f;">
+        준비를 누르면 상대방과 매칭을 시작합니다.
+      </div>
     </div>
   </div>
+</div>
+
+<!-- ============================ 통합 블랙잭 자바스크립트 ============================ -->
+<script>
+// 멀티플레이 배팅 조절 함수
+function adjustMultiBetVal(val) {
+  const betInput = document.getElementById('bjMultiBetVal');
+  if (!betInput) return;
+  let current = parseInt(betInput.value) || 0;
+  if (typeof state !== 'undefined' && state.coins !== undefined) {
+    if (current + val <= state.coins) {
+      betInput.value = current + val;
+    } else {
+      betInput.value = state.coins;
+    }
+  } else {
+    betInput.value = current + val;
+  }
+}
+
+window.addEventListener('load', function() {
+  // 모드 전환 UI 제어
+  const btnSwitchSingle = document.getElementById('btnSwitchSingle');
+  const btnSwitchMulti = document.getElementById('btnSwitchMulti');
+  const bjSingleArea = document.getElementById('bjSingleArea');
+  const bjMultiArea = document.getElementById('bjMultiArea');
+
+  if (btnSwitchSingle && btnSwitchMulti && bjSingleArea && bjMultiArea) {
+    btnSwitchSingle.addEventListener('click', function() {
+      bjSingleArea.style.display = 'block';
+      bjMultiArea.style.display = 'none';
+      btnSwitchSingle.style.background = '#6c5ce7';
+      btnSwitchSingle.style.color = '#fff';
+      btnSwitchMulti.style.background = '#3f3f4e';
+      btnSwitchMulti.style.color = '#aaa';
+    });
+
+    btnSwitchMulti.addEventListener('click', function() {
+      bjSingleArea.style.display = 'none';
+      bjMultiArea.style.display = 'block';
+      btnSwitchMulti.style.background = '#6c5ce7';
+      btnSwitchMulti.style.color = '#fff';
+      btnSwitchSingle.style.background = '#3f3f4e';
+      btnSwitchSingle.style.color = '#aaa';
+    });
+  }
+
+  // 멀티플레이 기능 바인딩 (안전 장치 포함)
+  const btnCreate = document.getElementById('btnCreateRoom');
+  const btnJoin = document.getElementById('btnJoinRoom');
+  const roomInput = document.getElementById('bjRoomInput');
+  const statusDiv = document.getElementById('bjStatus');
+  const gameArea = document.getElementById('bjGameArea');
+  const btnReady = document.getElementById('btnReady');
+  const btnHit = document.getElementById('btnHit');
+  const btnStand = document.getElementById('btnStand');
+  
+  // 요소가 하나라도 없으면 에러를 뿜지 않고 멀티 기능 바인딩을 스킵하여 안전성 유지
+  if (!btnCreate || !btnJoin || !roomInput) return;
+
+  let currentRoomId = null;
+  let myRole = null;
+  let dbRef = null;
+
+  // 1. 방 만들기
+  btnCreate.addEventListener('click', function() {
+    const roomId = roomInput.value.trim();
+    if (!roomId) return alert('방 번호를 입력하세요!');
+    if (typeof database === 'undefined' || !database) return alert('서버가 연결되지 않았습니다.');
+
+    currentRoomId = roomId;
+    myRole = 'p1';
+    dbRef = database.ref('bjRooms/' + roomId);
+
+    dbRef.set({
+      roomId: roomId,
+      status: 'waiting',
+      p1: { ready: false, hand: [], score: 0, bet: 0, stand: false, bust: false },
+      p2: { ready: false, hand: [], score: 0, bet: 0, stand: false, bust: false },
+      deck: generateBJDeck(),
+      turn: 'p1'
+    }).then(() => {
+      if(statusDiv) statusDiv.innerHTML = `🏠 <strong>방 생성 성공!</strong> 방 번호: <span style="color:#00b894">${roomId}</span> (상대방을 기다리는 중...)`;
+      if(gameArea) gameArea.style.display = 'block';
+      listenToRoom();
+    });
+  });
+
+  // 2. 참가하기
+  btnJoin.addEventListener('click', function() {
+    const roomId = roomInput.value.trim();
+    if (!roomId) return alert('방 번호를 입력하세요!');
+    if (typeof database === 'undefined' || !database) return alert('서버가 연결되지 않았습니다.');
+
+    currentRoomId = roomId;
+    myRole = 'p2';
+    dbRef = database.ref('bjRooms/' + roomId);
+
+    dbRef.once('value', (snapshot) => {
+      if (!snapshot.exists()) {
+        alert('존재하지 않는 방입니다!');
+        return;
+      }
+      const data = snapshot.val();
+      if (data.status !== 'waiting') {
+        alert('이미 게임이 진행 중이거나 꽉 찬 방입니다.');
+        return;
+      }
+
+      if(statusDiv) statusDiv.innerHTML = `🎮 <strong>방 입장 성공!</strong> 방 번호: <span style="color:#74b9ff">${roomId}</span>`;
+      if(gameArea) gameArea.style.display = 'block';
+      listenToRoom();
+    });
+  });
+
+  // 3. 실시간 방 데이터 동기화
+  function listenToRoom() {
+    if (!dbRef) return;
+    dbRef.on('value', (snapshot) => {
+      if (!snapshot.exists()) return;
+      const room = snapshot.val();
+      
+      const me = myRole === 'p1' ? room.p1 : room.p2;
+      const opp = myRole === 'p1' ? room.p2 : room.p1;
+
+      const oppNameEl = document.getElementById('oppName');
+      const oppScoreEl = document.getElementById('oppScore');
+      const oppStatusEl = document.getElementById('oppStatus');
+      const myStatusEl = document.getElementById('myStatus');
+      const myScoreEl = document.getElementById('myScore');
+      const multiResultEl = document.getElementById('bjMultiResult');
+      const multiActionsEl = document.getElementById('bjMultiActions');
+
+      if (oppNameEl) oppNameEl.innerText = myRole === 'p1' ? '상대방 (Player 2)' : '방장 (Player 1)';
+
+      if (myStatusEl) {
+        myStatusEl.innerText = me.ready ? "준비 완료!" : "대기 중";
+        myStatusEl.style.color = me.ready ? "#00b894" : "#74b9ff";
+      }
+      if (oppStatusEl) {
+        oppStatusEl.innerText = opp.ready ? "준비 완료!" : "대기 중";
+        oppStatusEl.style.color = opp.ready ? "#00b894" : "#ff7675";
+      }
+
+      renderMultiHand('myHand', me.hand);
+      renderMultiHand('oppHand', opp.hand);
+      
+      if (myScoreEl) myScoreEl.innerText = me.score;
+      if (oppScoreEl) oppScoreEl.innerText = opp.score;
+
+      if (room.status === 'waiting' && room.p1.ready && room.p2.ready) {
+        if (myRole === 'p1') {
+          let deck = room.deck;
+          let p1Hand = [deck.pop(), deck.pop()];
+          let p2Hand = [deck.pop(), deck.pop()];
+
+          dbRef.update({
+            status: 'playing',
+            deck: deck,
+            'p1/hand': p1Hand,
+            'p1/score': calculateMultiScore(p1Hand),
+            'p2/hand': p2Hand,
+            'p2/score': calculateMultiScore(p2Hand),
+            turn: 'p1'
+          });
+        }
+      }
+
+      if (room.status === 'playing') {
+        if (multiResultEl) {
+          multiResultEl.innerText = `🔥 경기 진행 중! 현재 턴: ${room.turn === myRole ? '👉 나의 턴 👈' : '상대방 턴 대기 중...'}`;
+        }
+        
+        if (multiActionsEl) {
+          if (room.turn === myRole && !me.stand && !me.bust) {
+            multiActionsEl.style.display = 'flex';
+          } else {
+            multiActionsEl.style.display = 'none';
+          }
+        }
+
+        if (me.score > 21 && !me.bust) {
+          dbRef.child(myRole).update({ bust: true, stand: true });
+          passTurn(room.turn);
+        }
+
+        if (room.p1.stand && room.p2.stand) {
+          determineMultiWinner(room);
+        }
+      }
+
+      if (room.status === 'finished') {
+        if (multiActionsEl) multiActionsEl.style.display = 'none';
+        if (btnReady) {
+          btnReady.style.display = 'inline-block';
+          btnReady.innerText = '다시 하기';
+        }
+      }
+    });
+  }
+
+  // 4. 준비하기 버튼 클릭
+  if (btnReady) {
+    btnReady.addEventListener('click', function() {
+      const betInput = document.getElementById('bjMultiBetVal');
+      const betVal = betInput ? (parseInt(betInput.value) || 1) : 1;
+      
+      if (typeof state !== 'undefined' && state.coins !== undefined) {
+        if (state.coins < betVal) {
+          alert('보유 코인이 부족합니다!');
+          return;
+        }
+      }
+
+      btnReady.style.display = 'none';
+      const multiResultEl = document.getElementById('bjMultiResult');
+      if (multiResultEl) multiResultEl.innerText = "상대방의 준비를 기다리는 중입니다...";
+
+      dbRef.child(myRole).set({
+        ready: true,
+        hand: [],
+        score: 0,
+        bet: betVal,
+        stand: false,
+        bust: false
+      });
+      
+      dbRef.update({ status: 'waiting' });
+    });
+  }
+
+  // 5. 히트(Hit) 버튼 클릭
+  if (btnHit) {
+    btnHit.addEventListener('click', function() {
+      if (!dbRef) return;
+      dbRef.once('value', (snapshot) => {
+        const room = snapshot.val();
+        if (room.turn !== myRole) return;
+
+        let deck = room.deck;
+        let hand = room[myRole].hand || [];
+        const newCard = deck.pop();
+        hand.push(newCard);
+
+        const score = calculateMultiScore(hand);
+        const isBust = score > 21;
+
+        let updates = {};
+        updates[`${myRole}/hand`] = hand;
+        updates[`${myRole}/score`] = score;
+        updates[`deck`] = deck;
+        if (isBust) {
+          updates[`${myRole}/bust`] = true;
+          updates[`${myRole}/stand`] = true;
+        }
+
+        dbRef.update(updates).then(() => {
+          if (isBust || room[myRole === 'p1' ? 'p2' : 'p1'].stand) {
+            passTurn(room.turn);
+          }
+        });
+      });
+    });
+  }
+
+  // 6. 스탠드(Stand) 버튼 클릭
+  if (btnStand) {
+    btnStand.addEventListener('click', function() {
+      if (!dbRef) return;
+      dbRef.once('value', (snapshot) => {
+        const room = snapshot.val();
+        if (room.turn !== myRole) return;
+
+        let updates = {};
+        updates[`${myRole}/stand`] = true;
+        dbRef.update(updates).then(() => {
+          passTurn(room.turn);
+        });
+      });
+    });
+  }
+
+  function passTurn(currentTurn) {
+    if (!dbRef) return;
+    dbRef.once('value', (snapshot) => {
+      const room = snapshot.val();
+      const nextTurn = currentTurn === 'p1' ? 'p2' : 'p1';
+      
+      if (room[nextTurn].stand) {
+        dbRef.update({ turn: currentTurn });
+      } else {
+        dbRef.update({ turn: nextTurn });
+      }
+    });
+  }
+
+  function determineMultiWinner(room) {
+    const p1Score = room.p1.score;
+    const p2Score = room.p2.score;
+    const p1Bust = room.p1.bust;
+    const p2Bust = room.p2.bust;
+
+    let resultMsg = "";
+    let winner = null;
+
+    if (p1Bust && p2Bust) {
+      resultMsg = "🤝 양쪽 모두 버스트(Bust)로 무승부!";
+      winner = 'draw';
+    } else if (p1Bust) {
+      resultMsg = "🎉 Player 2 승리! (Player 1 버스트)";
+      winner = 'p2';
+    } else if (p2Bust) {
+      resultMsg = "🎉 Player 1 승리! (Player 2 버스트)";
+      winner = 'p1';
+    } else {
+      if (p1Score > p2Score) {
+        resultMsg = `🎉 Player 1 승리! (${p1Score} vs ${p2Score})`;
+        winner = 'p1';
+      } else if (p2Score > p1Score) {
+        resultMsg = `🎉 Player 2 승리! (${p2Score} vs ${p1Score})`;
+        winner = 'p2';
+      } else {
+        resultMsg = `🤝 점수 동점으로 무승부! (${p1Score} vs ${p2Score})`;
+        winner = 'draw';
+      }
+    }
+
+    const multiResultEl = document.getElementById('bjMultiResult');
+    if (multiResultEl) {
+      multiResultEl.innerHTML = `🏁 <strong>게임 종료</strong><br>${resultMsg}`;
+    }
+
+    if (myRole === 'p1') {
+      dbRef.update({ status: 'finished' });
+      dbRef.child('rewardProcessed').transaction((processed) => {
+        if (processed) return;
+        dbRef.child('winner').set(winner);
+        return true;
+      });
+    }
+
+    dbRef.child('winner').once('value', (snap) => {
+      const finalWinner = snap.val();
+      if (!finalWinner) return;
+
+      if (typeof state !== 'undefined' && state.coins !== undefined) {
+        const betAmt = room[myRole].bet;
+        if (finalWinner === myRole) {
+          state.coins += betAmt;
+          alert(`🏆 승리하셨습니다! +${betAmt} COIN 획득!`);
+        } else if (finalWinner === 'draw') {
+          // 무승부 시 변동 없음
+        } else {
+          state.coins -= betAmt;
+          alert(`💸 패배하셨습니다... -${betAmt} COIN 차감.`);
+        }
+        
+        if (typeof updateUI === 'function') updateUI();
+        if (typeof saveGame === 'function') saveGame();
+      }
+    });
+  }
+
+  function generateBJDeck() {
+    const suits = ['♠', '♥', '♦', '♣'];
+    const values = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+    let deck = [];
+    for (let s of suits) {
+      for (let v of values) {
+        deck.push({ suit: s, value: v });
+      }
+    }
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    return deck;
+  }
+
+  function calculateMultiScore(hand) {
+    if (!hand || hand.length === 0) return 0;
+    let score = 0;
+    let aces = 0;
+    for (let card of hand) {
+      if (card.value === 'A') {
+        aces++;
+        score += 11;
+      } else if (['J', 'Q', 'K'].includes(card.value)) {
+        score += 10;
+      } else {
+        score += parseInt(card.value);
+      }
+    }
+    while (score > 21 && aces > 0) {
+      score -= 10;
+      aces--;
+    }
+    return score;
+  }
+
+  function renderMultiHand(elementId, hand) {
+    const container = document.getElementById(elementId);
+    if (!container) return;
+    container.innerHTML = '';
+    if (!hand) return;
+
+    hand.forEach(card => {
+      const cardDiv = document.createElement('div');
+      const isRed = ['♥', '♦'].includes(card.suit);
+      cardDiv.className = `card ${isRed ? 'red' : ''}`;
+      cardDiv.innerHTML = `
+        <span style="font-size:14px; align-self: flex-start; margin-left:5px;">${card.value}</span>
+        <span class="suit">${card.suit}</span>
+      `;
+      container.appendChild(cardDiv);
+    });
+  }
+});
+</script>
 
   <div class="footNote">가상의 Gold/Coin으로만 진행되는 브라우저 오프라인 게임입니다. 실제 화폐가 오가지 않으며, 진행 상황은 이 브라우저에 자동 저장됩니다. <span class="resetLink" id="resetSaveBtn">저장 데이터 초기화</span></div>
 </div>
@@ -1066,9 +1534,99 @@ function oreWeights(){
   });
 }
 
-/* ============================ SAVE / LOAD (새로고침해도 유지) ============================ */
-const SAVE_KEY = 'deeprockMine_save_v3';
+// 3. 게임 로드 함수 (SAVE_KEY 에러 완벽 해결 버전)
+function loadGame(){
+  // 변수가 꼬이지 않도록 함수 내부에서 안전하게 키 정의
+  const ACTUAL_SAVE_KEY = 'deeprockMine_save_v3';
+
+  if (typeof state === 'undefined') {
+    console.log("state 객체가 준비되지 않아 로드를 대기합니다.");
+    return;
+  }
+
+  // [1단계] 로컬 세이브 로드
+  try{
+    const raw = localStorage.getItem(ACTUAL_SAVE_KEY);
+    if(raw) {
+      const saved = JSON.parse(raw);
+      if(typeof saved.gold==='number') state.gold = saved.gold;
+      if(typeof saved.coins==='number') state.coins = saved.coins;
+      if(typeof saved.pickaxeIdx==='number') state.pickaxeIdx = saved.pickaxeIdx;
+      if(typeof saved.mineLevel==='number') state.mineLevel = saved.mineLevel;
+      
+      if (state.ores) {
+        state.ores = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0}, saved.ores||{});
+      }
+      
+      if(saved.lastDailyBonusDate) state.lastDailyBonusDate = saved.lastDailyBonusDate;
+      console.log("로컬 세이브 데이터를 성공적으로 불러왔습니다.");
+    }
+  }catch(e){ 
+    console.error("로컬 로드 중 진짜 에러 발생:", e);
+  }
+
+  // [오리지널 코드 안전장치]
+  try {
+    if (typeof PICKAXES !== 'undefined' && PICKAXES.length > 0 && typeof state !== 'undefined') {
+      state.pickaxeIdx = Math.max(0, Math.min(state.pickaxeIdx, PICKAXES.length-1));
+    }
+  } catch(e) {}
+
+  // [2단계] 파이어베이스 동기화 (세팅 완료 시 실행)
+  try {
+    if (typeof database !== 'undefined' && database !== null) {
+      const currentUser = sessionStorage.getItem('current_user') || localStorage.getItem('current_user');
+      if (currentUser) {
+        database.ref('users/' + currentUser + '/gameData').once('value')
+          .then((snapshot) => {
+            if (snapshot.exists()) {
+              const cloudData = snapshot.val();
+              const localRaw = localStorage.getItem(ACTUAL_SAVE_KEY);
+              let shouldUpdate = false;
+
+              if (!localRaw) {
+                shouldUpdate = true;
+              } else {
+                const localData = JSON.parse(localRaw);
+                if (cloudData.savedAt && (!localData.savedAt || cloudData.savedAt > localData.savedAt)) {
+                  shouldUpdate = true;
+                }
+              }
+
+              if (shouldUpdate && typeof state !== 'undefined') {
+                if(typeof cloudData.gold==='number') state.gold = cloudData.gold;
+                if(typeof cloudData.coins==='number') state.coins = cloudData.coins;
+                if(typeof cloudData.pickaxeIdx==='number') state.pickaxeIdx = cloudData.pickaxeIdx;
+                if(typeof cloudData.mineLevel==='number') state.mineLevel = cloudData.mineLevel;
+                
+                if (state.ores) {
+                  state.ores = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0}, cloudData.ores||{});
+                }
+                
+                if(cloudData.lastDailyBonusDate) state.lastDailyBonusDate = cloudData.lastDailyBonusDate;
+                
+                try {
+                  state.pickaxeIdx = Math.max(0, Math.min(state.pickaxeIdx, PICKAXES.length-1));
+                } catch(err) {}
+                
+                localStorage.setItem(ACTUAL_SAVE_KEY, JSON.stringify(cloudData));
+                if (typeof updateUI === 'function') updateUI();
+                console.log('클라우드 동기화 완료!');
+              }
+            }
+          })
+          .catch((err) => {
+            console.log('서버 불러오기 지연됨');
+          });
+      }
+    }
+  } catch(e) {}
+}
+
+// 4. saveGame 함수
 function saveGame(){
+  const ACTUAL_SAVE_KEY = 'deeprockMine_save_v3';
+  if (typeof state === 'undefined') return;
   try{
     const snap = {
       gold: state.gold,
@@ -1079,24 +1637,35 @@ function saveGame(){
       lastDailyBonusDate: state.lastDailyBonusDate,
       savedAt: Date.now(),
     };
-    localStorage.setItem(SAVE_KEY, JSON.stringify(snap));
-  }catch(e){ /* 저장 공간을 쓸 수 없는 환경이면 조용히 무시 */ }
-}
-function loadGame(){
-  try{
-    const raw = localStorage.getItem(SAVE_KEY);
-    if(!raw) return;
-    const saved = JSON.parse(raw);
-    if(typeof saved.gold==='number') state.gold = saved.gold;
-    if(typeof saved.coins==='number') state.coins = saved.coins;
-    if(typeof saved.pickaxeIdx==='number') state.pickaxeIdx = saved.pickaxeIdx;
-    if(typeof saved.mineLevel==='number') state.mineLevel = saved.mineLevel;
-    state.ores = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0}, saved.ores||{});
-    if(saved.lastDailyBonusDate) state.lastDailyBonusDate = saved.lastDailyBonusDate;
-  }catch(e){ /* 저장 데이터가 손상됐으면 기본값으로 계속 진행 */ }
-  state.pickaxeIdx = Math.max(0, Math.min(state.pickaxeIdx, PICKAXES.length-1));
+    
+    localStorage.setItem(ACTUAL_SAVE_KEY, JSON.stringify(snap));
+    
+    if (typeof database !== 'undefined' && database !== null) {
+      const currentUser = sessionStorage.getItem('current_user') || localStorage.getItem('current_user');
+      if (currentUser) {
+        database.ref('users/' + currentUser + '/gameData').set(snap)
+          .catch((err) => console.log('서버 저장 실패 피드백 무시'));
+      }
+    }
+  }catch(e){}
 }
 
+// [5. 안전한 강제 로딩 장치]
+window.addEventListener('load', function() {
+  try {
+    console.log("새로고침 완료: 안전 강제 세이브 로드를 시작합니다.");
+    if (typeof loadGame === 'function') {
+      loadGame();
+    }
+    if (typeof updateUI === 'function') {
+      updateUI();
+    } else if (typeof render === 'function') {
+      render();
+    }
+  } catch(e) {
+    console.error("안전 강제 로드 중 에러 발생:", e);
+  }
+});
 /* ============================ TOAST 알림 ============================ */
 let toastTimer = null;
 function showToast(msg){
@@ -2246,6 +2815,34 @@ checkDailyBonus();
 setInterval(checkRelief, RELIEF_CHECK_TICK_MS);
 
 })();
+</script>
+
+<!-- ============================ FIREBASE ENGINE ============================ -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBkmb3U8cOZjAmjZpAdfgy6KcACjfnHnDM",
+    authDomain: "back-mountain-game.firebaseapp.com",
+    databaseURL: "https://back-mountain-game-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "back-mountain-game",
+    storageBucket: "back-mountain-game.firebasestorage.app",
+    messagingSenderId: "601053833899",
+    appId: "1:601053833899:web:857b1af895520cd421e5ee",
+    measurementId: "G-FC1MR8445F"
+  };
+
+  let database;
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    database = firebase.database();
+    console.log("🔥 SUCCESS: Firebase connection established!");
+  } catch (error) {
+    console.log("Firebase connection waiting...");
+  }
 </script>
 </body>
 </html>
