@@ -2501,12 +2501,13 @@ document.getElementById('wheelPlay').addEventListener('click', ()=>{
 
 /* ============================ 낚시 (타이밍 챔질 미니게임) ============================ */
 const FISH_ZONES = [
-  {id:'miss1',  label:'놓침',          mult:0,    from:0,  to:14,  color:'#3a3f4b'},
-  {id:'small',  label:'잔챙이',        mult:1.0,  from:14, to:42,  color:'#5a6272'},
-  {id:'normal', label:'물고기',        mult:1.6,  from:42, to:68,  color:'#3fe0ff'},
-  {id:'gold',   label:'황금 물고기',   mult:3.5,  from:68, to:87,  color:'#ffd23f'},
-  {id:'legend', label:'전설의 물고기', mult:12,   from:87, to:94,  color:'legend'},
-  {id:'miss2',  label:'놓침',          mult:0,    from:94, to:100, color:'#3a3f4b'},
+  {id:'miss1',  label:'놓침',          mult:0,    from:0,  to:10,  color:'#3a3f4b'},
+  {id:'small',  label:'잔챙이',        mult:1.0,  from:10, to:50,  color:'#5a6272'},
+  {id:'normal', label:'물고기',        mult:1.2,  from:50, to:65,  color:'#3fe0ff'},
+  {id:'miss3',  label:'놓침',          mult:0,    from:65, to:85, color:'#3a3f4b'},
+  {id:'gold',   label:'황금 물고기',   mult:3.0,  from:85, to:88,  color:'#ffd23f'},
+  {id:'legend', label:'전설의 물고기', mult:12,   from:88, to:90,  color:'legend'},
+  {id:'miss2',  label:'놓침',          mult:0,    from:90, to:100, color:'#3a3f4b'},
 ];
 
 function renderFishZones(){
