@@ -579,6 +579,23 @@ input{font-family:inherit;}
 .bjActions{display:flex;gap:8px;justify-content:center;margin-bottom:6px;flex-wrap:wrap;}
 .bjAct{font-weight:800;}
 
+/* ---------- MULTIPLAYER BLACKJACK (로비 / 상태 표시) ---------- */
+.mpLobby{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px;}
+.mpLobbyTitle{margin:0 0 10px;font-size:13px;color:var(--text);font-weight:800;letter-spacing:.02em;}
+.mpLobbyRow{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.mpLobbyRow input[type="text"]{flex:1;min-width:140px;background:#0c0f16;border:1px solid var(--line);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;}
+.mpBtn{flex:0 0 auto;min-width:84px;font-size:12.5px;margin-left:0;}
+.mpLobbyStatus{font-size:12px;color:var(--sub);line-height:1.5;}
+.mpBetLabel{font-size:12px;color:var(--sub);margin-right:2px;white-space:nowrap;}
+.mpStatusTag{font-size:10.5px;font-style:normal;font-weight:800;padding:2px 9px;border-radius:999px;background:#181321;border:1px solid var(--line);color:var(--sub);margin-left:8px;letter-spacing:.02em;}
+.mpStatusTag.ready{color:var(--neon2);border-color:var(--neon2);}
+.mpStatusTag.busy{color:var(--brass-glow);border-color:var(--brass-glow);}
+.mpStatusTag.done{color:var(--win);border-color:var(--win);}
+.mpStatusTag.bust{color:var(--lose);border-color:var(--lose);}
+.mpBetTag{display:block;font-size:11px;color:var(--sub);margin-top:4px;font-family:var(--mono);}
+.bacChoiceRow{flex-wrap:wrap;justify-content:center;}
+.bacChoiceRow .diceChoice{padding:10px 16px;font-size:12px;}
+
 /* ---------- CONFETTI / FIREWORKS / COIN RAIN ---------- */
 #confettiLayer{position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden;}
 .confetti{position:absolute;top:-16px;border-radius:2px;animation:confettifall linear forwards;}
@@ -868,77 +885,67 @@ input{font-family:inherit;}
     <div class="resultBanner" id="bjResult">베팅하고 딜을 눌러 시작하세요 · 블랙잭 3:2 배당</div>
   </div>
 
-  <!-- [2] 멀티플레이 화면 (배팅 현황 및 돈 없음 차단 기능 완벽 연동 버전) -->
+  <!-- [2] 멀티플레이 화면 (실시간 1:1 · 상대 카드 히든 · 더블다운 · 블랙잭 3:2 배당 · 싱글플레이와 동일 규칙) -->
 <div id="bjMultiArea" style="display: none;">
-  <div id="bjLobby" style="background: rgba(30,30,40,0.6); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);">
-    <h3 style="margin-top:0; color: #fff; font-size: 14px; margin-bottom: 8px;">🃏 실시간 1:1 멀티플레이 설정</h3>
-    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-      <input type="text" id="bjRoomInput" placeholder="방 번호 입력 (예: 1234)" style="flex: 1; padding: 8px; border-radius: 6px; border: none; background: #222; color: #fff;">
-      <button class="playBtn" id="btnCreateRoom" style="background: #6c5ce7; font-weight: bold; width: 80px; font-size: 13px;">방 생성</button>
-      <button class="playBtn" id="btnJoinRoom" style="background: #00b894; font-weight: bold; width: 80px; font-size: 13px;">참가</button>
+  <div id="bjLobby" class="mpLobby">
+    <h3 class="mpLobbyTitle">🃏 실시간 1:1 멀티플레이 설정</h3>
+    <div class="mpLobbyRow">
+      <input type="text" id="bjRoomInput" placeholder="방 번호 입력 (예: 1234)">
+      <button class="playBtn mpBtn" id="btnCreateRoom">방 생성</button>
+      <button class="playBtn mpBtn" id="btnJoinRoom">참가</button>
     </div>
-    <div id="bjStatus" style="font-size: 12px; color: #aaa;">방을 생성하거나 기존 방 번호를 입력해 참여하세요.</div>
+    <div id="bjStatus" class="mpLobbyStatus">방을 생성하거나 기존 방 번호를 입력해 참여하세요.</div>
   </div>
 
   <div id="bjGameArea" style="display: none;">
-    <!-- 내 배팅 설정 구역 (정상 작동하도록 버튼 ID 부여) -->
-    <div class="betRow" style="margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 5px;">
-      <span style="color: #ccc; font-size: 13px; margin-right: 5px;">내 배팅금 설정:</span>
-      <input type="number" id="bjMultiBetVal" value="10" min="1" style="width: 80px; text-align: center; font-weight: bold; background: #111; color: #fff; border: 1px solid #444; border-radius: 4px;">
-      <button class="chipbtn" id="btnMultiBetPlus1" style="padding: 5px 10px;">+1</button>
-      <button class="chipbtn" id="btnMultiBetPlus10" style="padding: 5px 10px;">+10</button>
-      <button class="playBtn" id="btnReady" style="background: #e17055; font-weight: bold; margin-left: auto;">준비하기</button>
+    <div class="betRow">
+      <span class="mpBetLabel">내 배팅금:</span>
+      <input type="number" id="bjMultiBetVal" value="10" min="1">
+      <button class="chipbtn" id="btnMultiBetPlus1">+1</button>
+      <button class="chipbtn" id="btnMultiBetPlus10">+10</button>
+      <button class="playBtn" id="btnReady">준비하기</button>
     </div>
 
-    <!-- 게임 테이블 (실시간 나와 상대방의 배팅금 현황판 추가!) -->
     <div class="bjTable">
       <div class="bjRow">
         <div class="bjLabel">
-          <span id="oppName">상대방</span> 
-          <span id="oppScore" style="color: #ffeaa7; font-weight: bold; margin-left: 5px;">0</span> 
-          <span id="oppStatus" style="color: #ff7675; margin-left: 10px;">(대기 중)</span>
-          <!-- 상대 실시간 배팅액 표시 구역 -->
-          <div id="oppBetDisplay" style="font-size: 12px; color: #ff7675; margin-top: 4px; font-weight: normal;">배팅금: 대기 중</div>
+          <span id="oppName">상대방</span> <span id="oppScore"></span>
+          <em id="oppStatus" class="mpStatusTag">대기 중</em>
+          <span class="mpBetTag" id="oppBetDisplay"></span>
         </div>
         <div class="bjHand" id="oppHand"></div>
       </div>
-      
-      <hr style="border: none; border-top: 1px dashed rgba(255,255,255,0.1); margin: 15px 0;">
-      
       <div class="bjRow">
         <div class="bjLabel">
-          <span>나</span> 
-          <span id="myScore" style="color: #ffeaa7; font-weight: bold; margin-left: 5px;">0</span> 
-          <span id="myStatus" style="color: #74b9ff; margin-left: 10px;">(대기 중)</span>
-          <!-- 내 실시간 배팅액 표시 구역 -->
-          <div id="myBetDisplay" style="font-size: 12px; color: #74b9ff; margin-top: 4px; font-weight: normal;">배팅금: 대기 중</div>
+          나 <span id="myScore"></span>
+          <em id="myStatus" class="mpStatusTag">대기 중</em>
+          <span class="mpBetTag" id="myBetDisplay"></span>
         </div>
         <div class="bjHand" id="myHand"></div>
       </div>
     </div>
 
-    <div class="bjActions" id="bjMultiActions" style="display:none; margin-top: 15px; justify-content: center; gap: 10px;">
-      <button class="chipbtn bjAct" id="btnHit" style="background: #0984e3; color: white; padding: 10px 20px;">히트 (Card)</button>
-      <button class="chipbtn bjAct" id="btnStand" style="background: #d63031; color: white; padding: 10px 20px;">스탠드 (Stop)</button>
+    <div class="bjActions" id="bjMultiActions" style="display:none;">
+      <button class="chipbtn bjAct" id="btnHit">히트</button>
+      <button class="chipbtn bjAct" id="btnStand">스탠드</button>
+      <button class="chipbtn bjAct" id="btnDouble">더블다운</button>
     </div>
-    
-    <div class="resultBanner" id="bjMultiResult" style="margin-top: 15px; text-align: center; font-weight: bold; color: #ffd23f;">
-      배팅금을 설정하고 준비를 누르면 상대방과 매칭을 시작합니다.
-    </div>
+
+    <div class="resultBanner" id="bjMultiResult">배팅금을 설정하고 준비를 누르면 상대방과 매칭을 시작합니다 · 블랙잭 3:2 배당</div>
   </div>
 </div>
 
-<!-- ============================ 통합 블랙잭 자바스크립트 ============================ -->
+<!-- ============================ 통합 블랙잭 자바스크립트 (멀티플레이 버그 수정판) ============================ -->
 <script>
-// [커스텀 알림창 및 코인 인식 절대 실패 방지 버전]
+(function(){
+"use strict";
 
-// 🎨 1. 못생긴 alert 대신, 기존 UI 스타일을 복사한 게임 내 커스텀 팝업창 함수!
+/* 🎨 커스텀 알림창 (기존 UI 톤 유지) */
 function customWarning(msg) {
   let alertBox = document.getElementById('bjCustomAlert');
   if (!alertBox) {
     alertBox = document.createElement('div');
     alertBox.id = 'bjCustomAlert';
-    // 작성해주셨던 로비 UI와 똑같은 테마 적용 (rgba 30,30,40 스타일)
     alertBox.style.cssText = "position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(30,30,40,0.95); border:1px solid #ff7675; padding:25px; border-radius:12px; color:#fff; text-align:center; z-index:99999; min-width:300px; box-shadow: 0 8px 25px rgba(0,0,0,0.8);";
     document.body.appendChild(alertBox);
   }
@@ -946,58 +953,35 @@ function customWarning(msg) {
     <div style="margin-bottom:20px; line-height:1.6; font-size: 15px; color:#ffeaa7;">
       ${msg.replace(/\n/g, '<br>')}
     </div>
-    <button onclick="document.getElementById('bjCustomAlert').style.display='none'" style="background:#e17055; color:#fff; border:none; padding:10px 30px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px; transition: 0.2s;">확인</button>
+    <button onclick="document.getElementById('bjCustomAlert').style.display='none'" style="background:#e17055; color:#fff; border:none; padding:10px 30px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px;">확인</button>
   `;
   alertBox.style.display = 'block';
 }
 
-// 💰 2. 화면의 topbar에서 코인을 찾아오는 무적의 함수
 function getMyCoins() {
-  // 1순위: 전역 변수에서 확인
-  if (typeof state !== 'undefined' && state.coins !== undefined) {
-    return parseInt(state.coins) || 0;
-  }
-  // 2순위: 화면 상단 topbar 안에서 숫자만 골라내기
-  const topbar = document.getElementById('topbar');
-  if (topbar) {
-    // 모든 텍스트에서 숫자만 찾음
-    const textContent = topbar.innerText || "";
-    const matches = textContent.match(/\d+/);
-    if (matches) {
-      return parseInt(matches[0]);
-    }
-  }
-  // 3순위: 그래도 안되면 로컬스토리지 확인
-  try {
-    const localState = JSON.parse(localStorage.getItem('gameState'));
-    if (localState && localState.coins !== undefined) {
-      return parseInt(localState.coins) || 0;
-    }
-  } catch(e) {}
-  return 0; 
+  if (window.state && typeof window.state.coins !== 'undefined') return parseInt(window.state.coins) || 0;
+  return 0;
 }
+function coinFmt(n){ return (typeof window.fmt === 'function') ? window.fmt(n) : n; }
 
-// 배팅금 조절 함수 (커스텀 알림 적용)
 window.adjustMultiBetVal = function(val) {
   const betInput = document.getElementById('bjMultiBetVal');
   if (!betInput) return;
   let cur = parseInt(betInput.value) || 0;
-  
   const myCoins = getMyCoins();
   if (cur + val > myCoins) {
-    betInput.value = myCoins;
-    customWarning(`❌ 배팅 한도 초과!\n보유하신 코인(${myCoins}개)보다 더 많이 배팅할 수 없습니다.`);
+    betInput.value = Math.max(1, myCoins);
+    customWarning(`❌ 배팅 한도 초과!\n보유하신 코인(${coinFmt(myCoins)}개)보다 더 많이 배팅할 수 없습니다.`);
   } else {
     betInput.value = cur + val;
   }
 };
 
-// 모드 전환 UI 제어
+/* 모드 전환 (싱글 ↔ 멀티) */
 const btnSwitchSingle = document.getElementById('btnSwitchSingle');
 const btnSwitchMulti = document.getElementById('btnSwitchMulti');
 const bjSingleArea = document.getElementById('bjSingleArea');
 const bjMultiArea = document.getElementById('bjMultiArea');
-
 if (btnSwitchSingle && btnSwitchMulti && bjSingleArea && bjMultiArea) {
   btnSwitchSingle.onclick = function() {
     bjSingleArea.style.display = 'block';
@@ -1007,7 +991,6 @@ if (btnSwitchSingle && btnSwitchMulti && bjSingleArea && bjMultiArea) {
     btnSwitchMulti.style.background = '#3f3f4e';
     btnSwitchMulti.style.color = '#aaa';
   };
-
   btnSwitchMulti.onclick = function() {
     bjSingleArea.style.display = 'none';
     bjMultiArea.style.display = 'block';
@@ -1020,12 +1003,64 @@ if (btnSwitchSingle && btnSwitchMulti && bjSingleArea && bjMultiArea) {
 
 const btnPlus1 = document.getElementById('btnMultiBetPlus1');
 const btnPlus10 = document.getElementById('btnMultiBetPlus10');
-if (btnPlus1) btnPlus1.onclick = function() { window.adjustMultiBetVal(1); };
-if (btnPlus10) btnPlus10.onclick = function() { window.adjustMultiBetVal(10); };
+if (btnPlus1) btnPlus1.onclick = function(){ window.adjustMultiBetVal(1); };
+if (btnPlus10) btnPlus10.onclick = function(){ window.adjustMultiBetVal(10); };
 
+/* ---------- 카드 유틸 (싱글플레이와 동일한 규칙: A=11/1, J·Q·K=10, 21=블랙잭) ---------- */
+const MP_SUITS = ['♠','♥','♦','♣'];
+const MP_RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+function generateBJDeck(){
+  let deck = [];
+  for(const s of MP_SUITS){ for(const r of MP_RANKS){ deck.push({r,s}); } }
+  for(let i=deck.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    const tmp = deck[i]; deck[i]=deck[j]; deck[j]=tmp;
+  }
+  return deck;
+}
+function mpCardValue(card){
+  if(card.r==='A') return 11;
+  if(card.r==='K'||card.r==='Q'||card.r==='J') return 10;
+  return parseInt(card.r,10);
+}
+function calculateMultiScore(hand){
+  if(!hand || hand.length===0) return 0;
+  let total = hand.reduce((s,c)=>s+mpCardValue(c),0);
+  let aces = hand.filter(c=>c.r==='A').length;
+  while(total>21 && aces>0){ total-=10; aces--; }
+  return total;
+}
+function mpIsBlackjack(hand){ return !!hand && hand.length===2 && calculateMultiScore(hand)===21; }
+function mpCardEl(card, hidden){
+  const el = document.createElement('div');
+  if(hidden){ el.className = 'card back'; return el; }
+  const isRed = card.s==='♥' || card.s==='♦';
+  el.className = 'card' + (isRed ? ' red' : '');
+  el.innerHTML = `<div>${card.r}</div><div class="suit">${card.s}</div>`;
+  return el;
+}
+function renderMultiHand(elementId, hand, hideExceptFirst){
+  const el = document.getElementById(elementId);
+  if(!el) return;
+  el.innerHTML = '';
+  (hand||[]).forEach((c,i)=>{
+    const hidden = !!hideExceptFirst && i>0;
+    el.appendChild(mpCardEl(c, hidden));
+  });
+}
+function mpScoreLabel(hand, hidden){
+  if(!hand || hand.length===0) return '';
+  if(hidden) return '(' + mpCardValue(hand[0]) + ' + ?)';
+  return '(' + calculateMultiScore(hand) + ')';
+}
+
+/* ---------- 방 상태 ---------- */
 let currentRoomId = null;
 let myRole = null;
 let dbRef = null;
+let hostDealing = false;
+let hostResolving = false;
+let mpProcessedFinish = false;
 
 const btnCreate = document.getElementById('btnCreateRoom');
 const btnJoin = document.getElementById('btnJoinRoom');
@@ -1035,6 +1070,24 @@ const gameArea = document.getElementById('bjGameArea');
 const btnReady = document.getElementById('btnReady');
 const btnHit = document.getElementById('btnHit');
 const btnStand = document.getElementById('btnStand');
+const btnDouble = document.getElementById('btnDouble');
+
+function freshPlayerNode(){
+  return { ready:false, hand:[], score:0, bet:0, stand:false, bust:false, blackjack:false };
+}
+
+/* 공유 덱에서 안전하게(트랜잭션) 카드 한 장을 뽑는다 — 두 명이 동시에 히트해도 카드가 겹치지 않도록 보장 */
+function drawFromSharedDeck(callback){
+  if(!dbRef) return;
+  let popped = null;
+  dbRef.child('deck').transaction((currentDeck) => {
+    let deck = (currentDeck && currentDeck.length) ? currentDeck.slice() : generateBJDeck();
+    popped = deck.pop();
+    return deck;
+  }, (error, committed) => {
+    if (!error && committed) callback(popped);
+  });
+}
 
 if (btnCreate) {
   btnCreate.onclick = function() {
@@ -1049,10 +1102,11 @@ if (btnCreate) {
     dbRef.set({
       roomId: roomId,
       status: 'waiting',
-      p1: { ready: false, hand: [], score: 0, bet: 0, stand: false, bust: false },
-      p2: { ready: false, hand: [], score: 0, bet: 0, stand: false, bust: false },
+      p1: freshPlayerNode(),
+      p2: freshPlayerNode(),
+      p2Joined: false,
       deck: generateBJDeck(),
-      turn: 'p1'
+      winner: null
     }).then(() => {
       if(statusDiv) statusDiv.innerHTML = `🏠 <strong>방 생성 성공!</strong> 방 번호: <span style="color:#00b894">${roomId}</span> (상대방 대기 중)`;
       if(gameArea) gameArea.style.display = 'block';
@@ -1067,26 +1121,39 @@ if (btnJoin) {
     if (!roomId) return customWarning('방 번호를 입력하세요!');
     if (typeof database === 'undefined' || !database) return customWarning('서버가 연결되지 않았습니다.');
 
-    currentRoomId = roomId;
-    myRole = 'p2';
-    dbRef = database.ref('bjRooms/' + roomId);
-
-    dbRef.once('value', (snapshot) => {
-      if (!snapshot.exists()) {
-        customWarning('존재하지 않는 방입니다!');
-        return;
-      }
+    const joinRef = database.ref('bjRooms/' + roomId);
+    joinRef.once('value', (snapshot) => {
+      if (!snapshot.exists()) { customWarning('존재하지 않는 방입니다!'); return; }
       const data = snapshot.val();
-      if (data.status !== 'waiting') {
-        customWarning('이미 게임이 진행 중이거나 인원이 가득 찼습니다.');
-        return;
-      }
+      if (data.status === 'playing') { customWarning('게임이 한창 진행 중인 방입니다. 라운드가 끝난 뒤 다시 시도해주세요.'); return; }
 
-      if(statusDiv) statusDiv.innerHTML = `🎮 <strong>방 입장 성공!</strong> 방 번호: <span style="color:#74b9ff">${roomId}</span>`;
-      if(gameArea) gameArea.style.display = 'block';
-      listenToRoom();
+      joinRef.child('p2Joined').transaction((cur) => cur ? undefined : true).then((res) => {
+        if (!res.committed) { customWarning('이미 다른 상대가 참가한 방입니다.'); return; }
+        currentRoomId = roomId;
+        myRole = 'p2';
+        dbRef = joinRef;
+        if(statusDiv) statusDiv.innerHTML = `🎮 <strong>방 입장 성공!</strong> 방 번호: <span style="color:#74b9ff">${roomId}</span>`;
+        if(gameArea) gameArea.style.display = 'block';
+        listenToRoom();
+      });
     });
   };
+}
+
+function resolveWinner(room){
+  const p1 = room.p1, p2 = room.p2;
+  const p1BJ = !!p1.blackjack, p2BJ = !!p2.blackjack;
+  const p1Bust = !!p1.bust, p2Bust = !!p2.bust;
+  const p1Score = p1.score||0, p2Score = p2.score||0;
+  if (p1BJ && p2BJ) return 'push';
+  if (p1BJ) return 'p1_bj';
+  if (p2BJ) return 'p2_bj';
+  if (p1Bust && p2Bust) return 'push';
+  if (p1Bust) return 'p2';
+  if (p2Bust) return 'p1';
+  if (p1Score > p2Score) return 'p1';
+  if (p2Score > p1Score) return 'p2';
+  return 'push';
 }
 
 function listenToRoom() {
@@ -1094,7 +1161,8 @@ function listenToRoom() {
   dbRef.on('value', (snapshot) => {
     if (!snapshot.exists()) return;
     const room = snapshot.val();
-    
+    if (!room.p1 || !room.p2) return;
+
     const me = myRole === 'p1' ? room.p1 : room.p2;
     const opp = myRole === 'p1' ? room.p2 : room.p1;
 
@@ -1105,148 +1173,163 @@ function listenToRoom() {
     const myScoreEl = document.getElementById('myScore');
     const multiResultEl = document.getElementById('bjMultiResult');
     const multiActionsEl = document.getElementById('bjMultiActions');
-    
     const myBetDisplay = document.getElementById('myBetDisplay');
     const oppBetDisplay = document.getElementById('oppBetDisplay');
 
     if (oppNameEl) oppNameEl.innerText = myRole === 'p1' ? '상대방 (Player 2)' : '방장 (Player 1)';
 
-    if (myBetDisplay) myBetDisplay.innerText = me.ready ? `배팅금: 🪙 ${me.bet} COIN` : `배팅금 설정 중...`;
-    if (oppBetDisplay) oppBetDisplay.innerText = opp.ready ? `배팅금: 🪙 ${opp.bet} COIN` : `배팅금 설정 중...`;
+    // 상대가 아직 진행 중(스탠드/버스트 전)이면 카드를 가려서 보여준다 (첫 장만 공개) — 싱글플레이 딜러와 동일한 방식
+    const oppHidden = room.status === 'playing' && !opp.stand && !opp.bust;
 
-    if (myStatusEl) {
-      myStatusEl.innerText = me.ready ? "준비 완료!" : "대기 중";
-      myStatusEl.style.color = me.ready ? "#00b894" : "#74b9ff";
+    if (myBetDisplay) myBetDisplay.innerText = me.bet ? `배팅금 🪙 ${coinFmt(me.bet)}` : '';
+    if (oppBetDisplay) oppBetDisplay.innerText = opp.bet ? `배팅금 🪙 ${coinFmt(opp.bet)}` : '';
+
+    function statusText(p, isMe){
+      if (room.status === 'finished' || (room.status==='playing' && (p.stand||p.bust))) {
+        return p.blackjack ? '블랙잭!' : (p.bust ? '버스트' : '스탠드');
+      }
+      if (room.status === 'playing') return isMe ? '진행 중' : '상대 진행 중';
+      return p.ready ? '준비 완료!' : '대기 중';
     }
-    if (oppStatusEl) {
-      oppStatusEl.innerText = opp.ready ? "준비 완료!" : "대기 중";
-      oppStatusEl.style.color = opp.ready ? "#00b894" : "#ff7675";
+    function statusClass(p, roomStatus){
+      if (p.bust) return 'bust';
+      if (p.blackjack) return 'done';
+      if (roomStatus !== 'waiting' && p.stand) return 'done';
+      if (roomStatus === 'playing') return 'busy';
+      if (p.ready) return 'ready';
+      return '';
     }
+    if (myStatusEl) { myStatusEl.innerText = statusText(me, true); myStatusEl.className = 'mpStatusTag ' + statusClass(me, room.status); }
+    if (oppStatusEl) { oppStatusEl.innerText = statusText(opp, false); oppStatusEl.className = 'mpStatusTag ' + statusClass(opp, room.status); }
 
-    renderMultiHand('myHand', me.hand);
-    renderMultiHand('oppHand', opp.hand);
-    
-    if (myScoreEl) myScoreEl.innerText = me.score;
-    if (oppScoreEl) oppScoreEl.innerText = opp.score;
+    renderMultiHand('myHand', me.hand, false);
+    renderMultiHand('oppHand', opp.hand, oppHidden);
 
-    if (room.status === 'waiting' && room.p1.ready && room.p2.ready) {
-      if (myRole === 'p1') {
-        let deck = room.deck;
+    if (myScoreEl) myScoreEl.innerText = mpScoreLabel(me.hand, false);
+    if (oppScoreEl) oppScoreEl.innerText = mpScoreLabel(opp.hand, oppHidden);
+
+    /* 두 명 모두 준비되면 방장(p1)이 카드를 나눈다 */
+    if (room.status === 'waiting') {
+      hostResolving = false;
+      if (room.p1.ready && room.p2.ready && myRole === 'p1' && !hostDealing) {
+        hostDealing = true;
+        let deck = room.deck && room.deck.length >= 10 ? room.deck.slice() : generateBJDeck();
         let p1Hand = [deck.pop(), deck.pop()];
         let p2Hand = [deck.pop(), deck.pop()];
-
+        const p1BJ = mpIsBlackjack(p1Hand);
+        const p2BJ = mpIsBlackjack(p2Hand);
+        const bothDone = p1BJ || p2BJ;
         dbRef.update({
           status: 'playing',
           deck: deck,
-          'p1/hand': p1Hand,
-          'p1/score': calculateMultiScore(p1Hand),
-          'p2/hand': p2Hand,
-          'p2/score': calculateMultiScore(p2Hand),
-          turn: 'p1'
-        });
+          'p1/hand': p1Hand, 'p1/score': calculateMultiScore(p1Hand), 'p1/blackjack': p1BJ, 'p1/stand': bothDone, 'p1/bust': false,
+          'p2/hand': p2Hand, 'p2/score': calculateMultiScore(p2Hand), 'p2/blackjack': p2BJ, 'p2/stand': bothDone, 'p2/bust': false,
+          winner: null
+        }).then(()=>{ hostDealing = false; });
+      }
+      if (multiResultEl && !(room.p1.ready && room.p2.ready)) {
+        multiResultEl.innerText = '배팅금을 설정하고 준비를 누르면 상대방과 매칭을 시작합니다 · 블랙잭 3:2 배당';
       }
     }
 
     if (room.status === 'playing') {
-      if (multiResultEl) multiResultEl.innerText = `🔥 경기 진행 중! 현재 턴: ${room.turn === myRole ? '👉 나의 턴 👈' : '상대방 턴 대기 중...'}`;
-      
+      if (multiResultEl) {
+        multiResultEl.innerText = (me.stand || me.bust) ? '상대방이 진행 중입니다...' : '🔥 히트 · 스탠드 · 더블다운으로 승부하세요!';
+      }
       if (multiActionsEl) {
-        if (room.turn === myRole && !me.stand && !me.bust) {
-          multiActionsEl.style.display = 'flex';
-        } else {
-          multiActionsEl.style.display = 'none';
-        }
+        multiActionsEl.style.display = (!me.stand && !me.bust) ? 'flex' : 'none';
       }
+      if (btnDouble) btnDouble.disabled = !(me.hand && me.hand.length===2 && !me.stand && !me.bust && getMyCoins() >= (me.bet*2));
 
+      // 내 점수가 21 초과인데 아직 반영 안됐다면 버스트 처리 (안전망)
       if (me.score > 21 && !me.bust) {
-        dbRef.child(myRole).update({ bust: true, stand: true });
-        passTurn(room.turn);
+        dbRef.child(myRole).update({ bust:true, stand:true });
       }
 
-      if (room.p1.stand && room.p2.stand) {
-        determineMultiWinner(room);
+      if (room.p1.stand && room.p2.stand && myRole === 'p1' && !hostResolving) {
+        hostResolving = true;
+        const winner = resolveWinner(room);
+        dbRef.update({ status:'finished', winner: winner, 'p1/ready': false, 'p2/ready': false });
       }
     }
 
     if (room.status === 'finished') {
       if (multiActionsEl) multiActionsEl.style.display = 'none';
-      if (btnReady) {
-        btnReady.style.display = 'inline-block';
-        btnReady.innerText = '다시 하기';
+      if (btnReady) { btnReady.style.display = 'inline-block'; btnReady.innerText = '다시 하기'; }
+
+      if (!mpProcessedFinish) {
+        mpProcessedFinish = true;
+        const winner = room.winner;
+        const bet = parseInt(me.bet) || 0;
+        const myBJKey = myRole + '_bj';
+        const oppBJKey = (myRole==='p1'?'p2':'p1') + '_bj';
+        let outcome, delta, msg;
+        if (winner === 'push') { outcome='push'; delta=0; msg='🤝 무승부! 코인 변동 없음.'; }
+        else if (winner === myBJKey) { outcome='blackjack'; delta=Math.round(bet*1.5); msg=`🂡 블랙잭! +${coinFmt(delta)} Coin (3:2 배당)`; }
+        else if (winner === oppBJKey) { outcome='lose'; delta=-bet; msg=`💸 상대방 블랙잭! -${coinFmt(bet)} Coin`; }
+        else if (winner === myRole) { outcome='win'; delta=bet; msg=`🏆 승리! +${coinFmt(delta)} Coin`; }
+        else { outcome='lose'; delta=-bet; msg=`💸 패배... -${coinFmt(bet)} Coin`; }
+
+        if (window.state && typeof window.state.coins !== 'undefined') {
+          window.state.coins += delta;
+          if (typeof window.renderTop === 'function') window.renderTop();
+          if (typeof window.saveGame === 'function') window.saveGame();
+        }
+        if (outcome==='win' || outcome==='blackjack') {
+          if (window.Sound && window.Sound.win) window.Sound.win();
+          if (typeof window.burstConfetti==='function') window.burstConfetti(outcome==='blackjack'?45:24);
+        } else if (outcome==='lose') {
+          if (window.Sound && window.Sound.lose) window.Sound.lose();
+        }
+
+        if (multiResultEl) multiResultEl.innerHTML = `🏁 ${msg}`;
+        customWarning(msg);
       }
+    } else {
+      mpProcessedFinish = false;
     }
   });
 }
 
-// ⚠️ [준비하기 클릭] 커스텀 경고창 연동
 if (btnReady) {
   btnReady.onclick = function() {
+    if (!dbRef || !myRole) return;
     const myCoins = getMyCoins();
     const betInput = document.getElementById('bjMultiBetVal');
     const betVal = betInput ? parseInt(betInput.value) : 0;
-    
-    if (myCoins <= 0) {
-      customWarning(`❌ 게임 참여 불가!\n보유하고 계신 코인이 없습니다.\n코인을 먼저 획득해 주세요.`);
-      return;
-    }
 
-    if (isNaN(betVal) || betVal <= 0) {
-      customWarning('최소 1 코인 이상 배팅해야 합니다!');
-      if (betInput) betInput.value = 1;
-      return;
-    }
-    
-    if (myCoins < betVal) {
-      customWarning(`❌ 배팅 실패!\n현재 보유 중인 코인(${myCoins}개)을 초과할 수 없습니다.`);
-      if (betInput) betInput.value = myCoins; 
-      return;
-    }
+    if (myCoins <= 0) { customWarning('❌ 게임 참여 불가!\n보유하고 계신 코인이 없습니다.\n코인을 먼저 획득해 주세요.'); return; }
+    if (isNaN(betVal) || betVal <= 0) { customWarning('최소 1 코인 이상 배팅해야 합니다!'); if (betInput) betInput.value = 1; return; }
+    if (myCoins < betVal) { customWarning(`❌ 배팅 실패!\n현재 보유 중인 코인(${coinFmt(myCoins)}개)을 초과할 수 없습니다.`); if (betInput) betInput.value = myCoins; return; }
 
     btnReady.style.display = 'none';
     const multiResultEl = document.getElementById('bjMultiResult');
-    if (multiResultEl) multiResultEl.innerText = "상대방의 준비를 기다리는 중입니다...";
+    if (multiResultEl) multiResultEl.innerText = '상대방의 준비를 기다리는 중입니다...';
 
-    dbRef.child(myRole).set({
-      ready: true,
-      hand: [],
-      score: 0,
-      bet: betVal,
-      stand: false,
-      bust: false
-    });
-    
-    dbRef.update({ status: 'waiting' });
+    dbRef.child(myRole).set({ ready:true, hand:[], score:0, bet:betVal, stand:false, bust:false, blackjack:false });
+    // 'finished' 상태일 때만 'waiting'으로 되돌린다 (그 외에는 아무것도 쓰지 않아, 방장이 딜을 거는
+    // 순간과 불필요하게 경합하지 않는다 — 이미 waiting인데 waiting을 또 쓰면 방장의 'playing' 전환과
+    // 타이밍이 겹칠 때 되돌려써버리는 경쟁 상태가 생길 수 있었음)
+    dbRef.child('status').transaction((cur) => (cur === 'finished' ? 'waiting' : undefined));
   };
 }
 
 if (btnHit) {
   btnHit.onclick = function() {
-    if (!dbRef) return;
-    dbRef.once('value', (snapshot) => {
-      const room = snapshot.val();
-      if (room.turn !== myRole) return;
-
-      let deck = room.deck;
-      let hand = room[myRole].hand || [];
-      const newCard = deck.pop();
-      hand.push(newCard);
-
-      const score = calculateMultiScore(hand);
-      const isBust = score > 21;
-
-      let updates = {};
-      updates[`${myRole}/hand`] = hand;
-      updates[`${myRole}/score`] = score;
-      updates[`deck`] = deck;
-      if (isBust) {
-        updates[`${myRole}/bust`] = true;
-        updates[`${myRole}/stand`] = true;
-      }
-
-      dbRef.update(updates).then(() => {
-        if (isBust || room[myRole === 'p1' ? 'p2' : 'p1'].stand) {
-          passTurn(room.turn);
-        }
+    if (!dbRef || !myRole) return;
+    dbRef.once('value', (snap)=>{
+      const room = snap.val();
+      const me = room[myRole];
+      if (room.status !== 'playing' || me.stand || me.bust) return;
+      drawFromSharedDeck((card)=>{
+        if(!card) return;
+        let hand = (me.hand||[]).slice();
+        hand.push(card);
+        const score = calculateMultiScore(hand);
+        const isBust = score > 21;
+        let updates = { hand:hand, score:score };
+        if (isBust) { updates.bust = true; updates.stand = true; }
+        dbRef.child(myRole).update(updates);
       });
     });
   };
@@ -1254,189 +1337,78 @@ if (btnHit) {
 
 if (btnStand) {
   btnStand.onclick = function() {
-    if (!dbRef) return;
-    dbRef.once('value', (snapshot) => {
-      const room = snapshot.val();
-      if (room.turn !== myRole) return;
+    if (!dbRef || !myRole) return;
+    dbRef.once('value', (snap)=>{
+      const room = snap.val();
+      const me = room[myRole];
+      if (room.status !== 'playing' || me.stand || me.bust) return;
+      dbRef.child(myRole).update({ stand:true });
+    });
+  };
+}
 
-      let updates = {};
-      updates[`${myRole}/stand`] = true;
-      dbRef.update(updates).then(() => {
-        passTurn(room.turn);
+if (btnDouble) {
+  btnDouble.onclick = function() {
+    if (!dbRef || !myRole) return;
+    dbRef.once('value', (snap)=>{
+      const room = snap.val();
+      const me = room[myRole];
+      if (room.status !== 'playing' || me.stand || me.bust || !me.hand || me.hand.length !== 2) return;
+      if (getMyCoins() < (me.bet*2)) { customWarning('❌ 더블다운을 위한 코인이 부족합니다!'); return; }
+
+      drawFromSharedDeck((card)=>{
+        if(!card) return;
+        let hand = me.hand.slice();
+        hand.push(card);
+        const score = calculateMultiScore(hand);
+        const isBust = score > 21;
+        dbRef.child(myRole).update({
+          hand: hand,
+          score: score,
+          bet: me.bet*2,
+          bust: isBust,
+          stand: true
+        });
       });
     });
   };
 }
 
-function passTurn(currentTurn) {
-  if (!dbRef) return;
-  dbRef.once('value', (snapshot) => {
-    const room = snapshot.val();
-    const nextTurn = currentTurn === 'p1' ? 'p2' : 'p1';
-    
-    if (room[nextTurn].stand) {
-      dbRef.update({ turn: currentTurn });
-    } else {
-      dbRef.update({ turn: nextTurn });
-    }
-  });
-
-function determineMultiWinner(room) {
-  const p1Score = room.p1.score;
-  const p2Score = room.p2.score;
-  const p1Bust = room.p1.bust;
-  const p2Bust = room.p2.bust;
-
-  let resultMsg = "";
-  let winner = null;
-
-  // 승패 판정 로직
-  if (p1Bust && p2Bust) { resultMsg = "무승부!"; winner = 'draw'; }
-  else if (p1Bust) { resultMsg = "Player 2 승리!"; winner = 'p2'; }
-  else if (p2Bust) { resultMsg = "Player 1 승리!"; winner = 'p1'; }
-  else if (p1Score > p2Score) { resultMsg = "Player 1 승리!"; winner = 'p1'; }
-  else if (p2Score > p1Score) { resultMsg = "Player 2 승리!"; winner = 'p2'; }
-  else { resultMsg = "무승부!"; winner = 'draw'; }
-
-  const multiResultEl = document.getElementById('bjMultiResult');
-  if (multiResultEl) multiResultEl.innerHTML = `🏁 결과: ${resultMsg}`;
-
-  // ★ 중요: 여기서부터 실제 코인 계산 및 반영
-  if (myRole === 'p1') {
-    dbRef.update({ status: 'finished', winner: winner });
-  }
-
-  dbRef.child('winner').once('value', (snap) => {
-    const finalWinner = snap.val();
-    if (!finalWinner || room.rewardProcessed) return;
-
-    // 보상 처리 한 번만 실행
-    if (myRole === 'p1') dbRef.update({ rewardProcessed: true });
-
-    const betAmt = parseInt(room[myRole].bet) || 0;
-    
-    // [핵심] 여기서 state.coins를 직접 수정합니다
-    if (finalWinner === myRole) {
-      if (typeof state !== 'undefined') state.coins += betAmt;
-      customWarning(`🎉 승리! ${betAmt} 코인 획득!`);
-    } else if (finalWinner !== 'draw') {
-      if (typeof state !== 'undefined') state.coins -= betAmt;
-      customWarning(`💸 패배... ${betAmt} 코인 차감.`);
-    } else {
-      customWarning(`🤝 무승부! 코인 변동 없음.`);
-    }
-
-    // [핵심] 수정된 state를 저장하고 화면 갱신
-    if (typeof updateUI === 'function') updateUI();
-    if (typeof saveGame === 'function') saveGame();
-    else localStorage.setItem('gameState', JSON.stringify(state));
-  });
-}
-  const multiResultEl = document.getElementById('bjMultiResult');
-  if (multiResultEl) multiResultEl.innerHTML = `🏁 <strong>게임 종료</strong><br>${resultMsg}`;
-
-  if (myRole === 'p1') {
-    dbRef.update({ status: 'finished' });
-    dbRef.child('rewardProcessed').transaction((processed) => {
-      if (processed) return;
-      dbRef.child('winner').set(winner);
-      return true;
-    });
-  }
-
-  dbRef.child('winner').once('value', (snap) => {
-    const finalWinner = snap.val();
-    if (!finalWinner) return;
-
-    if (typeof state !== 'undefined' && state.coins !== undefined) {
-      const betAmt = parseInt(room[myRole].bet) || 0;
-
-      if (finalWinner === myRole) {
-        state.coins += betAmt;
-        customWarning(`🏆 승리하셨습니다!\n💰 +${betAmt} COIN 획득! (현재 잔액: ${state.coins})`);
-      } else if (finalWinner === 'draw') {
-        customWarning(`🤝 무승부입니다.\n배팅금이 그대로 유지됩니다.`);
-      } else {
-        state.coins -= betAmt;
-        customWarning(`💸 패배하셨습니다...\n📉 -${betAmt} COIN 차감. (현재 잔액: ${state.coins})`);
-      }
-      
-      if (typeof updateUI === 'function') {
-        updateUI();
-      } else {
-        const coinEl = document.getElementById('coinDisplay') || document.getElementById('userCoins');
-        if (coinEl) coinEl.innerText = state.coins;
-      }
-
-      if (typeof saveGame === 'function') {
-        saveGame();
-      } else if (typeof saveData === 'function') {
-        saveData();
-      } else {
-        localStorage.setItem('gameState', JSON.stringify(state));
-      }
-    }
-  });
-}
-
-function generateBJDeck() {
-  const suits = ['♠', '♥', '♦', '♣'];
-  const values = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
-  let deck = [];
-  for (let s of suits) {
-    for (let v of values) {
-      deck.push({ suit: s, value: v });
-    }
-  }
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
-  }
-  return deck;
-}
-
-function calculateMultiScore(hand) {
-  if (!hand || hand.length === 0) return 0;
-  let score = 0;
-  let aces = 0;
-  for (let card of hand) {
-    if (card.value === 'A') {
-      aces++;
-      score += 11;
-    } else if (['J', 'Q', 'K'].includes(card.value)) {
-      score += 10;
-    } else {
-      score += parseInt(card.value);
-    }
-  }
-  while (score > 21 && aces > 0) {
-    score -= 10;
-    aces--;
-  }
-  return score;
-}
-
-function renderMultiHand(elementId, hand) {
-  const container = document.getElementById(elementId);
-  if (!container) return;
-  container.innerHTML = '';
-  if (!hand) return;
-
-  hand.forEach(card => {
-    const cardDiv = document.createElement('div');
-    const isRed = ['♥', '♦'].includes(card.suit);
-    cardDiv.className = `card ${isRed ? 'red' : ''}`;
-    cardDiv.innerHTML = `
-      <span style="font-size:14px; align-self: flex-start; margin-left:5px;">${card.value}</span>
-      <span class="suit">${card.suit}</span>
-    `;
-    container.appendChild(cardDiv);
-  });
-}
+})();
 </script>
+</div>
+
+<!-- ============================ 바카라 (Baccarat) ============================ -->
+<div class="tabpane" data-pane="baccarat">
+  <div class="betRow">
+    <input type="number" id="bacBet" value="1" min="1">
+    <button class="chipbtn" data-bet="+1">+1</button>
+    <button class="chipbtn" data-bet="+10">+10</button>
+    <button class="chipbtn" data-bet="max">MAX</button>
+    <button class="playBtn" id="bacPlay">베팅 &amp; 딜</button>
+  </div>
+  <div class="diceChoiceRow bacChoiceRow" id="bacChoiceRow">
+    <button class="diceChoice sel" data-bac="player">플레이어 (1:1)</button>
+    <button class="diceChoice" data-bac="banker">뱅커 (0.95:1)</button>
+    <button class="diceChoice" data-bac="tie">타이 (8:1)</button>
+  </div>
+  <div class="bjTable">
+    <div class="bjRow">
+      <div class="bjLabel">뱅커 <span id="bacBankerScore"></span></div>
+      <div class="bjHand" id="bacBankerHand"></div>
+    </div>
+    <div class="bjRow">
+      <div class="bjLabel">플레이어 <span id="bacPlayerScore"></span></div>
+      <div class="bjHand" id="bacPlayerHand"></div>
+    </div>
+  </div>
+  <div class="resultBanner" id="bacResult">플레이어 · 뱅커 · 타이 중 하나를 선택하고 베팅하세요</div>
+</div>
+
+</div>
+</div>
 
   <div class="footNote">가상의 Gold/Coin으로만 진행되는 브라우저 오프라인 게임입니다. 실제 화폐가 오가지 않으며, 진행 상황은 이 브라우저에 자동 저장됩니다. <span class="resetLink" id="resetSaveBtn">저장 데이터 초기화</span></div>
-</div>
 <div id="confettiLayer"></div>
 
 <script>
@@ -2080,6 +2052,7 @@ const TABS = [
   {id:'slot', label:'슬롯머신'},
   {id:'fishing', label:'낚시'},
   {id:'blackjack', label:'21(블랙잭)'},
+  {id:'baccarat', label:'바카라'},
 ];
 function renderTabs(){
   const bar = document.getElementById('tabbar');
@@ -2820,6 +2793,112 @@ document.getElementById('bjDouble').addEventListener('click', ()=>{
 });
 
 bjSetActionsEnabled(false,false);
+
+/* ============================ 바카라 (Baccarat) — 싱글 플레이 ============================ */
+let bacShoe = [];
+function bacDraw(){
+  if(bacShoe.length < 8) bacShoe = freshShoe();
+  return bacShoe.pop();
+}
+function bacCardValue(card){
+  if(card.r==='A') return 1;
+  if(card.r==='10'||card.r==='J'||card.r==='Q'||card.r==='K') return 0;
+  return parseInt(card.r,10);
+}
+function bacHandTotal(cards){
+  return cards.reduce((s,c)=>s+bacCardValue(c),0) % 10;
+}
+
+let bacChoice = 'player';
+document.querySelectorAll('#bacChoiceRow .diceChoice[data-bac]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#bacChoiceRow .diceChoice[data-bac]').forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel');
+    bacChoice = btn.dataset.bac;
+  });
+});
+
+let bacBusy = false;
+document.getElementById('bacPlay').addEventListener('click', ()=>{
+  if(bacBusy) return;
+  const bet = Math.max(1, Math.floor(+document.getElementById('bacBet').value||0));
+  const banner = document.getElementById('bacResult');
+  if(bet > state.coins){ banner.textContent='Coin이 부족합니다.'; banner.className='resultBanner lose'; return; }
+  bacBusy = true;
+  state.coins -= bet; renderTop();
+  banner.textContent = '카드를 나누는 중...';
+  banner.className = 'resultBanner';
+  document.getElementById('bacBankerHand').innerHTML='';
+  document.getElementById('bacPlayerHand').innerHTML='';
+  document.getElementById('bacBankerScore').textContent='';
+  document.getElementById('bacPlayerScore').textContent='';
+
+  let player = [bacDraw(), bacDraw()];
+  let banker = [bacDraw(), bacDraw()];
+
+  let pVal = bacHandTotal(player);
+  let bVal = bacHandTotal(banker);
+  const playerNatural = pVal >= 8;
+  const bankerNatural = bVal >= 8;
+
+  if(!playerNatural && !bankerNatural){
+    let playerThird = null;
+    if(pVal <= 5){
+      playerThird = bacDraw();
+      player.push(playerThird);
+      pVal = bacHandTotal(player);
+    }
+    if(playerThird === null){
+      if(bVal <= 5){ banker.push(bacDraw()); bVal = bacHandTotal(banker); }
+    } else {
+      const pt = bacCardValue(playerThird);
+      let bankerDraws = false;
+      if(bVal <= 2) bankerDraws = true;
+      else if(bVal === 3) bankerDraws = (pt !== 8);
+      else if(bVal === 4) bankerDraws = [2,3,4,5,6,7].includes(pt);
+      else if(bVal === 5) bankerDraws = [4,5,6,7].includes(pt);
+      else if(bVal === 6) bankerDraws = [6,7].includes(pt);
+      if(bankerDraws){ banker.push(bacDraw()); bVal = bacHandTotal(banker); }
+    }
+  }
+
+  Sound.tick();
+  setTimeout(()=>{
+    const bankerHandEl = document.getElementById('bacBankerHand');
+    const playerHandEl = document.getElementById('bacPlayerHand');
+    banker.forEach(c=>bankerHandEl.appendChild(cardEl(c,false)));
+    player.forEach(c=>playerHandEl.appendChild(cardEl(c,false)));
+    document.getElementById('bacBankerScore').textContent = '('+bVal+')';
+    document.getElementById('bacPlayerScore').textContent = '('+pVal+')';
+
+    let outcome;
+    if(pVal > bVal) outcome='player';
+    else if(bVal > pVal) outcome='banker';
+    else outcome='tie';
+
+    let payout = 0, resultText = '';
+    if(bacChoice === outcome){
+      if(outcome==='player'){ payout = bet*2; resultText = `플레이어 승리! +${fmt(payout)} Coin`; }
+      else if(outcome==='banker'){ payout = Math.round(bet*1.95); resultText = `뱅커 승리! +${fmt(payout)} Coin (수수료 5%)`; }
+      else { payout = bet*9; resultText = `🎉 타이 적중! +${fmt(payout)} Coin (8:1 배당)`; }
+      state.coins += payout;
+      banner.textContent = resultText;
+      banner.className = outcome==='tie' ? 'resultBanner jackpot' : 'resultBanner win';
+      Sound.win();
+      burstConfetti(outcome==='tie'?50:24);
+    } else if(outcome==='tie'){
+      state.coins += bet;
+      banner.textContent = `타이(무승부)! 베팅금 반환 (Push)`;
+      banner.className = 'resultBanner';
+    } else {
+      banner.textContent = `패배 (${outcome==='player'?'플레이어':'뱅커'} 승리 · -${fmt(bet)} Coin)`;
+      banner.className = 'resultBanner lose';
+      Sound.lose();
+    }
+    renderTop();
+    bacBusy = false;
+  }, 550);
+});
 
 /* ============================ CONFETTI / COIN RAIN / FIREWORKS ============================ */
 function burstConfetti(n){
