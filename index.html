@@ -681,6 +681,62 @@ input{font-family:inherit;}
   position:absolute;top:-4px;bottom:-4px;width:4px;background:#fff;
   box-shadow:0 0 10px #fff, 0 0 4px #fff;transform:translateX(-50%);z-index:5;border-radius:2px;
 }
+
+/* ---------- RUSSIAN ROULETTE (러시안 룰렛) ---------- */
+.rrStage{display:flex;flex-direction:column;align-items:center;gap:16px;padding:6px 0 2px;}
+.rrBulletRow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.rrBulletBtn{
+  background:#0d1119;border:2px solid var(--line);color:var(--text);border-radius:10px;
+  padding:9px 16px;font-weight:800;font-size:12.5px;text-align:center;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.rrBulletBtn .rrbSub{display:block;font-size:10px;color:var(--sub);font-weight:700;margin-top:2px;font-family:var(--mono);}
+.rrBulletBtn:hover{border-color:var(--lose);box-shadow:0 0 12px -4px rgba(255,77,106,.6);}
+.rrBulletBtn.sel{border-color:var(--lose);color:var(--lose);box-shadow:0 0 14px -3px var(--lose);}
+.rrCylinderWrap{position:relative;width:220px;height:220px;}
+.rrCylinderWrap::before{
+  content:"";position:absolute;inset:-14px;border-radius:50%;
+  background:radial-gradient(circle, rgba(255,77,106,.28), transparent 70%);
+  filter:blur(8px);animation:rrGlow 2.4s ease-in-out infinite;
+}
+@keyframes rrGlow{0%,100%{opacity:.55;}50%{opacity:1;}}
+.rrCylinder{
+  width:100%;height:100%;border-radius:50%;position:relative;
+  background:radial-gradient(circle at 40% 35%, #3a3f4b, #14161c 72%);
+  border:6px solid #1a1e29;box-shadow:0 0 0 3px #2b2f3c, 0 16px 34px -12px rgba(0,0,0,.8), inset 0 0 26px rgba(0,0,0,.6);
+  transition:transform 1s cubic-bezier(.2,.7,.25,1);
+}
+.rrCylinder.spinning{animation:rrSpin .15s linear infinite;}
+@keyframes rrSpin{to{transform:rotate(360deg);}}
+.rrChamber{
+  position:absolute;width:34px;height:34px;border-radius:50%;left:50%;top:50%;
+  margin:-17px 0 0 -17px;background:#05060a;border:2px solid #2c303a;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  transform-origin:center;transition:background .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+.rrChamber.spent{background:#1a0d0f;border-color:var(--lose);}
+.rrChamber.current{border-color:var(--gold-txt);box-shadow:0 0 12px -2px rgba(255,210,63,.85);}
+.rrChamber.bulletReveal{background:radial-gradient(circle,#ff8a9c,var(--lose));border-color:#fff;box-shadow:0 0 16px -2px rgba(255,77,106,.95);}
+.rrHammer{position:absolute;top:-4px;left:50%;transform:translateX(-50%);font-size:22px;z-index:4;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6));}
+.rrCenter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;
+  background:radial-gradient(circle,#9a9aa2,#3a3f4b);box-shadow:0 0 0 3px #1a1e29,0 0 12px rgba(0,0,0,.6);z-index:3;}
+.rrStatusText{font-size:13px;font-weight:800;color:var(--sub);letter-spacing:.03em;text-align:center;min-height:18px;}
+.rrStatusText.alert{color:var(--lose);text-shadow:0 0 10px rgba(255,77,106,.7);animation:fishAlertPulse .5s ease-in-out infinite;}
+.rrMultiRow{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;color:var(--sub);}
+.rrMultiRow b{color:var(--gold-txt);font-size:16px;text-shadow:0 0 8px rgba(255,210,63,.6);}
+.rrActionRow{display:flex;gap:10px;}
+.rrCashoutBtn{
+  background:linear-gradient(180deg,#3fe07a,#1f9e52);border:none;color:#04170b;font-weight:800;
+  padding:10px 20px;border-radius:9px;font-size:13px;box-shadow:0 6px 16px -6px rgba(63,224,122,.7);
+  transition:box-shadow .2s ease, transform .12s ease;
+}
+.rrCashoutBtn:hover:not(:disabled){box-shadow:0 6px 22px -3px rgba(63,224,122,.9);transform:translateY(-1px);}
+.rrTriggerBtn{
+  background:linear-gradient(180deg,#ff6b81,#c0223b);border:none;color:#fff;font-weight:800;
+  padding:10px 20px;border-radius:9px;font-size:13px;box-shadow:0 6px 16px -6px rgba(255,77,106,.7);
+  transition:box-shadow .2s ease, transform .12s ease;
+}
+.rrTriggerBtn:hover:not(:disabled){box-shadow:0 6px 22px -3px rgba(255,77,106,.9);transform:translateY(-1px);}
 </style>
 </head>
 <body>
@@ -896,6 +952,502 @@ input{font-family:inherit;}
         <div class="resultBanner" id="fishResult">낚싯대를 던져서 입질이 오면 타이밍에 맞춰 챔질하세요!</div>
       </div>
 
+      <!-- 러시안 룰렛 (솔로 · 멀티 모두 지원) -->
+      <div class="tabpane" data-pane="roulette-rr">
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; justify-content: center;">
+          <button id="btnRRSwitchSingle" style="flex: 1; padding: 10px; border-radius: 8px; border: none; background: #6c5ce7; color: #fff; font-weight: bold; cursor: pointer;">👤 솔로 플레이 (누적 배당)</button>
+          <button id="btnRRSwitchMulti" style="flex: 1; padding: 10px; border-radius: 8px; border: none; background: #3f3f4e; color: #aaa; font-weight: bold; cursor: pointer;">🎮 멀티플레이 (1:1 대결)</button>
+        </div>
+
+        <!-- [1] 솔로 플레이: 실린더에 원하는 만큼 총알을 넣고, 방아쇠를 당길 때마다 배당이 누적됩니다 -->
+        <div id="rrSingleArea">
+          <div class="betRow">
+            <input type="number" id="rrBet" value="1" min="1">
+            <button class="chipbtn" data-bet="+1">+1</button>
+            <button class="chipbtn" data-bet="+10">+10</button>
+            <button class="chipbtn" data-bet="max">MAX</button>
+            <button class="playBtn" id="rrPlay">실린더 장전</button>
+          </div>
+          <div class="rrBulletRow" id="rrBulletRow"></div>
+          <div class="rrStage">
+            <div class="rrCylinderWrap">
+              <div class="rrHammer">🔫</div>
+              <div class="rrCylinder" id="rrCylinder"></div>
+              <div class="rrCenter"></div>
+            </div>
+            <div class="rrStatusText" id="rrStatusText">장전할 총알 개수를 고르고 장전하세요</div>
+            <div class="rrMultiRow">현재 배당 <b id="rrMultiVal">1.00x</b> · 예상 획득 <span id="rrPayoutVal">0</span> Coin</div>
+            <div class="rrActionRow" id="rrActionRow" style="display:none;">
+              <button class="rrTriggerBtn" id="rrTrigger">방아쇠 당기기</button>
+              <button class="rrCashoutBtn" id="rrCashout">수령하기</button>
+            </div>
+          </div>
+          <div class="resultBanner" id="rrResult">총알이 적을수록 안전하지만 배당은 낮아집니다</div>
+        </div>
+
+        <!-- [2] 멀티플레이 화면 (실시간 1:1 · 방 형식 · 베팅 상호 합의 · 번갈아 방아쇠 · 재대결 투표) -->
+        <div id="rrMultiArea" style="display: none;">
+          <div id="rrLobby" class="mpLobby">
+            <h3 class="mpLobbyTitle">🔫 실시간 1:1 러시안 룰렛 설정</h3>
+            <div class="mpLobbyRow">
+              <input type="text" id="rrRoomInput" placeholder="방 번호 입력 (예: 1234)">
+              <button class="playBtn mpBtn" id="btnRRCreateRoom">방 생성</button>
+              <button class="playBtn mpBtn" id="btnRRJoinRoom">참가</button>
+            </div>
+            <div id="rrStatusDiv" class="mpLobbyStatus">방을 생성하거나 기존 방 번호를 입력해 참여하세요.</div>
+          </div>
+
+          <div id="rrGameArea" style="display: none;">
+
+            <div id="rrBetNegotiate" class="mpLobby">
+              <h3 class="mpLobbyTitle">🤝 베팅금 합의</h3>
+              <div class="mpLobbyRow">
+                <span class="mpBetLabel">제안할 베팅금:</span>
+                <input type="number" id="rrProposeInput" value="10" min="1">
+                <button class="chipbtn" id="btnRRProposePlus1">+1</button>
+                <button class="chipbtn" id="btnRRProposePlus10">+10</button>
+                <button class="playBtn mpBtn" id="btnRRProposeBet">제안하기</button>
+              </div>
+              <div id="rrNegotiateStatus" class="mpLobbyStatus">베팅금을 제안해 협상을 시작하세요.</div>
+              <div class="mpLobbyRow" style="margin-top:6px;">
+                <button class="playBtn mpBtn" id="btnRRAgreeBet" style="display:none;">이 금액에 동의</button>
+              </div>
+            </div>
+
+            <div class="betRow" id="rrMultiBetInfoRow" style="display:none;">
+              <span class="mpBetLabel">합의된 베팅금:</span>
+              <span class="mpBetTag" id="rrAgreedBetDisplay" style="margin-top:0;"></span>
+            </div>
+
+            <div class="rrStage">
+              <div class="rrCylinderWrap">
+                <div class="rrHammer">🔫</div>
+                <div class="rrCylinder" id="rrMultiCylinder"></div>
+                <div class="rrCenter"></div>
+              </div>
+              <div class="rrStatusText" id="rrMultiStatusText">상대방과 번갈아 방아쇠를 당깁니다 · 맞는 사람이 패배합니다</div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+                <div><span id="rrOppName">상대방</span> <em id="rrOppStatus" class="mpStatusTag">대기 중</em></div>
+                <div>나 <em id="rrMyStatus" class="mpStatusTag">대기 중</em></div>
+              </div>
+            </div>
+
+            <div class="rrActionRow" id="rrMultiActionRow" style="display:none;justify-content:center;">
+              <button class="rrTriggerBtn" id="rrMultiTrigger">방아쇠 당기기</button>
+            </div>
+
+            <div class="bjActions" id="rrRematchVoteRow" style="display:none;">
+              <button class="chipbtn bjAct" id="btnRRRematchYes" style="border-color:var(--win);color:var(--win);">🔁 다시하기</button>
+              <button class="chipbtn bjAct" id="btnRRRematchNo" style="border-color:var(--lose);color:var(--lose);">🚪 그만하기</button>
+            </div>
+
+            <div class="resultBanner" id="rrMultiResult">방에 입장하면 먼저 베팅금을 합의합니다 · 승자가 상금을 모두 가져갑니다 (2배)</div>
+          </div>
+        </div>
+
+        <!-- ============================ 러시안 룰렛 멀티플레이 자바스크립트 ============================ -->
+        <script>
+        (function(){
+        "use strict";
+
+        function rrCustomWarning(msg) {
+          let alertBox = document.getElementById('rrCustomAlert');
+          if (!alertBox) {
+            alertBox = document.createElement('div');
+            alertBox.id = 'rrCustomAlert';
+            alertBox.style.cssText = "position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(30,30,40,0.95); border:1px solid #ff7675; padding:25px; border-radius:12px; color:#fff; text-align:center; z-index:99999; min-width:300px; box-shadow: 0 8px 25px rgba(0,0,0,0.8);";
+            document.body.appendChild(alertBox);
+          }
+          alertBox.innerHTML = `
+            <div style="margin-bottom:20px; line-height:1.6; font-size: 15px; color:#ffeaa7;">
+              ${msg.replace(/\n/g, '<br>')}
+            </div>
+            <button onclick="document.getElementById('rrCustomAlert').style.display='none'" style="background:#e17055; color:#fff; border:none; padding:10px 30px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px;">확인</button>
+          `;
+          alertBox.style.display = 'block';
+        }
+        function rrGetMyCoins() {
+          if (window.state && typeof window.state.coins !== 'undefined') return parseInt(window.state.coins) || 0;
+          return 0;
+        }
+        function rrCoinFmt(n){ return (typeof window.fmt === 'function') ? window.fmt(n) : n; }
+
+        /* 모드 전환 (솔로 ↔ 멀티) */
+        const btnRRSwitchSingle = document.getElementById('btnRRSwitchSingle');
+        const btnRRSwitchMulti = document.getElementById('btnRRSwitchMulti');
+        const rrSingleArea = document.getElementById('rrSingleArea');
+        const rrMultiArea = document.getElementById('rrMultiArea');
+        if (btnRRSwitchSingle && btnRRSwitchMulti && rrSingleArea && rrMultiArea) {
+          btnRRSwitchSingle.onclick = function() {
+            rrSingleArea.style.display = 'block';
+            rrMultiArea.style.display = 'none';
+            btnRRSwitchSingle.style.background = '#6c5ce7';
+            btnRRSwitchSingle.style.color = '#fff';
+            btnRRSwitchMulti.style.background = '#3f3f4e';
+            btnRRSwitchMulti.style.color = '#aaa';
+          };
+          btnRRSwitchMulti.onclick = function() {
+            rrSingleArea.style.display = 'none';
+            rrMultiArea.style.display = 'block';
+            btnRRSwitchMulti.style.background = '#6c5ce7';
+            btnRRSwitchMulti.style.color = '#fff';
+            btnRRSwitchSingle.style.background = '#3f3f4e';
+            btnRRSwitchSingle.style.color = '#aaa';
+          };
+        }
+
+        /* ---------- 실린더 렌더 (솔로 렌더러를 재사용 — window.rrRenderCylinder) ---------- */
+        function rrMultiRenderCylinder(currentIdx, spentArr, bulletRevealIdx){
+          if (typeof window.rrRenderCylinder === 'function') {
+            window.rrRenderCylinder('rrMultiCylinder', [0,1,2,3,4,5], currentIdx, new Set(spentArr||[]), bulletRevealIdx);
+          }
+        }
+
+        function freshRRPlayerNode(){
+          return { betAgreed:false, proposedBet:0, rematchVote:null };
+        }
+
+        /* ---------- 방 상태 ---------- */
+        let rrRoomId = null;
+        let rrMyRole = null;
+        let rrDbRef = null;
+        let rrHostDealing = false;
+        let rrHostRebooting = false;
+        let rrProcessedRoundId = null;
+
+        const btnRRCreate = document.getElementById('btnRRCreateRoom');
+        const btnRRJoin = document.getElementById('btnRRJoinRoom');
+        const rrRoomInput = document.getElementById('rrRoomInput');
+        const rrStatusDiv = document.getElementById('rrStatusDiv');
+        const rrGameArea = document.getElementById('rrGameArea');
+        const rrBetNegotiateEl = document.getElementById('rrBetNegotiate');
+        const rrBetInfoRowEl = document.getElementById('rrMultiBetInfoRow');
+        const rrProposeInput = document.getElementById('rrProposeInput');
+        const rrNegotiateStatusEl = document.getElementById('rrNegotiateStatus');
+        const btnRRProposeBet = document.getElementById('btnRRProposeBet');
+        const btnRRAgreeBet = document.getElementById('btnRRAgreeBet');
+        const btnRRProposePlus1 = document.getElementById('btnRRProposePlus1');
+        const btnRRProposePlus10 = document.getElementById('btnRRProposePlus10');
+        const rrMultiActionRowEl = document.getElementById('rrMultiActionRow');
+        const rrMultiTriggerBtn = document.getElementById('rrMultiTrigger');
+        const rrRematchRowEl = document.getElementById('rrRematchVoteRow');
+        const btnRRRematchYes = document.getElementById('btnRRRematchYes');
+        const btnRRRematchNo = document.getElementById('btnRRRematchNo');
+        if(btnRRProposePlus1) btnRRProposePlus1.onclick = function(){ rrProposeInput.value = (parseInt(rrProposeInput.value)||0)+1; };
+        if(btnRRProposePlus10) btnRRProposePlus10.onclick = function(){ rrProposeInput.value = (parseInt(rrProposeInput.value)||0)+10; };
+
+        if (btnRRCreate) {
+          btnRRCreate.onclick = function() {
+            const roomId = rrRoomInput.value.trim();
+            if (!roomId) return rrCustomWarning('방 번호를 입력하세요!');
+            if (typeof database === 'undefined' || !database) return rrCustomWarning('서버(Firebase)가 연결되지 않았습니다.');
+
+            rrRoomId = roomId;
+            rrMyRole = 'p1';
+            rrDbRef = database.ref('rrRooms/' + roomId);
+
+            rrDbRef.set({
+              roomId: roomId,
+              status: 'betting',
+              roundId: 0,
+              p1: freshRRPlayerNode(),
+              p2: freshRRPlayerNode(),
+              p2Joined: false,
+              agreedBet: 0,
+              bulletPos: null,
+              cylinderPos: 0,
+              spentChambers: [],
+              turn: null,
+              winner: null
+            }).then(() => {
+              if(rrStatusDiv) rrStatusDiv.innerHTML = `🏠 <strong>방 생성 성공!</strong> 방 번호: <span style="color:#00b894">${roomId}</span> (상대방 대기 중)`;
+              if(rrGameArea) rrGameArea.style.display = 'block';
+              rrListenToRoom();
+            });
+          };
+        }
+        if (btnRRJoin) {
+          btnRRJoin.onclick = function() {
+            const roomId = rrRoomInput.value.trim();
+            if (!roomId) return rrCustomWarning('방 번호를 입력하세요!');
+            if (typeof database === 'undefined' || !database) return rrCustomWarning('서버가 연결되지 않았습니다.');
+
+            const joinRef = database.ref('rrRooms/' + roomId);
+            joinRef.once('value', (snapshot) => {
+              if (!snapshot.exists()) { rrCustomWarning('존재하지 않는 방입니다!'); return; }
+              const data = snapshot.val();
+              if (data.status === 'playing') { rrCustomWarning('게임이 한창 진행 중인 방입니다. 라운드가 끝난 뒤 다시 시도해주세요.'); return; }
+
+              joinRef.child('p2Joined').transaction((cur) => cur ? undefined : true).then((res) => {
+                if (!res.committed) { rrCustomWarning('이미 다른 상대가 참가한 방입니다.'); return; }
+                rrRoomId = roomId;
+                rrMyRole = 'p2';
+                rrDbRef = joinRef;
+                if(rrStatusDiv) rrStatusDiv.innerHTML = `🎮 <strong>방 입장 성공!</strong> 방 번호: <span style="color:#74b9ff">${roomId}</span>`;
+                if(rrGameArea) rrGameArea.style.display = 'block';
+                rrListenToRoom();
+              });
+            });
+          };
+        }
+
+        /* ---------- 베팅 제안 / 동의 ---------- */
+        if (btnRRProposeBet) {
+          btnRRProposeBet.onclick = function(){
+            if(!rrDbRef || !rrMyRole) return;
+            const amt = parseInt(rrProposeInput.value);
+            if(isNaN(amt) || amt <= 0){ rrCustomWarning('1 이상의 베팅금을 입력하세요!'); return; }
+            const myCoins = rrGetMyCoins();
+            if(myCoins < amt){ rrCustomWarning(`❌ 보유 코인(${rrCoinFmt(myCoins)}개)보다 많은 금액을 제안할 수 없습니다.`); return; }
+            const oppRole = rrMyRole==='p1' ? 'p2' : 'p1';
+            rrDbRef.update({
+              agreedBet: amt,
+              [rrMyRole+'/proposedBet']: amt,
+              [rrMyRole+'/betAgreed']: true,
+              [oppRole+'/betAgreed']: false
+            });
+          };
+        }
+        if (btnRRAgreeBet) {
+          btnRRAgreeBet.onclick = function(){
+            if(!rrDbRef || !rrMyRole) return;
+            rrDbRef.once('value', (snap)=>{
+              const room = snap.val();
+              if(!room) return;
+              const amt = room.agreedBet || 0;
+              if(amt <= 0) return;
+              const myCoins = rrGetMyCoins();
+              if(myCoins < amt){ rrCustomWarning(`❌ 보유 코인(${rrCoinFmt(myCoins)}개)보다 많은 금액에는 동의할 수 없습니다.`); return; }
+              rrDbRef.child(rrMyRole).update({ betAgreed:true });
+            });
+          };
+        }
+
+        /* ---------- 방아쇠 당기기 (트랜잭션으로 원자적 처리 — 동시 클릭/중복 클릭에도 안전) ---------- */
+        if (rrMultiTriggerBtn) {
+          rrMultiTriggerBtn.onclick = function(){
+            if(!rrDbRef || !rrMyRole) return;
+            rrMultiTriggerBtn.disabled = true;
+            rrDbRef.transaction((room)=>{
+              if(!room) return room;
+              if(room.status!=='playing' || room.turn!==rrMyRole) return room;
+              const pos = room.cylinderPos;
+              const spent = (room.spentChambers||[]).concat([pos]);
+              if(pos === room.bulletPos){
+                room.status = 'finished';
+                room.winner = rrMyRole==='p1' ? 'p2' : 'p1';
+                room.spentChambers = spent;
+                if(room.p1) room.p1.rematchVote = null;
+                if(room.p2) room.p2.rematchVote = null;
+              } else {
+                room.spentChambers = spent;
+                room.cylinderPos = (pos+1)%6;
+                room.turn = rrMyRole==='p1' ? 'p2' : 'p1';
+              }
+              return room;
+            });
+          };
+        }
+
+        /* ---------- 재대결 투표 ---------- */
+        if (btnRRRematchYes) {
+          btnRRRematchYes.onclick = function(){
+            if(!rrDbRef || !rrMyRole) return;
+            btnRRRematchYes.disabled = true;
+            if(btnRRRematchNo) btnRRRematchNo.disabled = true;
+            rrDbRef.child(rrMyRole).update({ rematchVote:'yes' });
+          };
+        }
+        if (btnRRRematchNo) {
+          btnRRRematchNo.onclick = function(){
+            if(!rrDbRef || !rrMyRole) return;
+            btnRRRematchYes.disabled = true;
+            btnRRRematchNo.disabled = true;
+            rrDbRef.child(rrMyRole).update({ rematchVote:'no' });
+          };
+        }
+
+        function rrListenToRoom() {
+          if (!rrDbRef) return;
+          rrDbRef.on('value', (snapshot) => {
+            if (!snapshot.exists()) return;
+            const room = snapshot.val();
+            if (!room.p1 || !room.p2) return;
+
+            const me = rrMyRole === 'p1' ? room.p1 : room.p2;
+            const opp = rrMyRole === 'p1' ? room.p2 : room.p1;
+            const oppRole = rrMyRole === 'p1' ? 'p2' : 'p1';
+            const roundId = room.roundId || 0;
+
+            const oppNameEl = document.getElementById('rrOppName');
+            const oppStatusEl = document.getElementById('rrOppStatus');
+            const myStatusEl = document.getElementById('rrMyStatus');
+            const multiResultEl = document.getElementById('rrMultiResult');
+            const multiStatusTextEl = document.getElementById('rrMultiStatusText');
+
+            if (oppNameEl) oppNameEl.innerText = rrMyRole === 'p1' ? '상대방 (Player 2)' : '방장 (Player 1)';
+
+            /* ---------- 베팅 협상 단계 ---------- */
+            if (room.status === 'betting') {
+              if(rrBetNegotiateEl) rrBetNegotiateEl.style.display = 'block';
+              if(rrBetInfoRowEl) rrBetInfoRowEl.style.display = 'none';
+              if(rrMultiActionRowEl) rrMultiActionRowEl.style.display = 'none';
+              if(rrRematchRowEl) rrRematchRowEl.style.display = 'none';
+              if(btnRRRematchYes) btnRRRematchYes.disabled = false;
+              if(btnRRRematchNo) btnRRRematchNo.disabled = false;
+
+              const amt = room.agreedBet || 0;
+              if (amt > 0) {
+                if (document.activeElement !== rrProposeInput) rrProposeInput.value = amt;
+                if(btnRRAgreeBet) btnRRAgreeBet.style.display = me.betAgreed ? 'none' : 'inline-block';
+                if (me.betAgreed && !opp.betAgreed) {
+                  rrNegotiateStatusEl.textContent = `${rrCoinFmt(amt)} Coin 제안 완료! 상대방의 동의를 기다리는 중...`;
+                } else if (!me.betAgreed && opp.betAgreed) {
+                  rrNegotiateStatusEl.textContent = `상대방이 ${rrCoinFmt(amt)} Coin을 제안했습니다. 동의하시겠습니까?`;
+                } else {
+                  rrNegotiateStatusEl.textContent = '두 사람이 같은 금액에 동의하면 게임이 시작됩니다.';
+                }
+              } else {
+                if(btnRRAgreeBet) btnRRAgreeBet.style.display = 'none';
+                rrNegotiateStatusEl.textContent = '베팅금을 제안해 협상을 시작하세요.';
+              }
+
+              /* 새 라운드로 전환되면 실린더 표시를 완전히 비운다 — 이전 라운드 잔상 방지 */
+              rrMultiRenderCylinder(-1, [], -1);
+              if(multiStatusTextEl) multiStatusTextEl.textContent = '상대방과 번갈아 방아쇠를 당깁니다 · 맞는 사람이 패배합니다';
+              if(myStatusEl){ myStatusEl.innerText = me.betAgreed ? '동의함' : '협상 중'; myStatusEl.className = 'mpStatusTag'+(me.betAgreed?' ready':''); }
+              if(oppStatusEl){ oppStatusEl.innerText = opp.betAgreed ? '동의함' : '협상 중'; oppStatusEl.className = 'mpStatusTag'+(opp.betAgreed?' ready':''); }
+              if(multiResultEl) multiResultEl.innerText = '방에 입장하면 먼저 베팅금을 합의합니다 · 승자가 상금을 모두 가져갑니다 (2배)';
+
+              /* 두 사람 모두 같은 금액에 동의 → 방장이 실린더를 장전하고 라운드를 시작 */
+              if (room.p1.betAgreed && room.p2.betAgreed && amt > 0 && rrMyRole === 'p1' && !rrHostDealing) {
+                rrHostDealing = true;
+                const bulletPos = Math.floor(Math.random()*6);
+                const firstTurn = Math.random() < 0.5 ? 'p1' : 'p2';
+                rrDbRef.update({
+                  status: 'playing',
+                  roundId: roundId + 1,
+                  bulletPos: bulletPos,
+                  cylinderPos: 0,
+                  spentChambers: [],
+                  turn: firstTurn,
+                  winner: null
+                }).then(()=>{ rrHostDealing = false; });
+              }
+              return;
+            }
+
+            /* ---------- 게임 진행 / 종료 화면 공통 ---------- */
+            if(rrBetNegotiateEl) rrBetNegotiateEl.style.display = 'none';
+            if(rrBetInfoRowEl){
+              rrBetInfoRowEl.style.display = 'flex';
+              const disp = document.getElementById('rrAgreedBetDisplay');
+              if(disp) disp.textContent = `🪙 ${rrCoinFmt(room.agreedBet||0)}`;
+            }
+
+            const bulletRevealIdx = room.status === 'finished' ? room.bulletPos : -1;
+            rrMultiRenderCylinder(room.status==='playing' ? room.cylinderPos : -1, room.spentChambers||[], bulletRevealIdx);
+
+            function rrStatusClass(isTurn, isLoser){
+              if(isLoser) return 'bust';
+              if(room.status==='finished') return isTurn ? '' : 'done';
+              if(isTurn) return 'busy';
+              return '';
+            }
+            const myTurn = room.turn === rrMyRole;
+            const oppTurn = room.turn === oppRole;
+            const myLost = room.status==='finished' && room.winner===oppRole;
+            const oppLost = room.status==='finished' && room.winner===rrMyRole;
+
+            if (myStatusEl) {
+              myStatusEl.innerText = room.status==='finished' ? (myLost ? '💥 사망' : '🏆 생존') : (myTurn ? '내 차례' : '대기 중');
+              myStatusEl.className = 'mpStatusTag ' + rrStatusClass(myTurn, myLost);
+            }
+            if (oppStatusEl) {
+              oppStatusEl.innerText = room.status==='finished' ? (oppLost ? '💥 사망' : '🏆 생존') : (oppTurn ? '상대 차례' : '대기 중');
+              oppStatusEl.className = 'mpStatusTag ' + rrStatusClass(oppTurn, oppLost);
+            }
+
+            if (room.status === 'playing') {
+              if (rrRematchRowEl) rrRematchRowEl.style.display = 'none';
+              if (multiStatusTextEl) multiStatusTextEl.textContent = myTurn ? '내 차례입니다! 방아쇠를 당기세요' : '상대방의 차례를 기다리는 중...';
+              if (multiResultEl) multiResultEl.innerText = myTurn ? '🔫 지금 방아쇠를 당길 차례입니다' : '⏳ 상대방이 방아쇠를 당기는 중...';
+              if (rrMultiActionRowEl) rrMultiActionRowEl.style.display = 'flex';
+              if (rrMultiTriggerBtn) rrMultiTriggerBtn.disabled = !myTurn;
+            }
+
+            if (room.status === 'finished') {
+              if (rrMultiActionRowEl) rrMultiActionRowEl.style.display = 'none';
+              if (rrRematchRowEl) rrRematchRowEl.style.display = me.rematchVote ? 'none' : 'flex';
+              if(btnRRRematchYes) btnRRRematchYes.disabled = !!me.rematchVote;
+              if(btnRRRematchNo) btnRRRematchNo.disabled = !!me.rematchVote;
+              if (multiStatusTextEl) multiStatusTextEl.textContent = myLost ? '💥 빵! 총알에 맞았습니다...' : '🏆 상대방이 총알에 맞았습니다! 승리!';
+
+              /* roundId 기준으로 정산 여부를 판단 — 같은 라운드는 절대 두 번 정산하지 않는다 */
+              if (rrProcessedRoundId !== roundId) {
+                rrProcessedRoundId = roundId;
+                const bet = room.agreedBet || 0;
+                let delta, msg;
+                if (room.winner === rrMyRole) { delta = bet; msg = `🏆 승리! 상대방이 총알에 맞았습니다. +${rrCoinFmt(delta)} Coin`; }
+                else { delta = -bet; msg = `💥 빵! 총알에 맞았습니다... -${rrCoinFmt(bet)} Coin`; }
+
+                if (window.state && typeof window.state.coins !== 'undefined') {
+                  window.state.coins += delta;
+                  if (typeof window.renderTop === 'function') window.renderTop();
+                  if (typeof window.saveGame === 'function') window.saveGame();
+                }
+                if (delta > 0) {
+                  if (window.Sound && window.Sound.win) window.Sound.win();
+                  if (typeof window.burstConfetti==='function') window.burstConfetti(30);
+                } else {
+                  if (window.Sound && window.Sound.rrBang) window.Sound.rrBang();
+                  else if (window.Sound && window.Sound.lose) window.Sound.lose();
+                }
+
+                if (multiResultEl) multiResultEl.innerHTML = `🏁 ${msg} · 다시 대결할지 선택해주세요.`;
+                rrCustomWarning(msg);
+              } else if (multiResultEl) {
+                if (me.rematchVote && !opp.rematchVote) multiResultEl.innerText = '🏁 상대방의 재대결 선택을 기다리는 중...';
+                else if (!me.rematchVote) multiResultEl.innerText = '🏁 다시 대결할지 선택해주세요.';
+              }
+
+              /* 두 사람 모두 투표하면 방장이 판정 */
+              const myVote = me.rematchVote;
+              const oppVote = opp.rematchVote;
+              if (myVote && oppVote && rrMyRole === 'p1' && !rrHostRebooting) {
+                rrHostRebooting = true;
+                if (myVote === 'yes' && oppVote === 'yes') {
+                  const prevBet = room.agreedBet || 0;
+                  rrDbRef.update({
+                    status:'betting',
+                    winner: null,
+                    agreedBet: prevBet,
+                    bulletPos: null, cylinderPos: 0, spentChambers: [], turn: null,
+                    'p1/betAgreed':false, 'p1/proposedBet':0, 'p1/rematchVote':null,
+                    'p2/betAgreed':false, 'p2/proposedBet':0, 'p2/rematchVote':null
+                  }).then(()=>{ rrHostRebooting=false; });
+                } else {
+                  rrDbRef.update({
+                    status:'betting',
+                    winner: null,
+                    agreedBet: 0,
+                    bulletPos: null, cylinderPos: 0, spentChambers: [], turn: null,
+                    'p1/betAgreed':false, 'p1/proposedBet':0, 'p1/rematchVote':null,
+                    'p2/betAgreed':false, 'p2/proposedBet':0, 'p2/rematchVote':null
+                  }).then(()=>{
+                    rrHostRebooting=false;
+                    rrCustomWarning('상대방이 종료를 선택하여 게임이 종료되었습니다.\n새로 베팅을 제안하면 다시 시작할 수 있습니다.');
+                  });
+                }
+              }
+            }
+          });
+        }
+
+        })();
+        </script>
+      </div>
+
       <!-- ============================ 통합 블랙잭 (싱글 & 멀티 모두 지원) ============================ -->
 <div class="tabpane" data-pane="blackjack">
   <!-- 모드 선택 버튼 -->
@@ -1105,7 +1657,7 @@ let dbRef = null;
 let hostDealing = false;
 let hostResolving = false;
 let hostRebooting = false;
-let mpProcessedFinish = false;
+let mpProcessedRoundId = null;
 
 const btnCreate = document.getElementById('btnCreateRoom');
 const btnJoin = document.getElementById('btnJoinRoom');
@@ -1162,6 +1714,7 @@ if (btnCreate) {
     dbRef.set({
       roomId: roomId,
       status: 'betting',
+      roundId: 0,
       p1: freshPlayerNode(),
       p2: freshPlayerNode(),
       p2Joined: false,
@@ -1237,12 +1790,19 @@ if (btnAgreeBet) {
 if (btnRematchYes) {
   btnRematchYes.onclick = function(){
     if(!dbRef || !myRole) return;
+    btnRematchYes.disabled = true;
+    if(btnRematchNo) btnRematchNo.disabled = true;
+    /* 낙관적 UI: 응답을 기다리지 않고 바로 카드/점수를 지워 "이전 카드가 남아있는" 문제를 방지 */
+    renderMultiHand('myHand', [], false);
+    renderMultiHand('oppHand', [], false);
     dbRef.child(myRole).update({ rematchVote:'yes' });
   };
 }
 if (btnRematchNo) {
   btnRematchNo.onclick = function(){
     if(!dbRef || !myRole) return;
+    btnRematchYes.disabled = true;
+    btnRematchNo.disabled = true;
     dbRef.child(myRole).update({ rematchVote:'no' });
   };
 }
@@ -1273,6 +1833,7 @@ function listenToRoom() {
     const me = myRole === 'p1' ? room.p1 : room.p2;
     const opp = myRole === 'p1' ? room.p2 : room.p1;
     const oppRole = myRole === 'p1' ? 'p2' : 'p1';
+    const roundId = room.roundId || 0;
 
     const oppNameEl = document.getElementById('oppName');
     const oppScoreEl = document.getElementById('oppScore');
@@ -1286,13 +1847,14 @@ function listenToRoom() {
 
     /* ---------- 베팅 협상 단계 ---------- */
     if (room.status === 'betting') {
-      mpProcessedFinish = false;
       hostResolving = false;
 
       if(betNegotiateEl) betNegotiateEl.style.display = 'block';
       if(betInfoRowEl) betInfoRowEl.style.display = 'none';
       if(multiActionsEl) multiActionsEl.style.display = 'none';
       if(rematchRowEl) rematchRowEl.style.display = 'none';
+      if(btnRematchYes) btnRematchYes.disabled = false;
+      if(btnRematchNo) btnRematchNo.disabled = false;
 
       const amt = room.agreedBet || 0;
       if (amt > 0) {
@@ -1310,6 +1872,7 @@ function listenToRoom() {
         negotiateStatusEl.textContent = '베팅금을 제안해 협상을 시작하세요.';
       }
 
+      /* 새 라운드(betting)로 전환되면 항상 카드/점수 표시를 완전히 비운다 — 이전 라운드 카드 잔상 방지 */
       renderMultiHand('myHand', [], false);
       renderMultiHand('oppHand', [], false);
       if(myScoreEl) myScoreEl.innerText = '';
@@ -1329,6 +1892,7 @@ function listenToRoom() {
         const bothDone = p1BJ || p2BJ;
         dbRef.update({
           status: 'playing',
+          roundId: roundId + 1,
           deck: deck,
           'p1/hand': p1Hand, 'p1/score': calculateMultiScore(p1Hand), 'p1/blackjack': p1BJ, 'p1/stand': bothDone, 'p1/bust': false, 'p1/bet': amt,
           'p2/hand': p2Hand, 'p2/score': calculateMultiScore(p2Hand), 'p2/blackjack': p2BJ, 'p2/stand': bothDone, 'p2/bust': false, 'p2/bet': amt,
@@ -1395,9 +1959,12 @@ function listenToRoom() {
     if (room.status === 'finished') {
       if (multiActionsEl) multiActionsEl.style.display = 'none';
       if (rematchRowEl) rematchRowEl.style.display = me.rematchVote ? 'none' : 'flex';
+      if(btnRematchYes) btnRematchYes.disabled = !!me.rematchVote;
+      if(btnRematchNo) btnRematchNo.disabled = !!me.rematchVote;
 
-      if (!mpProcessedFinish) {
-        mpProcessedFinish = true;
+      /* roundId 기준으로 정산 여부를 판단 — 같은 라운드는 절대 두 번 정산하지 않는다 */
+      if (mpProcessedRoundId !== roundId) {
+        mpProcessedRoundId = roundId;
         hostResolving = false;
         const winner = room.winner;
         const bet = parseInt(me.bet) || 0;
@@ -1441,8 +2008,8 @@ function listenToRoom() {
             deck: generateBJDeck(),
             winner: null,
             agreedBet: prevBet,
-            'p1/hand':[], 'p1/score':0, 'p1/stand':false, 'p1/bust':false, 'p1/blackjack':false, 'p1/betAgreed':false, 'p1/rematchVote':null,
-            'p2/hand':[], 'p2/score':0, 'p2/stand':false, 'p2/bust':false, 'p2/blackjack':false, 'p2/betAgreed':false, 'p2/rematchVote':null
+            'p1/hand':[], 'p1/score':0, 'p1/bet':0, 'p1/stand':false, 'p1/bust':false, 'p1/blackjack':false, 'p1/betAgreed':false, 'p1/proposedBet':0, 'p1/rematchVote':null,
+            'p2/hand':[], 'p2/score':0, 'p2/bet':0, 'p2/stand':false, 'p2/bust':false, 'p2/blackjack':false, 'p2/betAgreed':false, 'p2/proposedBet':0, 'p2/rematchVote':null
           }).then(()=>{ hostRebooting=false; });
         } else {
           dbRef.update({
@@ -1450,16 +2017,14 @@ function listenToRoom() {
             deck: generateBJDeck(),
             winner: null,
             agreedBet: 0,
-            'p1/hand':[], 'p1/score':0, 'p1/stand':false, 'p1/bust':false, 'p1/blackjack':false, 'p1/betAgreed':false, 'p1/proposedBet':0, 'p1/rematchVote':null,
-            'p2/hand':[], 'p2/score':0, 'p2/stand':false, 'p2/bust':false, 'p2/blackjack':false, 'p2/betAgreed':false, 'p2/proposedBet':0, 'p2/rematchVote':null
+            'p1/hand':[], 'p1/score':0, 'p1/bet':0, 'p1/stand':false, 'p1/bust':false, 'p1/blackjack':false, 'p1/betAgreed':false, 'p1/proposedBet':0, 'p1/rematchVote':null,
+            'p2/hand':[], 'p2/score':0, 'p2/bet':0, 'p2/stand':false, 'p2/bust':false, 'p2/blackjack':false, 'p2/betAgreed':false, 'p2/proposedBet':0, 'p2/rematchVote':null
           }).then(()=>{
             hostRebooting=false;
             customWarning('상대방이 종료를 선택하여 게임이 종료되었습니다.\n새로 베팅을 제안하면 다시 시작할 수 있습니다.');
           });
         }
       }
-    } else if (room.status === 'playing') {
-      mpProcessedFinish = false;
     }
   });
 }
@@ -1717,6 +2282,15 @@ const Sound = (function(){
       const notes=[523,659,784,1046,1318,1568,2093];
       notes.forEach((f,i)=>tone(f,.3,'triangle',.16,i*.09));
       for(let i=0;i<24;i++){ tone(600+Math.random()*1200,.16,'triangle',.08,.4+i*.045); }
+    },
+    rrTick(){ tone(300,.02,'square',.05); },
+    rrBang(){
+      const c = ensure(); const t0 = c.currentTime;
+      const osc = c.createOscillator(); const gain = c.createGain();
+      osc.type='square'; osc.frequency.setValueAtTime(120,t0); osc.frequency.exponentialRampToValueAtTime(30,t0+.35);
+      gain.gain.setValueAtTime(.35,t0); gain.gain.exponentialRampToValueAtTime(.0001,t0+.4);
+      osc.connect(gain); gain.connect(c.destination); osc.start(t0); osc.stop(t0+.42);
+      sweep(200,40,.45,'sawtooth',.2);
     }
   };
 })();
@@ -2195,6 +2769,7 @@ const TABS = [
   {id:'ladder', label:'사다리'},
   {id:'slot', label:'슬롯머신'},
   {id:'fishing', label:'낚시'},
+  {id:'roulette-rr', label:'러시안 룰렛'},
   {id:'blackjack', label:'21(블랙잭)'},
   {id:'baccarat', label:'바카라'},
 ];
@@ -2646,6 +3221,183 @@ function resolveFishStrike(timedOut){
   renderTop();
   fishBusy = false;
 }
+
+/* ============================ 러시안 룰렛 (Russian Roulette · 푸시-유어-럭) ============================ */
+const RR_CHAMBERS = 6;
+const RR_HOUSE_EDGE = 0.95;
+const RR_BULLET_OPTIONS = [
+  {n:1, label:'총알 1발', sub:'안전 · 저배당'},
+  {n:2, label:'총알 2발', sub:'보통 위험'},
+  {n:3, label:'총알 3발', sub:'고위험 · 고배당'},
+];
+let rrBulletCount = 1;
+let rrBusy = false;
+let rrChambers = [];
+let rrCurrentIdx = 0;
+let rrSpent = new Set();
+let rrBulletsLeft = 0;
+let rrChambersLeft = RR_CHAMBERS;
+let rrMultiplier = 1;
+let rrBetAmt = 0;
+
+function renderRRBulletRow(){
+  const row = document.getElementById('rrBulletRow');
+  if(!row) return;
+  row.innerHTML = '';
+  RR_BULLET_OPTIONS.forEach(opt=>{
+    const b = document.createElement('button');
+    b.className = 'rrBulletBtn'+(opt.n===rrBulletCount?' sel':'')+(rrBusy?' locked':'');
+    b.innerHTML = `${opt.label}<span class="rrbSub">${opt.sub}</span>`;
+    b.disabled = rrBusy;
+    b.addEventListener('click', ()=>{
+      if(rrBusy) return;
+      rrBulletCount = opt.n;
+      renderRRBulletRow();
+    });
+    row.appendChild(b);
+  });
+}
+renderRRBulletRow();
+
+function rrSurviveChance(chambersLeft, bulletsLeft){
+  return (chambersLeft - bulletsLeft) / chambersLeft;
+}
+function rrRenderCylinder(elementId, chambers, currentIdx, spentSet, bulletRevealIdx){
+  const cyl = document.getElementById(elementId || 'rrCylinder');
+  if(!cyl) return;
+  cyl.innerHTML = '';
+  const radius = 78;
+  for(let i=0;i<chambers.length;i++){
+    const ang = (Math.PI*2*i)/chambers.length - Math.PI/2;
+    const x = 110 + Math.cos(ang)*radius;
+    const y = 110 + Math.sin(ang)*radius;
+    const div = document.createElement('div');
+    let cls = 'rrChamber';
+    if(spentSet.has(i)) cls += ' spent';
+    if(i===currentIdx) cls += ' current';
+    if(i===bulletRevealIdx) cls += ' bulletReveal';
+    div.className = cls;
+    div.style.left = x+'px';
+    div.style.top = y+'px';
+    div.textContent = (i===bulletRevealIdx) ? '💥' : (spentSet.has(i) ? '·' : '');
+    cyl.appendChild(div);
+  }
+}
+
+function rrUpdateInfo(){
+  document.getElementById('rrMultiVal').textContent = rrMultiplier.toFixed(2)+'x';
+  document.getElementById('rrPayoutVal').textContent = fmt(Math.round(rrBetAmt*rrMultiplier));
+}
+function rrSetStatus(text, alert){
+  const el = document.getElementById('rrStatusText');
+  el.textContent = text;
+  el.classList.toggle('alert', !!alert);
+}
+
+document.getElementById('rrPlay').addEventListener('click', ()=>{
+  if(rrBusy) return;
+  const bet = Math.max(1, Math.floor(+document.getElementById('rrBet').value||0));
+  const banner = document.getElementById('rrResult');
+  if(bet > state.coins){ banner.textContent='Coin이 부족합니다.'; banner.className='resultBanner lose'; return; }
+  rrBusy = true;
+  rrBetAmt = bet;
+  state.coins -= bet; renderTop();
+  renderRRBulletRow();
+
+  rrChambers = Array.from({length:RR_CHAMBERS}, (_,i)=>i);
+  rrSpent = new Set();
+  rrCurrentIdx = 0;
+  rrBulletsLeft = rrBulletCount;
+  rrChambersLeft = RR_CHAMBERS;
+  rrMultiplier = 1;
+
+  banner.textContent = '실린더를 돌리는 중...';
+  banner.className = 'resultBanner';
+  rrSetStatus('실린더를 돌리는 중...', false);
+  document.getElementById('rrActionRow').style.display = 'none';
+
+  const cyl = document.getElementById('rrCylinder');
+  cyl.classList.add('spinning');
+  rrRenderCylinder('rrCylinder', rrChambers, -1, rrSpent, -1);
+  const spinTick = setInterval(()=>Sound.rrTick(), 90);
+  setTimeout(()=>{
+    clearInterval(spinTick);
+    cyl.classList.remove('spinning');
+    rrRenderCylinder('rrCylinder', rrChambers, rrCurrentIdx, rrSpent, -1);
+    rrUpdateInfo();
+    rrSetStatus('방아쇠를 당기거나 지금까지의 배당을 수령하세요', false);
+    document.getElementById('rrActionRow').style.display = 'flex';
+  }, 900);
+});
+
+document.getElementById('rrTrigger').addEventListener('click', ()=>{
+  if(!rrBusy) return;
+  const banner = document.getElementById('rrResult');
+  document.getElementById('rrActionRow').style.display = 'none';
+  rrSetStatus('방아쇠를 당기는 중...', false);
+  Sound.rrTick();
+
+  setTimeout(()=>{
+    const surviveChance = rrSurviveChance(rrChambersLeft, rrBulletsLeft);
+    const survived = Math.random() < surviveChance;
+
+    if(!survived){
+      rrRenderCylinder('rrCylinder', rrChambers, rrCurrentIdx, rrSpent, rrCurrentIdx);
+      rrSetStatus('탕! 총알이 발사되었습니다...', true);
+      banner.textContent = `💥 빵! 총알에 맞았습니다... (-${fmt(rrBetAmt)} Coin)`;
+      banner.className = 'resultBanner lose';
+      Sound.rrBang();
+      rrBusy = false;
+      renderRRBulletRow();
+      return;
+    }
+
+    rrSpent.add(rrCurrentIdx);
+    rrChambersLeft -= 1;
+    rrCurrentIdx += 1;
+    rrMultiplier = rrMultiplier * (1/surviveChance) * RR_HOUSE_EDGE;
+    rrRenderCylinder('rrCylinder', rrChambers, rrCurrentIdx, rrSpent, -1);
+    rrUpdateInfo();
+    Sound.tick();
+
+    if(rrChambersLeft <= rrBulletsLeft){
+      /* 남은 칸이 모두 총알뿐 — 강제 수령 */
+      rrSetStatus('빈 칸을 모두 통과했습니다! 자동으로 수령합니다.', false);
+      banner.textContent = `🎉 실린더의 빈 칸을 모두 통과! 최고 배당 획득!`;
+      banner.className = 'resultBanner jackpot';
+      doRRCashout(true);
+      return;
+    }
+
+    rrSetStatus(`살아남았습니다! (${rrChambersLeft}칸 중 ${rrBulletsLeft}발 남음)`, false);
+    banner.textContent = '한 번 더 당길까요, 아니면 지금 수령할까요?';
+    banner.className = 'resultBanner win';
+    document.getElementById('rrActionRow').style.display = 'flex';
+  }, 550);
+});
+
+function doRRCashout(isMax){
+  const banner = document.getElementById('rrResult');
+  const payout = Math.round(rrBetAmt*rrMultiplier);
+  state.coins += payout;
+  renderTop();
+  if(!isMax){
+    banner.textContent = `✅ 수령 완료! +${fmt(payout)} Coin (${rrMultiplier.toFixed(2)}x)`;
+    banner.className = 'resultBanner win';
+  } else {
+    banner.className = 'resultBanner jackpot';
+  }
+  Sound.win();
+  burstConfetti(isMax?45:22);
+  document.getElementById('rrActionRow').style.display = 'none';
+  rrSetStatus('총알 개수를 고르고 다시 장전하세요', false);
+  rrBusy = false;
+  renderRRBulletRow();
+}
+document.getElementById('rrCashout').addEventListener('click', ()=>{
+  if(!rrBusy) return;
+  doRRCashout(false);
+});
 
 /* ============================ LADDER ============================ */
 document.querySelectorAll('[data-lchoice]').forEach(btn=>{
@@ -3243,7 +3995,7 @@ document.getElementById('resetSaveBtn').addEventListener('click', ()=>{
   }
 });
 
-/* ============================ 외부 스크립트 연동 (멀티플레이 블랙잭 등) ============================
+/* ============================ 외부 스크립트 연동 (멀티플레이 블랙잭 · 러시안 룰렛 등) ============================
    이 아래 블록들은 별도의 <script> 태그(즉시실행함수) 안에 있어서, 이 IIFE 안의
    state/renderTop/saveGame 등은 원래 외부에서 절대 보이지 않습니다.
    그 스크립트들이 실제 코인(state.coins)을 정확히 읽고 반영할 수 있도록 window에 노출합니다. */
@@ -3254,6 +4006,7 @@ window.fmt = fmt;
 window.Sound = Sound;
 window.burstConfetti = burstConfetti;
 window.megaConfetti = megaConfetti;
+window.rrRenderCylinder = rrRenderCylinder;
 
 /* ============================ INIT ============================ */
 loadGame();
