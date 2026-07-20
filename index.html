@@ -800,6 +800,7 @@ input{font-family:inherit;}
       <h2><span class="bar"></span>대장간 · 곡괭이 상점</h2>
       <div class="oreInventory" id="oreInventory"></div>
       <div class="shopList" id="shopList"></div>
+      <div id="mineBoostSlot"></div>
       <div id="mineLevelSlot"></div>
     </div>
   </div>
@@ -999,6 +1000,10 @@ input{font-family:inherit;}
 
           <div id="rrGameArea" style="display: none;">
 
+            <div class="mpLobbyRow" style="justify-content:flex-end;">
+              <button class="playBtn mpBtn" id="btnRRLeaveRoom" style="background:linear-gradient(180deg,#ff6b81,#c0223b);margin-left:auto;">🚪 그만하기 (방 나가기)</button>
+            </div>
+
             <div id="rrBetNegotiate" class="mpLobby">
               <h3 class="mpLobbyTitle">🤝 베팅금 합의</h3>
               <div class="mpLobbyRow">
@@ -1079,6 +1084,11 @@ input{font-family:inherit;}
         const rrMultiArea = document.getElementById('rrMultiArea');
         if (btnRRSwitchSingle && btnRRSwitchMulti && rrSingleArea && rrMultiArea) {
           btnRRSwitchSingle.onclick = function() {
+            if(window.__mpActiveRoom && window.__mpActiveRoom.pane==='roulette-rr'){
+              if(typeof window.__mpBlockedWarning==='function') window.__mpBlockedWarning();
+              else alert('멀티플레이 방에 참여 중입니다. 먼저 "그만하기" 버튼으로 방을 나가주세요.');
+              return;
+            }
             rrSingleArea.style.display = 'block';
             rrMultiArea.style.display = 'none';
             btnRRSwitchSingle.style.background = '#6c5ce7';
@@ -1133,6 +1143,39 @@ input{font-family:inherit;}
         const rrRematchRowEl = document.getElementById('rrRematchVoteRow');
         const btnRRRematchYes = document.getElementById('btnRRRematchYes');
         const btnRRRematchNo = document.getElementById('btnRRRematchNo');
+        const btnRRLeaveRoom = document.getElementById('btnRRLeaveRoom');
+
+        /* ---------- 방 나가기: 리스너 해제 + 방 데이터 완전 삭제 → 같은 방 번호를 다른 사람이 재사용해도 이전 게임과 섞이지 않음 ---------- */
+        function rrLeaveRoom(silent){
+          if(rrDbRef){
+            try{ rrDbRef.onDisconnect().cancel(); }catch(e){}
+            try{ rrDbRef.off(); }catch(e){}
+            try{ rrDbRef.remove(); }catch(e){}
+          }
+          rrDbRef = null; rrMyRole = null; rrRoomId = null;
+          rrProcessedRoundId = null;
+          rrHostDealing = false; rrHostRebooting = false;
+          window.__mpActiveRoom = null;
+          if(rrGameArea) rrGameArea.style.display = 'none';
+          if(rrStatusDiv) rrStatusDiv.innerHTML = '방을 생성하거나 기존 방 번호를 입력해 참여하세요.';
+          if(rrRoomInput) rrRoomInput.value = '';
+          if(!silent) showToastSafe('방에서 나갔습니다 · 방 코드가 초기화되었습니다.');
+        }
+        function showToastSafe(msg){
+          if(typeof window.showToast === 'function') window.showToast(msg);
+        }
+        /* 상대방이 먼저 나가서 방 데이터 자체가 사라진 경우, 내 화면도 정리하고 알려준다 */
+        function rrHandleRoomGone(){
+          if(!rrDbRef && !rrMyRole) return;
+          rrCustomWarning('상대방이 방을 나가 게임이 종료되었습니다.\n방 코드가 초기화되었습니다.');
+          rrLeaveRoom(true);
+        }
+        if (btnRRLeaveRoom) {
+          btnRRLeaveRoom.onclick = function(){
+            if(!rrDbRef) return;
+            if(confirm('정말 방을 나가시겠습니까? 방 코드가 초기화되어 더 이상 사용할 수 없게 됩니다.')) rrLeaveRoom();
+          };
+        }
         if(btnRRProposePlus1) btnRRProposePlus1.onclick = function(){ rrProposeInput.value = (parseInt(rrProposeInput.value)||0)+1; };
         if(btnRRProposePlus10) btnRRProposePlus10.onclick = function(){ rrProposeInput.value = (parseInt(rrProposeInput.value)||0)+10; };
 
@@ -1142,27 +1185,37 @@ input{font-family:inherit;}
             if (!roomId) return rrCustomWarning('방 번호를 입력하세요!');
             if (typeof database === 'undefined' || !database) return rrCustomWarning('서버(Firebase)가 연결되지 않았습니다.');
 
-            rrRoomId = roomId;
-            rrMyRole = 'p1';
-            rrDbRef = database.ref('rrRooms/' + roomId);
+            const newRef = database.ref('rrRooms/' + roomId);
+            newRef.once('value', (existSnap) => {
+              if (existSnap.exists()) {
+                rrCustomWarning('이미 사용 중인 방 번호입니다.\n다른 번호를 입력하거나, 상대방에게 이 번호를 알려주고 "참가"를 눌러달라고 해주세요.');
+                return;
+              }
 
-            rrDbRef.set({
-              roomId: roomId,
-              status: 'betting',
-              roundId: 0,
-              p1: freshRRPlayerNode(),
-              p2: freshRRPlayerNode(),
-              p2Joined: false,
-              agreedBet: 0,
-              bulletPos: null,
-              cylinderPos: 0,
-              spentChambers: [],
-              turn: null,
-              winner: null
-            }).then(() => {
-              if(rrStatusDiv) rrStatusDiv.innerHTML = `🏠 <strong>방 생성 성공!</strong> 방 번호: <span style="color:#00b894">${roomId}</span> (상대방 대기 중)`;
-              if(rrGameArea) rrGameArea.style.display = 'block';
-              rrListenToRoom();
+              rrRoomId = roomId;
+              rrMyRole = 'p1';
+              rrDbRef = newRef;
+
+              rrDbRef.set({
+                roomId: roomId,
+                status: 'betting',
+                roundId: 0,
+                p1: freshRRPlayerNode(),
+                p2: freshRRPlayerNode(),
+                p2Joined: false,
+                agreedBet: 0,
+                bulletPos: null,
+                cylinderPos: 0,
+                spentChambers: [],
+                turn: null,
+                winner: null
+              }).then(() => {
+                rrDbRef.onDisconnect().remove();
+                window.__mpActiveRoom = {pane:'roulette-rr'};
+                if(rrStatusDiv) rrStatusDiv.innerHTML = `🏠 <strong>방 생성 성공!</strong> 방 번호: <span style="color:#00b894">${roomId}</span> (상대방 대기 중)`;
+                if(rrGameArea) rrGameArea.style.display = 'block';
+                rrListenToRoom();
+              });
             });
           };
         }
@@ -1183,6 +1236,8 @@ input{font-family:inherit;}
                 rrRoomId = roomId;
                 rrMyRole = 'p2';
                 rrDbRef = joinRef;
+                rrDbRef.onDisconnect().remove();
+                window.__mpActiveRoom = {pane:'roulette-rr'};
                 if(rrStatusDiv) rrStatusDiv.innerHTML = `🎮 <strong>방 입장 성공!</strong> 방 번호: <span style="color:#74b9ff">${roomId}</span>`;
                 if(rrGameArea) rrGameArea.style.display = 'block';
                 rrListenToRoom();
@@ -1261,16 +1316,14 @@ input{font-family:inherit;}
         if (btnRRRematchNo) {
           btnRRRematchNo.onclick = function(){
             if(!rrDbRef || !rrMyRole) return;
-            btnRRRematchYes.disabled = true;
-            btnRRRematchNo.disabled = true;
-            rrDbRef.child(rrMyRole).update({ rematchVote:'no' });
+            if(confirm('정말 방을 나가시겠습니까? 방 코드가 초기화되어 더 이상 사용할 수 없게 됩니다.')) rrLeaveRoom();
           };
         }
 
         function rrListenToRoom() {
           if (!rrDbRef) return;
           rrDbRef.on('value', (snapshot) => {
-            if (!snapshot.exists()) return;
+            if (!snapshot.exists()) { if(rrDbRef) rrHandleRoomGone(); return; }
             const room = snapshot.val();
             if (!room.p1 || !room.p2) return;
 
@@ -1497,6 +1550,10 @@ input{font-family:inherit;}
 
   <div id="bjGameArea" style="display: none;">
 
+    <div class="mpLobbyRow" style="justify-content:flex-end;">
+      <button class="playBtn mpBtn" id="btnLeaveRoom" style="background:linear-gradient(180deg,#ff6b81,#c0223b);margin-left:auto;">🚪 그만하기 (방 나가기)</button>
+    </div>
+
     <div id="bjBetNegotiate" class="mpLobby">
       <h3 class="mpLobbyTitle">🤝 베팅금 합의</h3>
       <div class="mpLobbyRow">
@@ -1585,6 +1642,11 @@ const bjSingleArea = document.getElementById('bjSingleArea');
 const bjMultiArea = document.getElementById('bjMultiArea');
 if (btnSwitchSingle && btnSwitchMulti && bjSingleArea && bjMultiArea) {
   btnSwitchSingle.onclick = function() {
+    if(window.__mpActiveRoom && window.__mpActiveRoom.pane==='blackjack'){
+      if(typeof window.__mpBlockedWarning==='function') window.__mpBlockedWarning();
+      else alert('멀티플레이 방에 참여 중입니다. 먼저 "그만하기" 버튼으로 방을 나가주세요.');
+      return;
+    }
     bjSingleArea.style.display = 'block';
     bjMultiArea.style.display = 'none';
     btnSwitchSingle.style.background = '#6c5ce7';
@@ -1680,6 +1742,36 @@ const btnProposePlus1 = document.getElementById('btnProposePlus1');
 const btnProposePlus10 = document.getElementById('btnProposePlus10');
 if(btnProposePlus1) btnProposePlus1.onclick = function(){ proposeInput.value = (parseInt(proposeInput.value)||0)+1; };
 if(btnProposePlus10) btnProposePlus10.onclick = function(){ proposeInput.value = (parseInt(proposeInput.value)||0)+10; };
+const btnLeaveRoom = document.getElementById('btnLeaveRoom');
+
+/* ---------- 방 나가기: 리스너 해제 + 방 데이터 완전 삭제 → 같은 방 번호를 다른 사람이 재사용해도 이전 게임과 섞이지 않음 ---------- */
+function bjLeaveRoom(silent){
+  if(dbRef){
+    try{ dbRef.onDisconnect().cancel(); }catch(e){}
+    try{ dbRef.off(); }catch(e){}
+    try{ dbRef.remove(); }catch(e){}
+  }
+  dbRef = null; myRole = null; currentRoomId = null;
+  mpProcessedRoundId = null;
+  hostDealing = false; hostResolving = false; hostRebooting = false;
+  window.__mpActiveRoom = null;
+  if(gameArea) gameArea.style.display = 'none';
+  if(statusDiv) statusDiv.innerHTML = '방을 생성하거나 기존 방 번호를 입력해 참여하세요.';
+  if(roomInput) roomInput.value = '';
+  if(!silent && typeof window.showToast === 'function') window.showToast('방에서 나갔습니다 · 방 코드가 초기화되었습니다.');
+}
+/* 상대방이 먼저 나가서 방 데이터 자체가 사라진 경우, 내 화면도 정리하고 알려준다 */
+function bjHandleRoomGone(){
+  if(!dbRef && !myRole) return;
+  customWarning('상대방이 방을 나가 게임이 종료되었습니다.\n방 코드가 초기화되었습니다.');
+  bjLeaveRoom(true);
+}
+if (btnLeaveRoom) {
+  btnLeaveRoom.onclick = function(){
+    if(!dbRef) return;
+    if(confirm('정말 방을 나가시겠습니까? 방 코드가 초기화되어 더 이상 사용할 수 없게 됩니다.')) bjLeaveRoom();
+  };
+}
 
 function freshPlayerNode(){
   return {
@@ -1707,24 +1799,34 @@ if (btnCreate) {
     if (!roomId) return customWarning('방 번호를 입력하세요!');
     if (typeof database === 'undefined' || !database) return customWarning('서버(Firebase)가 연결되지 않았습니다.');
 
-    currentRoomId = roomId;
-    myRole = 'p1';
-    dbRef = database.ref('bjRooms/' + roomId);
+    const newRef = database.ref('bjRooms/' + roomId);
+    newRef.once('value', (existSnap) => {
+      if (existSnap.exists()) {
+        customWarning('이미 사용 중인 방 번호입니다.\n다른 번호를 입력하거나, 상대방에게 이 번호를 알려주고 "참가"를 눌러달라고 해주세요.');
+        return;
+      }
 
-    dbRef.set({
-      roomId: roomId,
-      status: 'betting',
-      roundId: 0,
-      p1: freshPlayerNode(),
-      p2: freshPlayerNode(),
-      p2Joined: false,
-      deck: generateBJDeck(),
-      agreedBet: 0,
-      winner: null
-    }).then(() => {
-      if(statusDiv) statusDiv.innerHTML = `🏠 <strong>방 생성 성공!</strong> 방 번호: <span style="color:#00b894">${roomId}</span> (상대방 대기 중)`;
-      if(gameArea) gameArea.style.display = 'block';
-      listenToRoom();
+      currentRoomId = roomId;
+      myRole = 'p1';
+      dbRef = newRef;
+
+      dbRef.set({
+        roomId: roomId,
+        status: 'betting',
+        roundId: 0,
+        p1: freshPlayerNode(),
+        p2: freshPlayerNode(),
+        p2Joined: false,
+        deck: generateBJDeck(),
+        agreedBet: 0,
+        winner: null
+      }).then(() => {
+        dbRef.onDisconnect().remove();
+        window.__mpActiveRoom = {pane:'blackjack'};
+        if(statusDiv) statusDiv.innerHTML = `🏠 <strong>방 생성 성공!</strong> 방 번호: <span style="color:#00b894">${roomId}</span> (상대방 대기 중)`;
+        if(gameArea) gameArea.style.display = 'block';
+        listenToRoom();
+      });
     });
   };
 }
@@ -1746,6 +1848,8 @@ if (btnJoin) {
         currentRoomId = roomId;
         myRole = 'p2';
         dbRef = joinRef;
+        dbRef.onDisconnect().remove();
+        window.__mpActiveRoom = {pane:'blackjack'};
         if(statusDiv) statusDiv.innerHTML = `🎮 <strong>방 입장 성공!</strong> 방 번호: <span style="color:#74b9ff">${roomId}</span>`;
         if(gameArea) gameArea.style.display = 'block';
         listenToRoom();
@@ -1801,9 +1905,7 @@ if (btnRematchYes) {
 if (btnRematchNo) {
   btnRematchNo.onclick = function(){
     if(!dbRef || !myRole) return;
-    btnRematchYes.disabled = true;
-    btnRematchNo.disabled = true;
-    dbRef.child(myRole).update({ rematchVote:'no' });
+    if(confirm('정말 방을 나가시겠습니까? 방 코드가 초기화되어 더 이상 사용할 수 없게 됩니다.')) bjLeaveRoom();
   };
 }
 
@@ -1826,7 +1928,7 @@ function resolveWinner(room){
 function listenToRoom() {
   if (!dbRef) return;
   dbRef.on('value', (snapshot) => {
-    if (!snapshot.exists()) return;
+    if (!snapshot.exists()) { if(dbRef) bjHandleRoomGone(); return; }
     const room = snapshot.val();
     if (!room.p1 || !room.p2) return;
 
@@ -2178,27 +2280,31 @@ if (btnDouble) {
 
 /* ============================ CONFIG ============================ */
 const ORES = [
-  {id:'stone',  name:'돌멩이',        min:1,   max:3,    weight:50, color:'#9a9aa2', glow:0},
-  {id:'iron',   name:'철광석',        min:6,   max:14,   weight:27, color:'#c98a5a', glow:0},
-  {id:'silver', name:'은광석',        min:20,  max:45,   weight:13, color:'#dfe2e8', glow:6},
-  {id:'gold',   name:'금광석',        min:90,  max:210,  weight:6.5,color:'#f4b942', glow:10},
-  {id:'diamond',name:'다이아몬드',    min:400, max:980,  weight:2.3,color:'#7ee8fa', glow:16},
-  {id:'dark',   name:'암흑물질 광석', min:2400,max:5600, weight:.4, color:'#c04bff', glow:24},
+  {id:'stone',  name:'돌멩이',        min:1,   max:2,    weight:56, color:'#9a9aa2', glow:0},
+  {id:'iron',   name:'철광석',        min:3,   max:7,    weight:29, color:'#c98a5a', glow:0},
+  {id:'silver', name:'은광석',        min:8,   max:17,   weight:9.3,color:'#dfe2e8', glow:6},
+  {id:'gold',   name:'금광석',        min:30,  max:70,   weight:3.9,color:'#f4b942', glow:10},
+  {id:'diamond',name:'다이아몬드',    min:120, max:280,  weight:1.1,color:'#7ee8fa', glow:16},
+  {id:'dark',   name:'암흑물질 광석', min:650, max:1500, weight:.15,color:'#c04bff', glow:24},
 ];
 
 const PICKAXES = [
-  {id:'wood',  name:'나무 곡괭이',      cost:0,      mult:1,   rare:0,  crit:.03, power:1, requires:{}},
-  {id:'ironpk',name:'철 곡괭이',        cost:3000,    mult:1.5, rare:6,  crit:.05, power:2, requires:{iron:10}},
-  {id:'gold pk', name:'황금 곡괭이',    cost:9000,   mult:2.3, rare:14, crit:.08, power:3, requires:{iron:6, silver:8}},
-  {id:'diapk', name:'다이아 곡괭이',    cost:60000,  mult:3.6, rare:24, crit:.12, power:5, requires:{silver:6, gold:6}},
-  {id:'rift',  name:'차원 균열 곡괭이', cost:450000, mult:5.5, rare:40, crit:.2,  power:9, requires:{gold:5, diamond:6, dark:1}},
+  {id:'wood',   name:'나무 곡괭이',      cost:0,       mult:1.0, rare:0,  crit:.03, power:1,  requires:{}},
+  {id:'stonepk',name:'돌 곡괭이',        cost:1200,    mult:1.15,rare:2,  crit:.035,power:1,  requires:{stone:40}},
+  {id:'ironpk', name:'철 곡괭이',        cost:8000,    mult:1.4, rare:6,  crit:.045,power:2,  requires:{stone:30, iron:25}},
+  {id:'steelpk',name:'강철 곡괭이',      cost:22000,   mult:1.7, rare:9,  crit:.06, power:2,  requires:{iron:35, silver:10}},
+  {id:'goldpk', name:'황금 곡괭이',      cost:55000,   mult:2.1, rare:13, crit:.08, power:3,  requires:{iron:20, silver:35}},
+  {id:'platpk', name:'백금 곡괭이',      cost:130000,  mult:2.6, rare:17, crit:.10, power:4,  requires:{silver:25, gold:15}},
+  {id:'diapk',  name:'다이아 곡괭이',    cost:320000,  mult:3.3, rare:22, crit:.12, power:5,  requires:{silver:20, gold:30}},
+  {id:'orichpk',name:'오리하르콘 곡괭이', cost:800000,  mult:4.2, rare:29, crit:.15, power:7,  requires:{gold:25, diamond:15}},
+  {id:'rift',   name:'차원 균열 곡괭이', cost:2200000, mult:5.5, rare:38, crit:.20, power:10, requires:{gold:20, diamond:28, dark:5}},
 ];
 
 const HORSES = [
-  {name:'번개호',   color:'#f4b942', odds:1.5, weight:44},
-  {name:'질풍호',   color:'#3fe0ff', odds:2.5, weight:29},
-  {name:'황소호',   color:'#c04bff', odds:4.6, weight:18},
-  {name:'굼벵이호', color:'#ff4d6a', odds:100,  weight:9},
+  {name:'번개호',   color:'#f4b942', odds:1.5, weight:48},
+  {name:'질풍호',   color:'#3fe0ff', odds:2.5, weight:32},
+  {name:'황소호',   color:'#c04bff', odds:4.6, weight:17},
+  {name:'굼벵이호', color:'#ff4d6a', odds:100,  weight:0.1},
 ];
 
 const WHEEL_SEGS = [
@@ -2212,11 +2318,11 @@ const WHEEL_SEGS = [
 ];
 
 const SLOT_SYMS = [
-  {sym:'🍒', weight:42, pay3:1,  pay4:3,  pay5:10},
-  {sym:'🍋', weight:30, pay3:2,  pay4:6,  pay5:20},
-  {sym:'🔔', weight:16, pay3:4,  pay4:12, pay5:40},
-  {sym:'💎', weight:8,  pay3:8,  pay4:24, pay5:80},
-  {sym:'7',  weight:4,  pay3:15, pay4:60, pay5:1000, seven:true},
+  {sym:'🍒', weight:35, pay3:1,  pay4:3,  pay5:10},
+  {sym:'🍋', weight:25, pay3:2,  pay4:5,  pay5:20},
+  {sym:'🔔', weight:12, pay3:4,  pay4:10,  pay5:40},
+  {sym:'💎', weight:4,  pay3:8,  pay4:25, pay5:100},
+  {sym:'7',  weight:0.5,  pay3:80, pay4:150, pay5:2000, seven:true},
 ];
 
 const RATE = 4000; // 1 coin = 4000 gold
@@ -2233,6 +2339,9 @@ const state = {
   ores: {stone:0, iron:0, silver:0, gold:0, diamond:0, dark:0},
   brokeSince: null,
   lastDailyBonusDate: null,
+  dailyStreak: 0,
+  oreBreakCount: 0,
+  boostUntil: 0,
 };
 
 /* ============================ SOUND ENGINE ============================ */
@@ -2317,8 +2426,13 @@ function hexToRgba(hex, alpha){
   return 'rgba('+r+','+g+','+b+','+alpha+')';
 }
 function currentPickaxe(){ return PICKAXES[state.pickaxeIdx]; }
-const MINE_LEVEL_BONUS = 6;
+const MINE_LEVEL_BONUS = 4;
 function mineLevelCost(lv){ return Math.round(6 * Math.pow(1.55, lv-1)); }
+const MINE_COMBO_INTERVAL = 25;
+const MINE_COMBO_BASE = 400;
+const MINE_BOOST_MULT = 1.8;
+const MINE_BOOST_DURATION_MS = 90*1000;
+function mineBoostCost(){ return 2500 + state.pickaxeIdx*2200; }
 function oreWeights(){
   const pk = currentPickaxe();
   const bonus = pk.rare + (state.mineLevel-1)*MINE_LEVEL_BONUS;
@@ -2353,6 +2467,9 @@ function loadGame(){
       }
       
       if(saved.lastDailyBonusDate) state.lastDailyBonusDate = saved.lastDailyBonusDate;
+      if(typeof saved.dailyStreak==='number') state.dailyStreak = saved.dailyStreak;
+      if(typeof saved.oreBreakCount==='number') state.oreBreakCount = saved.oreBreakCount;
+      if(typeof saved.boostUntil==='number') state.boostUntil = saved.boostUntil;
       console.log("로컬 세이브 데이터를 성공적으로 불러왔습니다.");
     }
   }catch(e){ 
@@ -2398,6 +2515,9 @@ function loadGame(){
                 }
                 
                 if(cloudData.lastDailyBonusDate) state.lastDailyBonusDate = cloudData.lastDailyBonusDate;
+                if(typeof cloudData.dailyStreak==='number') state.dailyStreak = cloudData.dailyStreak;
+                if(typeof cloudData.oreBreakCount==='number') state.oreBreakCount = cloudData.oreBreakCount;
+                if(typeof cloudData.boostUntil==='number') state.boostUntil = cloudData.boostUntil;
                 
                 try {
                   state.pickaxeIdx = Math.max(0, Math.min(state.pickaxeIdx, PICKAXES.length-1));
@@ -2429,6 +2549,9 @@ function saveGame(){
       mineLevel: state.mineLevel,
       ores: state.ores,
       lastDailyBonusDate: state.lastDailyBonusDate,
+      dailyStreak: state.dailyStreak,
+      oreBreakCount: state.oreBreakCount,
+      boostUntil: state.boostUntil,
       savedAt: Date.now(),
     };
     
@@ -2494,13 +2617,21 @@ function checkRelief(){
   }
 }
 const DAILY_BONUS_AMOUNT = 150;
+const DAILY_STREAK_STEP = 45;
+const DAILY_STREAK_CAP = 10;
 function checkDailyBonus(){
-  const todayKey = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD, 로컬 기준
+  const now = new Date();
+  const todayKey = now.toLocaleDateString('en-CA'); // YYYY-MM-DD, 로컬 기준
   if(state.lastDailyBonusDate !== todayKey){
+    const yesterday = new Date(now); yesterday.setDate(now.getDate()-1);
+    const yesterdayKey = yesterday.toLocaleDateString('en-CA');
+    state.dailyStreak = (state.lastDailyBonusDate === yesterdayKey) ? (state.dailyStreak||0)+1 : 1;
     state.lastDailyBonusDate = todayKey;
-    state.gold += DAILY_BONUS_AMOUNT;
+    const streakForBonus = Math.min(state.dailyStreak, DAILY_STREAK_CAP);
+    const bonus = DAILY_BONUS_AMOUNT + (streakForBonus-1)*DAILY_STREAK_STEP;
+    state.gold += bonus;
     renderTop();
-    showToast(`☀️ 오늘의 접속 보너스 +${fmt(DAILY_BONUS_AMOUNT)}G`);
+    showToast(`☀️ ${state.dailyStreak}일 연속 접속 보너스 +${fmt(bonus)}G`);
   }
 }
 
@@ -2636,8 +2767,16 @@ function onRockClick(){
 
   let crit = Math.random() < pk.crit;
   let value = crit ? node.value*2 : node.value;
+  if(Date.now() < state.boostUntil) value = Math.round(value*MINE_BOOST_MULT);
   state.gold += value;
   state.ores[node.ore.id] = (state.ores[node.ore.id]||0) + 1;
+
+  state.oreBreakCount = (state.oreBreakCount||0) + 1;
+  if(state.oreBreakCount % MINE_COMBO_INTERVAL === 0){
+    const comboBonus = MINE_COMBO_BASE + state.mineLevel*40 + state.pickaxeIdx*60;
+    state.gold += comboBonus;
+    showToast(`🔥 채굴 콤보 ${state.oreBreakCount}회 달성! +${fmt(comboBonus)}G`);
+  }
 
   const epic = node.idx>=4;
   rockWrap.classList.remove('shake','mega'); void rockWrap.offsetWidth; rockWrap.classList.add(epic?'mega':'shake');
@@ -2724,6 +2863,46 @@ function renderShop(){
   });
   renderOreInventory();
   renderMineLevel();
+  renderMineBoost();
+}
+function renderMineBoost(){
+  const slot = document.getElementById('mineBoostSlot');
+  if(!slot) return;
+  const remainMs = state.boostUntil - Date.now();
+  const active = remainMs > 0;
+  const cost = mineBoostCost();
+  if(active){
+    const secs = Math.ceil(remainMs/1000);
+    slot.innerHTML = `
+      <div class="mineLevelCard">
+        <div class="mlTitle">⚡ 채굴 부스터 작동 중</div>
+        <div class="mlRow">
+          <div class="mlLv">x${MINE_BOOST_MULT} 골드 획득</div>
+          <div class="mlDesc">남은 시간: ${secs}초 · 채굴로 얻는 골드가 ${MINE_BOOST_MULT}배로 적용됩니다.</div>
+        </div>
+      </div>
+    `;
+  } else {
+    slot.innerHTML = `
+      <div class="mineLevelCard">
+        <div class="mlTitle">⚡ 채굴 부스터</div>
+        <div class="mlRow">
+          <div class="mlLv">${MINE_BOOST_MULT}배 · ${Math.round(MINE_BOOST_DURATION_MS/1000)}초</div>
+          <div class="mlDesc">Gold를 소비해 일정 시간 동안 채굴 골드 획득량을 늘립니다. (골드 소비처)</div>
+          <button id="mineBoostBuy"${state.gold<cost?' disabled':''}>${fmt(cost)} Gold 사용</button>
+        </div>
+      </div>
+    `;
+    const btn = document.getElementById('mineBoostBuy');
+    if(btn) btn.addEventListener('click', ()=>{
+      if(state.gold >= cost){
+        state.gold -= cost;
+        state.boostUntil = Date.now() + MINE_BOOST_DURATION_MS;
+        Sound.rareFanfare(3);
+        renderTop(); renderShop();
+      }
+    });
+  }
 }
 function renderMineLevel(){
   const slot = document.getElementById('mineLevelSlot');
@@ -2753,6 +2932,10 @@ function renderMineLevel(){
 
 /* ============================ NAV (지역 이동) ============================ */
 function switchView(id){
+  if(window.__mpActiveRoom && id!=='casino'){
+    if(typeof window.__mpBlockedWarning==='function') window.__mpBlockedWarning();
+    return;
+  }
   document.querySelectorAll('.navBtn').forEach(b=>b.classList.toggle('active', b.dataset.view===id));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.dataset.view===id));
 }
@@ -2786,6 +2969,10 @@ function renderTabs(){
   document.querySelector('.tabpane[data-pane="exchange"]').classList.add('active');
 }
 function switchTab(id){
+  if(window.__mpActiveRoom && id!==window.__mpActiveRoom.pane){
+    if(typeof window.__mpBlockedWarning==='function') window.__mpBlockedWarning();
+    return;
+  }
   document.querySelectorAll('.tabbtn').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
   document.querySelectorAll('.tabpane').forEach(p=>p.classList.toggle('active', p.dataset.pane===id));
 }
@@ -3078,8 +3265,8 @@ document.getElementById('wheelPlay').addEventListener('click', ()=>{
 const FISH_ZONES = [
   {id:'miss1',  label:'놓침',          mult:0,    from:0,  to:10,  color:'#3a3f4b'},
   {id:'small',  label:'잔챙이',        mult:1.0,  from:10, to:50,  color:'#5a6272'},
-  {id:'normal', label:'물고기',        mult:1.2,  from:50, to:65,  color:'#3fe0ff'},
-  {id:'miss3',  label:'놓침',          mult:0,    from:65, to:85, color:'#3a3f4b'},
+  {id:'normal', label:'물고기',        mult:1.2,  from:50, to:60,  color:'#3fe0ff'},
+  {id:'miss3',  label:'놓침',          mult:0,    from:60, to:85, color:'#3a3f4b'},
   {id:'gold',   label:'황금 물고기',   mult:3.0,  from:85, to:88,  color:'#ffd23f'},
   {id:'legend', label:'전설의 물고기', mult:12,   from:88, to:90,  color:'legend'},
   {id:'miss2',  label:'놓침',          mult:0,    from:90, to:100, color:'#3a3f4b'},
@@ -3159,7 +3346,7 @@ function startFishTiming(){
   renderFishZones();
   wrap.style.display = 'flex';
   fishMarkerPos = 0; fishDir = 1;
-  const speed = 1.6 + Math.random()*0.9;
+  const speed = 3.0 + Math.random()*1.5;
   function step(){
     fishMarkerPos += fishDir*speed;
     if(fishMarkerPos>=100){ fishMarkerPos=100; fishDir=-1; }
@@ -3545,19 +3732,30 @@ function renderSlotPayTable(){
 renderSlotPayTable();
 
 function evaluateSlotResult(results){
-  const counts = {};
-  results.forEach(r=>{ counts[r.sym] = (counts[r.sym]||0)+1; });
-  let best = null;
-  Object.keys(counts).forEach(sym=>{
-    const count = counts[sym];
-    if(count<3) return;
-    const data = SLOT_SYMS.find(s=>s.sym===sym);
-    const payMult = count>=5 ? data.pay5 : count===4 ? data.pay4 : data.pay3;
-    if(!best || payMult>best.payMult){ best = {sym, count, payMult, data}; }
-  });
-  return best;
-}
+  // 1. 첫 번째 칸의 심볼을 기준으로 잡습니다.
+  const targetSym = results[0].sym;
+  let count = 1;
 
+  // 2. 왼쪽에서부터 연속으로 몇 개가 똑같이 이어지는지 셉니다.
+  for(let i = 1; i < results.length; i++){
+    if(results[i].sym === targetSym){
+      count++;
+    } else {
+      break; // 중간에 다른 심볼이 나오면 즉시 카운트를 멈춥니다! (연속 끊김)
+    }
+  }
+
+  // 3. 연속된 개수가 3개 미만이면 꽝!
+  if(count < 3) return null;
+
+  // 4. 당첨 데이터 정보를 가져옵니다.
+  const data = SLOT_SYMS.find(s => s.sym === targetSym);
+  
+  // 5. 연속된 개수에 맞게 배당률을 지정합니다.
+  const payMult = count >= 5 ? data.pay5 : count === 4 ? data.pay4 : data.pay3;
+
+  return { sym: targetSym, count, payMult, data };
+}
 function spinReel(idx, finalSymData, delayStop){
   return new Promise(resolve=>{
     const strip = document.getElementById('strip'+idx);
@@ -3972,6 +4170,14 @@ function megaConfetti(){
   setTimeout(()=>flash.remove(), 1200);
 }
 
+/* ============================ 멀티플레이 방 이탈 방지 ============================ */
+window.addEventListener('beforeunload', function(e){
+  if(window.__mpActiveRoom){
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
 /* ============================ RIPPLE (버튼 클릭 피드백) ============================ */
 document.addEventListener('click', function(e){
   const btn = e.target.closest('button');
@@ -4007,6 +4213,8 @@ window.Sound = Sound;
 window.burstConfetti = burstConfetti;
 window.megaConfetti = megaConfetti;
 window.rrRenderCylinder = rrRenderCylinder;
+window.showToast = showToast;
+window.__mpBlockedWarning = function(){ showToast('🚪 멀티플레이 방에 참여 중입니다. 먼저 "그만하기" 버튼으로 방을 나가주세요.'); };
 
 /* ============================ INIT ============================ */
 loadGame();
@@ -4018,6 +4226,7 @@ scopedWire();
 switchView('mine');
 checkDailyBonus();
 setInterval(checkRelief, RELIEF_CHECK_TICK_MS);
+setInterval(renderMineBoost, 1000);
 
 })();
 </script>
