@@ -759,6 +759,14 @@ input{font-family:inherit;}
   border:2px solid #7a5a10;
 }
 .coinFace.back{transform:rotateY(180deg);background:radial-gradient(circle at 35% 30%, #eae0ff, #c04bff 55%, #6a1fa0 100%);color:#2a0a45;border-color:#4a1470;}
+
+/* ---------- ATTENDANCE (출석체크) ---------- */
+.attnPip{width:34px;height:34px;border-radius:50%;background:#181b24;border:2px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;
+  color:var(--sub);font-family:var(--mono);transition:background .2s ease,border-color .2s ease;}
+.attnPip.done{background:var(--brass);border-color:var(--brass-glow);color:#1a1206;
+  box-shadow:0 0 10px -2px rgba(224,165,66,.7);}
+.attnPip.today{border-color:var(--neon2);box-shadow:0 0 12px -3px rgba(63,224,255,.7);}
 </style>
 </head>
 <body>
@@ -859,6 +867,12 @@ input{font-family:inherit;}
       <h2><span class="bar"></span>명예의 전당 · 골드 랭킹</h2>
       <div id="rankingList"></div>
       <div class="resultBanner" id="rankingBanner">보유 Gold 기준 실시간 랭킹입니다 · 1~3위는 왕관 아이콘을 획득합니다</div>
+    </div>
+
+    <div class="panel shop-panel" id="attendancePanel" style="margin-top:16px;">
+      <h2><span class="bar"></span>7일 연속 출석체크</h2>
+      <div id="attendancePips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>
+      <div class="resultBanner" id="attendanceBanner">매일 접속하면 보상을 드립니다 · 7일 연속 달성 시 특별 보상!</div>
     </div>
 
     <div class="panel shop-panel" id="gachaPanel" style="margin-top:16px;">
@@ -2615,6 +2629,8 @@ const state = {
   equippedCosmetic: null,
   gachaItems: {},
   goldSpentTotal: 0,
+  lastAttendanceDate: null,
+  attendanceDay: 0,
 };
 
 /* ============================ SOUND ENGINE ============================ */
@@ -2748,6 +2764,8 @@ function loadGame(){
       if(saved.equippedCosmetic) state.equippedCosmetic = saved.equippedCosmetic;
       if(saved.gachaItems) state.gachaItems = saved.gachaItems;
       if(typeof saved.goldSpentTotal==='number') state.goldSpentTotal = saved.goldSpentTotal;
+      if(saved.lastAttendanceDate) state.lastAttendanceDate = saved.lastAttendanceDate;
+      if(typeof saved.attendanceDay==='number') state.attendanceDay = saved.attendanceDay;
       console.log("로컬 세이브 데이터를 성공적으로 불러왔습니다.");
     }
   }catch(e){ 
@@ -2800,6 +2818,8 @@ function loadGame(){
                 if(cloudData.equippedCosmetic) state.equippedCosmetic = cloudData.equippedCosmetic;
                 if(cloudData.gachaItems) state.gachaItems = cloudData.gachaItems;
                 if(typeof cloudData.goldSpentTotal==='number') state.goldSpentTotal = cloudData.goldSpentTotal;
+                if(cloudData.lastAttendanceDate) state.lastAttendanceDate = cloudData.lastAttendanceDate;
+                if(typeof cloudData.attendanceDay==='number') state.attendanceDay = cloudData.attendanceDay;
                 
                 try {
                   state.pickaxeIdx = Math.max(0, Math.min(state.pickaxeIdx, PICKAXES.length-1));
@@ -2838,6 +2858,8 @@ function saveGame(){
       equippedCosmetic: state.equippedCosmetic,
       gachaItems: state.gachaItems,
       goldSpentTotal: state.goldSpentTotal,
+      lastAttendanceDate: state.lastAttendanceDate,
+      attendanceDay: state.attendanceDay,
       savedAt: Date.now(),
     };
     
@@ -2927,6 +2949,50 @@ function checkDailyBonus(){
   }
 }
 
+/* ============================ 7일 연속 출석체크 ============================ */
+const ATTENDANCE_REWARDS = [50, 80, 120, 160, 220, 300, 1000]; // 1~7일차 보상(Gold), 7일차는 특별보상
+function checkAttendance(){
+  const now = new Date();
+  const todayKey = now.toLocaleDateString('en-CA');
+  const alreadyToday = state.lastAttendanceDate === todayKey;
+
+  if(!alreadyToday){
+    const yesterday = new Date(now); yesterday.setDate(now.getDate()-1);
+    const yesterdayKey = yesterday.toLocaleDateString('en-CA');
+
+    state.attendanceDay = (state.lastAttendanceDate === yesterdayKey) ? (state.attendanceDay||0)+1 : 1;
+    if(state.attendanceDay > 7) state.attendanceDay = 1;
+    state.lastAttendanceDate = todayKey;
+
+    const reward = ATTENDANCE_REWARDS[state.attendanceDay-1] || ATTENDANCE_REWARDS[0];
+    state.gold += reward;
+
+    if(state.attendanceDay === 7){
+      showToast(`🎉 7일 연속 출석 완료! 특별 보상 +${fmt(reward)}G!`);
+      Sound.jackpot(); megaConfetti();
+    } else {
+      showToast(`📅 출석 ${state.attendanceDay}/7일차 · +${fmt(reward)}G`);
+      Sound.tick();
+    }
+    renderTop();
+  }
+
+  const pipWrap = document.getElementById('attendancePips');
+  const banner = document.getElementById('attendanceBanner');
+  if(pipWrap){
+    pipWrap.innerHTML = '';
+    for(let d=1; d<=7; d++){
+      const pip = document.createElement('div');
+      pip.className = 'attnPip' + (d < state.attendanceDay ? ' done' : d===state.attendanceDay ? ' today' : '');
+      pip.textContent = d===7 ? '★' : d;
+      pipWrap.appendChild(pip);
+    }
+  }
+  if(banner) banner.textContent = state.attendanceDay===7
+    ? '7일차 특별 보상을 오늘 받았습니다! 내일부터 다시 1일차로 시작합니다.'
+    : `오늘 ${state.attendanceDay}일차 출석 완료 · 내일도 접속해서 스트릭을 이어가세요!`;
+}
+
 /* ============================ RENDER: TOPBAR ============================ */
 function renderTop(){
   document.getElementById('goldVal').textContent = fmt(state.gold);
@@ -2934,7 +3000,7 @@ function renderTop(){
   document.getElementById('pickVal').textContent = currentPickaxe().name;
   renderMineLevel();
   saveGame();
-  if(typeof renderRankingBoard === 'function') renderRankingBoard();
+  if(typeof loadRankingData === 'function') loadRankingData();
 }
 
 /* ============================ MINE ============================ */
@@ -3159,45 +3225,68 @@ function renderShop(){
   renderMineLevel();
   renderMineBoost();
 }
-function renderMineBoost(){
+
+/* ============================ 채굴 부스터 UI (깜빡임 방지: 상태 변경 시에만 DOM 재생성) ============================ */
+let boosterUIState = { active: null, costCache: null };
+function updateBoosterUI(data){
   const slot = document.getElementById('mineBoostSlot');
   if(!slot) return;
-  const remainMs = state.boostUntil - Date.now();
-  const active = remainMs > 0;
-  const cost = mineBoostCost();
-  if(active){
-    const secs = Math.ceil(remainMs/1000);
-    slot.innerHTML = `
-      <div class="mineLevelCard">
-        <div class="mlTitle">⚡ 채굴 부스터 작동 중</div>
-        <div class="mlRow">
-          <div class="mlLv">x${MINE_BOOST_MULT} 골드 획득</div>
-          <div class="mlDesc">남은 시간: ${secs}초 · 채굴로 얻는 골드가 ${MINE_BOOST_MULT}배로 적용됩니다.</div>
-        </div>
-      </div>
-    `;
-  } else {
-    slot.innerHTML = `
-      <div class="mineLevelCard">
-        <div class="mlTitle">⚡ 채굴 부스터</div>
-        <div class="mlRow">
-          <div class="mlLv">${MINE_BOOST_MULT}배 · ${Math.round(MINE_BOOST_DURATION_MS/1000)}초</div>
-          <div class="mlDesc">Gold를 소비해 일정 시간 동안 채굴 골드 획득량을 늘립니다. (골드 소비처)</div>
-          <button id="mineBoostBuy"${state.gold<cost?' disabled':''}>${fmt(cost)} Gold 사용</button>
-        </div>
-      </div>
-    `;
-    const btn = document.getElementById('mineBoostBuy');
-    if(btn) btn.addEventListener('click', ()=>{
-      if(state.gold >= cost){
-        state.gold -= cost;
-        state.goldSpentTotal = (state.goldSpentTotal||0) + cost;
-        state.boostUntil = Date.now() + MINE_BOOST_DURATION_MS;
-        Sound.rareFanfare(3);
-        renderTop(); renderShop();
-      }
-    });
+  const isActive = data.active;
+
+  if(boosterUIState.active !== isActive || (!isActive && boosterUIState.costCache !== data.cost)){
+    boosterUIState.active = isActive;
+    boosterUIState.costCache = data.cost;
+
+    if(isActive){
+      slot.innerHTML = `
+        <div class="mineLevelCard">
+          <div class="mlTitle">⚡ 채굴 부스터 작동 중</div>
+          <div class="mlRow">
+            <div class="mlLv">x${data.mult} 골드 획득</div>
+            <div class="mlDesc">남은 시간: <span id="boosterSecsVal">${Math.ceil(data.remainMs/1000)}</span>초 · 채굴로 얻는 골드가 ${data.mult}배로 적용됩니다.</div>
+          </div>
+        </div>`;
+    } else {
+      slot.innerHTML = `
+        <div class="mineLevelCard">
+          <div class="mlTitle">⚡ 채굴 부스터</div>
+          <div class="mlRow">
+            <div class="mlLv">${data.mult}배 · ${data.durationSec}초</div>
+            <div class="mlDesc">Gold를 소비해 일정 시간 동안 채굴 골드 획득량을 늘립니다. (골드 소비처)</div>
+            <button id="mineBoostBuy"${state.gold<data.cost?' disabled':''}>${fmt(data.cost)} Gold 사용</button>
+          </div>
+        </div>`;
+      const btn = document.getElementById('mineBoostBuy');
+      if(btn) btn.addEventListener('click', ()=>{
+        if(state.gold >= data.cost){
+          state.gold -= data.cost;
+          state.goldSpentTotal = (state.goldSpentTotal||0) + data.cost;
+          state.boostUntil = Date.now() + MINE_BOOST_DURATION_MS;
+          Sound.rareFanfare(3);
+          renderTop(); renderShop();
+        }
+      });
+    }
+    return;
   }
+
+  if(isActive){
+    const secsEl = document.getElementById('boosterSecsVal');
+    if(secsEl) secsEl.textContent = Math.ceil(data.remainMs/1000);
+  } else {
+    const btn = document.getElementById('mineBoostBuy');
+    if(btn) btn.disabled = state.gold < data.cost;
+  }
+}
+function renderMineBoost(){
+  const remainMs = state.boostUntil - Date.now();
+  updateBoosterUI({
+    active: remainMs > 0,
+    remainMs: remainMs,
+    cost: mineBoostCost(),
+    mult: MINE_BOOST_MULT,
+    durationSec: Math.round(MINE_BOOST_DURATION_MS/1000)
+  });
 }
 function renderMineLevel(){
   const slot = document.getElementById('mineLevelSlot');
@@ -3236,7 +3325,8 @@ function switchView(id){
   if(id==='exchangeView'){
     renderCosmeticShop();
     renderGachaPanel();
-    renderRankingBoard();
+    loadRankingData();
+    checkAttendance();
   }
 }
 document.querySelectorAll('.navBtn').forEach(btn=>{
@@ -4777,12 +4867,12 @@ document.getElementById('gachaPlay').addEventListener('click', ()=>{
 });
 
 /* ============================ 골드 소모 실시간 유저 랭킹 보드 (명예의 전당) ============================
-   Firebase가 연결되어 있으면 실시간 랭킹을, 연결되지 않았거나 로그인 정보가 없으면
-   현재 세션의 보유 Gold만으로 안내 문구를 표시한다. */
+   Firebase Realtime DB에서 Gold 기준 내림차순 정렬을 실시간 수신하여 DOM에 바인딩한다. */
 function currentUserName(){
   return sessionStorage.getItem('current_user') || localStorage.getItem('current_user') || null;
 }
-function renderRankingBoard(){
+let rankingDbRef = null;
+function loadRankingData(){
   const listEl = document.getElementById('rankingList');
   const bannerEl = document.getElementById('rankingBanner');
   if(!listEl) return;
@@ -4791,10 +4881,14 @@ function renderRankingBoard(){
     listEl.innerHTML = '<div class="resultBanner">서버(Firebase) 연결 시 실시간 랭킹이 표시됩니다.</div>';
     return;
   }
-  database.ref('leaderboard').orderByChild('gold').limitToLast(10).once('value').then(snap=>{
+
+  if(rankingDbRef){ rankingDbRef.off(); } // 중복 리스너 방지
+  rankingDbRef = database.ref('leaderboard').orderByChild('gold').limitToLast(10);
+
+  rankingDbRef.on('value', (snap)=>{
     const rows = [];
     snap.forEach(child=>{ rows.push(child.val()); });
-    rows.reverse(); // 내림차순
+    rows.reverse(); // Gold 내림차순
     const me = currentUserName();
     listEl.innerHTML = rows.map((r,i)=>{
       const rank = i+1;
@@ -4809,7 +4903,7 @@ function renderRankingBoard(){
       </div>`;
     }).join('') || '<div class="resultBanner">아직 랭킹 데이터가 없습니다.</div>';
     if(bannerEl) bannerEl.textContent = '보유 Gold 기준 실시간 랭킹입니다 · 1~3위는 왕관 아이콘을 획득합니다';
-  }).catch(()=>{
+  }, ()=>{
     listEl.innerHTML = '<div class="resultBanner">랭킹 정보를 불러오지 못했습니다.</div>';
   });
 }
@@ -4921,7 +5015,9 @@ window.burstConfetti = burstConfetti;
 window.megaConfetti = megaConfetti;
 window.rrRenderCylinder = rrRenderCylinder;
 window.showToast = showToast;
-window.__mpBlockedWarning = function(){ showToast('🚪 멀티플레이 방에 참여 중입니다. 먼저 "그만하기" 버튼으로 방을 나가주세요.'); };
+window.__mpBlockedWarning = function(){
+  showToast('🔒 멀티플레이 방에 참여 중입니다. 먼저 "그만하기" 버튼으로 방을 나가주세요.');
+};
 
 /* ==================================== INIT ==================================== */
 const ACCESS_PASSWORD = "1026"; // 👈 사용할 비밀번호 입력
@@ -4938,19 +5034,17 @@ if (sessionStorage.getItem('passed_auth') !== 'true') {
 
 loadGame();
 newOreNode();
-// ... 기존 코드 계속
-loadGame();
-newOreNode();
 renderTop();
 renderShop();
 renderTabs();
 scopedWire();
 switchView('mine');
 checkDailyBonus();
+checkAttendance();
 applyCosmeticEffect();
 renderCosmeticShop();
 renderGachaPanel();
-renderRankingBoard();
+loadRankingData();
 setInterval(checkRelief, RELIEF_CHECK_TICK_MS);
 setInterval(renderMineBoost, 1000);
 
@@ -4985,4 +5079,4 @@ setInterval(renderMineBoost, 1000);
   }
 </script>
 </body>
-</html>
+  </html>
