@@ -4923,7 +4923,22 @@ window.rrRenderCylinder = rrRenderCylinder;
 window.showToast = showToast;
 window.__mpBlockedWarning = function(){ showToast('🚪 멀티플레이 방에 참여 중입니다. 먼저 "그만하기" 버튼으로 방을 나가주세요.'); };
 
-/* ============================ INIT ============================ */
+/* ==================================== INIT ==================================== */
+const ACCESS_PASSWORD = "1026"; // 👈 사용할 비밀번호 입력
+
+if (sessionStorage.getItem('passed_auth') !== 'true') {
+  const inputPass = prompt("🔒 접속 비밀번호를 입력하세요:");
+  if (inputPass !== ACCESS_PASSWORD) {
+    alert("❌ 비밀번호가 올바르지 않습니다.");
+    document.body.innerHTML = "<div style='color:white; background:#111; height:100vh; display:flex; align-items:center; justify-content:center; font-size:24px;'>접속 권한이 없습니다.</div>";
+    throw new Error("Access Denied");
+  }
+  sessionStorage.setItem('passed_auth', 'true'); // 접속 성공 시 탭 닫기 전까지 유지
+}
+
+loadGame();
+newOreNode();
+// ... 기존 코드 계속
 loadGame();
 newOreNode();
 renderTop();
