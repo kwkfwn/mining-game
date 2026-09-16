@@ -110,6 +110,44 @@ input{font-family:inherit;}
 .profileStat.coin{color:var(--coin-txt);text-shadow:0 0 8px rgba(192,75,255,.6);}
 @media(max-width:520px){.profileName{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}}
 
+/* ---------- 칭호 / 테두리 / 배경 꾸미기 ---------- */
+.titleBadge{
+  display:inline-block;font-size:10px;font-weight:800;color:#1a1206;
+  background:linear-gradient(135deg,var(--brass-glow),var(--brass));
+  border-radius:999px;padding:1px 8px;margin-bottom:2px;white-space:nowrap;
+  box-shadow:0 0 8px -1px rgba(255,200,107,.6);
+}
+.profileAvatar.border_gold{border:2px solid var(--gold-txt);box-shadow:0 0 14px -2px rgba(255,210,63,.9);}
+.profileAvatar.border_neon{border:2px solid var(--neon2);box-shadow:0 0 14px -2px rgba(63,224,255,.9);}
+.profileAvatar.border_rainbow{
+  border:2px solid transparent;
+  background-image:linear-gradient(160deg,#3a2a17,#1c1308),conic-gradient(from 0deg,#ff2ea6,#ffd23f,#3fe0ff,#c04bff,#ff2ea6);
+  background-origin:border-box;background-clip:padding-box, border-box;
+  animation:rainbowSpin 4s linear infinite;
+}
+@keyframes rainbowSpin{to{filter:hue-rotate(360deg);}}
+.profileCard.bg_theme{background:linear-gradient(120deg,#3a1c2e,#1c1308);}
+.profileCard.bg_normal{background:linear-gradient(120deg,#20242e,#12141a);}
+.profileCard.bg_nebula{background:radial-gradient(circle at 30% 20%,rgba(122,92,255,.45),transparent 60%),radial-gradient(circle at 80% 80%,rgba(192,75,255,.4),transparent 55%),#120a24;}
+
+.custItemRow{display:flex;align-items:center;gap:10px;}
+.emoteBtn{
+  font-size:24px;background:#181321;border:1px solid #3a2a4a;border-radius:10px;
+  padding:8px 12px;transition:transform .15s ease, box-shadow .15s ease;
+}
+.emoteBtn:hover:not(:disabled){transform:scale(1.12);box-shadow:0 0 14px -3px rgba(192,75,255,.8);}
+.emoteBtn:disabled{opacity:.35;}
+.emoteFly{
+  position:fixed;font-size:52px;z-index:5000;pointer-events:none;
+  animation:emoteFlyAnim 1.6s ease-out forwards;
+}
+@keyframes emoteFlyAnim{
+  0%{transform:translateY(0) scale(.4) rotate(0deg);opacity:0;}
+  15%{opacity:1;transform:translateY(-20px) scale(1.2) rotate(-8deg);}
+  80%{opacity:1;transform:translateY(-140px) scale(1.05) rotate(8deg);}
+  100%{transform:translateY(-180px) scale(.9) rotate(0deg);opacity:0;}
+}
+
 .attnFab{
   width:38px;height:38px;border-radius:50%;flex-shrink:0;
   background:linear-gradient(160deg,#3a2a17,#1c1308);
@@ -841,7 +879,13 @@ input{font-family:inherit;}
 .attnDayCard.today{border-color:var(--neon2);box-shadow:0 0 0 1px var(--neon2) inset,0 0 18px -4px rgba(63,224,255,.65);}
 .attnDayCard .attnClaimBtn{
   font-size:10.5px;font-weight:800;color:#1a1206;background:var(--brass);border:none;
-  border-radius:999px;padding:3px 10px;margin-top:2px;cursor:pointer;
+  border-radius:999px;padding:4px 12px;margin-top:2px;cursor:pointer;
+  animation:attnClaimPulse 1.3s ease-in-out infinite;
+}
+.attnDayCard .attnClaimBtn:hover{background:var(--brass-glow);}
+@keyframes attnClaimPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,200,107,.55);}
+  50%{box-shadow:0 0 0 6px rgba(255,200,107,0);}
 }
 .attnDayCard.locked .attnDayIcon,.attnDayCard.locked .attnDayLabel{opacity:.4;filter:grayscale(1) drop-shadow(0 3px 4px rgba(0,0,0,.5));}
 .attnLockIcon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
@@ -919,8 +963,9 @@ input{font-family:inherit;}
   <div id="topbar">
     <div class="topbarTop">
       <div class="profileCard" id="profileCard">
-        <div class="profileAvatar">⛏️</div>
+        <div class="profileAvatar" id="profileAvatar">⛏️</div>
         <div class="profileInfo">
+          <div class="titleBadge" id="titleBadge" style="display:none;"></div>
           <div class="profileName" id="profileName">Guest</div>
           <div class="profileStats">
             <span class="profileStat gold"><span class="ic">🪙</span><span id="goldVal">0</span></span>
@@ -1005,7 +1050,7 @@ input{font-family:inherit;}
             <button class="exMax" id="g2cMax">MAX</button>
             <button class="exGo" id="g2cGo">환전하기</button>
           </div>
-          <div class="exRate">2,000 Gold = 1 Coin</div>
+          <div class="exRate">1,000 Gold = 1 Coin</div>
         </div>
         <div class="exCard">
           <div class="exTitle">🎰 Coin → 🪙 Gold</div>
@@ -1014,7 +1059,7 @@ input{font-family:inherit;}
             <button class="exMax" id="c2gMax">MAX</button>
             <button class="exGo" id="c2gGo">환전하기</button>
           </div>
-          <div class="exRate">1 Coin = 2,000 Gold (환전 수수료 5% 적용 → 실수령 1,900 Gold)</div>
+          <div class="exRate">1 Coin = 1,000 Gold (환전 수수료 5% 적용 → 실수령 950 Gold)</div>
         </div>
       </div>
       <div class="resultBanner" id="exResult">원하는 만큼 환전해서 미니 게임을 즐겨보세요. Coin → Gold 환전에는 5% 수수료가 붙습니다.</div>
@@ -1046,6 +1091,26 @@ input{font-family:inherit;}
       <h2><span class="bar"></span>골드 이펙트 상점 (한정판)</h2>
       <div class="oreInventory" id="cosmeticOwnedRow"></div>
       <div class="shopList" id="cosmeticShopList"></div>
+    </div>
+
+    <div class="panel shop-panel" id="myCustomPanel" style="margin-top:16px;">
+      <h2><span class="bar"></span>🎭 나의 꾸미기 (럭키박스 획득 아이템 사용)</h2>
+      <div class="resultBanner" id="customBanner">럭키 박스에서 획득한 칭호 · 테두리 · 배경 · 감정표현을 여기서 장착하고 사용하세요!</div>
+
+      <div style="margin-top:14px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">🏅 칭호</div>
+      <div class="shopList" id="titleList" style="margin-top:8px;"></div>
+
+      <div style="margin-top:16px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">🖼️ 아바타 테두리</div>
+      <div class="shopList" id="borderList" style="margin-top:8px;"></div>
+
+      <div style="margin-top:16px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">🌌 프로필 배경</div>
+      <div class="shopList" id="bgList" style="margin-top:8px;"></div>
+
+      <div style="margin-top:16px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">😂 감정표현 (사용권 소모)</div>
+      <div id="emoteRow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
+
+      <div style="margin-top:16px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">⚡ 랭킹 스코어 부스터</div>
+      <div class="shopList" id="boosterList" style="margin-top:8px;"></div>
     </div>
   </div>
 
@@ -2860,7 +2925,7 @@ const SLOT_SYMS = [
   {sym:'7',  weight:0.5,  pay3:80, pay4:150, pay5:2000, seven:true},
 ];
 
-const RATE = 2000; // 1 coin = 2000 gold
+const RATE = 1000; // 1 coin = 1000 gold
 const EXCHANGE_FEE = 0.05; // Coin → Gold 환전 수수료 5%
 
 /* ============================ STATE ============================ */
@@ -2885,6 +2950,11 @@ const state = {
   coinSpentTotal: 0,
   lastAttendanceDate: null,
   attendanceDay: 0,
+  ownedTitles: {},
+  ownedBorders: {},
+  equippedTitle: null,
+  equippedBorder: null,
+  equippedBg: null,
 };
 
 /* ============================ SOUND ENGINE ============================ */
@@ -3014,6 +3084,11 @@ function loadGame(){
       if(typeof saved.coinSpentTotal==='number') state.coinSpentTotal = saved.coinSpentTotal;
       if(saved.lastAttendanceDate) state.lastAttendanceDate = saved.lastAttendanceDate;
       if(typeof saved.attendanceDay==='number') state.attendanceDay = saved.attendanceDay;
+      if(saved.ownedTitles) state.ownedTitles = saved.ownedTitles;
+      if(saved.ownedBorders) state.ownedBorders = saved.ownedBorders;
+      if(saved.equippedTitle) state.equippedTitle = saved.equippedTitle;
+      if(saved.equippedBorder) state.equippedBorder = saved.equippedBorder;
+      if(saved.equippedBg) state.equippedBg = saved.equippedBg;
     }
   }catch(e){ console.error("로컬 로드 중 에러:", e); }
 
@@ -3055,6 +3130,11 @@ function loadGame(){
                 if(typeof cloudData.coinSpentTotal==='number') state.coinSpentTotal = cloudData.coinSpentTotal;
                 if(cloudData.lastAttendanceDate) state.lastAttendanceDate = cloudData.lastAttendanceDate;
                 if(typeof cloudData.attendanceDay==='number') state.attendanceDay = cloudData.attendanceDay;
+                if(cloudData.ownedTitles) state.ownedTitles = cloudData.ownedTitles;
+                if(cloudData.ownedBorders) state.ownedBorders = cloudData.ownedBorders;
+                if(cloudData.equippedTitle) state.equippedTitle = cloudData.equippedTitle;
+                if(cloudData.equippedBorder) state.equippedBorder = cloudData.equippedBorder;
+                if(cloudData.equippedBg) state.equippedBg = cloudData.equippedBg;
                 try { state.pickaxeIdx = Math.max(0, Math.min(state.pickaxeIdx, PICKAXES.length-1)); } catch(err) {}
                 localStorage.setItem(ACTUAL_SAVE_KEY, JSON.stringify(cloudData));
                 if (typeof updateUI === 'function') updateUI();
@@ -3076,7 +3156,9 @@ function saveGame(){
       oreBreakCount: state.oreBreakCount, boostUntil: state.boostUntil, cosmetics: state.cosmetics,
       equippedCosmetic: state.equippedCosmetic, gachaItems: state.gachaItems, goldSpentTotal: state.goldSpentTotal,
       coinSpentTotal: state.coinSpentTotal,
-      lastAttendanceDate: state.lastAttendanceDate, attendanceDay: state.attendanceDay, savedAt: Date.now(),
+      lastAttendanceDate: state.lastAttendanceDate, attendanceDay: state.attendanceDay,
+      ownedTitles: state.ownedTitles, ownedBorders: state.ownedBorders, equippedTitle: state.equippedTitle,
+      equippedBorder: state.equippedBorder, equippedBg: state.equippedBg, savedAt: Date.now(),
     };
     localStorage.setItem(ACTUAL_SAVE_KEY, JSON.stringify(snap));
     if (typeof database !== 'undefined' && database !== null) {
@@ -3183,24 +3265,45 @@ function grantAttendanceReward(r){
   else if(r.type==='jackpot'){ state.gold += 10000; state.coins += 20; }
 }
 
+/* 출석 로직: lastAttendanceDate = "마지막으로 보상을 실제로 수령한 날짜", attendanceDay = "마지막으로 수령한 회차".
+   오늘 아직 수령 전이면 canClaim=true, claimDay = 받을 수 있는 회차. 사용자가 버튼을 눌러야 실제 지급됨. */
+function getAttendanceClaimInfo(){
+  const now = new Date();
+  const todayKey = now.toLocaleDateString('en-CA');
+  const canClaim = state.lastAttendanceDate !== todayKey;
+  let claimDay = state.attendanceDay || 0;
+  if(canClaim){
+    const yesterday = new Date(now); yesterday.setDate(now.getDate()-1);
+    const yesterdayKey = yesterday.toLocaleDateString('en-CA');
+    claimDay = (state.lastAttendanceDate === yesterdayKey) ? (state.attendanceDay||0)+1 : 1;
+    if(claimDay > ATTENDANCE_DAYS) claimDay = 1;
+  }
+  return { canClaim, claimDay, todayKey };
+}
+
 function renderAttendanceUI(){
+  const info = getAttendanceClaimInfo();
   const pipWrap = document.getElementById('attendancePips');
   const banner = document.getElementById('attendanceBanner');
   const grid = document.getElementById('attnDayGrid');
+  const claimedThrough = state.attendanceDay || 0; // 실제로 수령 완료한 마지막 회차
+  const todayCard = info.canClaim ? info.claimDay : claimedThrough;
 
   if(pipWrap){
     pipWrap.innerHTML = '';
     for(let d=1; d<=ATTENDANCE_DAYS; d++){
       const pip = document.createElement('div');
-      pip.className = 'attnPip' + (d < state.attendanceDay ? ' done' : d===state.attendanceDay ? ' today' : '');
+      pip.className = 'attnPip' + (d<=claimedThrough ? ' done' : (d===todayCard ? ' today' : ''));
       pip.style.cssText = 'width:22px;height:22px;font-size:9.5px;';
       pip.textContent = ATTENDANCE_REWARDS[d-1].special ? '★' : d;
       pipWrap.appendChild(pip);
     }
   }
-  if(banner) banner.textContent = state.attendanceDay===ATTENDANCE_DAYS
-    ? '14일차 최종 보상을 오늘 받았습니다! 내일부터 다시 1일차로 시작합니다.'
-    : `오늘 ${state.attendanceDay}일차 출석 완료 · 내일도 접속해서 스트릭을 이어가세요! (총 ${ATTENDANCE_DAYS}일)`;
+  if(banner) banner.textContent = info.canClaim
+    ? `🎁 ${info.claimDay}일차 출석 보상이 도착했어요! 아래에서 "받기" 버튼을 눌러 수령하세요.`
+    : (claimedThrough===ATTENDANCE_DAYS
+        ? '14일차 최종 보상까지 모두 받았습니다! 내일부터 다시 1일차로 시작합니다.'
+        : `오늘 ${claimedThrough}일차 보상을 받았습니다 · 내일 다시 접속해서 스트릭을 이어가세요! (총 ${ATTENDANCE_DAYS}일)`);
 
   if(grid){
     grid.innerHTML = '';
@@ -3209,28 +3312,51 @@ function renderAttendanceUI(){
       const card = document.createElement('div');
       let cls = 'attnDayCard';
       if(r.special) cls += ' special';
-      if(day < state.attendanceDay) cls += ' done';
-      else if(day === state.attendanceDay) cls += ' today';
+      const isDone = day <= claimedThrough;
+      const isClaimable = info.canClaim && day === info.claimDay;
+      if(isDone) cls += ' done';
+      else if(isClaimable || day===todayCard) cls += ' today';
       else cls += ' locked';
       card.className = cls;
       card.innerHTML = `
         <span class="attnDayNum">${day}회차</span>
         <span class="attnDayIcon">${r.icon}</span>
         <span class="attnDayLabel">${r.label}</span>
-        ${day < state.attendanceDay ? '<span class="attnDoneBadge">✔ 보상완료</span>' : ''}
-        ${day > state.attendanceDay ? '<span class="attnLockIcon">🔒</span>' : ''}
+        ${isDone ? '<span class="attnDoneBadge">✔ 보상완료</span>' : ''}
+        ${isClaimable ? '<button type="button" class="attnClaimBtn" data-claim-day="'+day+'">🎁 받기</button>' : ''}
+        ${(!isDone && !isClaimable) ? '<span class="attnLockIcon">🔒</span>' : ''}
       `;
       grid.appendChild(card);
     });
   }
+
+  const badge = document.getElementById('attnFabBadge');
+  if(badge) badge.style.display = info.canClaim ? 'block' : 'none';
+}
+
+function claimAttendanceReward(){
+  const info = getAttendanceClaimInfo();
+  if(!info.canClaim) return;
+  state.attendanceDay = info.claimDay;
+  state.lastAttendanceDate = info.todayKey;
+  const reward = ATTENDANCE_REWARDS[info.claimDay-1] || ATTENDANCE_REWARDS[0];
+  grantAttendanceReward(reward);
+  if(info.claimDay === ATTENDANCE_DAYS){
+    showToast(`🎉 14일 출석 완료! 최종 보상 획득!`);
+    Sound.jackpot(); megaConfetti();
+  } else {
+    showToast(`📅 출석 ${info.claimDay}/${ATTENDANCE_DAYS}일차 · ${attendanceRewardText(reward)} 수령!`);
+    Sound.win(); burstConfetti(28);
+  }
+  renderTop();
+  saveGame();
+  renderAttendanceUI();
 }
 
 function openAttendanceModal(){
   renderAttendanceUI();
   const modal = document.getElementById('attnModal');
   if(modal) modal.classList.add('show');
-  const badge = document.getElementById('attnFabBadge');
-  if(badge) badge.style.display = 'none';
 }
 function closeAttendanceModal(){
   const modal = document.getElementById('attnModal');
@@ -3238,42 +3364,19 @@ function closeAttendanceModal(){
 }
 
 function checkAttendance(autoOpen){
-  const now = new Date();
-  const todayKey = now.toLocaleDateString('en-CA');
-  const alreadyToday = state.lastAttendanceDate === todayKey;
-  let justGranted = false;
-
-  if(!alreadyToday){
-    const yesterday = new Date(now); yesterday.setDate(now.getDate()-1);
-    const yesterdayKey = yesterday.toLocaleDateString('en-CA');
-    state.attendanceDay = (state.lastAttendanceDate === yesterdayKey) ? (state.attendanceDay||0)+1 : 1;
-    if(state.attendanceDay > ATTENDANCE_DAYS) state.attendanceDay = 1;
-    state.lastAttendanceDate = todayKey;
-    const reward = ATTENDANCE_REWARDS[state.attendanceDay-1] || ATTENDANCE_REWARDS[0];
-    grantAttendanceReward(reward);
-    justGranted = true;
-    if(state.attendanceDay === ATTENDANCE_DAYS){
-      showToast(`🎉 14일 출석 완료! 최종 보상 획득!`);
-      Sound.jackpot(); megaConfetti();
-    } else {
-      showToast(`📅 출석 ${state.attendanceDay}/${ATTENDANCE_DAYS}일차 · ${attendanceRewardText(reward)}`);
-      Sound.tick();
-    }
-    renderTop();
-    saveGame();
-  }
-
   renderAttendanceUI();
-  if(autoOpen && justGranted) openAttendanceModal();
-  else if(justGranted){
-    const badge = document.getElementById('attnFabBadge');
-    if(badge) badge.style.display = 'block';
-  }
+  const info = getAttendanceClaimInfo();
+  if(autoOpen && info.canClaim) openAttendanceModal();
 }
 if(document.getElementById('attnFabBtn')) document.getElementById('attnFabBtn').onclick = openAttendanceModal;
 if(document.getElementById('attnModalCloseBtn')) document.getElementById('attnModalCloseBtn').onclick = closeAttendanceModal;
 if(document.getElementById('attnModal')) document.getElementById('attnModal').addEventListener('click', (e)=>{
   if(e.target.id==='attnModal') closeAttendanceModal();
+});
+const attnDayGridEl = document.getElementById('attnDayGrid');
+if(attnDayGridEl) attnDayGridEl.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.attnClaimBtn');
+  if(btn) claimAttendanceReward();
 });
 
 /* ============================ RENDER: TOPBAR ============================ */
@@ -3283,6 +3386,7 @@ function renderTop(){
   document.getElementById('pickVal').textContent = currentPickaxe().name;
   const profileNameEl = document.getElementById('profileName');
   if(profileNameEl) profileNameEl.textContent = localStorage.getItem('current_user') || 'Guest';
+  if(typeof applyCustomization==='function') applyCustomization();
   renderMineLevel();
   saveGame();
   if(typeof loadRankingData === 'function') loadRankingData();
@@ -5161,14 +5265,14 @@ function renderCosmeticShop(){
         state.cosmetics[c.id] = true;
         state.equippedCosmetic = c.id;
         Sound.rareFanfare(4);
-        renderTop(); renderCosmeticShop(); applyCosmeticEffect();
+        renderTop(); renderCosmeticShop(); applyCosmeticEffect(); if(typeof renderCustomPanel==='function') renderCustomPanel();
       }
     });
   });
   list.querySelectorAll('[data-eq-cos]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       state.equippedCosmetic = btn.dataset.eqCos;
-      renderTop(); renderCosmeticShop(); applyCosmeticEffect();
+      renderTop(); renderCosmeticShop(); applyCosmeticEffect(); if(typeof renderCustomPanel==='function') renderCustomPanel();
     });
   });
 }
@@ -5228,19 +5332,237 @@ document.getElementById('gachaPlay').addEventListener('click', ()=>{
     banner.className = 'resultBanner lose';
     Sound.lose();
   } else if(pick.id === 'title_hidden'){
-    banner.textContent = `🌟 대박! [한정판] 히든 칭호 & 테두리 스킨을 획득했습니다!`;
+    const grantedTitle = grantRandomTitle();
+    const grantedBorder = grantRandomBorder();
+    banner.textContent = `🌟 대박! [한정판] "${grantedTitle.name}" 칭호와 "${grantedBorder.name}"을(를) 획득했습니다! 나의 꾸미기에서 장착해보세요.`;
     banner.className = 'resultBanner jackpot';
     Sound.jackpot();
     megaConfetti();
   } else {
-    banner.textContent = `🎁 ${pick.label}을(를) 획득했습니다!`;
+    banner.textContent = `🎁 ${pick.label}을(를) 획득했습니다! 나의 꾸미기에서 사용/장착할 수 있어요.`;
     banner.className = 'resultBanner win';
     Sound.win();
     burstConfetti(20);
   }
   renderTop();
   renderGachaPanel();
+  if(typeof renderCustomPanel==='function') renderCustomPanel();
 });
+
+/* ============================ 나의 꾸미기 (칭호 · 테두리 · 배경 · 감정표현 · 부스터) ============================ */
+const TITLES = [
+  {id:'title_legend',    name:'🏆 전설의 광부'},
+  {id:'title_diamond',   name:'💎 다이아몬드 손'},
+  {id:'title_highroller',name:'🎰 하이롤러'},
+  {id:'title_lucky',     name:'🍀 행운의 사나이'},
+  {id:'title_speed',     name:'⚡ 스피드러너'},
+  {id:'title_ghost',     name:'👻 심야의 채굴자'},
+];
+const BORDERS = [
+  {id:'border_gold',    name:'황금 테두리', cls:'border_gold'},
+  {id:'border_neon',    name:'네온 테두리', cls:'border_neon'},
+  {id:'border_rainbow', name:'무지개 테두리', cls:'border_rainbow'},
+];
+const BG_ITEMS = [
+  {id:'bg_theme',  name:'노을빛 프로필 배경', cls:'bg_theme',  source:'gacha'},
+  {id:'bg_normal', name:'심플 그레이 배경',   cls:'bg_normal', source:'gacha'},
+  {id:'bg_nebula', name:'성운 배경',          cls:'bg_nebula', source:'shop'},
+];
+const EMOTES = ['😂','🔥','👏','😭','🎉','🤔','💪','😱'];
+const SCORE_BOOST_DURATION_MS = 15*60*1000;
+
+function grantRandomTitle(){
+  state.ownedTitles = state.ownedTitles || {};
+  const unowned = TITLES.filter(t=>!state.ownedTitles[t.id]);
+  const pool = unowned.length ? unowned : TITLES;
+  const t = pool[Math.floor(Math.random()*pool.length)];
+  state.ownedTitles[t.id] = true;
+  return t;
+}
+function grantRandomBorder(){
+  state.ownedBorders = state.ownedBorders || {};
+  const unowned = BORDERS.filter(b=>!state.ownedBorders[b.id]);
+  const pool = unowned.length ? unowned : BORDERS;
+  const b = pool[Math.floor(Math.random()*pool.length)];
+  state.ownedBorders[b.id] = true;
+  return b;
+}
+
+function applyCustomization(){
+  const avatar = document.getElementById('profileAvatar');
+  const titleBadge = document.getElementById('titleBadge');
+  const card = document.getElementById('profileCard');
+  if(avatar){
+    BORDERS.forEach(b=>avatar.classList.remove(b.cls));
+    const b = BORDERS.find(x=>x.id===state.equippedBorder);
+    if(b) avatar.classList.add(b.cls);
+  }
+  if(titleBadge){
+    const t = TITLES.find(x=>x.id===state.equippedTitle);
+    if(t){ titleBadge.textContent = t.name; titleBadge.style.display='inline-block'; }
+    else { titleBadge.style.display='none'; }
+  }
+  if(card){
+    BG_ITEMS.forEach(bg=>card.classList.remove(bg.cls));
+    const bg = BG_ITEMS.find(x=>x.id===state.equippedBg);
+    if(bg) card.classList.add(bg.cls);
+  }
+}
+
+function renderCustomPanel(){
+  const titleList = document.getElementById('titleList');
+  const borderList = document.getElementById('borderList');
+  const bgList = document.getElementById('bgList');
+  const emoteRow = document.getElementById('emoteRow');
+  const boosterList = document.getElementById('boosterList');
+  if(!titleList) return;
+
+  // 칭호
+  const ownedTitleIds = Object.keys(state.ownedTitles||{}).filter(id=>state.ownedTitles[id]);
+  titleList.innerHTML = ownedTitleIds.length ? '' : '<span class="invChip">아직 획득한 칭호가 없습니다 · 럭키 박스에서 획득하세요!</span>';
+  ownedTitleIds.forEach(id=>{
+    const t = TITLES.find(x=>x.id===id); if(!t) return;
+    const isEq = state.equippedTitle===id;
+    const card = document.createElement('div');
+    card.className = 'pick-card'+(isEq?' current':' owned');
+    card.innerHTML = `
+      <div class="picon">🏅</div>
+      <div class="info"><div class="name">${t.name}</div></div>
+      ${isEq ? '<span class="badge">장착중</span>' : '<button data-eq-title="'+id+'">장착</button>'}
+    `;
+    titleList.appendChild(card);
+  });
+  titleList.querySelectorAll('[data-eq-title]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.equippedTitle = btn.dataset.eqTitle;
+      renderTop(); renderCustomPanel();
+    });
+  });
+  if(ownedTitleIds.length){
+    const unequipBtn = document.createElement('button');
+    unequipBtn.className = 'chipbtn'; unequipBtn.style.marginTop='4px'; unequipBtn.textContent='칭호 해제';
+    unequipBtn.onclick = ()=>{ state.equippedTitle=null; renderTop(); renderCustomPanel(); };
+    titleList.appendChild(unequipBtn);
+  }
+
+  // 테두리
+  const ownedBorderIds = Object.keys(state.ownedBorders||{}).filter(id=>state.ownedBorders[id]);
+  borderList.innerHTML = ownedBorderIds.length ? '' : '<span class="invChip">아직 획득한 테두리가 없습니다 · 럭키 박스에서 획득하세요!</span>';
+  ownedBorderIds.forEach(id=>{
+    const b = BORDERS.find(x=>x.id===id); if(!b) return;
+    const isEq = state.equippedBorder===id;
+    const card = document.createElement('div');
+    card.className = 'pick-card'+(isEq?' current':' owned');
+    card.innerHTML = `
+      <div class="picon">🖼️</div>
+      <div class="info"><div class="name">${b.name}</div></div>
+      ${isEq ? '<span class="badge">장착중</span>' : '<button data-eq-border="'+id+'">장착</button>'}
+    `;
+    borderList.appendChild(card);
+  });
+  borderList.querySelectorAll('[data-eq-border]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.equippedBorder = btn.dataset.eqBorder;
+      renderTop(); renderCustomPanel();
+    });
+  });
+  if(ownedBorderIds.length){
+    const unequipBtn = document.createElement('button');
+    unequipBtn.className = 'chipbtn'; unequipBtn.style.marginTop='4px'; unequipBtn.textContent='테두리 해제';
+    unequipBtn.onclick = ()=>{ state.equippedBorder=null; renderTop(); renderCustomPanel(); };
+    borderList.appendChild(unequipBtn);
+  }
+
+  // 배경 (가챠 아이템 + 상점 쿠스메틱)
+  const ownedBg = BG_ITEMS.filter(bg=>{
+    if(bg.source==='gacha') return (state.gachaItems||{})[bg.id] > 0;
+    return !!(state.cosmetics||{})[bg.id];
+  });
+  bgList.innerHTML = ownedBg.length ? '' : '<span class="invChip">아직 획득한 배경이 없습니다</span>';
+  ownedBg.forEach(bg=>{
+    const isEq = state.equippedBg===bg.id;
+    const card = document.createElement('div');
+    card.className = 'pick-card'+(isEq?' current':' owned');
+    card.innerHTML = `
+      <div class="picon">🌌</div>
+      <div class="info"><div class="name">${bg.name}</div></div>
+      ${isEq ? '<span class="badge">장착중</span>' : '<button data-eq-bg="'+bg.id+'">장착</button>'}
+    `;
+    bgList.appendChild(card);
+  });
+  bgList.querySelectorAll('[data-eq-bg]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.equippedBg = btn.dataset.eqBg;
+      renderTop(); renderCustomPanel();
+    });
+  });
+  if(ownedBg.length){
+    const unequipBtn = document.createElement('button');
+    unequipBtn.className = 'chipbtn'; unequipBtn.style.marginTop='4px'; unequipBtn.textContent='배경 해제';
+    unequipBtn.onclick = ()=>{ state.equippedBg=null; renderTop(); renderCustomPanel(); };
+    bgList.appendChild(unequipBtn);
+  }
+
+  // 감정표현
+  const emoteUses = (state.gachaItems||{}).emote_pack || 0;
+  emoteRow.innerHTML = '';
+  const emoteCountEl = document.createElement('div');
+  emoteCountEl.className = 'invChip';
+  emoteCountEl.textContent = `사용 가능 횟수: ${emoteUses}`;
+  emoteRow.appendChild(emoteCountEl);
+  EMOTES.forEach(em=>{
+    const btn = document.createElement('button');
+    btn.className = 'emoteBtn';
+    btn.textContent = em;
+    btn.disabled = emoteUses<=0;
+    btn.addEventListener('click', ()=>useEmote(em));
+    emoteRow.appendChild(btn);
+  });
+
+  // 스코어 부스터
+  const boosterCount = (state.gachaItems||{}).score_booster || 0;
+  boosterList.innerHTML = '';
+  const bCard = document.createElement('div');
+  bCard.className = 'pick-card'+(boosterCount>0?' owned':'');
+  bCard.innerHTML = `
+    <div class="picon">⚡</div>
+    <div class="info"><div class="name">랭킹 스코어 부스터 x${boosterCount}</div><div class="stats">사용 시 15분간 채굴 골드 획득량 ${MINE_BOOST_MULT}배!</div></div>
+    <button id="useScoreBoosterBtn" ${boosterCount<=0?'disabled':''}>사용</button>
+  `;
+  boosterList.appendChild(bCard);
+  const useBtn = document.getElementById('useScoreBoosterBtn');
+  if(useBtn) useBtn.addEventListener('click', useScoreBooster);
+}
+
+function useEmote(emoji){
+  const uses = (state.gachaItems||{}).emote_pack || 0;
+  if(uses<=0) return;
+  state.gachaItems.emote_pack = uses-1;
+  const anchor = document.getElementById('profileAvatar') || document.body;
+  const rect = anchor.getBoundingClientRect();
+  const fly = document.createElement('div');
+  fly.className = 'emoteFly';
+  fly.textContent = emoji;
+  fly.style.left = (rect.left + rect.width/2 - 26) + 'px';
+  fly.style.top = (rect.top) + 'px';
+  document.body.appendChild(fly);
+  Sound.tick();
+  setTimeout(()=>fly.remove(), 1700);
+  showToast(`${emoji} 감정표현을 사용했습니다! (남은 사용권: ${state.gachaItems.emote_pack})`);
+  saveGame();
+  renderCustomPanel();
+}
+function useScoreBooster(){
+  const count = (state.gachaItems||{}).score_booster || 0;
+  if(count<=0) return;
+  state.gachaItems.score_booster = count-1;
+  state.boostUntil = Math.max(state.boostUntil||0, Date.now()) + SCORE_BOOST_DURATION_MS;
+  showToast(`⚡ 스코어 부스터 사용! 15분간 채굴 골드 획득량이 ${MINE_BOOST_MULT}배가 됩니다.`);
+  Sound.win(); burstConfetti(18);
+  renderTop();
+  renderCustomPanel();
+}
+
 
 /* ============================ 골드 소모 실시간 유저 랭킹 보드 ============================ */
 function currentUserName(){
@@ -5416,6 +5738,8 @@ function startGame(){
   applyCosmeticEffect();
   renderCosmeticShop();
   renderGachaPanel();
+  applyCustomization();
+  renderCustomPanel();
   loadRankingData();
   setInterval(checkRelief, RELIEF_CHECK_TICK_MS);
   setInterval(renderMineBoost, 1000);
@@ -6652,4 +6976,4 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
 })();
 </script>
 </body>
-                </html>
+        </html>
