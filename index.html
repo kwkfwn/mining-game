@@ -89,6 +89,42 @@ input{font-family:inherit;}
 .stat-chip.pick{border-color:rgba(224,165,66,.4);box-shadow:0 0 12px -5px rgba(224,165,66,.4);}
 .stat-chip.pick .val{color:var(--brass-glow);font-size:12.5px;text-shadow:0 0 8px rgba(255,200,107,.5);}
 
+.profileCard{
+  display:flex;align-items:center;gap:10px;
+  background:#0c0f16;border:1px solid var(--line);
+  border-radius:999px;padding:5px 16px 5px 5px;flex-shrink:0;
+}
+.profileAvatar{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(160deg,#3a2a17,#1c1308);
+  border:1px solid var(--brass-dim);color:var(--brass-glow);
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+  box-shadow:0 0 8px -2px rgba(224,165,66,.6);
+}
+.profileInfo{display:flex;flex-direction:column;gap:3px;}
+.profileName{font-size:12.5px;font-weight:800;color:var(--text);letter-spacing:.01em;line-height:1;}
+.profileStats{display:flex;gap:12px;}
+.profileStat{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:12px;font-weight:700;line-height:1;}
+.profileStat .ic{font-size:12px;}
+.profileStat.gold{color:var(--gold-txt);text-shadow:0 0 8px rgba(255,210,63,.5);}
+.profileStat.coin{color:var(--coin-txt);text-shadow:0 0 8px rgba(192,75,255,.6);}
+@media(max-width:520px){.profileName{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}}
+
+.attnFab{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(160deg,#3a2a17,#1c1308);
+  border:1px solid var(--brass-dim);color:var(--brass-glow);
+  font-size:17px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;
+  box-shadow:0 0 10px -3px rgba(224,165,66,.55);
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.attnFab:hover{transform:scale(1.08);box-shadow:0 0 14px -2px rgba(224,165,66,.8);}
+.attnFab .attnFabBadge{
+  position:absolute;top:-2px;right:-2px;width:11px;height:11px;border-radius:50%;
+  background:var(--lose);border:2px solid var(--panel);
+}
+
 /* ---------- NAV (지역 이동) ---------- */
 .navRow{display:flex;gap:10px;flex-wrap:wrap;}
 .navBtn{
@@ -760,7 +796,67 @@ input{font-family:inherit;}
 }
 .coinFace.back{transform:rotateY(180deg);background:radial-gradient(circle at 35% 30%, #eae0ff, #c04bff 55%, #6a1fa0 100%);color:#2a0a45;border-color:#4a1470;}
 
-/* ---------- ATTENDANCE (출석체크) ---------- */
+/* ---------- ATTENDANCE MODAL (14일 출석체크 팝업) ---------- */
+.attnModal{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;
+  background:rgba(4,5,9,.82);backdrop-filter:blur(3px);padding:16px;}
+.attnModal.show{display:flex;}
+.attnModalBox{
+  position:relative;width:100%;max-width:760px;max-height:92vh;overflow-y:auto;
+  background:linear-gradient(160deg,#241a10,#140d08 55%,#1a1108);
+  border:1px solid var(--brass-dim);border-radius:16px;
+  box-shadow:0 20px 60px -12px rgba(0,0,0,.8), 0 0 0 1px rgba(224,165,66,.15) inset;
+  padding:20px 18px 22px;
+}
+.attnModalClose{
+  position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:50%;
+  background:rgba(255,255,255,.08);border:1px solid var(--line);color:var(--text);
+  font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s ease;
+}
+.attnModalClose:hover{background:rgba(255,255,255,.18);}
+.attnModalTitle{text-align:center;margin-bottom:4px;}
+.attnModalTitle .welcome{font-size:26px;font-weight:900;color:#fff;letter-spacing:.01em;
+  text-shadow:0 0 14px rgba(63,224,255,.5);}
+.attnModalTitle .stamp{font-size:26px;font-weight:900;color:#ff9d3d;
+  text-shadow:0 0 14px rgba(255,157,61,.65);margin-left:6px;}
+.attnModalSub{text-align:center;font-size:12px;color:var(--sub);margin-bottom:16px;line-height:1.5;}
+.attnDayGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
+@media(max-width:640px){.attnDayGrid{grid-template-columns:repeat(4,1fr);}}
+.attnDayCard{
+  position:relative;border-radius:10px;padding:8px 6px 10px;text-align:center;
+  background:linear-gradient(165deg,#3a2a17,#241708);border:1px solid #4a3620;
+  display:flex;flex-direction:column;align-items:center;gap:4px;overflow:hidden;min-height:118px;
+}
+.attnDayCard .attnDayNum{font-size:10.5px;font-weight:800;color:var(--brass-glow);background:rgba(0,0,0,.35);
+  border-radius:6px;padding:2px 6px;}
+.attnDayCard .attnDayIcon{font-size:26px;margin-top:2px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.5));}
+.attnDayCard .attnDayLabel{font-size:10.5px;color:#d8c9ae;line-height:1.25;flex:1;display:flex;align-items:center;justify-content:center;}
+.attnDayCard.special{border-color:var(--brass);box-shadow:0 0 0 1px var(--brass) inset,0 0 18px -4px rgba(224,165,66,.6);
+  background:linear-gradient(165deg,#4a3510,#2a1c08);}
+.attnDayCard.done{opacity:.9;}
+.attnDayCard .attnDoneBadge{
+  font-size:10px;font-weight:800;color:var(--win);background:rgba(63,224,122,.12);
+  border:1px solid var(--win);border-radius:999px;padding:2px 7px;margin-top:2px;
+}
+.attnDayCard.today{border-color:var(--neon2);box-shadow:0 0 0 1px var(--neon2) inset,0 0 18px -4px rgba(63,224,255,.65);}
+.attnDayCard .attnClaimBtn{
+  font-size:10.5px;font-weight:800;color:#1a1206;background:var(--brass);border:none;
+  border-radius:999px;padding:3px 10px;margin-top:2px;cursor:pointer;
+}
+.attnDayCard.locked .attnDayIcon,.attnDayCard.locked .attnDayLabel{opacity:.4;filter:grayscale(1) drop-shadow(0 3px 4px rgba(0,0,0,.5));}
+.attnLockIcon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:15px;background:repeating-linear-gradient(-45deg,rgba(0,0,0,.55) 0 6px,rgba(0,0,0,.4) 6px 12px);
+  color:rgba(255,255,255,.7);}
+
+.comboGaugeWrap{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);z-index:4;width:100%;max-width:280px;margin:0;pointer-events:none;}
+.comboGaugeLabel{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:800;color:var(--sub);font-family:var(--mono);margin-bottom:3px;letter-spacing:.02em;}
+.comboGaugeLabel span:first-child{color:var(--brass-glow);}
+.comboGaugeBar{width:100%;height:10px;border-radius:999px;background:#12141c;border:1px solid var(--line);overflow:hidden;position:relative;}
+.comboGaugeFill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#ff8a3d,var(--brass-glow),#ffe8a3);box-shadow:0 0 10px -1px rgba(255,200,107,.8);transition:width .18s ease-out;}
+.comboGaugeFill.burst{animation:comboBurst .4s ease-out;}
+@keyframes comboBurst{0%{filter:brightness(1);}50%{filter:brightness(1.9);box-shadow:0 0 18px 2px rgba(255,210,63,.95);}100%{filter:brightness(1);}}
+.comboGaugeWrap.idle .comboGaugeFill{background:linear-gradient(90deg,#5a4a30,#7a6640);box-shadow:none;}
+
 .attnPip{width:34px;height:34px;border-radius:50%;background:#181b24;border:2px solid var(--line);
   display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;
   color:var(--sub);font-family:var(--mono);transition:background .2s ease,border-color .2s ease;}
@@ -822,11 +918,20 @@ input{font-family:inherit;}
 
   <div id="topbar">
     <div class="topbarTop">
+      <div class="profileCard" id="profileCard">
+        <div class="profileAvatar">⛏️</div>
+        <div class="profileInfo">
+          <div class="profileName" id="profileName">Guest</div>
+          <div class="profileStats">
+            <span class="profileStat gold"><span class="ic">🪙</span><span id="goldVal">0</span></span>
+            <span class="profileStat coin"><span class="ic">🎰</span><span id="coinVal">0</span></span>
+          </div>
+        </div>
+      </div>
       <div class="brand"><span class="gear">⚙️</span> 뒷산에서 보석캐기 &amp; 미니 게임</div>
       <div class="statRow">
-        <div class="stat-chip gold"><span class="ic">🪙</span><div><div class="lbl">Gold</div><div class="val" id="goldVal">0</div></div></div>
-        <div class="stat-chip coin"><span class="ic">🎰</span><div><div class="lbl">Coin</div><div class="val" id="coinVal">0</div></div></div>
         <div class="stat-chip pick"><span class="ic">⛏️</span><div><div class="lbl">장착 곡괭이</div><div class="val" id="pickVal">-</div></div></div>
+        <button class="attnFab" id="attnFabBtn" type="button" title="출석체크">📅<span class="attnFabBadge" id="attnFabBadge" style="display:none;"></span></button>
       </div>
     </div>
     <div class="navRow" id="navRow">
@@ -852,6 +957,10 @@ input{font-family:inherit;}
           <span class="oreLabelName" id="oreLabelName">돌멩이</span>
           <div class="oreHits" id="oreHits"></div>
         </div>
+        <div class="comboGaugeWrap" id="comboGaugeWrap">
+          <div class="comboGaugeLabel"><span>🔥 채굴 콤보</span><span id="comboGaugeCount">0 / 25</span></div>
+          <div class="comboGaugeBar"><div class="comboGaugeFill" id="comboGaugeFill" style="width:0%"></div></div>
+        </div>
         <div id="rockWrap">
           <svg id="rockSvg" width="210" height="210" viewBox="0 0 150 150">
             <defs>
@@ -867,7 +976,7 @@ input{font-family:inherit;}
           </svg>
         </div>
         <div class="popupLayer" id="popupLayer"></div>
-        <div id="mineHint">광석을 클릭해서 채굴하세요 · 희귀할수록 여러 번 쳐야 캐집니다</div>
+        <div id="mineHint">광석을 클릭해서 채굴하세요 · 희귀할수록 여러 번 쳐야 캐집니다 · 채굴은 Gold를 얻는 소소한 생계 수단입니다 (곡괭이는 Coin으로 구매!)</div>
       </div>
     </div>
   </div>
@@ -876,6 +985,7 @@ input{font-family:inherit;}
   <div class="view" data-view="shop" id="viewShop">
     <div class="panel shop-panel">
       <h2><span class="bar"></span>대장간 · 곡괭이 상점</h2>
+      <div class="resultBanner" style="margin-bottom:12px;">⛏️ 곡괭이는 <b>Coin</b>으로 구매합니다 (광석 재료는 채굴로 모으세요) · 게임의 전당에서 Coin을 벌어 곡괭이를 업그레이드하세요!</div>
       <div class="oreInventory" id="oreInventory"></div>
       <div class="shopList" id="shopList"></div>
       <div id="mineBoostSlot"></div>
@@ -895,7 +1005,7 @@ input{font-family:inherit;}
             <button class="exMax" id="g2cMax">MAX</button>
             <button class="exGo" id="g2cGo">환전하기</button>
           </div>
-          <div class="exRate">4,000 Gold = 1 Coin</div>
+          <div class="exRate">2,000 Gold = 1 Coin</div>
         </div>
         <div class="exCard">
           <div class="exTitle">🎰 Coin → 🪙 Gold</div>
@@ -904,7 +1014,7 @@ input{font-family:inherit;}
             <button class="exMax" id="c2gMax">MAX</button>
             <button class="exGo" id="c2gGo">환전하기</button>
           </div>
-          <div class="exRate">1 Coin = 4,000 Gold (환전 수수료 5% 적용 → 실수령 3,800 Gold)</div>
+          <div class="exRate">1 Coin = 2,000 Gold (환전 수수료 5% 적용 → 실수령 1,900 Gold)</div>
         </div>
       </div>
       <div class="resultBanner" id="exResult">원하는 만큼 환전해서 미니 게임을 즐겨보세요. Coin → Gold 환전에는 5% 수수료가 붙습니다.</div>
@@ -917,9 +1027,9 @@ input{font-family:inherit;}
     </div>
 
     <div class="panel shop-panel" id="attendancePanel" style="margin-top:16px;">
-      <h2><span class="bar"></span>7일 연속 출석체크</h2>
+      <h2><span class="bar"></span>14일 출석체크</h2>
       <div id="attendancePips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>
-      <div class="resultBanner" id="attendanceBanner">매일 접속하면 보상을 드립니다 · 7일 연속 달성 시 특별 보상!</div>
+      <div class="resultBanner" id="attendanceBanner">상단 오른쪽 📅 버튼을 눌러 출석체크를 확인하세요 · 14일 연속 달성 시 특별 보상!</div>
     </div>
 
     <div class="panel shop-panel" id="gachaPanel" style="margin-top:16px;">
@@ -1036,6 +1146,37 @@ input{font-family:inherit;}
           <div class="payTable" id="slotPayTable"></div>
         </div>
         <div class="resultBanner" id="slotResult">5칸 중 3개 이상 맞춰보세요 · 럭키 세븐 5개면 잭팟!</div>
+        <div id="slotDoubleUp" style="display:none;margin-top:10px;text-align:center;">
+          <div class="resultBanner" style="margin-bottom:8px;" id="slotDoubleUpBanner">🃏 상금을 걸고 더블업에 도전할까요?</div>
+          <div class="diceChoiceRow" style="justify-content:center;">
+            <button class="diceChoice sel" id="slotDoubleUpGo">🎲 더블업 시도 (2배)</button>
+            <button class="diceChoice" id="slotDoubleUpStop">💰 그만하고 수령</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 가위바위보 -->
+      <div class="tabpane" data-pane="rps">
+        <div class="betRow">
+          <input type="number" id="rpsBet" value="1" min="1">
+          <button class="chipbtn" data-bet="+1">+1</button>
+          <button class="chipbtn" data-bet="+10">+10</button>
+          <button class="chipbtn" data-bet="max">MAX</button>
+        </div>
+        <div class="diceArea">
+          <div style="display:flex;align-items:center;justify-content:center;gap:28px;font-size:52px;">
+            <div id="rpsMyHand" style="transition:transform .15s ease;">✊</div>
+            <div style="font-size:20px;color:var(--sub);font-weight:800;">VS</div>
+            <div id="rpsCpuHand" style="transition:transform .15s ease;">❓</div>
+          </div>
+          <div class="diceChoiceRow" id="rpsChoiceRow">
+            <button class="diceChoice sel" data-rps="rock">✊ 바위</button>
+            <button class="diceChoice" data-rps="scissors">✌️ 가위</button>
+            <button class="diceChoice" data-rps="paper">🖐️ 보</button>
+          </div>
+          <button class="playBtn" id="rpsPlay">대결!</button>
+        </div>
+        <div class="resultBanner" id="rpsResult">승리 시 2배, 비기면 베팅 반환, 지면 베팅 몰수!</div>
       </div>
 
       <!-- 낚시 (타이밍 챔질 미니게임) -->
@@ -2596,6 +2737,28 @@ if (btnDouble) {
 </div>
 <div id="confettiLayer"></div>
 
+<div class="attnModal" id="attnModal">
+  <div class="attnModalBox">
+    <button class="attnModalClose" id="attnModalCloseBtn" aria-label="닫기">✕</button>
+    <div class="attnModalTitle"><span class="welcome">Welcome!</span><span class="stamp">출석체크!</span></div>
+    <div class="attnModalSub">매일 접속해서 채굴하는 광부님께 드리는 선물! 14일간 매일매일 쏟아지는 푸짐한 보상을 놓치지 마세요!!</div>
+    <div class="attnDayGrid" id="attnDayGrid"></div>
+  </div>
+</div>
+
+<div class="attnModal" id="idModal" style="z-index:3000;">
+  <div class="attnModalBox" style="max-width:380px;">
+    <div class="attnModalTitle"><span class="welcome">환영합니다!</span></div>
+    <div class="attnModalSub">랭킹보드에 표시될 아이디와 비밀번호를 입력해주세요.<br>2~12자(한글/영문/숫자), 비밀번호는 4~20자.<br>다른 기기에서 같은 아이디+비밀번호로 접속하면 진행 상황이 그대로 이어집니다.</div>
+    <input type="text" id="idModalInput" maxlength="12" placeholder="아이디 입력" autocomplete="off"
+      style="width:100%;box-sizing:border-box;padding:11px 12px;border-radius:9px;border:1px solid var(--line);background:#0c0f16;color:var(--text);font-size:14px;margin-bottom:8px;">
+    <input type="password" id="idModalPwInput" maxlength="20" placeholder="비밀번호 입력" autocomplete="off"
+      style="width:100%;box-sizing:border-box;padding:11px 12px;border-radius:9px;border:1px solid var(--line);background:#0c0f16;color:var(--text);font-size:14px;margin-bottom:8px;">
+    <div class="resultBanner" id="idModalError" style="display:none;background:rgba(255,77,106,.1);border-color:var(--lose);color:var(--lose);margin-bottom:10px;"></div>
+    <button class="playBtn" id="idModalSubmit" style="width:100%;margin-left:0;">⛏️ 채굴 시작하기</button>
+  </div>
+</div>
+
 <script>
 /* ============================ BACKGROUND PARTICLES ============================ */
 (function(){
@@ -2647,25 +2810,29 @@ if (btnDouble) {
 "use strict";
 
 /* ============================ CONFIG ============================ */
+/* 밸런스 패치: 채굴은 "무일푼일 때의 최소 생계 수단"이 되도록 광석 가치를 크게 낮췄습니다.
+   대신 곡괭이 업그레이드는 전부 Coin(미니게임 재화)으로 구매하도록 바꿔서,
+   본격적인 성장은 미니게임(코인 게임)에서 이뤄지도록 유도합니다. */
 const ORES = [
-  {id:'stone',  name:'돌멩이',        min:1,   max:2,    weight:56, color:'#9a9aa2', glow:0},
-  {id:'iron',   name:'철광석',        min:3,   max:7,    weight:29, color:'#c98a5a', glow:0},
-  {id:'silver', name:'은광석',        min:8,   max:17,   weight:9.3,color:'#dfe2e8', glow:6},
-  {id:'gold',   name:'금광석',        min:30,  max:70,   weight:3.9,color:'#f4b942', glow:10},
-  {id:'diamond',name:'다이아몬드',    min:120, max:280,  weight:1.1,color:'#7ee8fa', glow:16},
-  {id:'dark',   name:'암흑물질 광석', min:650, max:1500, weight:.15,color:'#c04bff', glow:24},
+  {id:'stone',  name:'돌멩이',        min:1,  max:1,   weight:56, color:'#9a9aa2', glow:0},
+  {id:'iron',   name:'철광석',        min:1,  max:2,   weight:29, color:'#c98a5a', glow:0},
+  {id:'silver', name:'은광석',        min:2,  max:4,   weight:9.3,color:'#dfe2e8', glow:6},
+  {id:'gold',   name:'금광석',        min:6,  max:14,  weight:3.9,color:'#f4b942', glow:10},
+  {id:'diamond',name:'다이아몬드',    min:25, max:55,  weight:1.1,color:'#7ee8fa', glow:16},
+  {id:'dark',   name:'암흑물질 광석', min:120,max:300, weight:.15,color:'#c04bff', glow:24},
 ];
 
+/* cost는 이제 전부 Coin 기준입니다 (예전에는 Gold였습니다). requires(광석 재료)는 그대로 채굴에서 모읍니다. */
 const PICKAXES = [
-  {id:'wood',   name:'나무 곡괭이',      cost:0,       mult:1.0, rare:0,  crit:.03, power:1,  requires:{}},
-  {id:'stonepk',name:'돌 곡괭이',        cost:1200,    mult:1.15,rare:2,  crit:.035,power:1,  requires:{stone:40}},
-  {id:'ironpk', name:'철 곡괭이',        cost:8000,    mult:1.4, rare:6,  crit:.045,power:2,  requires:{stone:30, iron:25}},
-  {id:'steelpk',name:'강철 곡괭이',      cost:22000,   mult:1.7, rare:9,  crit:.06, power:2,  requires:{iron:35, silver:10}},
-  {id:'goldpk', name:'황금 곡괭이',      cost:55000,   mult:2.1, rare:13, crit:.08, power:3,  requires:{iron:20, silver:35}},
-  {id:'platpk', name:'백금 곡괭이',      cost:130000,  mult:2.6, rare:17, crit:.10, power:4,  requires:{silver:25, gold:15}},
-  {id:'diapk',  name:'다이아 곡괭이',    cost:320000,  mult:3.3, rare:22, crit:.12, power:5,  requires:{silver:20, gold:30}},
-  {id:'orichpk',name:'오리하르콘 곡괭이', cost:800000,  mult:4.2, rare:29, crit:.15, power:7,  requires:{gold:25, diamond:15}},
-  {id:'rift',   name:'차원 균열 곡괭이', cost:2200000, mult:5.5, rare:38, crit:.20, power:10, requires:{gold:20, diamond:28, dark:5}},
+  {id:'wood',   name:'나무 곡괭이',      cost:0,    mult:1.0, rare:0,  crit:.03, power:1,  requires:{}},
+  {id:'stonepk',name:'돌 곡괭이',        cost:3,    mult:1.15,rare:2,  crit:.035,power:1,  requires:{stone:40}},
+  {id:'ironpk', name:'철 곡괭이',        cost:8,    mult:1.4, rare:6,  crit:.045,power:2,  requires:{stone:30, iron:25}},
+  {id:'steelpk',name:'강철 곡괭이',      cost:18,   mult:1.7, rare:9,  crit:.06, power:2,  requires:{iron:35, silver:10}},
+  {id:'goldpk', name:'황금 곡괭이',      cost:40,   mult:2.1, rare:13, crit:.08, power:3,  requires:{iron:20, silver:35}},
+  {id:'platpk', name:'백금 곡괭이',      cost:90,   mult:2.6, rare:17, crit:.10, power:4,  requires:{silver:25, gold:15}},
+  {id:'diapk',  name:'다이아 곡괭이',    cost:200,  mult:3.3, rare:22, crit:.12, power:5,  requires:{silver:20, gold:30}},
+  {id:'orichpk',name:'오리하르콘 곡괭이', cost:480,  mult:4.2, rare:29, crit:.15, power:7,  requires:{gold:25, diamond:15}},
+  {id:'rift',   name:'차원 균열 곡괭이', cost:1200, mult:5.5, rare:38, crit:.20, power:10, requires:{gold:20, diamond:28, dark:5}},
 ];
 
 const HORSES = [
@@ -2693,7 +2860,7 @@ const SLOT_SYMS = [
   {sym:'7',  weight:0.5,  pay3:80, pay4:150, pay5:2000, seven:true},
 ];
 
-const RATE = 4000; // 1 coin = 4000 gold
+const RATE = 2000; // 1 coin = 2000 gold
 const EXCHANGE_FEE = 0.05; // Coin → Gold 환전 수수료 5%
 
 /* ============================ STATE ============================ */
@@ -2715,6 +2882,7 @@ const state = {
   equippedCosmetic: null,
   gachaItems: {},
   goldSpentTotal: 0,
+  coinSpentTotal: 0,
   lastAttendanceDate: null,
   attendanceDay: 0,
 };
@@ -2805,7 +2973,8 @@ function currentPickaxe(){ return PICKAXES[state.pickaxeIdx]; }
 const MINE_LEVEL_BONUS = 4;
 function mineLevelCost(lv){ return Math.round(6 * Math.pow(1.55, lv-1)); }
 const MINE_COMBO_INTERVAL = 25;
-const MINE_COMBO_BASE = 400;
+const MINE_COMBO_BASE = 60; /* 밸런스 패치: 채굴 콤보 보상도 새 광석 가치에 맞춰 축소 */
+const MINE_COMBO_IDLE_MS = 4000;
 const MINE_BOOST_MULT = 1.8;
 const MINE_BOOST_DURATION_MS = 90*1000;
 function mineBoostCost(){ return 2500 + state.pickaxeIdx*2200; }
@@ -2836,12 +3005,13 @@ function loadGame(){
       }
       if(saved.lastDailyBonusDate) state.lastDailyBonusDate = saved.lastDailyBonusDate;
       if(typeof saved.dailyStreak==='number') state.dailyStreak = saved.dailyStreak;
-      if(typeof saved.oreBreakCount==='number') state.oreBreakCount = saved.oreBreakCount;
+      if(typeof saved.oreBreakCount==='number') state.oreBreakCount = 0; // 콤보는 세션마다 초기화
       if(typeof saved.boostUntil==='number') state.boostUntil = saved.boostUntil;
       if(saved.cosmetics) state.cosmetics = saved.cosmetics;
       if(saved.equippedCosmetic) state.equippedCosmetic = saved.equippedCosmetic;
       if(saved.gachaItems) state.gachaItems = saved.gachaItems;
       if(typeof saved.goldSpentTotal==='number') state.goldSpentTotal = saved.goldSpentTotal;
+      if(typeof saved.coinSpentTotal==='number') state.coinSpentTotal = saved.coinSpentTotal;
       if(saved.lastAttendanceDate) state.lastAttendanceDate = saved.lastAttendanceDate;
       if(typeof saved.attendanceDay==='number') state.attendanceDay = saved.attendanceDay;
     }
@@ -2876,12 +3046,13 @@ function loadGame(){
                 if (state.ores) state.ores = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0}, cloudData.ores||{});
                 if(cloudData.lastDailyBonusDate) state.lastDailyBonusDate = cloudData.lastDailyBonusDate;
                 if(typeof cloudData.dailyStreak==='number') state.dailyStreak = cloudData.dailyStreak;
-                if(typeof cloudData.oreBreakCount==='number') state.oreBreakCount = cloudData.oreBreakCount;
+                if(typeof cloudData.oreBreakCount==='number') state.oreBreakCount = 0; // 콤보는 세션마다 초기화
                 if(typeof cloudData.boostUntil==='number') state.boostUntil = cloudData.boostUntil;
                 if(cloudData.cosmetics) state.cosmetics = cloudData.cosmetics;
                 if(cloudData.equippedCosmetic) state.equippedCosmetic = cloudData.equippedCosmetic;
                 if(cloudData.gachaItems) state.gachaItems = cloudData.gachaItems;
                 if(typeof cloudData.goldSpentTotal==='number') state.goldSpentTotal = cloudData.goldSpentTotal;
+                if(typeof cloudData.coinSpentTotal==='number') state.coinSpentTotal = cloudData.coinSpentTotal;
                 if(cloudData.lastAttendanceDate) state.lastAttendanceDate = cloudData.lastAttendanceDate;
                 if(typeof cloudData.attendanceDay==='number') state.attendanceDay = cloudData.attendanceDay;
                 try { state.pickaxeIdx = Math.max(0, Math.min(state.pickaxeIdx, PICKAXES.length-1)); } catch(err) {}
@@ -2904,6 +3075,7 @@ function saveGame(){
       ores: state.ores, lastDailyBonusDate: state.lastDailyBonusDate, dailyStreak: state.dailyStreak,
       oreBreakCount: state.oreBreakCount, boostUntil: state.boostUntil, cosmetics: state.cosmetics,
       equippedCosmetic: state.equippedCosmetic, gachaItems: state.gachaItems, goldSpentTotal: state.goldSpentTotal,
+      coinSpentTotal: state.coinSpentTotal,
       lastAttendanceDate: state.lastAttendanceDate, attendanceDay: state.attendanceDay, savedAt: Date.now(),
     };
     localStorage.setItem(ACTUAL_SAVE_KEY, JSON.stringify(snap));
@@ -2912,7 +3084,7 @@ function saveGame(){
       if (currentUser) {
         database.ref('users/' + currentUser + '/gameData').set(snap).catch((err) => {});
         database.ref('leaderboard/' + currentUser).set({
-          name: currentUser, gold: state.gold, goldSpentTotal: state.goldSpentTotal||0, updatedAt: Date.now()
+          name: currentUser, gold: state.gold, goldSpentTotal: state.goldSpentTotal||0, coinSpentTotal: state.coinSpentTotal||0, updatedAt: Date.now()
         }).catch((err)=>{});
       }
     }
@@ -2978,52 +3150,139 @@ function checkDailyBonus(){
   }
 }
 
-/* ============================ 7일 연속 출석체크 ============================ */
-const ATTENDANCE_REWARDS = [50, 80, 120, 160, 220, 300, 1000];
-function checkAttendance(){
+/* ============================ 14일 출석체크 ============================ */
+const ATTENDANCE_REWARDS = [
+  { icon:'🎁', label:'신규 지원금<br>300G',        type:'gold',  amount:300  },
+  { icon:'🎟️', label:'Coin x3',                    type:'coin',  amount:3    },
+  { icon:'💰', label:'Gold 600',                    type:'gold',  amount:600  },
+  { icon:'⚡', label:'채굴 부스터<br>10분',          type:'boost', amount:10   },
+  { icon:'📦', label:'Gold 1,000',                  type:'gold',  amount:1000 },
+  { icon:'🎟️', label:'Coin x5',                    type:'coin',  amount:5    },
+  { icon:'🏆', label:'주간 보너스<br>Gold 3,000',    type:'gold',  amount:3000, special:true },
+  { icon:'💰', label:'Gold 1,500',                  type:'gold',  amount:1500 },
+  { icon:'🎟️', label:'Coin x8',                    type:'coin',  amount:8    },
+  { icon:'⚡', label:'채굴 부스터<br>20분',          type:'boost', amount:20   },
+  { icon:'📦', label:'Gold 2,500',                  type:'gold',  amount:2500 },
+  { icon:'🎟️', label:'Coin x12',                   type:'coin',  amount:12   },
+  { icon:'💎', label:'Gold 4,000',                  type:'gold',  amount:4000 },
+  { icon:'👑', label:'최종 보상!<br>Gold 10,000+Coin x20', type:'jackpot', amount:0, special:true },
+];
+const ATTENDANCE_DAYS = ATTENDANCE_REWARDS.length;
+
+function attendanceRewardText(r){
+  if(r.type==='gold') return `+${fmt(r.amount)}G`;
+  if(r.type==='coin') return `Coin x${r.amount}`;
+  if(r.type==='boost') return `채굴 부스터 ${r.amount}분`;
+  if(r.type==='jackpot') return `Gold 10,000 + Coin x20`;
+  return '';
+}
+function grantAttendanceReward(r){
+  if(r.type==='gold'){ state.gold += r.amount; }
+  else if(r.type==='coin'){ state.coins += r.amount; }
+  else if(r.type==='boost'){ state.boostUntil = Math.max(state.boostUntil||0, Date.now()) + r.amount*60*1000; }
+  else if(r.type==='jackpot'){ state.gold += 10000; state.coins += 20; }
+}
+
+function renderAttendanceUI(){
+  const pipWrap = document.getElementById('attendancePips');
+  const banner = document.getElementById('attendanceBanner');
+  const grid = document.getElementById('attnDayGrid');
+
+  if(pipWrap){
+    pipWrap.innerHTML = '';
+    for(let d=1; d<=ATTENDANCE_DAYS; d++){
+      const pip = document.createElement('div');
+      pip.className = 'attnPip' + (d < state.attendanceDay ? ' done' : d===state.attendanceDay ? ' today' : '');
+      pip.style.cssText = 'width:22px;height:22px;font-size:9.5px;';
+      pip.textContent = ATTENDANCE_REWARDS[d-1].special ? '★' : d;
+      pipWrap.appendChild(pip);
+    }
+  }
+  if(banner) banner.textContent = state.attendanceDay===ATTENDANCE_DAYS
+    ? '14일차 최종 보상을 오늘 받았습니다! 내일부터 다시 1일차로 시작합니다.'
+    : `오늘 ${state.attendanceDay}일차 출석 완료 · 내일도 접속해서 스트릭을 이어가세요! (총 ${ATTENDANCE_DAYS}일)`;
+
+  if(grid){
+    grid.innerHTML = '';
+    ATTENDANCE_REWARDS.forEach((r,i)=>{
+      const day = i+1;
+      const card = document.createElement('div');
+      let cls = 'attnDayCard';
+      if(r.special) cls += ' special';
+      if(day < state.attendanceDay) cls += ' done';
+      else if(day === state.attendanceDay) cls += ' today';
+      else cls += ' locked';
+      card.className = cls;
+      card.innerHTML = `
+        <span class="attnDayNum">${day}회차</span>
+        <span class="attnDayIcon">${r.icon}</span>
+        <span class="attnDayLabel">${r.label}</span>
+        ${day < state.attendanceDay ? '<span class="attnDoneBadge">✔ 보상완료</span>' : ''}
+        ${day > state.attendanceDay ? '<span class="attnLockIcon">🔒</span>' : ''}
+      `;
+      grid.appendChild(card);
+    });
+  }
+}
+
+function openAttendanceModal(){
+  renderAttendanceUI();
+  const modal = document.getElementById('attnModal');
+  if(modal) modal.classList.add('show');
+  const badge = document.getElementById('attnFabBadge');
+  if(badge) badge.style.display = 'none';
+}
+function closeAttendanceModal(){
+  const modal = document.getElementById('attnModal');
+  if(modal) modal.classList.remove('show');
+}
+
+function checkAttendance(autoOpen){
   const now = new Date();
   const todayKey = now.toLocaleDateString('en-CA');
   const alreadyToday = state.lastAttendanceDate === todayKey;
+  let justGranted = false;
 
   if(!alreadyToday){
     const yesterday = new Date(now); yesterday.setDate(now.getDate()-1);
     const yesterdayKey = yesterday.toLocaleDateString('en-CA');
     state.attendanceDay = (state.lastAttendanceDate === yesterdayKey) ? (state.attendanceDay||0)+1 : 1;
-    if(state.attendanceDay > 7) state.attendanceDay = 1;
+    if(state.attendanceDay > ATTENDANCE_DAYS) state.attendanceDay = 1;
     state.lastAttendanceDate = todayKey;
     const reward = ATTENDANCE_REWARDS[state.attendanceDay-1] || ATTENDANCE_REWARDS[0];
-    state.gold += reward;
-    if(state.attendanceDay === 7){
-      showToast(`🎉 7일 연속 출석 완료! 특별 보상 +${fmt(reward)}G!`);
+    grantAttendanceReward(reward);
+    justGranted = true;
+    if(state.attendanceDay === ATTENDANCE_DAYS){
+      showToast(`🎉 14일 출석 완료! 최종 보상 획득!`);
       Sound.jackpot(); megaConfetti();
     } else {
-      showToast(`📅 출석 ${state.attendanceDay}/7일차 · +${fmt(reward)}G`);
+      showToast(`📅 출석 ${state.attendanceDay}/${ATTENDANCE_DAYS}일차 · ${attendanceRewardText(reward)}`);
       Sound.tick();
     }
     renderTop();
+    saveGame();
   }
 
-  const pipWrap = document.getElementById('attendancePips');
-  const banner = document.getElementById('attendanceBanner');
-  if(pipWrap){
-    pipWrap.innerHTML = '';
-    for(let d=1; d<=7; d++){
-      const pip = document.createElement('div');
-      pip.className = 'attnPip' + (d < state.attendanceDay ? ' done' : d===state.attendanceDay ? ' today' : '');
-      pip.textContent = d===7 ? '★' : d;
-      pipWrap.appendChild(pip);
-    }
+  renderAttendanceUI();
+  if(autoOpen && justGranted) openAttendanceModal();
+  else if(justGranted){
+    const badge = document.getElementById('attnFabBadge');
+    if(badge) badge.style.display = 'block';
   }
-  if(banner) banner.textContent = state.attendanceDay===7
-    ? '7일차 특별 보상을 오늘 받았습니다! 내일부터 다시 1일차로 시작합니다.'
-    : `오늘 ${state.attendanceDay}일차 출석 완료 · 내일도 접속해서 스트릭을 이어가세요!`;
 }
+if(document.getElementById('attnFabBtn')) document.getElementById('attnFabBtn').onclick = openAttendanceModal;
+if(document.getElementById('attnModalCloseBtn')) document.getElementById('attnModalCloseBtn').onclick = closeAttendanceModal;
+if(document.getElementById('attnModal')) document.getElementById('attnModal').addEventListener('click', (e)=>{
+  if(e.target.id==='attnModal') closeAttendanceModal();
+});
 
 /* ============================ RENDER: TOPBAR ============================ */
 function renderTop(){
   document.getElementById('goldVal').textContent = fmt(state.gold);
   document.getElementById('coinVal').textContent = fmt(state.coins);
   document.getElementById('pickVal').textContent = currentPickaxe().name;
+  const profileNameEl = document.getElementById('profileName');
+  if(profileNameEl) profileNameEl.textContent = localStorage.getItem('current_user') || 'Guest';
   renderMineLevel();
   saveGame();
   if(typeof loadRankingData === 'function') loadRankingData();
@@ -3108,6 +3367,30 @@ const oreLabelName = document.getElementById('oreLabelName');
 const oreHitsEl = document.getElementById('oreHits');
 const veinAEl = document.getElementById('veinA');
 const veinBEl = document.getElementById('veinB');
+const comboGaugeWrap = document.getElementById('comboGaugeWrap');
+const comboGaugeFill = document.getElementById('comboGaugeFill');
+const comboGaugeCount = document.getElementById('comboGaugeCount');
+let comboIdleTimer = null;
+
+function renderComboGauge(){
+  if(!comboGaugeFill) return;
+  const cur = state.oreBreakCount||0;
+  const pct = Math.min(100, Math.round((cur/MINE_COMBO_INTERVAL)*100));
+  comboGaugeFill.style.width = pct+'%';
+  if(comboGaugeCount) comboGaugeCount.textContent = `${cur} / ${MINE_COMBO_INTERVAL}`;
+  if(comboGaugeWrap) comboGaugeWrap.classList.toggle('idle', cur===0);
+}
+function resetCombo(){
+  if((state.oreBreakCount||0) > 0){
+    state.oreBreakCount = 0;
+    renderComboGauge();
+  }
+  comboIdleTimer = null;
+}
+function bumpComboIdleTimer(){
+  clearTimeout(comboIdleTimer);
+  comboIdleTimer = setTimeout(resetCombo, MINE_COMBO_IDLE_MS);
+}
 
 function updateOreLabel(){
   if(!currentNode) return;
@@ -3136,6 +3419,7 @@ function newOreNode(){
 
 function onRockClick(){
   if(!currentNode) newOreNode();
+  bumpComboIdleTimer();
   const pk = currentPickaxe();
   const node = currentNode;
   node.hitsLeft -= (pk.power||1);
@@ -3156,11 +3440,15 @@ function onRockClick(){
   state.ores[node.ore.id] = (state.ores[node.ore.id]||0) + 1;
 
   state.oreBreakCount = (state.oreBreakCount||0) + 1;
-  if(state.oreBreakCount % MINE_COMBO_INTERVAL === 0){
-    const comboBonus = MINE_COMBO_BASE + state.mineLevel*40 + state.pickaxeIdx*60;
+  if(state.oreBreakCount >= MINE_COMBO_INTERVAL){
+    const comboBonus = MINE_COMBO_BASE + state.mineLevel*6 + state.pickaxeIdx*9;
     state.gold += comboBonus;
-    showToast(`🔥 채굴 콤보 ${state.oreBreakCount}회 달성! +${fmt(comboBonus)}G`);
+    showToast(`🔥 채굴 콤보 ${MINE_COMBO_INTERVAL}회 달성! +${fmt(comboBonus)}G`);
+    state.oreBreakCount = 0;
+    if(comboGaugeFill){ comboGaugeFill.classList.remove('burst'); void comboGaugeFill.offsetWidth; comboGaugeFill.classList.add('burst'); }
+    clearTimeout(comboIdleTimer); comboIdleTimer = null;
   }
+  renderComboGauge();
 
   const epic = node.idx>=4;
   rockWrap.classList.remove('shake','mega'); void rockWrap.offsetWidth; rockWrap.classList.add(epic?'mega':'shake');
@@ -3224,18 +3512,18 @@ function renderShop(){
         <div class="stats">배율 x${pk.mult} · 타격력 ${pk.power} · 희귀확률↑ ${pk.rare} · 치명타 ${(pk.crit*100).toFixed(0)}%</div>
         ${!owned ? requirementsHtml(pk) : ''}
       </div>
-      ${isCurrent ? '<span class="badge">장착중</span>' : owned ? '<button data-eq="'+i+'">장착</button>' : '<button data-buy="'+i+'">'+fmt(pk.cost)+' G</button>'}
+      ${isCurrent ? '<span class="badge">장착중</span>' : owned ? '<button data-eq="'+i+'">장착</button>' : '<button data-buy="'+i+'">'+fmt(pk.cost)+' Coin</button>'}
     `;
     list.appendChild(card);
   });
   list.querySelectorAll('[data-buy]').forEach(btn=>{
     const i = +btn.dataset.buy;
     const pk = PICKAXES[i];
-    if(state.gold < pk.cost || !meetsRequirements(pk)) btn.disabled = true;
+    if(state.coins < pk.cost || !meetsRequirements(pk)) btn.disabled = true;
     btn.addEventListener('click', ()=>{
-      if(state.gold >= pk.cost && meetsRequirements(pk)){
-        state.gold -= pk.cost;
-        state.goldSpentTotal = (state.goldSpentTotal||0) + pk.cost;
+      if(state.coins >= pk.cost && meetsRequirements(pk)){
+        state.coins -= pk.cost;
+        state.coinSpentTotal = (state.coinSpentTotal||0) + pk.cost;
         Object.keys(pk.requires||{}).forEach(oreId=>{ state.ores[oreId] -= pk.requires[oreId]; });
         state.pickaxeIdx = i;
         Sound.rareFanfare(4);
@@ -3362,6 +3650,7 @@ const TABS = [
   {id:'wheel', label:'룰렛'},
   {id:'ladder', label:'사다리'},
   {id:'slot', label:'슬롯머신'},
+  {id:'rps', label:'✌️가위바위보'},
   {id:'fishing', label:'낚시'},
   {id:'hilo', label:'하이로우'},
   {id:'roulette-rr', label:'러시안 룰렛'},
@@ -3506,6 +3795,69 @@ document.getElementById('dicePlay').addEventListener('click', ()=>{
       diceBusy = false;
     }
   }, 70);
+});
+
+/* ============================ 가위바위보 (RPS) ============================ */
+const RPS_EMOJI = { rock:'✊', scissors:'✌️', paper:'🖐️' };
+const RPS_LABEL = { rock:'바위', scissors:'가위', paper:'보' };
+state.rpsChoice = 'rock';
+document.querySelectorAll('#rpsChoiceRow .diceChoice[data-rps]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#rpsChoiceRow .diceChoice[data-rps]').forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel');
+    state.rpsChoice = btn.dataset.rps;
+    document.getElementById('rpsMyHand').textContent = RPS_EMOJI[state.rpsChoice];
+  });
+});
+function rpsOutcome(mine, cpu){
+  if(mine===cpu) return 'tie';
+  const beats = { rock:'scissors', scissors:'paper', paper:'rock' };
+  return beats[mine]===cpu ? 'win' : 'lose';
+}
+let rpsBusy = false;
+document.getElementById('rpsPlay').addEventListener('click', ()=>{
+  if(rpsBusy) return;
+  const bet = Math.max(1, Math.floor(+document.getElementById('rpsBet').value||0));
+  const banner = document.getElementById('rpsResult');
+  if(bet > state.coins){ banner.textContent='Coin이 부족합니다.'; banner.className='resultBanner lose'; return; }
+  rpsBusy = true;
+  state.coins -= bet; renderTop();
+  const myHandEl = document.getElementById('rpsMyHand');
+  const cpuHandEl = document.getElementById('rpsCpuHand');
+  const keys = Object.keys(RPS_EMOJI);
+  let ticks = 0;
+  const shuffle = setInterval(()=>{
+    cpuHandEl.textContent = RPS_EMOJI[keys[Math.floor(Math.random()*3)]];
+    myHandEl.style.transform = ticks%2===0 ? 'scale(1.15)' : 'scale(1)';
+    Sound.tick();
+    ticks++;
+    if(ticks>9){
+      clearInterval(shuffle);
+      myHandEl.style.transform = 'scale(1)';
+      myHandEl.textContent = RPS_EMOJI[state.rpsChoice];
+      const cpuChoice = keys[Math.floor(Math.random()*3)];
+      cpuHandEl.textContent = RPS_EMOJI[cpuChoice];
+      const outcome = rpsOutcome(state.rpsChoice, cpuChoice);
+      if(outcome==='win'){
+        const payout = bet*2;
+        state.coins += payout;
+        banner.textContent = `${RPS_LABEL[state.rpsChoice]} vs ${RPS_LABEL[cpuChoice]} → 승리! +${fmt(payout)} Coin`;
+        banner.className='resultBanner win';
+        Sound.win();
+        burstConfetti(24);
+      } else if(outcome==='tie'){
+        state.coins += bet;
+        banner.textContent = `${RPS_LABEL[state.rpsChoice]} vs ${RPS_LABEL[cpuChoice]} → 비겼습니다! 베팅 반환`;
+        banner.className='resultBanner';
+      } else {
+        banner.textContent = `${RPS_LABEL[state.rpsChoice]} vs ${RPS_LABEL[cpuChoice]} → 패배 (-${fmt(bet)} Coin)`;
+        banner.className='resultBanner lose';
+        Sound.lose();
+      }
+      renderTop();
+      rpsBusy = false;
+    }
+  }, 90);
 });
 
 /* ============================ HORSE RACE ============================ */
@@ -4372,32 +4724,76 @@ document.getElementById('slotPlay').addEventListener('click', async ()=>{
     weightedPick(SLOT_SYMS,'weight'),
     weightedPick(SLOT_SYMS,'weight'),
   ];
-  const delays = [850, 1080, 1310, 1540, 1820];
+  const delays = [550, 550, 600, 650, 800];
 
-  await Promise.all(results.map((r,i)=>spinReel(i, r, delays[i])));
+  for(let i=0;i<5;i++){
+    await spinReel(i, results[i], delays[i]);
+  }
 
   const evalResult = evaluateSlotResult(results);
   if(evalResult){
     const payout = bet*evalResult.payMult;
-    state.coins += payout;
     const label = evalResult.data.seven ? '7' : evalResult.sym;
     if(evalResult.data.seven && evalResult.count>=5){
+      state.coins += payout;
       for(let i=0;i<5;i++){ document.getElementById('reel'+i).classList.add('jackGlow'); }
       banner.textContent = `🎊 JACKPOT!! 7 7 7 7 7 → +${fmt(payout)} Coin 🎊`;
       banner.className='resultBanner jackpot';
       Sound.jackpot();
       megaConfetti();
+      renderTop();
+      slotBusy = false;
     } else {
       banner.textContent = `${label} ${evalResult.count}개 일치! +${fmt(payout)} Coin`;
       banner.className='resultBanner win';
       Sound.win();
       burstConfetti(20 + evalResult.count*4);
+      renderTop();
+      showSlotDoubleUp(payout);
     }
   } else {
     banner.textContent = `아쉽네요, 일치한 심볼이 없어요 (-${fmt(bet)} Coin)`;
     banner.className='resultBanner lose';
     Sound.lose();
+    renderTop();
+    slotBusy = false;
   }
+});
+
+/* ---- 슬롯 더블업 (Double or Nothing) ---- */
+let slotPendingPayout = 0;
+const slotDoubleUpEl = document.getElementById('slotDoubleUp');
+const slotDoubleUpBannerEl = document.getElementById('slotDoubleUpBanner');
+function showSlotDoubleUp(amount){
+  slotPendingPayout = amount;
+  slotDoubleUpBannerEl.textContent = `🃏 현재 상금 ${fmt(slotPendingPayout)} Coin! 더블업(50%)에 도전할까요?`;
+  slotDoubleUpBannerEl.className = 'resultBanner';
+  slotDoubleUpEl.style.display = 'block';
+}
+document.getElementById('slotDoubleUpGo').addEventListener('click', ()=>{
+  const win = Math.random() < 0.5;
+  Sound.tick();
+  if(win){
+    slotPendingPayout *= 2;
+    slotDoubleUpBannerEl.textContent = `🎉 성공! 상금이 ${fmt(slotPendingPayout)} Coin으로 늘었습니다! 계속 더블업 하시겠어요?`;
+    slotDoubleUpBannerEl.className = 'resultBanner win';
+    Sound.win();
+    burstConfetti(16);
+  } else {
+    slotPendingPayout = 0;
+    slotDoubleUpBannerEl.textContent = `💥 실패! 상금을 모두 잃었습니다...`;
+    slotDoubleUpBannerEl.className = 'resultBanner lose';
+    Sound.lose();
+    slotDoubleUpEl.style.display = 'none';
+    renderTop();
+    slotBusy = false;
+  }
+});
+document.getElementById('slotDoubleUpStop').addEventListener('click', ()=>{
+  state.coins += slotPendingPayout;
+  document.getElementById('slotResult').textContent = `💰 ${fmt(slotPendingPayout)} Coin을 수령했습니다!`;
+  document.getElementById('slotResult').className = 'resultBanner win';
+  slotDoubleUpEl.style.display = 'none';
   renderTop();
   slotBusy = false;
 });
@@ -4877,7 +5273,7 @@ function loadRankingData(){
         <div class="picon">${crown}</div>
         <div class="info">
           <div class="name">${r.name||'익명'}${isMe?' (나)':''}</div>
-          <div class="stats">보유 Gold ${fmt(r.gold||0)} · 누적 소모 ${fmt(r.goldSpentTotal||0)}</div>
+          <div class="stats">보유 Gold ${fmt(r.gold||0)} · Gold 소모 ${fmt(r.goldSpentTotal||0)} · Coin 소모 ${fmt(r.coinSpentTotal||0)}</div>
         </div>
       </div>`;
     }).join('') || '<div class="resultBanner">아직 랭킹 데이터가 없습니다.</div>';
@@ -5007,21 +5403,108 @@ if (sessionStorage.getItem('passed_auth') !== 'true') {
   sessionStorage.setItem('passed_auth', 'true');
 }
 
-loadGame();
-newOreNode();
-renderTop();
-renderShop();
-renderTabs();
-scopedWire();
-switchView('mine');
-checkDailyBonus();
-checkAttendance();
-applyCosmeticEffect();
-renderCosmeticShop();
-renderGachaPanel();
-loadRankingData();
-setInterval(checkRelief, RELIEF_CHECK_TICK_MS);
-setInterval(renderMineBoost, 1000);
+function startGame(){
+  loadGame();
+  newOreNode();
+  renderTop();
+  renderShop();
+  renderTabs();
+  scopedWire();
+  switchView('mine');
+  checkDailyBonus();
+  checkAttendance(true);
+  applyCosmeticEffect();
+  renderCosmeticShop();
+  renderGachaPanel();
+  loadRankingData();
+  setInterval(checkRelief, RELIEF_CHECK_TICK_MS);
+  setInterval(renderMineBoost, 1000);
+}
+
+/* ---------- 랭킹보드용 아이디+비밀번호 등록/로그인 (최초 접속 시 1회, 다른 기기 연결 지원) ---------- */
+const ID_PATTERN = /^[가-힣a-zA-Z0-9]{2,12}$/;
+
+async function hashPassword(pw){
+  const salted = pw + '_mineGame_salt_2026';
+  try{
+    if(window.crypto && window.crypto.subtle){
+      const enc = new TextEncoder().encode(salted);
+      const buf = await window.crypto.subtle.digest('SHA-256', enc);
+      return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+  }catch(e){}
+  // 폴백: crypto.subtle을 못 쓰는 환경(예: file:// 로 직접 열었을 때)용 간단 해시
+  let h = 0;
+  for(let i=0;i<salted.length;i++){ h = (Math.imul(h,31) + salted.charCodeAt(i))|0; }
+  return 'f' + Math.abs(h).toString(16);
+}
+
+const savedUserId = localStorage.getItem('current_user');
+if(savedUserId){
+  startGame();
+} else {
+  const idModal = document.getElementById('idModal');
+  const idInput = document.getElementById('idModalInput');
+  const idPwInput = document.getElementById('idModalPwInput');
+  const idError = document.getElementById('idModalError');
+  const idSubmit = document.getElementById('idModalSubmit');
+  if(idModal) idModal.classList.add('show');
+
+  function showIdError(msg){
+    idError.textContent = msg;
+    idError.style.display = 'block';
+  }
+  function setIdBusy(busy){
+    if(idSubmit){ idSubmit.disabled = busy; idSubmit.textContent = busy ? '확인 중...' : '⛏️ 채굴 시작하기'; }
+  }
+
+  async function submitUserId(){
+    const val = (idInput.value||'').trim();
+    const pw = idPwInput.value||'';
+    idError.style.display = 'none';
+
+    if(!ID_PATTERN.test(val)){
+      showIdError('2~12자의 한글/영문/숫자만 사용할 수 있어요. 공백이나 특수문자는 안 돼요.');
+      idInput.focus();
+      return;
+    }
+    if(pw.length < 4 || pw.length > 20){
+      showIdError('비밀번호는 4~20자로 입력해주세요.');
+      idPwInput.focus();
+      return;
+    }
+
+    setIdBusy(true);
+    try{
+      const pwHash = await hashPassword(pw);
+      if(typeof database !== 'undefined' && database){
+        const snap = await database.ref('accounts/'+val).once('value');
+        if(snap.exists()){
+          const acc = snap.val();
+          if(acc.passwordHash !== pwHash){
+            showIdError('❌ 비밀번호가 올바르지 않습니다. 다른 기기에서 같은 아이디를 쓰려면 그때 설정한 비밀번호를 입력해주세요.');
+            setIdBusy(false);
+            return;
+          }
+          showToast(`👋 ${val}님, 다시 오신 것을 환영합니다! 진행 상황을 불러옵니다.`);
+        } else {
+          await database.ref('accounts/'+val).set({ passwordHash: pwHash, createdAt: Date.now() });
+        }
+      }
+      localStorage.setItem('current_user', val);
+      if(idModal) idModal.classList.remove('show');
+      startGame();
+    }catch(e){
+      showIdError('접속 확인 중 오류가 발생했습니다. 네트워크 상태를 확인 후 다시 시도해주세요.');
+      setIdBusy(false);
+    }
+  }
+
+  if(idSubmit) idSubmit.onclick = submitUserId;
+  if(idInput) idInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') idPwInput.focus(); });
+  if(idPwInput) idPwInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submitUserId(); });
+  setTimeout(()=>{ if(idInput) idInput.focus(); }, 50);
+}
 
 })();
 </script>
@@ -5080,6 +5563,8 @@ function mgAlert(msg){
 }
 function mgToast(msg){ if(typeof window.showToast==='function') window.showToast(msg); }
 function mgName(){
+  const uid = localStorage.getItem('current_user');
+  if(uid) return uid;
   let n = localStorage.getItem('mg_nickname');
   if(!n){
     n = '플레이어' + Math.floor(1000+Math.random()*9000);
@@ -6167,4 +6652,4 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
 })();
 </script>
 </body>
-      </html>
+                </html>
