@@ -93,7 +93,9 @@ input{font-family:inherit;}
   display:flex;align-items:center;gap:10px;
   background:#0c0f16;border:1px solid var(--line);
   border-radius:999px;padding:5px 16px 5px 5px;flex-shrink:0;
+  cursor:pointer;transition:box-shadow .15s ease;
 }
+.profileCard:hover{box-shadow:0 0 0 2px var(--brass-dim);}
 .profileAvatar{
   width:36px;height:36px;border-radius:50%;flex-shrink:0;
   background:linear-gradient(160deg,#3a2a17,#1c1308);
@@ -146,6 +148,27 @@ input{font-family:inherit;}
   15%{opacity:1;transform:translateY(-20px) scale(1.2) rotate(-8deg);}
   80%{opacity:1;transform:translateY(-140px) scale(1.05) rotate(8deg);}
   100%{transform:translateY(-180px) scale(.9) rotate(0deg);opacity:0;}
+}
+
+/* ---------- 상시 표시 랭킹 플로팅 위젯 ---------- */
+.rankingFloat{position:fixed;top:130px;right:16px;z-index:900;}
+.rankingFloatToggle{
+  width:48px;height:48px;border-radius:50%;
+  background:linear-gradient(160deg,#3a2a17,#1c1308);
+  border:1px solid var(--brass-dim);color:var(--brass-glow);font-size:21px;
+  box-shadow:0 6px 18px -5px rgba(0,0,0,.7);cursor:pointer;
+}
+.rankingFloatPanel{
+  display:none;position:absolute;top:0;right:58px;width:250px;max-height:64vh;overflow-y:auto;
+  background:#0c0f16;border:1px solid var(--line);border-radius:14px;padding:12px;
+  box-shadow:0 16px 40px -10px rgba(0,0,0,.75);
+}
+.rankingFloatPanel.show{display:block;}
+.rankingFloatHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:800;font-size:13px;color:var(--brass-glow);}
+.rankingFloatHeader button{background:none;border:none;color:var(--sub);font-size:15px;cursor:pointer;}
+@media(max-width:640px){
+  .rankingFloat{top:auto;bottom:86px;right:10px;}
+  .rankingFloatPanel{width:210px;right:52px;max-height:52vh;}
 }
 
 .attnFab{
@@ -430,6 +453,8 @@ input{font-family:inherit;}
 }
 .pick-card:hover{transform:translateY(-2px);box-shadow:0 8px 22px -10px rgba(0,0,0,.6);}
 .pick-card.owned{border-color:var(--brass-dim);background:#171106;}
+.pick-card.locked{opacity:.55;}
+.pick-card.locked .picon{filter:grayscale(1) opacity(.7);}
 .pick-card.current{border-color:var(--brass);background:linear-gradient(90deg,#241708,#12161f);box-shadow:0 0 0 1px var(--brass) inset, 0 0 22px -6px rgba(224,165,66,.5);}
 .pick-card .picon{font-size:26px;width:34px;text-align:center;filter:drop-shadow(0 0 6px rgba(224,165,66,.35));}
 .pick-card .info{flex:1;min-width:0;}
@@ -1021,7 +1046,7 @@ input{font-family:inherit;}
           </svg>
         </div>
         <div class="popupLayer" id="popupLayer"></div>
-        <div id="mineHint">광석을 클릭해서 채굴하세요 · 희귀할수록 여러 번 쳐야 캐집니다 · 채굴은 Gold를 얻는 소소한 생계 수단입니다 (곡괭이는 Coin으로 구매!)</div>
+        <div id="mineHint">광석을 클릭해서 채굴하세요 · 희귀할수록 여러 번 쳐야 캐집니다 · 채굴로 Gold를 모아 곡괭이를 업그레이드하세요!</div>
       </div>
     </div>
   </div>
@@ -1030,7 +1055,7 @@ input{font-family:inherit;}
   <div class="view" data-view="shop" id="viewShop">
     <div class="panel shop-panel">
       <h2><span class="bar"></span>대장간 · 곡괭이 상점</h2>
-      <div class="resultBanner" style="margin-bottom:12px;">⛏️ 곡괭이는 <b>Coin</b>으로 구매합니다 (광석 재료는 채굴로 모으세요) · 게임의 전당에서 Coin을 벌어 곡괭이를 업그레이드하세요!</div>
+      <div class="resultBanner" style="margin-bottom:12px;">⛏️ 곡괭이는 <b>Gold</b>로 구매합니다 (광석 재료는 채굴로 모으세요) · 채굴로 Gold를 벌어 곡괭이를 업그레이드하세요!</div>
       <div class="oreInventory" id="oreInventory"></div>
       <div class="shopList" id="shopList"></div>
       <div id="mineBoostSlot"></div>
@@ -1065,52 +1090,10 @@ input{font-family:inherit;}
       <div class="resultBanner" id="exResult">원하는 만큼 환전해서 미니 게임을 즐겨보세요. Coin → Gold 환전에는 5% 수수료가 붙습니다.</div>
     </div>
 
-    <div class="panel shop-panel" id="rankingPanel" style="margin-top:16px;">
-      <h2><span class="bar"></span>명예의 전당 · 골드 랭킹</h2>
-      <div id="rankingList"></div>
-      <div class="resultBanner" id="rankingBanner">보유 Gold 기준 실시간 랭킹입니다 · 1~3위는 왕관 아이콘을 획득합니다</div>
-    </div>
-
     <div class="panel shop-panel" id="attendancePanel" style="margin-top:16px;">
       <h2><span class="bar"></span>14일 출석체크</h2>
       <div id="attendancePips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>
       <div class="resultBanner" id="attendanceBanner">상단 오른쪽 📅 버튼을 눌러 출석체크를 확인하세요 · 14일 연속 달성 시 특별 보상!</div>
-    </div>
-
-    <div class="panel shop-panel" id="gachaPanel" style="margin-top:16px;">
-      <h2><span class="bar"></span>럭키 박스 (Gold 전용 가챠)</h2>
-      <div class="betRow" style="margin-bottom:8px;">
-        <button class="playBtn" id="gachaPlay" style="margin-left:0;">럭키 박스 열기</button>
-      </div>
-      <div class="payTable" id="gachaOddsTable"></div>
-      <div class="resultBanner" id="gachaResult">Gold를 소모해 랜덤 보상을 얻어보세요 · 코인 잭팟은 없습니다</div>
-      <div class="oreInventory" id="gachaOwnedRow" style="margin-top:10px;"></div>
-    </div>
-
-    <div class="panel shop-panel" id="cosmeticShopPanel" style="margin-top:16px;">
-      <h2><span class="bar"></span>골드 이펙트 상점 (한정판)</h2>
-      <div class="oreInventory" id="cosmeticOwnedRow"></div>
-      <div class="shopList" id="cosmeticShopList"></div>
-    </div>
-
-    <div class="panel shop-panel" id="myCustomPanel" style="margin-top:16px;">
-      <h2><span class="bar"></span>🎭 나의 꾸미기 (럭키박스 획득 아이템 사용)</h2>
-      <div class="resultBanner" id="customBanner">럭키 박스에서 획득한 칭호 · 테두리 · 배경 · 감정표현을 여기서 장착하고 사용하세요!</div>
-
-      <div style="margin-top:14px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">🏅 칭호</div>
-      <div class="shopList" id="titleList" style="margin-top:8px;"></div>
-
-      <div style="margin-top:16px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">🖼️ 아바타 테두리</div>
-      <div class="shopList" id="borderList" style="margin-top:8px;"></div>
-
-      <div style="margin-top:16px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">🌌 프로필 배경</div>
-      <div class="shopList" id="bgList" style="margin-top:8px;"></div>
-
-      <div style="margin-top:16px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">😂 감정표현 (사용권 소모)</div>
-      <div id="emoteRow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
-
-      <div style="margin-top:16px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">⚡ 랭킹 스코어 부스터</div>
-      <div class="shopList" id="boosterList" style="margin-top:8px;"></div>
     </div>
   </div>
 
@@ -2811,6 +2794,43 @@ if (btnDouble) {
   </div>
 </div>
 
+<!-- 프로필 클릭 시 열리는 스킨 인벤토리 -->
+<div class="attnModal" id="skinModal">
+  <div class="attnModalBox" style="max-width:640px;">
+    <button class="attnModalClose" id="skinModalCloseBtn" aria-label="닫기">✕</button>
+    <div class="attnModalTitle"><span class="welcome">🎭 스킨 인벤토리</span></div>
+    <div class="attnModalSub">테두리 · 배경 · 이펙트는 Gold로 구매하고, 칭호는 업적을 달성하면 자동으로 잠금 해제돼요!</div>
+
+    <div style="margin-top:10px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">✨ Coin 칩 이펙트</div>
+    <div class="shopList" id="coinFxList" style="margin-top:8px;"></div>
+
+    <div style="margin-top:16px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">🌌 프로필 배경</div>
+    <div class="shopList" id="bgShopList" style="margin-top:8px;"></div>
+
+    <div style="margin-top:16px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">🏅 칭호</div>
+    <div class="shopList" id="titleShopList" style="margin-top:8px;"></div>
+
+    <div style="margin-top:16px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">🖼️ 아바타 테두리</div>
+    <div class="shopList" id="borderShopList" style="margin-top:8px;"></div>
+
+    <div style="margin-top:16px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">😂 감정표현</div>
+    <div id="emoteShopWrap" style="margin-top:8px;"></div>
+  </div>
+</div>
+
+<!-- 상시 표시되는 랭킹 플로팅 위젯 -->
+<div class="rankingFloat" id="rankingFloat">
+  <button class="rankingFloatToggle" id="rankingFloatToggle" type="button" title="랭킹 보기">🏆</button>
+  <div class="rankingFloatPanel show" id="rankingFloatPanel">
+    <div class="rankingFloatHeader">
+      <span>🏆 명예의 전당</span>
+      <button id="rankingFloatClose" type="button" aria-label="닫기">✕</button>
+    </div>
+    <div id="rankingList"></div>
+    <div class="resultBanner" id="rankingBanner" style="font-size:10px;margin-top:6px;">보유 Gold 기준 실시간 랭킹 · 1~3위는 왕관 획득</div>
+  </div>
+</div>
+
 <div class="attnModal" id="idModal" style="z-index:3000;">
   <div class="attnModalBox" style="max-width:380px;">
     <div class="attnModalTitle"><span class="welcome">환영합니다!</span></div>
@@ -2875,9 +2895,9 @@ if (btnDouble) {
 "use strict";
 
 /* ============================ CONFIG ============================ */
-/* 밸런스 패치: 채굴은 "무일푼일 때의 최소 생계 수단"이 되도록 광석 가치를 크게 낮췄습니다.
-   대신 곡괭이 업그레이드는 전부 Coin(미니게임 재화)으로 구매하도록 바꿔서,
-   본격적인 성장은 미니게임(코인 게임)에서 이뤄지도록 유도합니다. */
+/* 밸런스 메모: 채굴은 "무일푼일 때의 최소 생계 수단" + Gold 획득 수단이며,
+   곡괭이 업그레이드도 Gold로 구매합니다. 미니게임(코인 게임)은 Coin을 벌어
+   환전소에서 Gold로 바꾸거나 재미로 즐기는 별도 콘텐츠입니다. */
 const ORES = [
   {id:'stone',  name:'돌멩이',        min:1,  max:1,   weight:56, color:'#9a9aa2', glow:0},
   {id:'iron',   name:'철광석',        min:1,  max:2,   weight:29, color:'#c98a5a', glow:0},
@@ -2955,6 +2975,9 @@ const state = {
   equippedTitle: null,
   equippedBorder: null,
   equippedBg: null,
+  achievements: {},
+  lifetimeOres: {stone:0, iron:0, silver:0, gold:0, diamond:0, dark:0},
+  totalOresMined: 0,
 };
 
 /* ============================ SOUND ENGINE ============================ */
@@ -3089,6 +3112,9 @@ function loadGame(){
       if(saved.equippedTitle) state.equippedTitle = saved.equippedTitle;
       if(saved.equippedBorder) state.equippedBorder = saved.equippedBorder;
       if(saved.equippedBg) state.equippedBg = saved.equippedBg;
+      if(saved.achievements) state.achievements = saved.achievements;
+      if(saved.lifetimeOres) state.lifetimeOres = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0}, saved.lifetimeOres);
+      if(typeof saved.totalOresMined==='number') state.totalOresMined = saved.totalOresMined;
     }
   }catch(e){ console.error("로컬 로드 중 에러:", e); }
 
@@ -3135,6 +3161,9 @@ function loadGame(){
                 if(cloudData.equippedTitle) state.equippedTitle = cloudData.equippedTitle;
                 if(cloudData.equippedBorder) state.equippedBorder = cloudData.equippedBorder;
                 if(cloudData.equippedBg) state.equippedBg = cloudData.equippedBg;
+                if(cloudData.achievements) state.achievements = cloudData.achievements;
+                if(cloudData.lifetimeOres) state.lifetimeOres = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0}, cloudData.lifetimeOres);
+                if(typeof cloudData.totalOresMined==='number') state.totalOresMined = cloudData.totalOresMined;
                 try { state.pickaxeIdx = Math.max(0, Math.min(state.pickaxeIdx, PICKAXES.length-1)); } catch(err) {}
                 localStorage.setItem(ACTUAL_SAVE_KEY, JSON.stringify(cloudData));
                 if (typeof updateUI === 'function') updateUI();
@@ -3158,7 +3187,9 @@ function saveGame(){
       coinSpentTotal: state.coinSpentTotal,
       lastAttendanceDate: state.lastAttendanceDate, attendanceDay: state.attendanceDay,
       ownedTitles: state.ownedTitles, ownedBorders: state.ownedBorders, equippedTitle: state.equippedTitle,
-      equippedBorder: state.equippedBorder, equippedBg: state.equippedBg, savedAt: Date.now(),
+      equippedBorder: state.equippedBorder, equippedBg: state.equippedBg,
+      achievements: state.achievements, lifetimeOres: state.lifetimeOres, totalOresMined: state.totalOresMined,
+      savedAt: Date.now(),
     };
     localStorage.setItem(ACTUAL_SAVE_KEY, JSON.stringify(snap));
     if (typeof database !== 'undefined' && database !== null) {
@@ -3387,6 +3418,7 @@ function renderTop(){
   const profileNameEl = document.getElementById('profileName');
   if(profileNameEl) profileNameEl.textContent = localStorage.getItem('current_user') || 'Guest';
   if(typeof applyCustomization==='function') applyCustomization();
+  if(typeof checkTitleAchievements==='function') checkTitleAchievements();
   renderMineLevel();
   saveGame();
   if(typeof loadRankingData === 'function') loadRankingData();
@@ -3543,6 +3575,16 @@ function onRockClick(){
   state.gold += value;
   state.ores[node.ore.id] = (state.ores[node.ore.id]||0) + 1;
 
+  state.lifetimeOres = state.lifetimeOres || {stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0};
+  state.lifetimeOres[node.ore.id] = (state.lifetimeOres[node.ore.id]||0) + 1;
+  state.totalOresMined = (state.totalOresMined||0) + 1;
+  const curHour = new Date().getHours();
+  if(curHour >= 0 && curHour < 4){
+    state.achievements = state.achievements || {};
+    state.achievements.midnightMined = true;
+  }
+  if(typeof checkTitleAchievements==='function') checkTitleAchievements();
+
   state.oreBreakCount = (state.oreBreakCount||0) + 1;
   if(state.oreBreakCount >= MINE_COMBO_INTERVAL){
     const comboBonus = MINE_COMBO_BASE + state.mineLevel*6 + state.pickaxeIdx*9;
@@ -3616,18 +3658,18 @@ function renderShop(){
         <div class="stats">배율 x${pk.mult} · 타격력 ${pk.power} · 희귀확률↑ ${pk.rare} · 치명타 ${(pk.crit*100).toFixed(0)}%</div>
         ${!owned ? requirementsHtml(pk) : ''}
       </div>
-      ${isCurrent ? '<span class="badge">장착중</span>' : owned ? '<button data-eq="'+i+'">장착</button>' : '<button data-buy="'+i+'">'+fmt(pk.cost)+' Coin</button>'}
+      ${isCurrent ? '<span class="badge">장착중</span>' : owned ? '<button data-eq="'+i+'">장착</button>' : '<button data-buy="'+i+'">'+fmt(pk.cost)+' G</button>'}
     `;
     list.appendChild(card);
   });
   list.querySelectorAll('[data-buy]').forEach(btn=>{
     const i = +btn.dataset.buy;
     const pk = PICKAXES[i];
-    if(state.coins < pk.cost || !meetsRequirements(pk)) btn.disabled = true;
+    if(state.gold < pk.cost || !meetsRequirements(pk)) btn.disabled = true;
     btn.addEventListener('click', ()=>{
-      if(state.coins >= pk.cost && meetsRequirements(pk)){
-        state.coins -= pk.cost;
-        state.coinSpentTotal = (state.coinSpentTotal||0) + pk.cost;
+      if(state.gold >= pk.cost && meetsRequirements(pk)){
+        state.gold -= pk.cost;
+        state.goldSpentTotal = (state.goldSpentTotal||0) + pk.cost;
         Object.keys(pk.requires||{}).forEach(oreId=>{ state.ores[oreId] -= pk.requires[oreId]; });
         state.pickaxeIdx = i;
         Sound.rareFanfare(4);
@@ -3737,8 +3779,6 @@ function switchView(id){
   document.querySelectorAll('.navBtn').forEach(b=>b.classList.toggle('active', b.dataset.view===id));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.dataset.view===id));
   if(id==='exchangeView'){
-    renderCosmeticShop();
-    renderGachaPanel();
     loadRankingData();
     checkAttendance();
   }
@@ -4840,6 +4880,9 @@ document.getElementById('slotPlay').addEventListener('click', async ()=>{
     const label = evalResult.data.seven ? '7' : evalResult.sym;
     if(evalResult.data.seven && evalResult.count>=5){
       state.coins += payout;
+      state.achievements = state.achievements || {};
+      state.achievements.slotJackpotHit = true;
+      if(typeof checkTitleAchievements==='function') checkTitleAchievements();
       for(let i=0;i<5;i++){ document.getElementById('reel'+i).classList.add('jackGlow'); }
       banner.textContent = `🎊 JACKPOT!! 7 7 7 7 7 → +${fmt(payout)} Coin 🎊`;
       banner.className='resultBanner jackpot';
@@ -5219,189 +5262,224 @@ document.getElementById('bacPlay').addEventListener('click', async ()=>{
   document.querySelectorAll('#bacChoiceRow .diceChoice[data-bac]').forEach(b=>b.disabled = false);
 });
 
-/* ============================ 골드 이펙트 상점 ============================ */
+/* ============================ 스킨 인벤토리 (프로필 클릭 시 오픈되는 통합 꾸미기) ============================ */
 const COSMETICS = [
-  {id:'ring_gold',   name:'황금 링 이펙트',   cost:18000,   desc:'Coin 칩 주위에 황금빛 링이 표시됩니다.', color:'#ffd23f'},
+  {id:'ring_gold',   name:'황금 링 이펙트',   cost:18000,  desc:'Coin 칩 주위에 황금빛 링이 표시됩니다.', color:'#ffd23f'},
   {id:'ring_neon',   name:'네온 퍼플 링',     cost:32000,  desc:'Coin 칩 주위에 네온 퍼플 링이 표시됩니다.', color:'#c04bff'},
   {id:'ring_cyan',   name:'사이버 시안 링',   cost:32000,  desc:'Coin 칩 주위에 시안색 글로우 링이 표시됩니다.', color:'#3fe0ff'},
-  {id:'ring_rainbow',name:'레인보우 프레임',  cost:120000,  desc:'한정판 무지개색 애니메이션 프레임을 장착합니다.', color:'legend'},
+  {id:'ring_rainbow',name:'레인보우 프레임',  cost:120000, desc:'무지개색 애니메이션 프레임을 장착합니다.', color:'legend'},
   {id:'chat_flame',  name:'채팅 이펙트: 불꽃',cost:65000,  desc:'멀티플레이 채팅/알림에 불꽃 효과가 붙습니다.', color:'#ff6b3d'},
-  {id:'bg_nebula',   name:'프로필 배경: 성운',cost:95000,  desc:'프로필 카드 배경이 성운 테마로 바뀝니다.', color:'#7a5cff'},
 ];
-function renderCosmeticShop(){
-  const owned = document.getElementById('cosmeticOwnedRow');
-  const list = document.getElementById('cosmeticShopList');
-  if(!owned || !list) return;
-  const ownedIds = Object.keys(state.cosmetics||{}).filter(id=>state.cosmetics[id]);
-  owned.innerHTML = ownedIds.length
-    ? ownedIds.map(id=>{ const c = COSMETICS.find(x=>x.id===id); return c ? `<span class="invChip" style="--invColor:${c.color==='legend'?'#ff2ea6':c.color}">${c.name}</span>` : ''; }).join('')
-    : '<span class="invChip">보유한 이펙트가 없습니다</span>';
+const BG_ITEMS = [
+  {id:'bg_theme',  name:'노을빛 프로필 배경', cls:'bg_theme',  cost:45000},
+  {id:'bg_normal', name:'심플 그레이 배경',   cls:'bg_normal', cost:20000},
+  {id:'bg_nebula', name:'성운 배경',          cls:'bg_nebula', cost:95000},
+];
+const TITLES = [
+  {id:'title_legend',    name:'🏆 전설의 광부',   req:'최고 등급 곡괭이(차원 균열 곡괭이) 장착', check:()=> state.pickaxeIdx >= PICKAXES.length-1},
+  {id:'title_diamond',   name:'💎 다이아몬드 손', req:'다이아몬드 누적 100개 채굴', check:()=> (state.lifetimeOres||{}).diamond >= 100},
+  {id:'title_highroller',name:'🎰 하이롤러',      req:'Coin 누적 100,000 소모', check:()=> (state.coinSpentTotal||0) >= 100000},
+  {id:'title_lucky',     name:'🍀 행운의 사나이', req:'슬롯머신 잭팟(7 7 7 7 7) 1회 달성', check:()=> !!(state.achievements||{}).slotJackpotHit},
+  {id:'title_speed',     name:'⚡ 스피드러너',    req:'누적 채굴 1,000회 달성', check:()=> (state.totalOresMined||0) >= 1000},
+  {id:'title_ghost',     name:'👻 심야의 채굴자', req:'새벽 0시~4시 사이 채굴 1회', check:()=> !!(state.achievements||{}).midnightMined},
+];
+function checkTitleAchievements(){
+  state.ownedTitles = state.ownedTitles || {};
+  let unlocked = false;
+  TITLES.forEach(t=>{
+    if(!state.ownedTitles[t.id] && t.check()){
+      state.ownedTitles[t.id] = true;
+      unlocked = true;
+      showToast(`🏅 업적 달성! "${t.name}" 칭호를 획득했습니다!`);
+      Sound.rareFanfare(4);
+      burstConfetti(28);
+    }
+  });
+  if(unlocked){ saveGame(); if(typeof renderSkinModal==='function') renderSkinModal(); }
+}
+const BORDERS = [
+  {id:'border_gold',    name:'황금 테두리',   cls:'border_gold',    cost:60000},
+  {id:'border_neon',    name:'네온 테두리',   cls:'border_neon',    cost:80000},
+  {id:'border_rainbow', name:'무지개 테두리', cls:'border_rainbow', cost:150000},
+];
+const EMOTES = ['😂','🔥','👏','😭','🎉','🤔','💪','😱'];
+const EMOTE_SET_COST = 35000;
 
+function renderEquipSection(containerId, items, ownedMap, equippedKey, iconChar){
+  const list = document.getElementById(containerId);
+  if(!list) return;
   list.innerHTML = '';
-  COSMETICS.forEach(c=>{
-    const isOwned = !!(state.cosmetics && state.cosmetics[c.id]);
-    const isEquipped = state.equippedCosmetic === c.id;
+  items.forEach(it=>{
+    const isOwned = !!ownedMap[it.id];
+    const isEquipped = state[equippedKey] === it.id;
     const card = document.createElement('div');
     card.className = 'pick-card'+(isOwned?' owned':'')+(isEquipped?' current':'');
     card.innerHTML = `
-      <div class="picon">✨</div>
+      <div class="picon">${iconChar}</div>
       <div class="info">
-        <div class="name">${c.name}</div>
-        <div class="stats">${c.desc}</div>
+        <div class="name">${it.name}</div>
+        ${it.desc ? '<div class="stats">'+it.desc+'</div>' : ''}
       </div>
-      ${isEquipped ? '<span class="badge">장착중</span>' : isOwned ? '<button data-eq-cos="'+c.id+'">장착</button>' : '<button data-buy-cos="'+c.id+'">'+fmt(c.cost)+' G</button>'}
+      ${isEquipped ? '<span class="badge">장착중</span>' : isOwned ? '<button data-eq="'+it.id+'">장착</button>' : '<button data-buy="'+it.id+'">'+fmt(it.cost)+' G</button>'}
     `;
     list.appendChild(card);
   });
-  list.querySelectorAll('[data-buy-cos]').forEach(btn=>{
-    const id = btn.dataset.buyCos;
-    const c = COSMETICS.find(x=>x.id===id);
-    if(state.gold < c.cost) btn.disabled = true;
+  list.querySelectorAll('[data-buy]').forEach(btn=>{
+    const id = btn.dataset.buy;
+    const it = items.find(x=>x.id===id);
+    if(state.gold < it.cost) btn.disabled = true;
     btn.addEventListener('click', ()=>{
-      if(state.gold >= c.cost){
-        state.gold -= c.cost;
-        state.goldSpentTotal = (state.goldSpentTotal||0) + c.cost;
-        state.cosmetics = state.cosmetics || {};
-        state.cosmetics[c.id] = true;
-        state.equippedCosmetic = c.id;
-        Sound.rareFanfare(4);
-        renderTop(); renderCosmeticShop(); applyCosmeticEffect(); if(typeof renderCustomPanel==='function') renderCustomPanel();
-      }
+      if(state.gold < it.cost) return;
+      state.gold -= it.cost;
+      state.goldSpentTotal = (state.goldSpentTotal||0) + it.cost;
+      ownedMap[id] = true;
+      state[equippedKey] = id;
+      Sound.rareFanfare(4);
+      renderTop();
+      renderSkinModal();
     });
   });
-  list.querySelectorAll('[data-eq-cos]').forEach(btn=>{
+  list.querySelectorAll('[data-eq]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      state.equippedCosmetic = btn.dataset.eqCos;
-      renderTop(); renderCosmeticShop(); applyCosmeticEffect(); if(typeof renderCustomPanel==='function') renderCustomPanel();
+      state[equippedKey] = btn.dataset.eq;
+      renderTop();
+      renderSkinModal();
     });
   });
+  const anyOwned = items.some(it=>ownedMap[it.id]);
+  if(anyOwned && state[equippedKey]){
+    const unequipBtn = document.createElement('button');
+    unequipBtn.className = 'chipbtn'; unequipBtn.style.marginTop='6px'; unequipBtn.textContent='해제';
+    unequipBtn.onclick = ()=>{ state[equippedKey]=null; renderTop(); renderSkinModal(); };
+    list.appendChild(unequipBtn);
+  }
 }
-function applyCosmeticEffect(){
-  const coinChip = document.querySelector('.stat-chip.coin');
-  if(!coinChip) return;
-  const c = COSMETICS.find(x=>x.id===state.equippedCosmetic);
-  if(!c){ coinChip.style.boxShadow=''; coinChip.style.borderColor=''; return; }
-  if(c.color==='legend'){
-    coinChip.style.borderColor = '#ff2ea6';
-    coinChip.style.boxShadow = '0 0 16px -2px rgba(255,46,166,.9), 0 0 28px -6px rgba(63,224,255,.8)';
+
+function renderEmoteSection(){
+  const wrap = document.getElementById('emoteShopWrap');
+  if(!wrap) return;
+  state.cosmetics = state.cosmetics || {};
+  const owned = !!state.cosmetics.emote_set;
+  if(!owned){
+    wrap.innerHTML = `
+      <div class="pick-card">
+        <div class="picon">😂</div>
+        <div class="info">
+          <div class="name">감정표현 팩 (무제한 사용)</div>
+          <div class="stats">구매 시 8종 이모지를 자유롭게 사용할 수 있어요.</div>
+        </div>
+        <button id="buyEmoteSetBtn">${fmt(EMOTE_SET_COST)} G</button>
+      </div>`;
+    const btn = document.getElementById('buyEmoteSetBtn');
+    if(state.gold < EMOTE_SET_COST) btn.disabled = true;
+    btn.addEventListener('click', ()=>{
+      if(state.gold < EMOTE_SET_COST) return;
+      state.gold -= EMOTE_SET_COST;
+      state.goldSpentTotal = (state.goldSpentTotal||0) + EMOTE_SET_COST;
+      state.cosmetics.emote_set = true;
+      Sound.rareFanfare(4);
+      renderTop();
+      renderSkinModal();
+    });
   } else {
-    coinChip.style.borderColor = c.color;
-    coinChip.style.boxShadow = `0 0 16px -2px ${c.color}`;
+    wrap.innerHTML = `<div class="invChip">😂 감정표현 팩 보유중 — 자유롭게 사용해보세요!</div>
+      <div id="emoteRow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>`;
+    const row = document.getElementById('emoteRow');
+    EMOTES.forEach(em=>{
+      const b = document.createElement('button');
+      b.className = 'emoteBtn';
+      b.textContent = em;
+      b.addEventListener('click', ()=>useEmote(em));
+      row.appendChild(b);
+    });
   }
 }
 
-/* ============================ 골드 전용 럭키 박스 (가챠) ============================ */
-const GACHA_COST = 5000;
-const GACHA_POOL = [
-  {id:'miss',      label:'꽝 (소량 코인 페이백)', weight:50, type:'coin' },
-  {id:'title_hidden', label:'[한정판] 히든 칭호 & 테두리 스킨', weight:5, type:'cosmeticItem' },
-  {id:'emote_pack', label:'멀티플레이 특별 감정표현 사용권', weight:12.5, type:'item' },
-  {id:'bg_theme',   label:'프로필 배경 테마', weight:12.5, type:'item' },
-  {id:'bg_normal',  label:'일반 등급 프로필 배경 이미지', weight:10, type:'item' },
-  {id:'score_booster', label:'랭킹 스코어 부스터', weight:10, type:'item' },
-];
-function renderGachaPanel(){
-  const oddsEl = document.getElementById('gachaOddsTable');
-  const ownedEl = document.getElementById('gachaOwnedRow');
-  const btn = document.getElementById('gachaPlay');
-  if(!oddsEl) return;
-  oddsEl.innerHTML = GACHA_POOL.map(p=>`<span>${p.label} <b>${p.weight}%</b></span>`).join('');
-  btn.textContent = `럭키 박스 열기 (${fmt(GACHA_COST)} Gold)`;
-  btn.disabled = state.gold < GACHA_COST;
-  const owned = Object.keys(state.gachaItems||{}).filter(id=>state.gachaItems[id] > 0);
-  if(ownedEl){
-    ownedEl.innerHTML = owned.length
-      ? owned.map(id=>{ const p = GACHA_POOL.find(x=>x.id===id); return p ? `<span class="invChip">${p.label} <b>x${state.gachaItems[id]}</b></span>` : ''; }).join('')
-      : '<span class="invChip">아직 획득한 아이템이 없습니다</span>';
-  }
+function useEmote(emoji){
+  const anchor = document.getElementById('profileAvatar') || document.body;
+  const rect = anchor.getBoundingClientRect();
+  const fly = document.createElement('div');
+  fly.className = 'emoteFly';
+  fly.textContent = emoji;
+  fly.style.left = (rect.left + rect.width/2 - 26) + 'px';
+  fly.style.top = rect.top + 'px';
+  document.body.appendChild(fly);
+  Sound.tick();
+  setTimeout(()=>fly.remove(), 1700);
 }
-document.getElementById('gachaPlay').addEventListener('click', ()=>{
-  const banner = document.getElementById('gachaResult');
-  if(state.gold < GACHA_COST){ banner.textContent = 'Gold가 부족합니다.'; banner.className='resultBanner lose'; return; }
-  state.gold -= GACHA_COST;
-  state.goldSpentTotal = (state.goldSpentTotal||0) + GACHA_COST;
 
-  const pick = weightedPick(GACHA_POOL, 'weight');
-  state.gachaItems = state.gachaItems || {};
-  state.gachaItems[pick.id] = (state.gachaItems[pick.id]||0) + 1;
-
-  if(pick.id === 'miss'){
-    const payback = Math.max(1, Math.round((GACHA_COST/RATE) * 0.15));
-    state.coins += payback;
-    banner.textContent = `😅 꽝... 위로금으로 ${fmt(payback)} Coin을 받았습니다.`;
-    banner.className = 'resultBanner lose';
-    Sound.lose();
-  } else if(pick.id === 'title_hidden'){
-    const grantedTitle = grantRandomTitle();
-    const grantedBorder = grantRandomBorder();
-    banner.textContent = `🌟 대박! [한정판] "${grantedTitle.name}" 칭호와 "${grantedBorder.name}"을(를) 획득했습니다! 나의 꾸미기에서 장착해보세요.`;
-    banner.className = 'resultBanner jackpot';
-    Sound.jackpot();
-    megaConfetti();
-  } else {
-    banner.textContent = `🎁 ${pick.label}을(를) 획득했습니다! 나의 꾸미기에서 사용/장착할 수 있어요.`;
-    banner.className = 'resultBanner win';
-    Sound.win();
-    burstConfetti(20);
-  }
-  renderTop();
-  renderGachaPanel();
-  if(typeof renderCustomPanel==='function') renderCustomPanel();
-});
-
-/* ============================ 나의 꾸미기 (칭호 · 테두리 · 배경 · 감정표현 · 부스터) ============================ */
-const TITLES = [
-  {id:'title_legend',    name:'🏆 전설의 광부'},
-  {id:'title_diamond',   name:'💎 다이아몬드 손'},
-  {id:'title_highroller',name:'🎰 하이롤러'},
-  {id:'title_lucky',     name:'🍀 행운의 사나이'},
-  {id:'title_speed',     name:'⚡ 스피드러너'},
-  {id:'title_ghost',     name:'👻 심야의 채굴자'},
-];
-const BORDERS = [
-  {id:'border_gold',    name:'황금 테두리', cls:'border_gold'},
-  {id:'border_neon',    name:'네온 테두리', cls:'border_neon'},
-  {id:'border_rainbow', name:'무지개 테두리', cls:'border_rainbow'},
-];
-const BG_ITEMS = [
-  {id:'bg_theme',  name:'노을빛 프로필 배경', cls:'bg_theme',  source:'gacha'},
-  {id:'bg_normal', name:'심플 그레이 배경',   cls:'bg_normal', source:'gacha'},
-  {id:'bg_nebula', name:'성운 배경',          cls:'bg_nebula', source:'shop'},
-];
-const EMOTES = ['😂','🔥','👏','😭','🎉','🤔','💪','😱'];
-const SCORE_BOOST_DURATION_MS = 15*60*1000;
-
-function grantRandomTitle(){
+function renderSkinModal(){
+  state.cosmetics = state.cosmetics || {};
   state.ownedTitles = state.ownedTitles || {};
-  const unowned = TITLES.filter(t=>!state.ownedTitles[t.id]);
-  const pool = unowned.length ? unowned : TITLES;
-  const t = pool[Math.floor(Math.random()*pool.length)];
-  state.ownedTitles[t.id] = true;
-  return t;
-}
-function grantRandomBorder(){
   state.ownedBorders = state.ownedBorders || {};
-  const unowned = BORDERS.filter(b=>!state.ownedBorders[b.id]);
-  const pool = unowned.length ? unowned : BORDERS;
-  const b = pool[Math.floor(Math.random()*pool.length)];
-  state.ownedBorders[b.id] = true;
-  return b;
+  renderEquipSection('coinFxList', COSMETICS, state.cosmetics, 'equippedCosmetic', '✨');
+  renderEquipSection('bgShopList', BG_ITEMS, state.cosmetics, 'equippedBg', '🌌');
+  renderTitleSection();
+  renderEquipSection('borderShopList', BORDERS, state.ownedBorders, 'equippedBorder', '🖼️');
+  renderEmoteSection();
+}
+
+function renderTitleSection(){
+  const list = document.getElementById('titleShopList');
+  if(!list) return;
+  list.innerHTML = '';
+  TITLES.forEach(t=>{
+    const isOwned = !!state.ownedTitles[t.id];
+    const isEquipped = state.equippedTitle === t.id;
+    const card = document.createElement('div');
+    card.className = 'pick-card'+(isOwned?' owned':' locked')+(isEquipped?' current':'');
+    card.innerHTML = `
+      <div class="picon">${isOwned?'🏅':'🔒'}</div>
+      <div class="info">
+        <div class="name">${t.name}</div>
+        <div class="stats">${isOwned ? '업적 달성 완료!' : '달성 조건: '+t.req}</div>
+      </div>
+      ${isEquipped ? '<span class="badge">장착중</span>' : isOwned ? '<button data-eq-title="'+t.id+'">장착</button>' : ''}
+    `;
+    list.appendChild(card);
+  });
+  list.querySelectorAll('[data-eq-title]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.equippedTitle = btn.dataset.eqTitle;
+      renderTop();
+      renderSkinModal();
+    });
+  });
+  const anyOwned = TITLES.some(t=>state.ownedTitles[t.id]);
+  if(anyOwned && state.equippedTitle){
+    const unequipBtn = document.createElement('button');
+    unequipBtn.className = 'chipbtn'; unequipBtn.style.marginTop='6px'; unequipBtn.textContent='칭호 해제';
+    unequipBtn.onclick = ()=>{ state.equippedTitle=null; renderTop(); renderSkinModal(); };
+    list.appendChild(unequipBtn);
+  }
 }
 
 function applyCustomization(){
+  const coinChip = document.querySelector('.stat-chip.coin');
+  if(coinChip){
+    const c = COSMETICS.find(x=>x.id===state.equippedCosmetic);
+    if(!c){ coinChip.style.boxShadow=''; coinChip.style.borderColor=''; }
+    else if(c.color==='legend'){
+      coinChip.style.borderColor = '#ff2ea6';
+      coinChip.style.boxShadow = '0 0 16px -2px rgba(255,46,166,.9), 0 0 28px -6px rgba(63,224,255,.8)';
+    } else {
+      coinChip.style.borderColor = c.color;
+      coinChip.style.boxShadow = `0 0 16px -2px ${c.color}`;
+    }
+  }
   const avatar = document.getElementById('profileAvatar');
-  const titleBadge = document.getElementById('titleBadge');
-  const card = document.getElementById('profileCard');
   if(avatar){
     BORDERS.forEach(b=>avatar.classList.remove(b.cls));
     const b = BORDERS.find(x=>x.id===state.equippedBorder);
     if(b) avatar.classList.add(b.cls);
   }
+  const titleBadge = document.getElementById('titleBadge');
   if(titleBadge){
     const t = TITLES.find(x=>x.id===state.equippedTitle);
     if(t){ titleBadge.textContent = t.name; titleBadge.style.display='inline-block'; }
     else { titleBadge.style.display='none'; }
   }
+  const card = document.getElementById('profileCard');
   if(card){
     BG_ITEMS.forEach(bg=>card.classList.remove(bg.cls));
     const bg = BG_ITEMS.find(x=>x.id===state.equippedBg);
@@ -5409,162 +5487,31 @@ function applyCustomization(){
   }
 }
 
-function renderCustomPanel(){
-  const titleList = document.getElementById('titleList');
-  const borderList = document.getElementById('borderList');
-  const bgList = document.getElementById('bgList');
-  const emoteRow = document.getElementById('emoteRow');
-  const boosterList = document.getElementById('boosterList');
-  if(!titleList) return;
-
-  // 칭호
-  const ownedTitleIds = Object.keys(state.ownedTitles||{}).filter(id=>state.ownedTitles[id]);
-  titleList.innerHTML = ownedTitleIds.length ? '' : '<span class="invChip">아직 획득한 칭호가 없습니다 · 럭키 박스에서 획득하세요!</span>';
-  ownedTitleIds.forEach(id=>{
-    const t = TITLES.find(x=>x.id===id); if(!t) return;
-    const isEq = state.equippedTitle===id;
-    const card = document.createElement('div');
-    card.className = 'pick-card'+(isEq?' current':' owned');
-    card.innerHTML = `
-      <div class="picon">🏅</div>
-      <div class="info"><div class="name">${t.name}</div></div>
-      ${isEq ? '<span class="badge">장착중</span>' : '<button data-eq-title="'+id+'">장착</button>'}
-    `;
-    titleList.appendChild(card);
-  });
-  titleList.querySelectorAll('[data-eq-title]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      state.equippedTitle = btn.dataset.eqTitle;
-      renderTop(); renderCustomPanel();
-    });
-  });
-  if(ownedTitleIds.length){
-    const unequipBtn = document.createElement('button');
-    unequipBtn.className = 'chipbtn'; unequipBtn.style.marginTop='4px'; unequipBtn.textContent='칭호 해제';
-    unequipBtn.onclick = ()=>{ state.equippedTitle=null; renderTop(); renderCustomPanel(); };
-    titleList.appendChild(unequipBtn);
-  }
-
-  // 테두리
-  const ownedBorderIds = Object.keys(state.ownedBorders||{}).filter(id=>state.ownedBorders[id]);
-  borderList.innerHTML = ownedBorderIds.length ? '' : '<span class="invChip">아직 획득한 테두리가 없습니다 · 럭키 박스에서 획득하세요!</span>';
-  ownedBorderIds.forEach(id=>{
-    const b = BORDERS.find(x=>x.id===id); if(!b) return;
-    const isEq = state.equippedBorder===id;
-    const card = document.createElement('div');
-    card.className = 'pick-card'+(isEq?' current':' owned');
-    card.innerHTML = `
-      <div class="picon">🖼️</div>
-      <div class="info"><div class="name">${b.name}</div></div>
-      ${isEq ? '<span class="badge">장착중</span>' : '<button data-eq-border="'+id+'">장착</button>'}
-    `;
-    borderList.appendChild(card);
-  });
-  borderList.querySelectorAll('[data-eq-border]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      state.equippedBorder = btn.dataset.eqBorder;
-      renderTop(); renderCustomPanel();
-    });
-  });
-  if(ownedBorderIds.length){
-    const unequipBtn = document.createElement('button');
-    unequipBtn.className = 'chipbtn'; unequipBtn.style.marginTop='4px'; unequipBtn.textContent='테두리 해제';
-    unequipBtn.onclick = ()=>{ state.equippedBorder=null; renderTop(); renderCustomPanel(); };
-    borderList.appendChild(unequipBtn);
-  }
-
-  // 배경 (가챠 아이템 + 상점 쿠스메틱)
-  const ownedBg = BG_ITEMS.filter(bg=>{
-    if(bg.source==='gacha') return (state.gachaItems||{})[bg.id] > 0;
-    return !!(state.cosmetics||{})[bg.id];
-  });
-  bgList.innerHTML = ownedBg.length ? '' : '<span class="invChip">아직 획득한 배경이 없습니다</span>';
-  ownedBg.forEach(bg=>{
-    const isEq = state.equippedBg===bg.id;
-    const card = document.createElement('div');
-    card.className = 'pick-card'+(isEq?' current':' owned');
-    card.innerHTML = `
-      <div class="picon">🌌</div>
-      <div class="info"><div class="name">${bg.name}</div></div>
-      ${isEq ? '<span class="badge">장착중</span>' : '<button data-eq-bg="'+bg.id+'">장착</button>'}
-    `;
-    bgList.appendChild(card);
-  });
-  bgList.querySelectorAll('[data-eq-bg]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      state.equippedBg = btn.dataset.eqBg;
-      renderTop(); renderCustomPanel();
-    });
-  });
-  if(ownedBg.length){
-    const unequipBtn = document.createElement('button');
-    unequipBtn.className = 'chipbtn'; unequipBtn.style.marginTop='4px'; unequipBtn.textContent='배경 해제';
-    unequipBtn.onclick = ()=>{ state.equippedBg=null; renderTop(); renderCustomPanel(); };
-    bgList.appendChild(unequipBtn);
-  }
-
-  // 감정표현
-  const emoteUses = (state.gachaItems||{}).emote_pack || 0;
-  emoteRow.innerHTML = '';
-  const emoteCountEl = document.createElement('div');
-  emoteCountEl.className = 'invChip';
-  emoteCountEl.textContent = `사용 가능 횟수: ${emoteUses}`;
-  emoteRow.appendChild(emoteCountEl);
-  EMOTES.forEach(em=>{
-    const btn = document.createElement('button');
-    btn.className = 'emoteBtn';
-    btn.textContent = em;
-    btn.disabled = emoteUses<=0;
-    btn.addEventListener('click', ()=>useEmote(em));
-    emoteRow.appendChild(btn);
-  });
-
-  // 스코어 부스터
-  const boosterCount = (state.gachaItems||{}).score_booster || 0;
-  boosterList.innerHTML = '';
-  const bCard = document.createElement('div');
-  bCard.className = 'pick-card'+(boosterCount>0?' owned':'');
-  bCard.innerHTML = `
-    <div class="picon">⚡</div>
-    <div class="info"><div class="name">랭킹 스코어 부스터 x${boosterCount}</div><div class="stats">사용 시 15분간 채굴 골드 획득량 ${MINE_BOOST_MULT}배!</div></div>
-    <button id="useScoreBoosterBtn" ${boosterCount<=0?'disabled':''}>사용</button>
-  `;
-  boosterList.appendChild(bCard);
-  const useBtn = document.getElementById('useScoreBoosterBtn');
-  if(useBtn) useBtn.addEventListener('click', useScoreBooster);
+function openSkinModal(){
+  renderSkinModal();
+  const modal = document.getElementById('skinModal');
+  if(modal) modal.classList.add('show');
 }
+function closeSkinModal(){
+  const modal = document.getElementById('skinModal');
+  if(modal) modal.classList.remove('show');
+}
+if(document.getElementById('profileCard')) document.getElementById('profileCard').addEventListener('click', openSkinModal);
+if(document.getElementById('skinModalCloseBtn')) document.getElementById('skinModalCloseBtn').addEventListener('click', closeSkinModal);
+if(document.getElementById('skinModal')) document.getElementById('skinModal').addEventListener('click', (e)=>{
+  if(e.target.id==='skinModal') closeSkinModal();
+});
 
-function useEmote(emoji){
-  const uses = (state.gachaItems||{}).emote_pack || 0;
-  if(uses<=0) return;
-  state.gachaItems.emote_pack = uses-1;
-  const anchor = document.getElementById('profileAvatar') || document.body;
-  const rect = anchor.getBoundingClientRect();
-  const fly = document.createElement('div');
-  fly.className = 'emoteFly';
-  fly.textContent = emoji;
-  fly.style.left = (rect.left + rect.width/2 - 26) + 'px';
-  fly.style.top = (rect.top) + 'px';
-  document.body.appendChild(fly);
-  Sound.tick();
-  setTimeout(()=>fly.remove(), 1700);
-  showToast(`${emoji} 감정표현을 사용했습니다! (남은 사용권: ${state.gachaItems.emote_pack})`);
-  saveGame();
-  renderCustomPanel();
-}
-function useScoreBooster(){
-  const count = (state.gachaItems||{}).score_booster || 0;
-  if(count<=0) return;
-  state.gachaItems.score_booster = count-1;
-  state.boostUntil = Math.max(state.boostUntil||0, Date.now()) + SCORE_BOOST_DURATION_MS;
-  showToast(`⚡ 스코어 부스터 사용! 15분간 채굴 골드 획득량이 ${MINE_BOOST_MULT}배가 됩니다.`);
-  Sound.win(); burstConfetti(18);
-  renderTop();
-  renderCustomPanel();
-}
+
 
 
 /* ============================ 골드 소모 실시간 유저 랭킹 보드 ============================ */
+if(document.getElementById('rankingFloatToggle')) document.getElementById('rankingFloatToggle').addEventListener('click', ()=>{
+  document.getElementById('rankingFloatPanel').classList.toggle('show');
+});
+if(document.getElementById('rankingFloatClose')) document.getElementById('rankingFloatClose').addEventListener('click', ()=>{
+  document.getElementById('rankingFloatPanel').classList.remove('show');
+});
 function currentUserName(){
   return sessionStorage.getItem('current_user') || localStorage.getItem('current_user') || null;
 }
@@ -5735,11 +5682,7 @@ function startGame(){
   switchView('mine');
   checkDailyBonus();
   checkAttendance(true);
-  applyCosmeticEffect();
-  renderCosmeticShop();
-  renderGachaPanel();
   applyCustomization();
-  renderCustomPanel();
   loadRankingData();
   setInterval(checkRelief, RELIEF_CHECK_TICK_MS);
   setInterval(renderMineBoost, 1000);
@@ -6976,4 +6919,4 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
 })();
 </script>
 </body>
-        </html>
+  </html>
