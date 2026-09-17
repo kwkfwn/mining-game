@@ -955,19 +955,6 @@ input{font-family:inherit;}
 .reactPad.go{background:linear-gradient(160deg,#1f9e52,#0d3f21);}
 .reactPad .reactSub{font-size:12px;font-weight:700;opacity:.85;}
 
-.puzzleGrid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:210px;height:210px;margin:0 auto;
-}
-.puzzleTile{
-  background:linear-gradient(160deg,#3a2f55,#1c1330);border:1px solid rgba(192,75,255,.4);
-  border-radius:8px;display:flex;align-items:center;justify-content:center;
-  font-size:26px;font-weight:800;color:#fff;cursor:pointer;
-  box-shadow:0 4px 10px -4px rgba(0,0,0,.6);transition:transform .1s ease, background .15s ease;
-}
-.puzzleTile:hover{transform:scale(1.03);}
-.puzzleTile.blank{background:transparent;border:1px dashed var(--line);box-shadow:none;cursor:default;}
-.puzzleTile.solved{background:linear-gradient(160deg,#1f9e52,#0d3f21);border-color:var(--win);}
-
 .wordChainLog{
   display:flex;flex-direction:column-reverse;gap:6px;max-height:220px;overflow-y:auto;
   background:#0a0c12;border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px;
@@ -1075,7 +1062,7 @@ input{font-family:inherit;}
             <button class="exMax" id="g2cMax">MAX</button>
             <button class="exGo" id="g2cGo">환전하기</button>
           </div>
-          <div class="exRate">1,000 Gold = 1 Coin</div>
+          <div class="exRate">2,000 Gold = 1 Coin</div>
         </div>
         <div class="exCard">
           <div class="exTitle">🎰 Coin → 🪙 Gold</div>
@@ -1084,7 +1071,7 @@ input{font-family:inherit;}
             <button class="exMax" id="c2gMax">MAX</button>
             <button class="exGo" id="c2gGo">환전하기</button>
           </div>
-          <div class="exRate">1 Coin = 1,000 Gold (환전 수수료 5% 적용 → 실수령 950 Gold)</div>
+          <div class="exRate">1 Coin = 2,000 Gold (환전 수수료 5% 적용 → 실수령 1,900 Gold)</div>
         </div>
       </div>
       <div class="resultBanner" id="exResult">원하는 만큼 환전해서 미니 게임을 즐겨보세요. Coin → Gold 환전에는 5% 수수료가 붙습니다.</div>
@@ -2646,15 +2633,15 @@ if (btnDouble) {
       <button class="playBtn mpBtn" id="btnReactLeave" style="background:linear-gradient(180deg,#ff6b81,#c0223b);margin-left:auto;">🚪 그만하기 (방 나가기)</button>
     </div>
     <div id="reactBetNegotiate" class="mpLobby">
-      <h3 class="mpLobbyTitle">🤝 베팅금 합의 (선택)</h3>
+      <h3 class="mpLobbyTitle">🤝 베팅금 합의 (필수)</h3>
       <div class="mpLobbyRow">
         <span class="mpBetLabel">제안할 베팅금:</span>
-        <input type="number" id="reactProposeInput" value="0" min="0">
+        <input type="number" id="reactProposeInput" value="10" min="1">
         <button class="chipbtn" id="btnReactProposePlus10">+10</button>
         <button class="chipbtn" id="btnReactProposePlus100">+100</button>
         <button class="playBtn mpBtn" id="btnReactProposeBet">제안하기</button>
       </div>
-      <div id="reactNegotiateStatus" class="mpLobbyStatus">베팅 없이(무료) 진행하려면 그냥 "준비 완료"를 누르세요. 베팅하려면 금액을 제안하세요.</div>
+      <div id="reactNegotiateStatus" class="mpLobbyStatus">베팅금을 정하고 모두 동의해야 시작할 수 있습니다. 진 사람이 이긴 사람에게 베팅금을 지불합니다!</div>
       <div class="mpLobbyRow" style="margin-top:6px;">
         <button class="playBtn mpBtn" id="btnReactAgreeBet" style="display:none;">이 금액에 동의</button>
       </div>
@@ -2680,49 +2667,53 @@ if (btnDouble) {
 </div>
 
 <!-- ============================ 퍼즐 먼저 맞추기 (2인 이상 멀티플레이) ============================ -->
-<div class="tabpane" data-pane="puzzle">
-  <div id="puzzleLobby" class="mpLobby">
-    <h3 class="mpLobbyTitle">🧩 퍼즐 먼저 맞추기 · 방 만들기</h3>
+<div class="tabpane" data-pane="bomb">
+  <div id="bombLobby" class="mpLobby">
+    <h3 class="mpLobbyTitle">💣 폭탄 돌리기 · 방 만들기 (8인 이상 가능!)</h3>
     <div class="mpLobbyRow">
-      <input type="text" id="puzzleRoomInput" placeholder="방 번호 입력 (예: 1234)">
-      <button class="playBtn mpBtn" id="btnPuzzleCreate">방 생성</button>
-      <button class="playBtn mpBtn" id="btnPuzzleJoin">참가</button>
+      <input type="text" id="bombRoomInput" placeholder="방 번호 입력 (예: 1234)">
+      <button class="playBtn mpBtn" id="btnBombCreate">방 생성</button>
+      <button class="playBtn mpBtn" id="btnBombJoin">참가</button>
     </div>
-    <div id="puzzleStatusDiv" class="mpLobbyStatus">방을 생성하거나 참가하세요. 2명 이상 모이면 시작할 수 있습니다.</div>
+    <div id="bombStatusDiv" class="mpLobbyStatus">방을 생성하거나 참가하세요. 2명~16명까지 함께 즐길 수 있습니다!</div>
   </div>
-  <div id="puzzleGameArea" style="display:none;">
+  <div id="bombGameArea" style="display:none;">
     <div class="mpLobbyRow" style="justify-content:flex-end;">
-      <button class="playBtn mpBtn" id="btnPuzzleLeave" style="background:linear-gradient(180deg,#ff6b81,#c0223b);margin-left:auto;">🚪 그만하기 (방 나가기)</button>
+      <button class="playBtn mpBtn" id="btnBombLeave" style="background:linear-gradient(180deg,#ff6b81,#c0223b);margin-left:auto;">🚪 그만하기 (방 나가기)</button>
     </div>
-    <div id="puzzleBetNegotiate" class="mpLobby">
-      <h3 class="mpLobbyTitle">🤝 베팅금 합의 (선택)</h3>
+    <div id="bombBetNegotiate" class="mpLobby">
+      <h3 class="mpLobbyTitle">🤝 베팅금 합의 (필수)</h3>
       <div class="mpLobbyRow">
         <span class="mpBetLabel">제안할 베팅금:</span>
-        <input type="number" id="puzzleProposeInput" value="0" min="0">
-        <button class="chipbtn" id="btnPuzzleProposePlus10">+10</button>
-        <button class="chipbtn" id="btnPuzzleProposePlus100">+100</button>
-        <button class="playBtn mpBtn" id="btnPuzzleProposeBet">제안하기</button>
+        <input type="number" id="bombProposeInput" value="10" min="1">
+        <button class="chipbtn" id="btnBombProposePlus10">+10</button>
+        <button class="chipbtn" id="btnBombProposePlus100">+100</button>
+        <button class="playBtn mpBtn" id="btnBombProposeBet">제안하기</button>
       </div>
-      <div id="puzzleNegotiateStatus" class="mpLobbyStatus">베팅 없이(무료) 진행하려면 그냥 "준비 완료"를 누르세요. 베팅하려면 금액을 제안하세요.</div>
+      <div id="bombNegotiateStatus" class="mpLobbyStatus">베팅금을 정하고 모두 동의해야 시작할 수 있습니다. 마지막까지 살아남은 사람이 나머지 전원의 베팅금을 모두 가져갑니다!</div>
       <div class="mpLobbyRow" style="margin-top:6px;">
-        <button class="playBtn mpBtn" id="btnPuzzleAgreeBet" style="display:none;">이 금액에 동의</button>
+        <button class="playBtn mpBtn" id="btnBombAgreeBet" style="display:none;">이 금액에 동의</button>
       </div>
     </div>
-    <div class="betRow" id="puzzleBetInfoRow" style="display:none;">
+    <div class="betRow" id="bombBetInfoRow" style="display:none;">
       <span class="mpBetLabel">합의된 베팅금:</span>
-      <span class="mpBetTag" id="puzzleAgreedBetDisplay"></span>
+      <span class="mpBetTag" id="bombAgreedBetDisplay"></span>
     </div>
-    <div class="mpPlayerGrid" id="puzzlePlayerGrid"></div>
-    <div class="betRow" id="puzzleReadyRow" style="justify-content:center;">
-      <button class="playBtn mpBtn" id="btnPuzzleReady" style="margin-left:0;">준비 완료</button>
-      <button class="playBtn mpBtn" id="btnPuzzleStart" style="display:none;">게임 시작 (방장)</button>
+    <div class="mpPlayerGrid" id="bombPlayerGrid"></div>
+    <div class="betRow" id="bombReadyRow" style="justify-content:center;">
+      <button class="playBtn mpBtn" id="btnBombReady" style="margin-left:0;">준비 완료</button>
+      <button class="playBtn mpBtn" id="btnBombStart" style="display:none;">게임 시작 (방장)</button>
     </div>
-    <div class="wcHint">각자 똑같이 섞인 3x3 퍼즐을 풉니다 · 빈 칸 옆의 타일을 클릭하면 이동합니다 · 가장 먼저 완성하는 사람이 승리!</div>
-    <div class="puzzleGrid" id="puzzleGrid"></div>
-    <div class="bjActions" id="puzzleRematchRow" style="display:none;justify-content:center;margin-top:10px;">
-      <button class="chipbtn bjAct" id="btnPuzzleRematch" style="border-color:var(--win);color:var(--win);">🔁 다시하기</button>
+    <div class="wcHint">폭탄이 터지기 전에 얼른 다음 사람에게 넘기세요! 언제 터질지는 아무도 모릅니다 · 폭탄을 들고 터지면 탈락, 최후의 1인이 우승!</div>
+    <div id="bombStage" style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 0;">
+      <div id="bombIcon" style="font-size:72px;transition:transform .1s ease;">💣</div>
+      <div id="bombHolderText" style="font-size:15px;font-weight:800;color:var(--brass-glow);"></div>
+      <button class="playBtn" id="btnBombPass" style="display:none;font-size:16px;padding:14px 32px;">🔥 지금 넘기기!</button>
     </div>
-    <div class="resultBanner" id="puzzleResult">방장이 시작하면 모두에게 동일한 퍼즐이 주어집니다</div>
+    <div class="bjActions" id="bombRematchRow" style="display:none;justify-content:center;margin-top:10px;">
+      <button class="chipbtn bjAct" id="btnBombRematch" style="border-color:var(--win);color:var(--win);">🔁 다시하기</button>
+    </div>
+    <div class="resultBanner" id="bombResult">방장이 시작하면 무작위로 첫 번째 폭탄 소지자가 정해집니다!</div>
   </div>
 </div>
 
@@ -2733,6 +2724,7 @@ if (btnDouble) {
     <div class="mpLobbyRow">
       <input type="text" id="wcRoomInput" placeholder="방 번호 입력 (예: 1234)">
       <button class="playBtn mpBtn" id="btnWcCreate">방 생성</button>
+
       <button class="playBtn mpBtn" id="btnWcJoin">참가</button>
     </div>
     <div id="wcStatusDiv" class="mpLobbyStatus">방을 생성하거나 참가하세요. 2명 이상 모이면 시작할 수 있습니다.</div>
@@ -2828,6 +2820,7 @@ if (btnDouble) {
     </div>
     <div id="rankingList"></div>
     <div class="resultBanner" id="rankingBanner" style="font-size:10px;margin-top:6px;">보유 Gold 기준 실시간 랭킹 · 1~3위는 왕관 획득</div>
+    <button id="adminResetBtn" type="button" style="margin-top:8px;background:none;border:none;color:var(--sub);font-size:9px;text-decoration:underline;cursor:pointer;opacity:.6;">관리자용 서버 초기화</button>
   </div>
 </div>
 
@@ -2907,17 +2900,17 @@ const ORES = [
   {id:'dark',   name:'암흑물질 광석', min:120,max:300, weight:.15,color:'#c04bff', glow:24},
 ];
 
-/* cost는 이제 전부 Coin 기준입니다 (예전에는 Gold였습니다). requires(광석 재료)는 그대로 채굴에서 모읍니다. */
+/* cost는 Gold 기준입니다. requires(광석 재료)는 채굴로 모읍니다. */
 const PICKAXES = [
-  {id:'wood',   name:'나무 곡괭이',      cost:0,    mult:1.0, rare:0,  crit:.03, power:1,  requires:{}},
-  {id:'stonepk',name:'돌 곡괭이',        cost:3,    mult:1.15,rare:2,  crit:.035,power:1,  requires:{stone:40}},
-  {id:'ironpk', name:'철 곡괭이',        cost:8,    mult:1.4, rare:6,  crit:.045,power:2,  requires:{stone:30, iron:25}},
-  {id:'steelpk',name:'강철 곡괭이',      cost:18,   mult:1.7, rare:9,  crit:.06, power:2,  requires:{iron:35, silver:10}},
-  {id:'goldpk', name:'황금 곡괭이',      cost:40,   mult:2.1, rare:13, crit:.08, power:3,  requires:{iron:20, silver:35}},
-  {id:'platpk', name:'백금 곡괭이',      cost:90,   mult:2.6, rare:17, crit:.10, power:4,  requires:{silver:25, gold:15}},
-  {id:'diapk',  name:'다이아 곡괭이',    cost:200,  mult:3.3, rare:22, crit:.12, power:5,  requires:{silver:20, gold:30}},
-  {id:'orichpk',name:'오리하르콘 곡괭이', cost:480,  mult:4.2, rare:29, crit:.15, power:7,  requires:{gold:25, diamond:15}},
-  {id:'rift',   name:'차원 균열 곡괭이', cost:1200, mult:5.5, rare:38, crit:.20, power:10, requires:{gold:20, diamond:28, dark:5}},
+  {id:'wood',   name:'나무 곡괭이',      cost:0,       mult:1.0, rare:0,  crit:.03, power:1,  requires:{}},
+  {id:'stonepk',name:'돌 곡괭이',        cost:1500,    mult:1.15,rare:2,  crit:.035,power:1,  requires:{stone:40}},
+  {id:'ironpk', name:'철 곡괭이',        cost:6000,    mult:1.4, rare:6,  crit:.045,power:2,  requires:{stone:30, iron:25}},
+  {id:'steelpk',name:'강철 곡괭이',      cost:18000,   mult:1.7, rare:9,  crit:.06, power:2,  requires:{iron:35, silver:10}},
+  {id:'goldpk', name:'황금 곡괭이',      cost:50000,   mult:2.1, rare:13, crit:.08, power:3,  requires:{iron:20, silver:35}},
+  {id:'platpk', name:'백금 곡괭이',      cost:130000,  mult:2.6, rare:17, crit:.10, power:4,  requires:{silver:25, gold:15}},
+  {id:'diapk',  name:'다이아 곡괭이',    cost:320000,  mult:3.3, rare:22, crit:.12, power:5,  requires:{silver:20, gold:30}},
+  {id:'orichpk',name:'오리하르콘 곡괭이', cost:800000,  mult:4.2, rare:29, crit:.15, power:7,  requires:{gold:25, diamond:15}},
+  {id:'rift',   name:'차원 균열 곡괭이', cost:2200000, mult:5.5, rare:38, crit:.20, power:10, requires:{gold:20, diamond:28, dark:5}},
 ];
 
 const HORSES = [
@@ -2945,7 +2938,7 @@ const SLOT_SYMS = [
   {sym:'7',  weight:0.5,  pay3:80, pay4:150, pay5:2000, seven:true},
 ];
 
-const RATE = 1000; // 1 coin = 1000 gold
+const RATE = 2000; // 1 coin = 2000 gold
 const EXCHANGE_FEE = 0.05; // Coin → Gold 환전 수수료 5%
 
 /* ============================ STATE ============================ */
@@ -3801,7 +3794,7 @@ const TABS = [
   {id:'blackjack', label:'21(블랙잭)'},
   {id:'baccarat', label:'바카라'},
   {id:'reaction', label:'⚡반응속도'},
-  {id:'puzzle', label:'🧩퍼즐대결'},
+  {id:'bomb', label:'💣폭탄돌리기'},
   {id:'wordchain', label:'📝끝말잇기'},
 ];
 function renderTabs(){
@@ -5661,6 +5654,7 @@ window.__mpBlockedWarning = function(){
 
 /* ==================================== INIT ==================================== */
 const ACCESS_PASSWORD = "1026";
+const ADMIN_RESET_PASSWORD = "shdnjstjq@1";
 
 if (sessionStorage.getItem('passed_auth') !== 'true') {
   const inputPass = prompt("🔒 접속 비밀번호를 입력하세요:");
@@ -5671,6 +5665,25 @@ if (sessionStorage.getItem('passed_auth') !== 'true') {
   }
   sessionStorage.setItem('passed_auth', 'true');
 }
+
+/* 관리자용 서버 초기화 (Firebase의 users/leaderboard 전체 삭제 + 내 로컬 저장도 초기화) */
+if(document.getElementById('adminResetBtn')) document.getElementById('adminResetBtn').addEventListener('click', ()=>{
+  if(!confirm('⚠️ 정말로 서버의 모든 유저 데이터와 랭킹을 초기화하시겠습니까?\n(모든 플레이어의 진행 상황이 사라지며 되돌릴 수 없습니다!)')) return;
+  const pw = prompt('관리자 비밀번호를 입력하세요:');
+  if(pw === null) return;
+  if(pw !== ADMIN_RESET_PASSWORD){ alert('❌ 비밀번호가 일치하지 않습니다.'); return; }
+  if(typeof database === 'undefined' || !database){ alert('❌ 서버(Firebase)가 연결되지 않았습니다.'); return; }
+  Promise.all([
+    database.ref('users').remove(),
+    database.ref('leaderboard').remove()
+  ]).then(()=>{
+    alert('✅ 서버 초기화가 완료되었습니다. 페이지를 새로고침합니다.');
+    localStorage.clear();
+    location.reload();
+  }).catch(err=>{
+    alert('❌ 초기화 중 오류가 발생했습니다: ' + (err && err.message));
+  });
+});
 
 function startGame(){
   loadGame();
@@ -5957,8 +5970,8 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
   if(btnProposePlus100) btnProposePlus100.onclick = ()=>{ proposeInput.value = Math.max(0,(parseInt(proposeInput.value)||0)+100); };
   if(btnProposeBet) btnProposeBet.onclick = ()=>{
     if(!dbRef) return;
-    const amt = Math.max(0, parseInt(proposeInput.value)||0);
-    if(amt>0 && mgGetMyCoins()<amt) return mgAlert(`❌ 보유 코인(${mgCoinFmt(mgGetMyCoins())}개)보다 많은 금액을 제안할 수 없습니다.`);
+    const amt = Math.max(1, parseInt(proposeInput.value)||0);
+    if(mgGetMyCoins()<amt) return mgAlert(`❌ 보유 코인(${mgCoinFmt(mgGetMyCoins())}개)보다 많은 금액을 제안할 수 없습니다.`);
     dbRef.transaction(room=>{
       if(!room || room.status!=='lobby') return room;
       room.agreedBet = amt;
@@ -6094,7 +6107,7 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
       const allReady = ids.length>=2 && ids.every(pid=>players[pid].ready);
       const amt = room.agreedBet||0;
       curAgreedBet = amt;
-      const betOk = amt===0 || (ids.length>=2 && ids.every(pid=>players[pid].betAgreed));
+      const betOk = amt>0 && ids.length>=2 && ids.every(pid=>players[pid].betAgreed);
 
       if(room.status==='lobby'){
         rematchRow.style.display='none';
@@ -6111,12 +6124,12 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
           else negotiateStatusEl.textContent = `누군가 ${mgCoinFmt(amt)} Coin 베팅을 제안했습니다. 동의하시겠습니까?`;
         } else {
           if(btnAgreeBet) btnAgreeBet.style.display = 'none';
-          negotiateStatusEl.textContent = '베팅 없이(무료) 진행하려면 그냥 "준비 완료"를 누르세요. 베팅하려면 금액을 제안하세요.';
+          negotiateStatusEl.textContent = '베팅금을 정하고 "제안하기"를 눌러주세요 (베팅 없이는 시작할 수 없습니다).';
         }
         pad.className = 'reactPad wait';
         padMain.textContent = '대기 중...';
         padSub.textContent = ids.length<2 ? '2명 이상 모여야 시작할 수 있어요' : (!betOk ? '베팅금 합의가 필요해요' : (allReady ? (amHost?'모두 준비됨 · 시작 버튼을 눌러주세요':'방장이 곧 시작합니다') : '모두 "준비 완료"를 눌러주세요'));
-        resultBanner.textContent = '신호가 초록색(GO!)으로 바뀌면 최대한 빨리 클릭하세요! 너무 일찍 누르면 실격입니다.';
+        resultBanner.textContent = '신호가 초록색(GO!)으로 바뀌면 최대한 빨리 클릭하세요! 너무 일찍 누르면 실격입니다. 진 사람이 이긴 사람에게 베팅금을 지불합니다.';
         resultBanner.className = 'resultBanner';
         clickedThisRound = false;
         return;
@@ -6193,39 +6206,46 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
 })();
 
 /* ============================================================================
-   2) 퍼즐 먼저 맞추기 (puzzleRooms/{roomId}) — 3x3 (1~8 + 빈칸), 모두 동일 초기 배치
+   2) 폭탄 돌리기 (bombRooms/{roomId}) — 8인 이상 가능, 턴 없이 자유롭게 패스,
+      숨겨진 무작위 폭발 시각에 폭탄을 들고 있으면 탈락. 최후의 1인이 전원의 베팅금을 획득.
 ============================================================================ */
-(function puzzleGame(){
-  const lobbyEl = document.getElementById('puzzleLobby');
-  const gameAreaEl = document.getElementById('puzzleGameArea');
-  const roomInput = document.getElementById('puzzleRoomInput');
-  const statusDiv = document.getElementById('puzzleStatusDiv');
-  const btnCreate = document.getElementById('btnPuzzleCreate');
-  const btnJoin = document.getElementById('btnPuzzleJoin');
-  const btnLeave = document.getElementById('btnPuzzleLeave');
-  const btnReady = document.getElementById('btnPuzzleReady');
-  const btnStart = document.getElementById('btnPuzzleStart');
-  const playerGrid = document.getElementById('puzzlePlayerGrid');
-  const betNegotiateEl = document.getElementById('puzzleBetNegotiate');
-  const betInfoRowEl = document.getElementById('puzzleBetInfoRow');
-  const betDisplayEl = document.getElementById('puzzleAgreedBetDisplay');
-  const proposeInput = document.getElementById('puzzleProposeInput');
-  const negotiateStatusEl = document.getElementById('puzzleNegotiateStatus');
-  const btnProposeBet = document.getElementById('btnPuzzleProposeBet');
-  const btnAgreeBet = document.getElementById('btnPuzzleAgreeBet');
-  const btnProposePlus10 = document.getElementById('btnPuzzleProposePlus10');
-  const btnProposePlus100 = document.getElementById('btnPuzzleProposePlus100');
-  const gridEl = document.getElementById('puzzleGrid');
-  const resultBanner = document.getElementById('puzzleResult');
-  const rematchRow = document.getElementById('puzzleRematchRow');
-  const btnRematch = document.getElementById('btnPuzzleRematch');
+(function bombGame(){
+  const lobbyEl = document.getElementById('bombLobby');
+  const gameAreaEl = document.getElementById('bombGameArea');
+  const roomInput = document.getElementById('bombRoomInput');
+  const statusDiv = document.getElementById('bombStatusDiv');
+  const btnCreate = document.getElementById('btnBombCreate');
+  const btnJoin = document.getElementById('btnBombJoin');
+  const btnLeave = document.getElementById('btnBombLeave');
+  const btnReady = document.getElementById('btnBombReady');
+  const btnStart = document.getElementById('btnBombStart');
+  const playerGrid = document.getElementById('bombPlayerGrid');
+  const betNegotiateEl = document.getElementById('bombBetNegotiate');
+  const betInfoRowEl = document.getElementById('bombBetInfoRow');
+  const betDisplayEl = document.getElementById('bombAgreedBetDisplay');
+  const proposeInput = document.getElementById('bombProposeInput');
+  const negotiateStatusEl = document.getElementById('bombNegotiateStatus');
+  const btnProposeBet = document.getElementById('btnBombProposeBet');
+  const btnAgreeBet = document.getElementById('btnBombAgreeBet');
+  const btnProposePlus10 = document.getElementById('btnBombProposePlus10');
+  const btnProposePlus100 = document.getElementById('btnBombProposePlus100');
+  const bombIcon = document.getElementById('bombIcon');
+  const bombHolderText = document.getElementById('bombHolderText');
+  const btnPass = document.getElementById('btnBombPass');
+  const resultBanner = document.getElementById('bombResult');
+  const rematchRow = document.getElementById('bombRematchRow');
+  const btnRematch = document.getElementById('btnBombRematch');
   if(!lobbyEl) return;
 
-  const SOLVED = [1,2,3,4,5,6,7,8,null];
-  let roomId=null, dbRef=null, myPid=mgPid(), board=SOLVED.slice(), curStatus=null, solvedSubmitted=false;
-  let curAgreedBet = 0, processedBetRoundId = null;
+  const MAX_PLAYERS = 16;
+  const MIN_EXPLODE_MS = 4000, MAX_EXPLODE_MS = 9000;
+
+  let roomId = null, dbRef = null, myPid = mgPid(), curStatus = null;
+  let curAgreedBet = 0, processedBetRoundId = null, hostTickTimer = null, shakeTimer = null;
 
   function leaveRoom(silent){
+    if(hostTickTimer){ clearInterval(hostTickTimer); hostTickTimer = null; }
+    if(shakeTimer){ clearInterval(shakeTimer); shakeTimer = null; }
     if(dbRef){
       try{ dbRef.onDisconnect().cancel(); }catch(e){}
       try{ dbRef.off(); }catch(e){}
@@ -6233,31 +6253,41 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
     }
     dbRef = null; roomId = null;
     window.__mpActiveRoom = null;
-    if(gameAreaEl) gameAreaEl.style.display='none';
-    if(statusDiv) statusDiv.innerHTML = '방을 생성하거나 참가하세요. 2명 이상 모이면 시작할 수 있습니다.';
-    if(roomInput) roomInput.value='';
-    curStatus = null; solvedSubmitted=false;
+    if(gameAreaEl) gameAreaEl.style.display = 'none';
+    if(statusDiv) statusDiv.innerHTML = '방을 생성하거나 참가하세요. 2명~16명까지 함께 즐길 수 있습니다!';
+    if(roomInput) roomInput.value = '';
+    curStatus = null;
     if(!silent) mgToast('방에서 나갔습니다.');
   }
   if(btnLeave) btnLeave.onclick = ()=>{ if(dbRef) leaveRoom(false); };
   if(btnRematch) btnRematch.onclick = ()=>{
     if(!dbRef) return;
     dbRef.transaction(room=>{
-      if(!room || room.status!=='finished') return room;
-      room.status='lobby'; room.winnerPid=null; room.roundId=(room.roundId||0)+1; room.shuffled=null;
-      Object.keys(room.players||{}).forEach(pid=>{ room.players[pid].ready=false; room.players[pid].solvedMs=null; room.players[pid].betAgreed=false; });
+      if(!room) return room;
+      if(room.status!=='finished') return room;
+      room.status = 'lobby';
+      room.winnerPid = null;
+      room.roundId = (room.roundId||0)+1;
+      room.order = null;
+      room.currentHolderPid = null;
+      room.explodeAt = null;
+      Object.keys(room.players||{}).forEach(pid=>{
+        room.players[pid].ready = false;
+        room.players[pid].alive = true;
+        room.players[pid].betAgreed = false;
+      });
       return room;
     });
   };
 
-  function freshPlayer(){ return { name: mgName(), ready:false, solvedMs:null, connected:true, betAgreed:false }; }
+  function freshPlayer(){ return { name: mgName(), ready:false, alive:true, connected:true, betAgreed:false }; }
 
-  if(btnProposePlus10) btnProposePlus10.onclick = ()=>{ proposeInput.value = Math.max(0,(parseInt(proposeInput.value)||0)+10); };
-  if(btnProposePlus100) btnProposePlus100.onclick = ()=>{ proposeInput.value = Math.max(0,(parseInt(proposeInput.value)||0)+100); };
+  if(btnProposePlus10) btnProposePlus10.onclick = ()=>{ proposeInput.value = Math.max(1,(parseInt(proposeInput.value)||0)+10); };
+  if(btnProposePlus100) btnProposePlus100.onclick = ()=>{ proposeInput.value = Math.max(1,(parseInt(proposeInput.value)||0)+100); };
   if(btnProposeBet) btnProposeBet.onclick = ()=>{
     if(!dbRef) return;
-    const amt = Math.max(0, parseInt(proposeInput.value)||0);
-    if(amt>0 && mgGetMyCoins()<amt) return mgAlert(`❌ 보유 코인(${mgCoinFmt(mgGetMyCoins())}개)보다 많은 금액을 제안할 수 없습니다.`);
+    const amt = Math.max(1, parseInt(proposeInput.value)||0);
+    if(mgGetMyCoins()<amt) return mgAlert(`❌ 보유 코인(${mgCoinFmt(mgGetMyCoins())}개)보다 많은 금액을 제안할 수 없습니다.`);
     dbRef.transaction(room=>{
       if(!room || room.status!=='lobby') return room;
       room.agreedBet = amt;
@@ -6280,16 +6310,16 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
     const id = (roomInput.value||'').trim();
     if(!id) return mgAlert('방 번호를 입력하세요!');
     if(!mgDbOk()) return mgAlert('서버(Firebase)가 연결되지 않았습니다.');
-    const ref = database.ref('puzzleRooms/'+id);
+    const ref = database.ref('bombRooms/'+id);
     ref.once('value').then(snap=>{
       if(snap.exists()) return mgAlert('이미 사용 중인 방 번호입니다.\n다른 번호를 입력하거나, 상대방에게 이 번호를 알려주고 "참가"를 눌러달라고 해주세요.');
       roomId = id; dbRef = ref;
       const players = {}; players[myPid] = freshPlayer();
-      dbRef.set({ status:'lobby', hostPid: myPid, players, winnerPid:null, roundId:0, shuffled:null, agreedBet:0 }).then(()=>{
+      dbRef.set({ status:'lobby', hostPid: myPid, players, winnerPid:null, roundId:0, order:null, currentHolderPid:null, explodeAt:null, agreedBet:0 }).then(()=>{
         dbRef.onDisconnect().remove();
-        window.__mpActiveRoom = {pane:'puzzle'};
+        window.__mpActiveRoom = {pane:'bomb'};
         statusDiv.innerHTML = `🏠 방 생성 완료! 방 번호: <b>${mgEscape(id)}</b>`;
-        gameAreaEl.style.display='block';
+        gameAreaEl.style.display = 'block';
         listen();
       });
     });
@@ -6298,17 +6328,19 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
     const id = (roomInput.value||'').trim();
     if(!id) return mgAlert('방 번호를 입력하세요!');
     if(!mgDbOk()) return mgAlert('서버가 연결되지 않았습니다.');
-    const ref = database.ref('puzzleRooms/'+id);
+    const ref = database.ref('bombRooms/'+id);
     ref.once('value').then(snap=>{
       if(!snap.exists()) return mgAlert('존재하지 않는 방입니다!');
       const room = snap.val();
-      if(room.status==='playing') return mgAlert('이미 진행 중인 라운드가 있습니다. 라운드 종료 후 참가해주세요.');
+      if(room.status!=='lobby') return mgAlert('이미 진행 중인 라운드가 있습니다. 라운드 종료 후 참가해주세요.');
+      const curCount = Object.keys(room.players||{}).length;
+      if(curCount >= MAX_PLAYERS) return mgAlert(`정원이 가득 찼습니다 (최대 ${MAX_PLAYERS}명).`);
       roomId = id; dbRef = ref;
       dbRef.child('players/'+myPid).set(freshPlayer()).then(()=>{
         dbRef.onDisconnect().remove();
-        window.__mpActiveRoom = {pane:'puzzle'};
+        window.__mpActiveRoom = {pane:'bomb'};
         statusDiv.innerHTML = `🎮 방 입장 완료! 방 번호: <b>${mgEscape(id)}</b>`;
-        gameAreaEl.style.display='block';
+        gameAreaEl.style.display = 'block';
         listen();
       });
     });
@@ -6316,68 +6348,80 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
   if(btnCreate) btnCreate.onclick = createRoom;
   if(btnJoin) btnJoin.onclick = joinRoom;
 
-  if(btnReady) btnReady.onclick = ()=>{ if(dbRef) dbRef.child('players/'+myPid+'/ready').set(true); };
+  if(btnReady) btnReady.onclick = ()=>{
+    if(!dbRef) return;
+    dbRef.child('players/'+myPid+'/ready').set(true);
+  };
   if(btnStart) btnStart.onclick = ()=>{
     if(!dbRef) return;
     dbRef.transaction(room=>{
       if(!room || room.hostPid!==myPid || room.status!=='lobby') return room;
       const ids = Object.keys(room.players||{});
-      if(ids.length<2) return room;
-      if(!ids.every(pid=>room.players[pid].ready)) return room;
-      // 풀 수 있음이 보장되는 셔플: 해결된 상태에서 무작위 유효 이동을 반복 적용
-      let b = SOLVED.slice();
-      let blank = 8;
-      const neighborsOf = (i)=>{
-        const r=Math.floor(i/3), c=i%3, out=[];
-        if(r>0) out.push(i-3); if(r<2) out.push(i+3);
-        if(c>0) out.push(i-1); if(c<2) out.push(i+1);
-        return out;
-      };
-      let lastBlank=-1;
-      for(let k=0;k<120;k++){
-        const opts = neighborsOf(blank).filter(n=>n!==lastBlank);
-        const pick = opts[Math.floor(Math.random()*opts.length)];
-        [b[blank], b[pick]] = [b[pick], b[blank]];
-        lastBlank = blank; blank = pick;
+      if(ids.length < 2) return room;
+      const allReady = ids.every(pid=>room.players[pid].ready);
+      if(!allReady) return room;
+      // 순서를 무작위로 섞는다
+      const order = ids.slice();
+      for(let i=order.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        const tmp = order[i]; order[i]=order[j]; order[j]=tmp;
       }
-      ids.forEach(pid=>{ room.players[pid].solvedMs=null; });
-      room.status='playing';
-      room.shuffled = b;
-      room.startedAt = Date.now();
+      ids.forEach(pid=>{ room.players[pid].alive = true; });
+      room.order = order;
+      room.currentHolderPid = order[0];
+      room.explodeAt = Date.now() + MIN_EXPLODE_MS + Math.floor(Math.random()*(MAX_EXPLODE_MS-MIN_EXPLODE_MS));
+      room.status = 'live';
       return room;
     });
   };
 
-  function renderBoard(){
-    gridEl.innerHTML='';
-    board.forEach((v,i)=>{
-      const t = document.createElement('div');
-      t.className = 'puzzleTile' + (v===null?' blank':'') + (solvedSubmitted?' solved':'');
-      t.textContent = v===null?'':v;
-      if(v!==null && !solvedSubmitted) t.addEventListener('click', ()=>tryMove(i));
-      gridEl.appendChild(t);
-    });
+  function nextAliveAfter(order, players, pid){
+    const idx = order.indexOf(pid);
+    if(idx===-1) return null;
+    for(let step=1; step<=order.length; step++){
+      const cand = order[(idx+step)%order.length];
+      if(players[cand] && players[cand].alive) return cand;
+    }
+    return null;
   }
-  function tryMove(i){
-    const blankIdx = board.indexOf(null);
-    const r1=Math.floor(i/3), c1=i%3, r2=Math.floor(blankIdx/3), c2=blankIdx%3;
-    const adjacent = (Math.abs(r1-r2)+Math.abs(c1-c2))===1;
-    if(!adjacent) return;
-    [board[i], board[blankIdx]] = [board[blankIdx], board[i]];
-    renderBoard();
-    if(!solvedSubmitted && board.every((v,idx)=>v===SOLVED[idx])){
-      solvedSubmitted = true;
-      const ms = Date.now() - (window.__mgPuzzleStart||Date.now());
-      dbRef.child('players/'+myPid+'/solvedMs').set(ms);
+
+  if(btnPass) btnPass.onclick = ()=>{
+    if(!dbRef) return;
+    dbRef.transaction(room=>{
+      if(!room || room.status!=='live') return room;
+      if(room.currentHolderPid !== myPid) return room;
+      if(Date.now() >= room.explodeAt) return room; // 이미 터질 시각이 지남 (호스트 틱이 곧 처리)
+      const next = nextAliveAfter(room.order||[], room.players||{}, myPid);
+      if(!next) return room;
+      room.currentHolderPid = next;
+      return room;
+    });
+  };
+
+  // 호스트만 주기적으로 폭발 여부를 체크한다 (중복 방지를 위해 트랜잭션 사용)
+  function startHostTick(){
+    if(hostTickTimer) return;
+    hostTickTimer = setInterval(()=>{
+      if(!dbRef) return;
       dbRef.transaction(room=>{
-        if(!room) return room;
-        if(room.status==='playing' && !room.winnerPid){
-          room.winnerPid = myPid;
+        if(!room || room.status!=='live') return room;
+        if(!room.explodeAt || Date.now() < room.explodeAt) return room;
+        const holder = room.currentHolderPid;
+        if(holder && room.players && room.players[holder]) room.players[holder].alive = false;
+        const aliveIds = (room.order||[]).filter(pid=>room.players[pid] && room.players[pid].alive);
+        if(aliveIds.length <= 1){
           room.status = 'finished';
+          room.winnerPid = aliveIds[0] || null;
+          room.currentHolderPid = null;
+          room.explodeAt = null;
+        } else {
+          const next = nextAliveAfter(room.order||[], room.players||{}, holder) || aliveIds[0];
+          room.currentHolderPid = next;
+          room.explodeAt = Date.now() + MIN_EXPLODE_MS + Math.floor(Math.random()*(MAX_EXPLODE_MS-MIN_EXPLODE_MS));
         }
         return room;
       });
-    }
+    }, 200);
   }
 
   function listen(){
@@ -6395,12 +6439,10 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
       renderMgPlayerGrid(playerGrid, players, myPid, {
         hostPid: room.hostPid,
         winnerPid: room.status==='finished' ? room.winnerPid : null,
+        deadFn: (p)=> room.status!=='lobby' && !p.alive,
         metaLabelFn: (p)=>{
-          if(room.status==='finished'){
-            return typeof p.solvedMs==='number' ? (p.solvedMs/1000).toFixed(2)+'초' : '미완성';
-          }
-          if(room.status==='playing') return typeof p.solvedMs==='number' ? '완성!' : '푸는 중...';
-          return p.ready ? '준비완료' : '대기중';
+          if(room.status==='lobby') return p.ready ? '준비완료' : '대기중';
+          return p.alive ? '생존' : '💥 탈락';
         }
       });
 
@@ -6409,13 +6451,13 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
       const allReady = ids.length>=2 && ids.every(pid=>players[pid].ready);
       const amt = room.agreedBet||0;
       curAgreedBet = amt;
-      const betOk = amt===0 || (ids.length>=2 && ids.every(pid=>players[pid].betAgreed));
+      const betOk = amt>0 && ids.length>=2 && ids.every(pid=>players[pid].betAgreed);
 
       if(room.status==='lobby'){
         rematchRow.style.display='none';
-        document.getElementById('puzzleReadyRow').style.display='flex';
-        btnReady.style.display = players[myPid].ready ? 'none':'inline-block';
-        btnStart.style.display = (amHost && allReady && betOk) ? 'inline-block':'none';
+        document.getElementById('bombReadyRow').style.display='flex';
+        btnReady.style.display = players[myPid].ready ? 'none' : 'inline-block';
+        btnStart.style.display = (amHost && allReady && betOk) ? 'inline-block' : 'none';
         if(betNegotiateEl) betNegotiateEl.style.display = 'block';
         if(betInfoRowEl) betInfoRowEl.style.display = 'none';
         if(amt>0){
@@ -6426,14 +6468,18 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
           else negotiateStatusEl.textContent = `누군가 ${mgCoinFmt(amt)} Coin 베팅을 제안했습니다. 동의하시겠습니까?`;
         } else {
           if(btnAgreeBet) btnAgreeBet.style.display = 'none';
-          negotiateStatusEl.textContent = '베팅 없이(무료) 진행하려면 그냥 "준비 완료"를 누르세요. 베팅하려면 금액을 제안하세요.';
+          negotiateStatusEl.textContent = '베팅금을 정하고 "제안하기"를 눌러주세요 (베팅 없이는 시작할 수 없습니다).';
         }
-        board = SOLVED.slice(); solvedSubmitted=false;
-        renderBoard();
-        resultBanner.textContent = ids.length<2 ? '2명 이상 모여야 시작할 수 있어요' : (!betOk ? '베팅금 합의가 필요해요' : (allReady ? (amHost?'모두 준비됨 · 시작 버튼을 눌러주세요':'방장이 곧 시작합니다') : '모두 "준비 완료"를 눌러주세요'));
+        bombIcon.style.transform = 'scale(1)';
+        bombHolderText.textContent = '';
+        btnPass.style.display = 'none';
+        if(shakeTimer){ clearInterval(shakeTimer); shakeTimer = null; }
+        resultBanner.textContent = ids.length<2 ? '2명 이상 모여야 시작할 수 있어요' : `${ids.length}명 참가 중 · 방장이 시작하면 무작위로 첫 소지자가 정해집니다!`;
         resultBanner.className = 'resultBanner';
         return;
       }
+
+      if(amHost) startHostTick();
 
       if(betNegotiateEl) betNegotiateEl.style.display = 'none';
       if(betInfoRowEl){
@@ -6441,34 +6487,42 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
         else betInfoRowEl.style.display='none';
       }
 
-      if(room.status==='playing'){
-        document.getElementById('puzzleReadyRow').style.display='none';
+      if(room.status==='live'){
+        document.getElementById('bombReadyRow').style.display='none';
         rematchRow.style.display='none';
-        if(room.shuffled && !window.__mgPuzzleLoadedRound !== room.roundId){
-          // 새 라운드 시작 시 1회만 보드를 로드
-        }
-        if(window.__mgPuzzleRound !== room.roundId){
-          window.__mgPuzzleRound = room.roundId;
-          window.__mgPuzzleStart = room.startedAt || Date.now();
-          board = (room.shuffled||SOLVED).slice();
-          solvedSubmitted=false;
-          renderBoard();
-        }
-        resultBanner.textContent = '가장 먼저 맞추는 사람이 승리합니다! 빈 칸 옆 타일을 클릭해 이동하세요.';
+        const holder = room.currentHolderPid;
+        const holderName = players[holder] ? players[holder].name : '???';
+        const amHolding = holder === myPid;
+        bombHolderText.textContent = amHolding ? '🔥 당신이 폭탄을 들고 있습니다! 얼른 넘기세요!' : `${mgEscape(holderName)}님이 폭탄을 들고 있습니다...`;
+        btnPass.style.display = amHolding ? 'inline-block' : 'none';
+        resultBanner.textContent = '폭탄이 터지기 전에 넘기세요! 언제 터질지는 아무도 모릅니다.';
         resultBanner.className = 'resultBanner';
+        if(!shakeTimer){
+          shakeTimer = setInterval(()=>{
+            const heldMs = Date.now() - (room.explodeAt - MAX_EXPLODE_MS); // 대략적인 경과 시간 추정(연출용)
+            const jitter = Math.min(10, 2 + heldMs/400);
+            const dx = (Math.random()*2-1)*jitter, dy = (Math.random()*2-1)*jitter;
+            bombIcon.style.transform = `translate(${dx}px,${dy}px) scale(${amHolding?1.15:1})`;
+          }, 90);
+        }
         return;
       }
+
       if(room.status==='finished'){
-        document.getElementById('puzzleReadyRow').style.display='none';
+        document.getElementById('bombReadyRow').style.display='none';
+        if(shakeTimer){ clearInterval(shakeTimer); shakeTimer = null; }
+        bombIcon.style.transform = 'scale(1)';
+        btnPass.style.display = 'none';
         const winner = players[room.winnerPid];
+        bombHolderText.textContent = '';
         if(room.winnerPid===myPid && resultBanner.dataset.roundId !== String(room.roundId)){
           resultBanner.dataset.roundId = String(room.roundId);
           if(window.burstConfetti) window.burstConfetti(30);
           if(window.Sound && window.Sound.win) window.Sound.win();
         }
-        resultBanner.textContent = winner ? `🏆 ${mgEscape(winner.name)}님이 ${(winner.solvedMs/1000).toFixed(2)}초 만에 완성해 승리했습니다!` : '결과를 집계 중입니다...';
+        resultBanner.textContent = winner ? `🏆 ${mgEscape(winner.name)}님이 최후의 생존자입니다!` : '라운드 종료';
         resultBanner.className = 'resultBanner win';
-        rematchRow.style.display='flex';
+        rematchRow.style.display = 'flex';
 
         if(processedBetRoundId !== room.roundId){
           processedBetRoundId = room.roundId;
@@ -6919,4 +6973,4 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
 })();
 </script>
 </body>
-  </html>
+</html>
