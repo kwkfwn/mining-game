@@ -1027,7 +1027,8 @@ input{font-family:inherit;}
 }
 .kkRoundBadge b{transform:rotate(-45deg);color:#fff;font-size:12px;font-weight:900;}
 .kkTimeBar{
-  position:absolute;left:0;right:0;bottom:0;height:17px;background:rgba(0,0,0,.28);
+  position:absolute;left:50%;bottom:0;height:17px;background:rgba(0,0,0,.28);
+  width:100%;transform:translateX(-50%);transition:width .3s ease;border-radius:2px;
 }
 .kkTimeBar #wcTimerFill{height:100%;width:100%;background:linear-gradient(180deg,#ffe97a,#f2cf2f);transition:width .12s linear;}
 .kkTimeBar #wcTimerFill.danger{background:linear-gradient(180deg,#ffb27a,#ef6a3b);}
@@ -1243,7 +1244,7 @@ input{font-family:inherit;}
             <button class="exMax" id="g2cMax">MAX</button>
             <button class="exGo" id="g2cGo">환전하기</button>
           </div>
-          <div class="exRate">2,000 Gold = 1 Coin</div>
+          <div class="exRate">1,000 Gold = 1 Coin</div>
         </div>
         <div class="exCard">
           <div class="exTitle">🎰 Coin → 🪙 Gold</div>
@@ -1252,7 +1253,7 @@ input{font-family:inherit;}
             <button class="exMax" id="c2gMax">MAX</button>
             <button class="exGo" id="c2gGo">환전하기</button>
           </div>
-          <div class="exRate">1 Coin = 2,000 Gold (환전 수수료 5% 적용 → 실수령 1,900 Gold)</div>
+          <div class="exRate">1 Coin = 1,000 Gold (환전 수수료 5% 적용 → 실수령 950 Gold)</div>
         </div>
       </div>
       <div class="resultBanner" id="exResult">원하는 만큼 환전해서 미니 게임을 즐겨보세요. Coin → Gold 환전에는 5% 수수료가 붙습니다.</div>
@@ -2930,7 +2931,7 @@ if (btnDouble) {
             <div class="kkPrevWord" id="wcPrevWord"></div>
             <div id="wcBoardWord" class="small">준비 중</div>
           </div>
-          <div class="kkTimeBar">
+          <div class="kkTimeBar" id="wcTimeBarTrack">
             <div id="wcTimerFill" style="width:100%;"></div>
             <span class="kkTimeText" id="wcTimerText">0.0초</span>
           </div>
@@ -3191,7 +3192,7 @@ const SLOT_SYMS = [
   {sym:'7',  weight:0.5,  pay3:80, pay4:150, pay5:2000, seven:true},
 ];
 
-const RATE = 2000; // 1 coin = 2000 gold
+const RATE = 1000; // 1 coin = 1000 gold
 const EXCHANGE_FEE = 0.05; // Coin → Gold 환전 수수료 5%
 
 /* ============================ STATE ============================ */
@@ -6893,7 +6894,7 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
   const proposeInput = $('wcProposeInput'), negotiateStatusEl = $('wcNegotiateStatus');
   const btnProposeBet = $('btnWcProposeBet'), btnAgreeBet = $('btnWcAgreeBet');
   const btnProposePlus10 = $('btnWcProposePlus10'), btnProposePlus100 = $('btnWcProposePlus100');
-  const logEl = $('wcLog'), timerFill = $('wcTimerFill'), timerTextEl = $('wcTimerText');
+  const logEl = $('wcLog'), timerFill = $('wcTimerFill'), timerTextEl = $('wcTimerText'), timeBarTrackEl = $('wcTimeBarTrack');
   const inputRow = $('wcInputRow'), wordInput = $('wcWordInput'), btnSubmit = $('wcSubmit');
   const resultBanner = $('wcResult'), rematchRow = $('wcRematchRow'), btnRematch = $('btnWcRematch');
   const boardWordEl = $('wcBoardWord'), prevWordEl = $('wcPrevWord'), chainCountEl = $('wcChainCount');
@@ -6907,10 +6908,11 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
   const DEFAULT_SETTINGS = { rounds:3, roundMs:90000, turnMs:12000 };
   const MIN_PENALTY = 100;        // 최소 감점
   const PENALTY_THRESHOLD = 200;  // 이 점수 미만이면 50% 대신 최소 감점 적용
+  const PREP_MS = 3000;           // 라운드 사이 준비 시간
   let roomId=null, dbRef=null, myPid=mgPid(), timerInterval=null, curRoom=null;
   let curAgreedBet = 0, processedBetRoundId = null, localMsg = '', localMsgAt = 0;
 
-  /* ---------- 서버 시간 동기화 (모든 참가자가 같은 시계를 쓰도록) ---------- */
+  /* ---------- 서버 시간 동기화 ---------- */
   let srvOffset = 0;
   try{
     if(typeof database !== 'undefined' && database){
@@ -6966,6 +6968,12 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
     const rs = roundScore||0;
     return rs < PENALTY_THRESHOLD ? MIN_PENALTY : Math.ceil(rs/2);
   }
+  // 이번 턴에 실제로 주어지는 시간 = min(설정된 턴 제한시간, 라운드 남은 시간)
+  // → 라운드 시간이 줄어들수록 턴 제한시간도 함께 짧아진다.
+  function turnAllotFor(room, st, now){
+    const remainRound = Math.max(0, (room.roundEndsAt||0) - now);
+    return Math.max(0, Math.min(st.turnMs, remainRound));
+  }
 
   /* ---------- 방 입퇴장 ---------- */
   function leaveRoom(silent){
@@ -6998,8 +7006,8 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
       roomId = id; dbRef = ref;
       const players = {}; players[myPid] = freshPlayer();
       dbRef.set({ status:'lobby', hostPid:myPid, players, winnerPid:null, roundId:0, agreedBet:0,
-        settings:{...DEFAULT_SETTINGS}, round:0, roundEndsAt:null, curChar:null,
-        usedWords:{}, history:[], turnOrder:null, turnIdx:0, turnDeadline:null, lastWord:null, lastScorerPid:null }).then(()=>{
+        settings:{...DEFAULT_SETTINGS}, round:0, roundEndsAt:null, prepEndsAt:null, nextTurnIdx:null, curChar:null,
+        usedWords:{}, history:[], turnOrder:null, turnIdx:0, turnDeadline:null, turnAllotted:null, lastWord:null, lastScorerPid:null }).then(()=>{
         dbRef.onDisconnect().remove();
         window.__mpActiveRoom = {pane:'wordchain'};
         statusDiv.innerHTML = `🏠 방 생성 완료! 방 번호: <b>${mgEscape(id)}</b>`;
@@ -7078,14 +7086,17 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
       for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; }
       const st = settingsOf(room);
       ids.forEach(pid=>{ room.players[pid].score=0; room.players[pid].roundScore=0; room.players[pid].lastGain=0; });
+      const now = wcNow();
       room.status='playing';
       room.round = 1;
-      room.turnOrder = order; room.turnIdx = 0;
+      room.turnOrder = order; room.turnIdx = 0; room.nextTurnIdx = null;
       room.usedWords = {}; room.lastWord = null; room.curChar = firstChar;
       room.lastScorerPid = null;
       room.history = [{ sys:true, text:`🎬 1 라운드 시작! 시작 글자는 "${firstChar}" 입니다.` }];
-      room.roundEndsAt = wcNow() + st.roundMs;
-      room.turnDeadline = wcNow() + st.turnMs;
+      room.roundEndsAt = now + st.roundMs;
+      room.prepEndsAt = null;
+      room.turnAllotted = Math.min(st.turnMs, st.roundMs);
+      room.turnDeadline = now + room.turnAllotted;
       return room;
     });
   };
@@ -7094,7 +7105,8 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
     dbRef.transaction(room=>{
       if(!room || room.status!=='finished') return room;
       room.status='lobby'; room.winnerPid=null; room.roundId=(room.roundId||0)+1;
-      room.round=0; room.roundEndsAt=null; room.curChar=null; room.lastScorerPid=null;
+      room.round=0; room.roundEndsAt=null; room.prepEndsAt=null; room.nextTurnIdx=null;
+      room.curChar=null; room.lastScorerPid=null; room.turnAllotted=null;
       room.usedWords={}; room.history=[]; room.turnOrder=null; room.turnIdx=0; room.turnDeadline=null; room.lastWord=null;
       Object.keys(room.players||{}).forEach(pid=>{
         const p=room.players[pid]; p.ready=false; p.betAgreed=false; p.score=0; p.roundScore=0; p.lastGain=0;
@@ -7121,7 +7133,8 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
     const check = submitWord(word, { usedWordsSet: curRoom.usedWords||{}, lastWordValue: prev, commit:false });
     if(!check.ok){ flashError(check.reason); wordInput.select(); return; }   // 오답은 감점 없음 · 재시도 가능
     const st = settingsOf(curRoom);
-    const remainRatio = curRoom.turnDeadline ? Math.max(0, Math.min(1, (curRoom.turnDeadline - wcNow())/st.turnMs)) : 0;
+    const allotted = curRoom.turnAllotted || st.turnMs;
+    const remainRatio = curRoom.turnDeadline ? Math.max(0, Math.min(1, (curRoom.turnDeadline - wcNow())/Math.max(1,allotted))) : 0;
     wordInput.value='';
     dbRef.transaction(room=>{
       if(!room || room.status!=='playing') return room;
@@ -7142,18 +7155,22 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
       room.history = room.history||[];
       room.history.push({ pid:myPid, name:p.name, word:word, ok:true, pts:sc.total, speed:sc.speed });
       const settings = settingsOf(room);
+      const now = wcNow();
       room.turnIdx = (room.turnIdx+1) % ord.length;
-      room.turnDeadline = wcNow() + settings.turnMs;
+      room.turnAllotted = turnAllotFor(room, settings, now);   // 남은 라운드 시간에 맞춰 다음 턴 시간 재계산(점점 짧아짐)
+      room.turnDeadline = now + room.turnAllotted;
       return room;
     });
   }
   if(btnSubmit) btnSubmit.onclick = handleSubmitClick;
   if(wordInput) wordInput.addEventListener('keydown', e=>{ if(e.key==='Enter') handleSubmitClick(); });
 
-  /* ---------- 호스트 진행 ---------- */
+  /* ---------- 호스트 진행: 턴 타임아웃 = 라운드 종료 트리거 ---------- */
+  // 라운드는 "누군가 타임아웃으로 탈락"하거나(턴 제한시간이 라운드 잔여시간에 맞춰 계속 짧아지다 결국 0에 수렴)
+  // "라운드 전체 시간이 0초가 되는" 바로 그 순간 함께 종료된다 (턴 데드라인이 항상 라운드 종료시각을 넘지 않도록
+  // 캡핑되어 있으므로, 두 조건은 실질적으로 같은 이벤트로 처리된다).
   function hostHandleTurnTimeout(){
     if(!dbRef) return;
-    const newChar = pickStartChar();
     dbRef.transaction(room=>{
       if(!room || room.status!=='playing') return room;
       if(!room.turnDeadline || wcNow() < room.turnDeadline) return room;
@@ -7166,19 +7183,26 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
         Object.keys(room.players||{}).forEach(id=>{
           const q=room.players[id]; q.score=(q.score||0)+(q.roundScore||0); q.roundScore=0; q.lastGain=0;
         });
-        room.status='finished'; room.turnDeadline=null; room.roundEndsAt=null;
+        room.status='finished'; room.turnDeadline=null; room.roundEndsAt=null; room.prepEndsAt=null;
         room.winnerPid = ord[0] || null;
         room.history = room.history||[];
         room.history.push({ sys:true, text:'⚠️ 참가자가 부족해 게임이 종료되었습니다.' });
         return room;
       }
+
+      const st = settingsOf(room);
       const idx = room.turnIdx % ord.length;
       const pid = ord[idx];
       const p = room.players && room.players[pid];
-      const st = settingsOf(room);
-      if(!p){ room.turnIdx=(idx+1)%ord.length; room.turnDeadline=wcNow()+st.turnMs; return room; }
+      if(!p){
+        const now = wcNow();
+        room.turnIdx = (idx+1)%ord.length;
+        room.turnAllotted = turnAllotFor(room, st, now);
+        room.turnDeadline = now + room.turnAllotted;
+        return room;
+      }
 
-      // 감점: 라운드 점수가 200점 미만이면 최소 감점 100점, 아니면 절반(올림) · 음수 허용
+      // 감점: 라운드 점수가 200점 미만이면 최소 100점, 아니면 절반(올림) 차감 · 마이너스 허용
       const cut = penaltyFor(p.roundScore||0);
       p.roundScore = (p.roundScore||0) - cut;
       p.lastGain = -cut;
@@ -7186,47 +7210,64 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
       room.history = room.history||[];
       room.history.push({ pid, name:p.name, word:'(시간 초과)', ok:false, reason:`-${cut}점`, pts:-cut });
 
-      // 체인 리셋: 새 제시어는 방금 죽은 사람이 그대로 받아 다시 시작
-      room.lastWord = null;
-      room.curChar = newChar;
-      room.turnIdx = idx;                       // 턴 유지 = 죽은 사람부터 재시작
-      room.turnDeadline = wcNow() + st.turnMs;
-      room.history.push({ sys:true, text:`🔄 ${p.name}님이 새 제시어 "${newChar}"(으)로 다시 시작합니다.` });
-      return room;
-    });
-  }
-  function hostHandleRoundEnd(){
-    if(!dbRef) return;
-    const newChar = pickStartChar();
-    dbRef.transaction(room=>{
-      if(!room || room.status!=='playing') return room;
-      if(!room.roundEndsAt || wcNow() < room.roundEndsAt) return room;
-      const st = settingsOf(room);
-      room.turnOrder = (room.turnOrder||[]).filter(id=>room.players && room.players[id]);
-      if(room.turnOrder.length===0) room.turnOrder = Object.keys(room.players||{});
-      if(room.turnIdx >= room.turnOrder.length) room.turnIdx = 0;
+      // 라운드 종료: 모든 참가자의 라운드 점수를 누적 점수에 합산(음수 포함)
       const ids = Object.keys(room.players||{});
-      ids.forEach(pid=>{
-        const p = room.players[pid];
-        p.score = (p.score||0) + (p.roundScore||0);   // 음수도 그대로 누적
-        p.roundScore = 0; p.lastGain = 0;
+      ids.forEach(qid=>{
+        const q = room.players[qid];
+        q.score = (q.score||0) + (q.roundScore||0);
+        q.roundScore = 0;
       });
-      room.history = room.history||[];
-      room.lastScorerPid = null;
+      room.history.push({ sys:true, text:`⏱️ ${p.name}님이 시간 초과! ${room.round||1}라운드가 종료되었습니다.` });
+
       if((room.round||1) >= st.rounds){
-        room.status='finished'; room.turnDeadline=null; room.roundEndsAt=null;
+        room.status='finished';
+        room.turnDeadline=null; room.roundEndsAt=null; room.prepEndsAt=null; room.turnAllotted=null;
         let best=null;
-        ids.forEach(pid=>{ if(best===null || (room.players[pid].score||0) > (room.players[best].score||0)) best=pid; });
+        ids.forEach(qid=>{ if(best===null || (room.players[qid].score||0) > (room.players[best].score||0)) best=qid; });
         room.winnerPid = best;
         room.history.push({ sys:true, text:`🏁 모든 라운드 종료! 최종 우승자는 ${room.players[best]?room.players[best].name:'-'}님입니다.` });
       } else {
-        room.round = (room.round||1)+1;
-        room.usedWords = {}; room.lastWord = null; room.curChar = newChar;
-        room.turnIdx = (room.turnIdx+1) % room.turnOrder.length;
-        room.roundEndsAt = wcNow() + st.roundMs;
-        room.turnDeadline = wcNow() + st.turnMs;
-        room.history.push({ sys:true, text:`🎬 ${room.round} 라운드 시작! 시작 글자는 "${newChar}" 입니다.` });
+        // 즉시 다음 라운드로 넘어가지 않고, 짧은 준비 시간을 준다
+        room.status = 'prep';
+        room.turnDeadline = null; room.roundEndsAt = null; room.turnAllotted = null;
+        room.nextTurnIdx = (idx+1) % ord.length;
+        room.prepEndsAt = wcNow() + PREP_MS;
+        room.history.push({ sys:true, text:`⏳ 잠시 후 ${(room.round||1)+1}라운드가 시작됩니다...` });
       }
+      return room;
+    });
+  }
+
+  /* ---------- 호스트 진행: 준비시간 종료 → 다음 라운드 시작 (라운드 시간 초기화) ---------- */
+  function hostHandlePrepEnd(){
+    if(!dbRef) return;
+    const newChar = pickStartChar();
+    dbRef.transaction(room=>{
+      if(!room || room.status!=='prep') return room;
+      if(!room.prepEndsAt || wcNow() < room.prepEndsAt) return room;
+      const st = settingsOf(room);
+      room.turnOrder = (room.turnOrder||[]).filter(id=>room.players && room.players[id]);
+      if(room.turnOrder.length < 2){
+        room.status='finished'; room.prepEndsAt=null;
+        room.winnerPid = room.turnOrder[0] || null;
+        room.history = room.history||[];
+        room.history.push({ sys:true, text:'⚠️ 참가자가 부족해 게임이 종료되었습니다.' });
+        return room;
+      }
+      let idx = (room.nextTurnIdx!=null) ? room.nextTurnIdx : 0;
+      if(idx >= room.turnOrder.length) idx = 0;
+      const now = wcNow();
+      room.round = (room.round||1) + 1;
+      room.usedWords = {}; room.lastWord = null; room.curChar = newChar;
+      room.turnIdx = idx; room.nextTurnIdx = null;
+      room.status = 'playing';
+      room.prepEndsAt = null;
+      room.lastScorerPid = null;
+      room.roundEndsAt = now + st.roundMs;               // 라운드 시간 초기화
+      room.turnAllotted = Math.min(st.turnMs, st.roundMs);
+      room.turnDeadline = now + room.turnAllotted;
+      room.history = room.history||[];
+      room.history.push({ sys:true, text:`🎬 ${room.round} 라운드 시작! 시작 글자는 "${newChar}" 입니다.` });
       return room;
     });
   }
@@ -7265,6 +7306,7 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
       const v = (players[pid].score||0)+(players[pid].roundScore||0);
       if(v>leadVal){ leadVal=v; leadPid=pid; }
     });
+    const showGainStatuses = (room.status==='playing' || room.status==='prep');
     playerGrid.className = 'mpPlayerGrid kkPlayers';
     playerGrid.innerHTML = '';
     const order = [];
@@ -7279,12 +7321,12 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
       if(pid===curPid) cls+=' turn';
       if(total<0) cls+=' neg';
       if(room.status==='finished' && room.winnerPid===pid) cls+=' winner';
-      const gain = (room.lastScorerPid===pid && (p.lastGain||0)!==0 && room.status==='playing')
+      const gain = (room.lastScorerPid===pid && (p.lastGain||0)!==0 && showGainStatuses)
         ? `<div class="kkPGain${p.lastGain<0?' minus':''}">${p.lastGain>0?'+':''}${p.lastGain}</div>` : '';
       const ready = room.status==='lobby' ? `<div class="kkPReady">${p.ready?'✅':'⌛'}</div>` : '';
       const rs = p.roundScore||0;
       const pct = Math.max(0, Math.min(100, (rs/goal)*100));
-      const lead = (room.status!=='lobby' && pid===leadPid && Object.keys(players).length>1) ? `<div class="kkPLead">🔥 선두</div>` : '';
+      const lead = (room.status==='playing' && pid===leadPid && Object.keys(players).length>1) ? `<div class="kkPLead">🔥 선두</div>` : '';
       const card = document.createElement('div');
       card.className = cls;
       card.innerHTML =
@@ -7299,48 +7341,12 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
     });
   }
 
-  function renderBoard(room){
-    const players = room.players||{};
-    const st = settingsOf(room);
+  function renderBoardCommon(room){
+    if(roomTagEl) roomTagEl.textContent = `[${roomId||'--'}] 끝말잇기 방`;
+    if(roomMetaEl) roomMetaEl.textContent = `참여자 ${Object.keys(room.players||{}).length} / 8`;
+    if(roundBadgeEl) roundBadgeEl.textContent = room.round||0;
     const chain = (room.history||[]).filter(h=>h.ok).length;
     if(chainCountEl) chainCountEl.textContent = chain;
-    if(roomTagEl) roomTagEl.textContent = `[${roomId||'--'}] 끝말잇기 방`;
-    if(roomMetaEl) roomMetaEl.textContent = `참여자 ${Object.keys(players).length} / 8`;
-    if(roundBadgeEl) roundBadgeEl.textContent = room.round||0;
-    if(roundTagEl) roundTagEl.textContent = room.status==='lobby'
-      ? `${st.rounds}라운드 · ${st.roundMs/1000}초 · 턴 ${st.turnMs/1000}초`
-      : `라운드 ${room.round||0} / ${st.rounds}`;
-
-    const rc = reqChar(room);
-    if(boardWordEl){
-      if(room.status==='lobby'){ boardWordEl.className='small'; boardWordEl.textContent='게임 준비 중'; }
-      else if(room.status==='finished'){ boardWordEl.className='small'; boardWordEl.textContent='게임 종료'; }
-      else { boardWordEl.className=''; boardWordEl.textContent = rc || '?'; }
-    }
-    if(prevWordEl) prevWordEl.textContent = (room.status==='playing' && room.lastWord) ? `직전 단어 · ${room.lastWord}` : '';
-    if(startDiscEl){
-      startDiscEl.textContent = room.status==='playing' ? (rc||'-') : '-';
-      startDiscEl.title = room.status==='playing' ? `가능한 시작 글자: ${startTextOf(room)}` : '';
-    }
-
-    const curPid = (room.status==='playing') ? (room.turnOrder||[])[room.turnIdx] : null;
-    if(turnPillEl){
-      if(room.status==='playing'){
-        const mine = curPid===myPid;
-        turnPillEl.textContent = mine ? '내 차례!' : `${(players[curPid]||{}).name||'상대'} 님의 차례`;
-        turnPillEl.className = mine ? '' : 'other';
-      } else {
-        turnPillEl.textContent = room.status==='finished' ? '게임 종료' : '대기 중';
-        turnPillEl.className = 'other';
-      }
-    }
-    if(inputRow) inputRow.classList.toggle('off', !(room.status==='playing' && curPid===myPid));
-
-    const me = players[myPid]||{};
-    const goal = goalOf(players);
-    const myRound = Math.round(me.roundScore||0);
-    if(gaugeFillEl) gaugeFillEl.style.width = Math.max(0, Math.min(100,(myRound/goal)*100)) + '%';
-    if(gaugeTextEl) gaugeTextEl.textContent = `${myRound} / ${goal}`;
   }
 
   /* ---------- 구독 ---------- */
@@ -7363,7 +7369,7 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
       const betOk = amt===0 || (ids.length>=2 && ids.every(pid=>players[pid].betAgreed));
 
       renderPlayers(room);
-      renderBoard(room);
+      renderBoardCommon(room);
       clearInterval(timerInterval);
 
       if(settingsBox){
@@ -7373,8 +7379,8 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
         if(document.activeElement!==setRoundSecEl) setRoundSecEl.value = String(st.roundMs/1000);
         if(document.activeElement!==setTurnSecEl) setTurnSecEl.value = String(st.turnMs/1000);
         if(settingsHint) settingsHint.textContent = amHost
-          ? '라운드마다 시작 글자가 자동으로 하나 주어집니다. 자유롭게 설정을 바꿔보세요.'
-          : `방장이 설정한 규칙: ${st.rounds}라운드 · 라운드당 ${st.roundMs/1000}초 · 턴 ${st.turnMs/1000}초`;
+          ? '라운드마다 시작 글자가 자동으로 하나 주어집니다. 라운드 시간이 줄어들수록 턴 제한시간도 함께 짧아져요.'
+          : `방장이 설정한 규칙: ${st.rounds}라운드 · 라운드당 ${st.roundMs/1000}초 · 턴 최대 ${st.turnMs/1000}초`;
       }
 
       /* --- 대기실 --- */
@@ -7397,9 +7403,16 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
           negotiateStatusEl.textContent = '베팅 없이(무료) 진행하려면 그냥 "준비 완료"를 누르세요. 베팅하려면 금액을 제안하세요.';
         }
         renderLog(room.history);
+        if(timeBarTrackEl) timeBarTrackEl.style.width='100%';
         timerFill.style.width='100%'; timerFill.classList.remove('danger');
         if(timerTextEl) timerTextEl.textContent = (st.turnMs/1000).toFixed(1)+'초';
         if(roundDiscEl) roundDiscEl.innerHTML = `${st.roundMs/1000}<small>초</small>`;
+        if(boardWordEl){ boardWordEl.className='small'; boardWordEl.textContent='게임 준비 중'; }
+        if(prevWordEl) prevWordEl.textContent='';
+        if(startDiscEl) startDiscEl.textContent='-';
+        if(turnPillEl){ turnPillEl.textContent='대기 중'; turnPillEl.className='other'; }
+        if(gaugeFillEl) gaugeFillEl.style.width='0%';
+        if(gaugeTextEl) gaugeTextEl.textContent='0 / 100';
         resultBanner.textContent = ids.length<2 ? '2명 이상 모여야 시작할 수 있어요'
           : (!betOk ? '베팅금 합의가 필요해요'
           : (allReady ? (amHost?'모두 준비됨 · 시작 버튼을 눌러주세요':'방장이 곧 시작합니다') : '모두 "준비 완료"를 눌러주세요'));
@@ -7413,6 +7426,38 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
         else betInfoRowEl.style.display='none';
       }
 
+      /* --- 라운드 사이 준비 시간 --- */
+      if(room.status==='prep'){
+        $('wcReadyRow').style.display='none';
+        rematchRow.style.display='none';
+        inputRow.style.display='flex';
+        wordInput.disabled = true; btnSubmit.disabled = true;
+        wordInput.placeholder = '다음 라운드 준비 중...';
+        if(inputRow) inputRow.classList.add('off');
+        renderLog(room.history);
+        if(boardWordEl){ boardWordEl.className='small'; boardWordEl.textContent='다음 라운드 준비 중'; }
+        if(prevWordEl) prevWordEl.textContent='';
+        if(startDiscEl) startDiscEl.textContent='-';
+        if(turnPillEl){ turnPillEl.textContent='라운드 종료'; turnPillEl.className='other'; }
+        if(timeBarTrackEl) timeBarTrackEl.style.width='100%';
+        timerFill.classList.remove('danger');
+
+        function tickPrep(){
+          const now = wcNow();
+          const remain = Math.max(0, (room.prepEndsAt||0) - now);
+          const pct = Math.max(0, Math.min(100, (remain/PREP_MS)*100));
+          timerFill.style.width = pct+'%';
+          if(timerTextEl) timerTextEl.textContent = (remain/1000).toFixed(1)+'초';
+          if(roundDiscEl) roundDiscEl.innerHTML = `${(remain/1000).toFixed(1)}<small>초 후</small>`;
+          if(amHost && remain<=0) hostHandlePrepEnd();
+        }
+        tickPrep();
+        timerInterval = setInterval(tickPrep, 100);
+        resultBanner.textContent = `⏳ ${(room.round||1)+1}라운드를 준비하고 있어요...`;
+        resultBanner.className='resultBanner';
+        return;
+      }
+
       /* --- 진행 중 --- */
       if(room.status==='playing'){
         $('wcReadyRow').style.display='none';
@@ -7424,7 +7469,34 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
         wordInput.disabled = !myTurn;
         btnSubmit.disabled = !myTurn;
         wordInput.placeholder = myTurn ? '단어를 입력하세요' : '다른 참가자의 차례입니다';
+        if(inputRow) inputRow.classList.toggle('off', !myTurn);
         if(myTurn) wordInput.focus();
+
+        // 시작 글자/직전단어/차례 표시
+        const rc = reqChar(room);
+        if(boardWordEl){ boardWordEl.className=''; boardWordEl.textContent = rc || '?'; }
+        if(prevWordEl) prevWordEl.textContent = room.lastWord ? `직전 단어 · ${room.lastWord}` : '';
+        if(startDiscEl){
+          startDiscEl.textContent = rc || '-';
+          startDiscEl.title = `가능한 시작 글자: ${startTextOf(room)}`;
+        }
+        if(turnPillEl){
+          const mine = myTurn;
+          turnPillEl.textContent = mine ? '내 차례!' : `${(players[curPid]||{}).name||'상대'} 님의 차례`;
+          turnPillEl.className = mine ? '' : 'other';
+        }
+        const me = players[myPid]||{};
+        const goal = goalOf(players);
+        const myRound = Math.round(me.roundScore||0);
+        if(gaugeFillEl) gaugeFillEl.style.width = Math.max(0, Math.min(100,(myRound/goal)*100)) + '%';
+        if(gaugeTextEl) gaugeTextEl.textContent = `${myRound} / ${goal}`;
+
+        // 현재 턴에 허용된 시간(라운드 잔여시간에 의해 캡핑됨) 기준으로 타이머 트랙 너비를 줄인다
+        const allotted = room.turnAllotted || st.turnMs;
+        if(timeBarTrackEl){
+          const ratio = Math.max(0.1, Math.min(1, allotted/st.turnMs));
+          timeBarTrackEl.style.width = (ratio*100)+'%';
+        }
 
         if(!(localMsg && wcNow()-localMsgAt < 1600)){
           const need = `"${startTextOf(room)}"(으)로 시작하는 단어`;
@@ -7438,7 +7510,7 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
           const t = wcNow();
           if(room.turnDeadline){
             const remain = room.turnDeadline - t;
-            const pct = Math.max(0, Math.min(100, (remain/st.turnMs)*100));
+            const pct = Math.max(0, Math.min(100, (remain/Math.max(1,allotted))*100));
             timerFill.style.width = pct+'%';
             timerFill.classList.toggle('danger', pct<30);
             if(timerTextEl) timerTextEl.textContent = (Math.max(0,remain)/1000).toFixed(1)+'초';
@@ -7447,10 +7519,7 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
             const r = Math.max(0, room.roundEndsAt - t)/1000;
             roundDiscEl.innerHTML = `${Math.floor(r)}<small>.${Math.floor((r%1)*10)}초</small>`;
           }
-          if(amHost){
-            if(room.roundEndsAt && t >= room.roundEndsAt) hostHandleRoundEnd();
-            else if(room.turnDeadline && t >= room.turnDeadline) hostHandleTurnTimeout();
-          }
+          if(amHost && room.turnDeadline && t >= room.turnDeadline) hostHandleTurnTimeout();
         }
         tick();
         timerInterval = setInterval(tick, 100);
@@ -7463,8 +7532,11 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
         inputRow.style.display='none';
         renderLog(room.history);
         timerFill.style.width='0%';
+        if(timeBarTrackEl) timeBarTrackEl.style.width='100%';
         if(timerTextEl) timerTextEl.textContent='0.0초';
         if(roundDiscEl) roundDiscEl.innerHTML = `0<small>초</small>`;
+        if(boardWordEl){ boardWordEl.className='small'; boardWordEl.textContent='게임 종료'; }
+        if(turnPillEl){ turnPillEl.textContent='게임 종료'; turnPillEl.className='other'; }
         const winner = players[room.winnerPid];
         if(room.winnerPid===myPid && resultBanner.dataset.roundId !== String(room.roundId)){
           resultBanner.dataset.roundId = String(room.roundId);
@@ -7500,4 +7572,4 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
 })();
 </script>
 </body>
-</html>
+  </html>
