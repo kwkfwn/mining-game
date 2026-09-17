@@ -6543,55 +6543,95 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
 })();
 
 /* ============================================================================
-   3) 끝말잇기 (wordchainRooms/{roomId}) — 순서대로 진행, 라이프제, 내장 사전
+   끝말잇기 코어 모듈 (끄투코리아 스타일) — 독립 함수/변수형
+   - 대용량 단어장을 /words.txt 에서 비동기로 불러와 Set에 담아 O(1) 조회
+   - 두음법칙(ㄹ→ㄴ/ㅇ, ㄴ→ㅇ) 계산 포함
+   - 2글자 이상 제한, 중복 단어 차단(usedWords Set), 사전 등재 여부 체크
+   - initWordChain(), submitWord(input) 형태로 다른 파일에도 그대로 이식 가능
 ============================================================================ */
-(function wordChainGame(){
-  // 내장 단어 사전: 명사 위주, 끝말잇기 연결성이 좋은 단어 위주로 선정.
-  // ※ 참고: 실제 사전(수십만 단어) 전체를 담은 것이 아니라 자주 쓰이는 단어를 모은 목록입니다.
-  //   필요하면 이 배열에 단어를 자유롭게 추가해 사전을 넓힐 수 있습니다.
-  const WORD_DICT = [
-    "가방","가족","가수","가을","가위","각도","간식","간장","갈매기","감기","감자","강아지","강물","개미","거북이","거울",
-    "건물","걸음","검사","게임","겨울","결과","경찰","계란","계절","고구마","고양이","고추","공기","공원","공책","과일",
-    "과자","교실","교육","구름","국가","국수","군인","궁전","귀걸이","규칙","그림","그릇","극장","금요일","기린","기억",
-    "기차","기타","길이","김치","까마귀","깃발","꽃병","꿈나라","나라","나무","나비","낙엽","낙타","날씨","날개","남자",
-    "낮잠","냄비","냉장고","넥타이","노래","노트","녹차","농구","눈사람","눈썹","느낌","능력","다리미","다람쥐","단어",
-    "달력","달팽이","닭고기","당근","대나무","대통령","도서관","도시","도토리","독수리","돌고래","동생","동화","두부",
-    "드라마","등대","딸기","땅콩","라디오","라면","레몬","리본","마늘","마당","마술","만두","말씀","망원경","매미",
-    "메뚜기","명절","모래","모자","목걸이","목도리","목요일","몸무게","무지개","문화","물고기","물감","물건","미술관",
-    "바구니","바나나","바다","바람","바지","박물관","반지","발가락","발레","밤하늘","방울","배구","배추","백조","버섯",
-    "번개","벌레","베개","병아리","보름달","보리","복숭아","봄바람","부엉이","분수","불고기","비둘기","비행기","빙수",
-    "사과","사자","사진기","산책","살구","삼겹살","상자","새우","생일","생쥐","서랍","선생님","설탕","섬마을","세탁기",
-    "소나무","소방차","소풍","손가락","손수건","수박","수영장","수첩","숙제","순록","숲속","스웨터","시계","시금치",
-    "식당","신문","신발","신호등","실험실","심부름","아기","아침","안경","알람","암소","앵무새","야구","약속","양말",
-    "양파","어린이","언덕","얼음","여름","여행","연필","연못","염소","영화관","오렌지","오리","오후","옥수수","온도계",
-    "완두콩","요리사","우산","우체국","우표","운동장","원숭이","월요일","유리창","유치원","음식점","음악회","의자",
-    "이불","이야기","인형","일요일","자동차","자전거","잠자리","장미꽃","장난감","저녁","전화기","젓가락","정원",
-    "제비꽃","조개","조약돌","종이컵","주말","주사위","주스","줄넘기","지구본","지도","지붕","지우개","진달래","진주",
-    "짜장면","참새","창문","책상","책가방","천둥","청소기","초콜릿","축구공","치약","치즈","침대","카메라","커튼",
-    "코끼리","코스모스","크레용","킹콩","타조","탁자","탐정","태양계","택시","토마토","토끼","통나무","파도","파란색",
-    "파리채","팔찌","편지지","포도","포크","풍선","피아노","하늘색","하마","학교","한여름","할머니","할아버지","해바라기",
-    "해수욕장","햄버거","향수","허수아비","헬리콥터","호랑이","호수","화분","화요일","화살표","화장실","환경","황소",
-    "회의실","횡단보도","후추","훈련소","휴가","흑곰","흙탕물","희망찬","기와집","림프구","롤러코스터","루비","리모컨",
-    "무궁화","비타민","지팡이","치킨집","카드놀이","타일","파인애플","하모니카","야채수프","고등어","넝쿨","도넛",
-    "라일락","마카롱","바이올린","사다리","아이스크림","자석","칫솔","콩나물","탱크","파스타","호떡","가로등","나침반",
-    "다육식물","마라톤","바닷가재","사탕수수","아보카도","자몽","초인종","카레라이스","탄산수","파프리카","해파리"
-  ];
-  const WORD_SET = new Set(WORD_DICT);
-  // 두음법칙 허용 매핑: 단어 끝 음절 → 다음 단어가 시작할 수 있는 대체 음절
-  const DUEUM_MAP = {
-    "라":["나","라"],"락":["낙","락"],"란":["난","란"],"람":["남","람"],"랑":["낭","랑"],"래":["내","래"],
-    "량":["양","량"],"력":["역","력"],"련":["연","련"],"렬":["열","렬"],"렵":["엽","렵"],"령":["영","령"],
-    "례":["예","례"],"로":["노","로"],"록":["녹","록"],"론":["논","론"],"롱":["농","롱"],"뢰":["뇌","뢰"],
-    "료":["요","료"],"룡":["용","룡"],"루":["누","루"],"류":["유","류"],"륙":["육","륙"],"률":["율","률"],
-    "륭":["융","륭"],"르":["느","르"],"른":["는","른"],"름":["늠","름"],"릉":["능","릉"],"리":["이","리"],
-    "린":["인","린"],"림":["임","림"],"립":["입","립"]
-  };
-  function possibleStartSyllables(lastSyllable){
-    const opts = new Set([lastSyllable]);
-    if(DUEUM_MAP[lastSyllable]) DUEUM_MAP[lastSyllable].forEach(s=>opts.add(s));
-    return opts;
+let WC_WORD_SET = new Set();     // 단어장 전체 (Set 구조 → 수만 개도 즉시 조회)
+let wcReady = false;             // 단어장 로드 완료 여부
+const wcUsedWords = new Set();   // (싱글/테스트용) 이번 판에서 이미 쓰인 단어
+let wcLastWord = '';             // (싱글/테스트용) 직전에 제출된 단어
+
+// 1) 대용량 단어장 비동기 로드: /words.txt → Set
+//    words.txt 형식: 한 줄에 단어 하나씩 (줄바꿈으로 구분된 일반 텍스트)
+async function initWordChain(){
+  try{
+    const res = await fetch('/words.txt');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const list = text.split(/\r?\n/).map(w => w.trim()).filter(Boolean);
+    WC_WORD_SET = new Set(list);
+    wcReady = true;
+    console.log(`[끝말잇기] 단어장 ${WC_WORD_SET.size.toLocaleString()}개 로드 완료`);
+  }catch(err){
+    console.error('[끝말잇기] /words.txt 로드 실패:', err);
+    wcReady = false;
+  }
+  return wcReady;
+}
+
+// 2) 두음법칙: 이전 단어의 마지막 글자 → 다음 단어가 시작할 수 있는 글자 집합
+//    ㄹ→ㄴ/ㅇ (라→나/라, 로→노/로, 리→이/리 …) + ㄴ→ㅇ (냐→야, 녀→여, 니→이 …)
+const WC_DUEUM_MAP = {
+  "라":["나","라"],"락":["낙","락"],"란":["난","란"],"람":["남","람"],"랑":["낭","랑"],"래":["내","래"],
+  "량":["양","량"],"력":["역","력"],"련":["연","련"],"렬":["열","렬"],"렵":["엽","렵"],"령":["영","령"],
+  "례":["예","례"],"로":["노","로"],"록":["녹","록"],"론":["논","론"],"롱":["농","롱"],"뢰":["뇌","뢰"],
+  "료":["요","료"],"룡":["용","룡"],"루":["누","루"],"류":["유","류"],"륙":["육","륙"],"률":["율","률"],
+  "륭":["융","륭"],"르":["느","르"],"른":["는","른"],"름":["늠","름"],"릉":["능","릉"],"리":["이","리"],
+  "린":["인","린"],"림":["임","림"],"립":["입","립"],
+  "냐":["야","냐"],"녀":["여","녀"],"뇨":["요","뇨"],"뉴":["유","뉴"],"니":["이","니"],
+};
+function wcPossibleStarts(lastChar){
+  const set = new Set([lastChar]);
+  if(WC_DUEUM_MAP[lastChar]) WC_DUEUM_MAP[lastChar].forEach(c=>set.add(c));
+  return set;
+}
+function wcFirstChar(w){ return w.charAt(0); }
+function wcLastChar(w){ return w.charAt(w.length-1); }
+
+// 3) 단어 제출 & 검증 (독립 함수)
+//    - opts.usedWordsSet / opts.lastWordValue 를 넘기면 그 컨텍스트(예: 멀티플레이 방의
+//      room.usedWords, room.lastWord) 기준으로 검사합니다. 생략하면 모듈 내부의
+//      wcUsedWords/wcLastWord(전역 싱글 플레이 상태)를 사용합니다.
+//    - opts.commit=false 로 호출하면 상태를 바꾸지 않고 "이 단어가 유효한가"만 확인합니다
+//      (Firebase 트랜잭션처럼 검증과 반영을 분리해야 하는 곳에서 사용).
+function submitWord(input, opts = {}){
+  const { usedWordsSet, lastWordValue, commit = true } = opts;
+  const uwSet = usedWordsSet || wcUsedWords;
+  const prevWord = (lastWordValue !== undefined) ? lastWordValue : wcLastWord;
+  const word = (input || '').trim();
+
+  if(!wcReady) return { ok:false, reason:'단어장을 아직 불러오는 중입니다. 잠시 후 다시 시도해주세요.' };
+  if(!word) return { ok:false, reason:'단어를 입력하세요.' };
+  if(!/^[가-힣]+$/.test(word)) return { ok:false, reason:'한글 단어만 입력할 수 있어요.' };
+  if(word.length < 2) return { ok:false, reason:'두 글자 이상 입력해야 해요.' };
+  if(!WC_WORD_SET.has(word)) return { ok:false, reason:'사전에 없는 단어예요.' };
+  const alreadyUsed = uwSet.has ? uwSet.has(word) : !!uwSet[word];
+  if(alreadyUsed) return { ok:false, reason:'이미 사용된 단어예요.' };
+  if(prevWord){
+    const allowed = wcPossibleStarts(wcLastChar(prevWord));
+    if(!allowed.has(wcFirstChar(word))){
+      return { ok:false, reason:`"${wcLastChar(prevWord)}"(으)로 시작하는 단어를 입력해야 해요.` };
+    }
   }
 
+  if(commit){
+    if(uwSet.add) uwSet.add(word); else uwSet[word] = true;
+    if(!usedWordsSet) wcLastWord = word; // 전역(싱글 플레이) 상태 갱신
+  }
+  return { ok:true, word };
+}
+function resetWordChain(){ wcUsedWords.clear(); wcLastWord = ''; }
+
+initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시작
+
+/* ============================================================================
+   3) 끝말잇기 (wordchainRooms/{roomId}) — 순서대로 진행, 라이프제,
+      단어 검증은 위 끝말잇기 코어 모듈(submitWord)에 위임
+============================================================================ */
+(function wordChainGame(){
   const lobbyEl = document.getElementById('wcLobby');
   const gameAreaEl = document.getElementById('wcGameArea');
   const roomInput = document.getElementById('wcRoomInput');
@@ -6755,25 +6795,19 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
   function countAlive(players){
     return Object.values(players||{}).filter(p=>p.alive).length;
   }
-  function firstSyllable(w){ return w.charAt(0); }
   function lastSyllable(w){ return w.charAt(w.length-1); }
 
+  // 방(room)의 usedWords/lastWord를 기준으로 끝말잇기 코어 모듈(submitWord)에 검증을 위임.
+  // commit:false 로 호출해 여기서는 상태를 바꾸지 않고, 통과했을 때만 트랜잭션 안에서 반영한다.
   function validateWord(room, word){
-    word = (word||'').trim();
-    if(!word) return {ok:false, reason:'단어를 입력하세요.'};
-    if(word.length < 2) return {ok:false, reason:'두 글자 이상 입력해주세요.'};
-    if(!/^[가-힣]+$/.test(word)) return {ok:false, reason:'한글 단어만 입력할 수 있어요.'};
-    if(!WORD_SET.has(word)) return {ok:false, reason:'사전에 없는 단어입니다.'};
-    if(room.usedWords && room.usedWords[word]) return {ok:false, reason:'이미 사용된 단어입니다.'};
-    if(room.lastWord){
-      const need = possibleStartSyllables(lastSyllable(room.lastWord));
-      if(!need.has(firstSyllable(word))) return {ok:false, reason:`"${lastSyllable(room.lastWord)}"(으)로 시작하는 단어를 입력해야 해요.`};
-    }
-    return {ok:true};
+    room.usedWords = room.usedWords || {};
+    const result = submitWord(word, { usedWordsSet: room.usedWords, lastWordValue: room.lastWord, commit:false });
+    return result.ok ? {ok:true} : {ok:false, reason:result.reason};
   }
 
-  function submitWord(){
+  function handleSubmitClick(){
     if(!dbRef) return;
+    if(!wcReady) return mgAlert('단어장을 아직 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
     const word = wordInput.value.trim();
     wordInput.value = '';
     dbRef.transaction(room=>{
@@ -6806,8 +6840,8 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
       return room;
     });
   }
-  if(btnSubmit) btnSubmit.onclick = submitWord;
-  if(wordInput) wordInput.addEventListener('keydown', e=>{ if(e.key==='Enter') submitWord(); });
+  if(btnSubmit) btnSubmit.onclick = handleSubmitClick;
+  if(wordInput) wordInput.addEventListener('keydown', e=>{ if(e.key==='Enter') handleSubmitClick(); });
 
   function handleTimeout(){
     if(!dbRef) return;
