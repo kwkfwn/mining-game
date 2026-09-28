@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" translate="no">
 <head>
 <meta charset="UTF-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title> 뒷산에서 보석캐기 </title>
 <style>
@@ -159,7 +160,7 @@ input{font-family:inherit;}
   box-shadow:0 6px 18px -5px rgba(0,0,0,.7);cursor:pointer;
 }
 .rankingFloatPanel{
-  display:none;position:absolute;top:0;right:58px;width:250px;max-height:64vh;overflow-y:auto;
+  display:none;position:absolute;top:0;right:58px;width:300px;max-height:64vh;overflow-y:auto;
   background:#0c0f16;border:1px solid var(--line);border-radius:14px;padding:12px;
   box-shadow:0 16px 40px -10px rgba(0,0,0,.75);
 }
@@ -168,7 +169,7 @@ input{font-family:inherit;}
 .rankingFloatHeader button{background:none;border:none;color:var(--sub);font-size:15px;cursor:pointer;}
 @media(max-width:640px){
   .rankingFloat{top:auto;bottom:86px;right:10px;}
-  .rankingFloatPanel{width:210px;right:52px;max-height:52vh;}
+  .rankingFloatPanel{width:250px;right:52px;max-height:52vh;}
 }
 
 .attnFab{
@@ -1148,6 +1149,85 @@ input{font-family:inherit;}
   .kkP .kkPScore{font-size:21px;}
   .kkDisc{min-width:120px;font-size:15px;}
 }
+
+/* ---------- 폭탄 돌리기 미션 ---------- */
+#bombMissionBox{display:none;width:100%;max-width:440px;background:#0c0f16;border:1px solid var(--brass-dim);border-radius:14px;padding:14px;text-align:center;box-shadow:0 0 22px -8px rgba(224,165,66,.6);}
+.bmTitle{font-size:14px;font-weight:800;color:var(--brass-glow);margin-bottom:4px;}
+.bmDesc{font-size:12px;color:var(--sub);margin-bottom:10px;line-height:1.5;}
+.bmPrompt{font-size:26px;font-weight:900;margin:6px 0 12px;letter-spacing:.04em;}
+.bmRow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.bmGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:280px;margin:0 auto;}
+.bmBtn{background:#181321;border:1px solid #3a2a4a;color:var(--text);border-radius:10px;padding:10px 16px;font-size:15px;font-weight:800;min-width:56px;transition:transform .1s ease, box-shadow .15s ease;}
+.bmBtn:hover:not(:disabled){box-shadow:0 0 14px -3px rgba(192,75,255,.8);}
+.bmBtn:active:not(:disabled){transform:scale(.94);}
+.bmBtn.done{background:#0f2a1a;border-color:var(--win);color:var(--win);opacity:1;}
+.bmBtn.bad{background:#2a0f16;border-color:var(--lose);color:var(--lose);}
+.bmBtn.big{font-size:22px;padding:14px 34px;}
+.bmBtn.emo{font-size:26px;padding:8px 0;min-width:0;}
+.bmInput{width:170px;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:#0c0f16;color:var(--text);font-size:18px;text-align:center;font-weight:800;margin-right:6px;}
+.bmBar{position:relative;height:26px;background:#181321;border:1px solid #3a2a4a;border-radius:8px;margin:8px 0 12px;overflow:hidden;}
+.bmBar .zone{position:absolute;top:0;bottom:0;background:rgba(63,224,122,.45);}
+.bmBar .cursor{position:absolute;top:0;bottom:0;width:6px;background:var(--brass-glow);box-shadow:0 0 8px var(--brass-glow);}
+.bmShake{animation:bmShake .28s linear;}
+@keyframes bmShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+.bmClear{color:var(--win);font-weight:900;font-size:17px;padding:8px 0;text-shadow:0 0 10px rgba(63,224,122,.6);}
+
+/* ---------- 관리자 모드 ---------- */
+.adminLabel{font-size:12px;font-weight:800;color:var(--brass-glow);margin:12px 0 6px;}
+.adminField{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:#0c0f16;color:var(--text);font-size:14px;}
+.adminTwo{display:flex;gap:10px;}
+.adminTwo > div{flex:1;}
+.adminDivider{height:1px;background:var(--line);margin:18px 0 6px;}
+.pick-card .stats + .stats{margin-top:1px;}
+
+/* ---------- 광산 선택 탭 & 미개방 광산 카드 ---------- */
+.mineTabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.mineTabBtn{
+  display:flex;align-items:center;gap:6px;
+  background:#0c0f16;border:1px solid var(--line);color:var(--sub);
+  border-radius:999px;padding:8px 16px;font-size:12.5px;font-weight:700;
+  transition:box-shadow .15s ease, border-color .15s ease, color .15s ease;
+}
+.mineTabBtn.active{border-color:var(--brass);color:var(--brass-glow);box-shadow:0 0 14px -4px rgba(224,165,66,.65);}
+.mineTabBtn.locked{opacity:.7;}
+.mineTabBtn .lockIcon{font-size:10px;}
+.mineLockedCard{
+  background:#0c0f16;border:1px dashed var(--brass-dim);border-radius:16px;
+  padding:32px 18px;text-align:center;
+}
+.mlcIcon{font-size:46px;margin-bottom:10px;filter:drop-shadow(0 0 10px rgba(224,165,66,.4));}
+.mlcTitle{font-size:16px;font-weight:800;color:var(--brass-glow);margin-bottom:6px;}
+.mlcDesc{font-size:12px;color:var(--sub);margin-bottom:12px;line-height:1.5;max-width:420px;margin-left:auto;margin-right:auto;}
+.mlcReq{font-size:12.5px;margin:5px 0;font-family:var(--mono);}
+
+/* ---------- 크롬북 한 화면 맞춤 (스크롤 없이 채굴) ---------- */
+#app:has(#viewMine.active){padding-bottom:8px;padding-top:8px;}
+#app:has(#viewMine.active) #topbar{margin-bottom:8px;padding:8px 14px 8px;gap:8px;position:relative;top:0;}
+#app:has(#viewMine.active) .navBtn{padding-top:7px;padding-bottom:7px;}
+.panel.mine-hero{padding:10px 14px 12px;}
+.panel.mine-hero h2{margin-bottom:6px;}
+.mineTabs{margin-bottom:8px;}
+.mineTabBtn{padding:5px 14px;}
+#mineZone{height:clamp(240px, calc(100vh - 235px), 520px);height:clamp(240px, calc(100dvh - 235px), 520px);}
+#mineHint{bottom:6px;font-size:10.5px;}
+.comboGaugeWrap{bottom:28px;}
+@media(max-height:760px){
+  #rockSvg{width:170px;height:170px;}
+  #rockWrap::before{width:210px;height:210px;}
+}
+@media(max-height:620px){
+  #rockSvg{width:140px;height:140px;}
+}
+
+/* ---------- 채굴 중 구글 기능(검색/렌즈/번역 팝업) 방지 ---------- */
+#mineZone, #mineZone *{
+  -webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-drag:none;
+}
+#mineZone{touch-action:manipulation;}
+#mineZone svg{-webkit-user-drag:none;}
 </style>
 </head>
 <body>
@@ -1185,6 +1265,7 @@ input{font-family:inherit;}
   <div class="view active" data-view="mine" id="viewMine">
     <div class="panel mine-hero">
       <h2><span class="bar"></span>광산 채굴</h2>
+      <div class="mineTabs" id="mineTabs"></div>
       <div id="mineZone">
         <svg class="cavebg" viewBox="0 0 400 460" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="70" cy="380" r="140" fill="#1c1120" opacity=".5"/>
@@ -1217,6 +1298,7 @@ input{font-family:inherit;}
         <div class="popupLayer" id="popupLayer"></div>
         <div id="mineHint">광석을 클릭해서 채굴하세요 · 희귀할수록 여러 번 쳐야 캐집니다 · 채굴로 Gold를 모아 곡괭이를 업그레이드하세요!</div>
       </div>
+      <div id="mineLockedCard" style="display:none;"></div>
     </div>
   </div>
 
@@ -2844,7 +2926,7 @@ if (btnDouble) {
     <div class="bjActions" id="reactRematchRow" style="display:none;justify-content:center;margin-top:10px;">
       <button class="chipbtn bjAct" id="btnReactRematch" style="border-color:var(--win);color:var(--win);">🔁 다시하기</button>
     </div>
-    <div class="resultBanner" id="reactResult">신호가 초록색(GO!)으로 바뀌면 최대한 빨리 클릭하세요! 너무 일찍 누르면 실격입니다.</div>
+    <div class="resultBanner" id="reactResult">신호가 초록색(GO!)으로 바뀌면 최대한 빨리 클릭하세요! 반응속도(ms)가 가장 빠른 사람이 승리하고, 너무 일찍 누르면 실격입니다.</div>
   </div>
 </div>
 
@@ -2890,6 +2972,7 @@ if (btnDouble) {
     <div id="bombStage" style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 0;">
       <div id="bombIcon" style="font-size:72px;transition:transform .1s ease;">💣</div>
       <div id="bombHolderText" style="font-size:15px;font-weight:800;color:var(--brass-glow);"></div>
+      <div id="bombMissionBox"></div>
       <button class="playBtn" id="btnBombPass" style="display:none;font-size:16px;padding:14px 32px;">🔥 지금 넘기기!</button>
     </div>
     <div class="bjActions" id="bombRematchRow" style="display:none;justify-content:center;margin-top:10px;">
@@ -3073,8 +3156,39 @@ if (btnDouble) {
       <button id="rankingFloatClose" type="button" aria-label="닫기">✕</button>
     </div>
     <div id="rankingList"></div>
-    <div class="resultBanner" id="rankingBanner" style="font-size:10px;margin-top:6px;">보유 Gold 기준 실시간 랭킹 · 1~3위는 왕관 획득</div>
-    <button id="adminResetBtn" type="button" style="margin-top:8px;background:none;border:none;color:var(--sub);font-size:9px;text-decoration:underline;cursor:pointer;opacity:.6;">관리자용 서버 초기화</button>
+    <div class="resultBanner" id="rankingBanner" style="font-size:10px;margin-top:6px;">Gold+Coin 환전가치 합산 총 자산 기준 실시간 랭킹 · 1~3위는 왕관 획득</div>
+    <button id="adminResetBtn" type="button" style="margin-top:8px;background:none;border:none;color:var(--sub);font-size:10px;text-decoration:underline;cursor:pointer;opacity:.75;">🛠️ 관리자 모드</button>
+  </div>
+</div>
+
+<div class="attnModal" id="adminModal" style="z-index:3500;">
+  <div class="attnModalBox" style="max-width:440px;">
+    <button class="attnModalClose" id="adminModalClose" aria-label="닫기">✕</button>
+    <div class="attnModalTitle"><span class="welcome">🛠️ 관리자 모드</span></div>
+    <div class="attnModalSub">유저에게 Gold / Coin을 지급하거나 서버를 초기화할 수 있어요.</div>
+
+    <div class="adminLabel">지급 대상</div>
+    <div style="display:flex;gap:8px;">
+      <select id="adminTarget" class="adminField" style="flex:1;"></select>
+      <button type="button" id="adminRefreshUsers" class="chipbtn" title="유저 목록 새로고침">🔄</button>
+    </div>
+
+    <div class="adminTwo">
+      <div>
+        <div class="adminLabel">💰 Gold</div>
+        <input type="number" id="adminGoldInput" class="adminField" min="0" value="0">
+      </div>
+      <div>
+        <div class="adminLabel">🪙 Coin</div>
+        <input type="number" id="adminCoinInput" class="adminField" min="0" value="0">
+      </div>
+    </div>
+    <button class="playBtn" id="adminGiveBtn" type="button" style="width:100%;margin:14px 0 0;">🎁 지급하기</button>
+    <div class="resultBanner" id="adminMsg" style="display:none;"></div>
+
+    <div class="adminDivider"></div>
+    <div class="adminLabel" style="color:var(--lose);">⚠️ 위험 구역</div>
+    <button class="playBtn" id="adminServerResetBtn" type="button" style="width:100%;margin:0;background:linear-gradient(180deg,#ff6b81,#c0223b);box-shadow:0 6px 18px -6px rgba(255,77,106,.7);">🗑️ 서버 초기화 (모든 유저 데이터 삭제)</button>
   </div>
 </div>
 
@@ -3152,6 +3266,10 @@ const ORES = [
   {id:'gold',   name:'금광석',        min:6,  max:14,  weight:3.9,color:'#f4b942', glow:10},
   {id:'diamond',name:'다이아몬드',    min:25, max:55,  weight:1.1,color:'#7ee8fa', glow:16},
   {id:'dark',   name:'암흑물질 광석', min:120,max:300, weight:.15,color:'#c04bff', glow:24},
+  /* ---- 폐광 갱도(2번째 광산) 전용 광물 ---- */
+  {id:'mithril',  name:'미스릴 원석',   min:18, max:40,  weight:10, color:'#7fffd4', glow:14, mine:1},
+  {id:'obsidian', name:'흑요석',       min:70, max:150, weight:3.2,color:'#3a2a55', glow:18, mine:1},
+  {id:'voidshard',name:'공허의 파편',   min:300,max:650, weight:.4, color:'#0b0014', glow:26, mine:1},
 ];
 
 /* cost는 Gold 기준입니다. requires(광석 재료)는 채굴로 모읍니다. */
@@ -3165,7 +3283,19 @@ const PICKAXES = [
   {id:'diapk',  name:'다이아 곡괭이',    cost:320000,  mult:3.3, rare:22, crit:.12, power:5,  requires:{silver:20, gold:30}},
   {id:'orichpk',name:'오리하르콘 곡괭이', cost:800000,  mult:4.2, rare:29, crit:.15, power:7,  requires:{gold:25, diamond:15}},
   {id:'rift',   name:'차원 균열 곡괭이', cost:2200000, mult:5.5, rare:38, crit:.20, power:10, requires:{gold:20, diamond:28, dark:5}},
+  /* ---- 폐광 갱도(2번째 광산)를 개방해야 재료를 구할 수 있는 상위 곡괭이 ---- */
+  {id:'mithrilpk', name:'미스릴 곡괭이', cost:5000000,  mult:7.0, rare:45, crit:.24, power:12, requires:{dark:15, mithril:25}},
+  {id:'obsidianpk',name:'흑요석 곡괭이', cost:14000000, mult:9.0, rare:58, crit:.28, power:16, requires:{mithril:30, obsidian:15}},
+  {id:'voidpk',    name:'공허 파쇄자',   cost:35000000, mult:12.0,rare:75, crit:.33, power:22, requires:{obsidian:25, voidshard:10}},
 ];
+
+/* ---- 광산(채굴 구역) 목록: idx 0은 항상 개방된 기본 광산 ---- */
+const MINES = [
+  { id:'backyard', icon:'🏞️', name:'뒷산',      desc:'모든 광부의 시작점. 돌멩이부터 암흑물질 광석까지 캘 수 있어요.', unlockCost:0, unlockReqPickaxeId:null },
+  { id:'abyss',    icon:'🕳️', name:'폐광 갱도', desc:'차원 균열 곡괭이를 손에 넣은 자만 들어갈 수 있는 심연의 갱도. 미스릴부터 공허의 파편까지 잠들어 있습니다.', unlockCost:3000000, unlockReqPickaxeId:'rift' },
+];
+function pickaxeIdxById(id){ return PICKAXES.findIndex(p=>p.id===id); }
+function isMineUnlocked(idx){ return idx===0 || !!(state.unlockedMines && state.unlockedMines[idx]); }
 
 const HORSES = [
   {name:'번개호',   color:'#f4b942', odds:1.5, weight:48},
@@ -3201,10 +3331,12 @@ const state = {
   coins: 0,
   pickaxeIdx: 0,
   mineLevel: 1,
+  mineAreaIdx: 0,
+  unlockedMines: {0:true},
   diceChoice: 'odd',
   horseChoice: 0,
   ladderChoice: 0,
-  ores: {stone:0, iron:0, silver:0, gold:0, diamond:0, dark:0},
+  ores: {stone:0, iron:0, silver:0, gold:0, diamond:0, dark:0, mithril:0, obsidian:0, voidshard:0},
   brokeSince: null,
   lastDailyBonusDate: null,
   dailyStreak: 0,
@@ -3223,9 +3355,26 @@ const state = {
   equippedBorder: null,
   equippedBg: null,
   achievements: {},
-  lifetimeOres: {stone:0, iron:0, silver:0, gold:0, diamond:0, dark:0},
+  lifetimeOres: {stone:0, iron:0, silver:0, gold:0, diamond:0, dark:0, mithril:0, obsidian:0, voidshard:0},
   totalOresMined: 0,
 };
+
+/* ---- Coin 소모량 자동 집계: state.coins가 줄어들 때마다 coinSpentTotal에 누적 (베팅/구매/환전 등 모든 감소 포함) ---- */
+(function(){
+  let _coins = state.coins;
+  Object.defineProperty(state, 'coins', {
+    enumerable: true, configurable: true,
+    get(){ return _coins; },
+    set(v){
+      if(typeof v === 'number' && typeof _coins === 'number' && v < _coins){
+        state.coinSpentTotal = (state.coinSpentTotal || 0) + (_coins - v);
+      }
+      _coins = v;
+    }
+  });
+  /* 저장 데이터를 불러올 때는 '소모'로 치지 않도록 우회하는 setter */
+  Object.defineProperty(state, '__coinRaw', { enumerable: false, value: function(v){ _coins = v; } });
+})();
 
 /* ============================ SOUND ENGINE ============================ */
 const Sound = (function(){
@@ -3321,9 +3470,14 @@ function mineBoostCost(){ return 2500 + state.pickaxeIdx*2200; }
 function oreWeights(){
   const pk = currentPickaxe();
   const bonus = pk.rare + (state.mineLevel-1)*MINE_LEVEL_BONUS;
+  const mineIdx = state.mineAreaIdx||0;
+  const activeIdxs = [];
+  ORES.forEach((o,i)=>{ if((o.mine||0)===mineIdx) activeIdxs.push(i); });
   return ORES.map((o,i)=>{
-    if(i<=1) return Math.max(1, o.weight - bonus*1.05);
-    return o.weight + bonus*(i-1)*0.42;
+    if((o.mine||0)!==mineIdx) return 0; // 다른 광산의 광물은 이 광산에서 나오지 않음
+    const li = activeIdxs.indexOf(i); // 현재 광산 내에서의 상대 순번(0부터)
+    if(li<=1) return Math.max(1, o.weight - bonus*1.05);
+    return o.weight + bonus*(li-1)*0.42;
   });
 }
 
@@ -3337,11 +3491,13 @@ function loadGame(){
     if(raw) {
       const saved = JSON.parse(raw);
       if(typeof saved.gold==='number') state.gold = saved.gold;
-      if(typeof saved.coins==='number') state.coins = saved.coins;
+      if(typeof saved.coins==='number') state.__coinRaw(saved.coins);
       if(typeof saved.pickaxeIdx==='number') state.pickaxeIdx = saved.pickaxeIdx;
       if(typeof saved.mineLevel==='number') state.mineLevel = saved.mineLevel;
+      if(typeof saved.mineAreaIdx==='number') state.mineAreaIdx = saved.mineAreaIdx;
+      if(saved.unlockedMines) state.unlockedMines = Object.assign({0:true}, saved.unlockedMines);
       if (state.ores) {
-        state.ores = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0}, saved.ores||{});
+        state.ores = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0}, saved.ores||{});
       }
       if(saved.lastDailyBonusDate) state.lastDailyBonusDate = saved.lastDailyBonusDate;
       if(typeof saved.dailyStreak==='number') state.dailyStreak = saved.dailyStreak;
@@ -3360,7 +3516,7 @@ function loadGame(){
       if(saved.equippedBorder) state.equippedBorder = saved.equippedBorder;
       if(saved.equippedBg) state.equippedBg = saved.equippedBg;
       if(saved.achievements) state.achievements = saved.achievements;
-      if(saved.lifetimeOres) state.lifetimeOres = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0}, saved.lifetimeOres);
+      if(saved.lifetimeOres) state.lifetimeOres = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0}, saved.lifetimeOres);
       if(typeof saved.totalOresMined==='number') state.totalOresMined = saved.totalOresMined;
     }
   }catch(e){ console.error("로컬 로드 중 에러:", e); }
@@ -3388,10 +3544,12 @@ function loadGame(){
               }
               if (shouldUpdate && typeof state !== 'undefined') {
                 if(typeof cloudData.gold==='number') state.gold = cloudData.gold;
-                if(typeof cloudData.coins==='number') state.coins = cloudData.coins;
+                if(typeof cloudData.coins==='number') state.__coinRaw(cloudData.coins);
                 if(typeof cloudData.pickaxeIdx==='number') state.pickaxeIdx = cloudData.pickaxeIdx;
                 if(typeof cloudData.mineLevel==='number') state.mineLevel = cloudData.mineLevel;
-                if (state.ores) state.ores = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0}, cloudData.ores||{});
+                if(typeof cloudData.mineAreaIdx==='number') state.mineAreaIdx = cloudData.mineAreaIdx;
+                if(cloudData.unlockedMines) state.unlockedMines = Object.assign({0:true}, cloudData.unlockedMines);
+                if (state.ores) state.ores = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0}, cloudData.ores||{});
                 if(cloudData.lastDailyBonusDate) state.lastDailyBonusDate = cloudData.lastDailyBonusDate;
                 if(typeof cloudData.dailyStreak==='number') state.dailyStreak = cloudData.dailyStreak;
                 if(typeof cloudData.oreBreakCount==='number') state.oreBreakCount = 0; // 콤보는 세션마다 초기화
@@ -3409,7 +3567,7 @@ function loadGame(){
                 if(cloudData.equippedBorder) state.equippedBorder = cloudData.equippedBorder;
                 if(cloudData.equippedBg) state.equippedBg = cloudData.equippedBg;
                 if(cloudData.achievements) state.achievements = cloudData.achievements;
-                if(cloudData.lifetimeOres) state.lifetimeOres = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0}, cloudData.lifetimeOres);
+                if(cloudData.lifetimeOres) state.lifetimeOres = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0}, cloudData.lifetimeOres);
                 if(typeof cloudData.totalOresMined==='number') state.totalOresMined = cloudData.totalOresMined;
                 try { state.pickaxeIdx = Math.max(0, Math.min(state.pickaxeIdx, PICKAXES.length-1)); } catch(err) {}
                 localStorage.setItem(ACTUAL_SAVE_KEY, JSON.stringify(cloudData));
@@ -3428,6 +3586,7 @@ function saveGame(){
   try{
     const snap = {
       gold: state.gold, coins: state.coins, pickaxeIdx: state.pickaxeIdx, mineLevel: state.mineLevel,
+      mineAreaIdx: state.mineAreaIdx, unlockedMines: state.unlockedMines,
       ores: state.ores, lastDailyBonusDate: state.lastDailyBonusDate, dailyStreak: state.dailyStreak,
       oreBreakCount: state.oreBreakCount, boostUntil: state.boostUntil, cosmetics: state.cosmetics,
       equippedCosmetic: state.equippedCosmetic, gachaItems: state.gachaItems, goldSpentTotal: state.goldSpentTotal,
@@ -3443,8 +3602,13 @@ function saveGame(){
       const currentUser = sessionStorage.getItem('current_user') || localStorage.getItem('current_user');
       if (currentUser) {
         database.ref('users/' + currentUser + '/gameData').set(snap).catch((err) => {});
+        /* 랭킹 순위는 "보유 Gold + 보유 Coin을 Gold로 환전했을 때 가치(수수료 5% 반영)"의 합산 총 자산 기준 */
+        const coinGoldValue = Math.max(0, Math.round((state.coins||0) * RATE * (1 - EXCHANGE_FEE)));
+        const totalValue = (state.gold||0) + coinGoldValue;
         database.ref('leaderboard/' + currentUser).set({
-          name: currentUser, gold: state.gold, goldSpentTotal: state.goldSpentTotal||0, coinSpentTotal: state.coinSpentTotal||0, updatedAt: Date.now()
+          name: currentUser, gold: state.gold, coins: state.coins||0,
+          coinGoldValue: coinGoldValue, totalValue: totalValue,
+          goldSpentTotal: state.goldSpentTotal||0, coinSpentTotal: state.coinSpentTotal||0, updatedAt: Date.now()
         }).catch((err)=>{});
       }
     }
@@ -3667,12 +3831,15 @@ function renderTop(){
   if(typeof applyCustomization==='function') applyCustomization();
   if(typeof checkTitleAchievements==='function') checkTitleAchievements();
   renderMineLevel();
+  if(typeof renderMineHero === 'function') renderMineHero();
   saveGame();
   if(typeof loadRankingData === 'function') loadRankingData();
 }
 
 /* ============================ MINE ============================ */
 const mineZone = document.getElementById('mineZone');
+const mineTabsEl = document.getElementById('mineTabs');
+const mineLockedCardEl = document.getElementById('mineLockedCard');
 const rockWrap = document.getElementById('rockWrap');
 const popupLayer = document.getElementById('popupLayer');
 const mineFlash = document.getElementById('mineFlash');
@@ -3731,16 +3898,22 @@ function spawnChips(n, color){
   }
 }
 
-const TIER_HIT_RANGES = [[1,1],[1,2],[2,4],[3,6],[5,9],[8,14]];
+const TIER_HIT_RANGES = [[1,1],[1,2],[2,4],[3,6],[5,9],[8,14],[10,16],[16,24],[24,36]];
 function rollHits(idx){
   const [lo,hi] = TIER_HIT_RANGES[idx];
   return lo + Math.floor(Math.random()*(hi-lo+1));
 }
 function pickOreIdx(){
   const weights = oreWeights();
-  let r = Math.random()*weights.reduce((a,b)=>a+b,0);
+  const total = weights.reduce((a,b)=>a+b,0);
+  if(total<=0){
+    const mineIdx = state.mineAreaIdx||0;
+    const fallback = ORES.findIndex(o=>(o.mine||0)===mineIdx);
+    return fallback>=0 ? fallback : 0;
+  }
+  let r = Math.random()*total;
   let idx = 0;
-  for(let i=0;i<ORES.length;i++){ r -= weights[i]; if(r<=0){ idx=i; break; } idx=i; }
+  for(let i=0;i<ORES.length;i++){ if(weights[i]<=0) continue; r -= weights[i]; if(r<=0){ idx=i; break; } idx=i; }
   return idx;
 }
 
@@ -3800,6 +3973,73 @@ function newOreNode(){
   updateOreLabel();
 }
 
+/* ============================ 광산 선택 / 개방 ============================ */
+function renderMineTabs(){
+  if(!mineTabsEl) return;
+  mineTabsEl.innerHTML = MINES.map((m,i)=>{
+    const unlocked = isMineUnlocked(i);
+    const active = i===(state.mineAreaIdx||0);
+    return `<button type="button" class="mineTabBtn${active?' active':''}${unlocked?'':' locked'}" data-mine="${i}">
+      <span>${m.icon}</span><span>${m.name}</span>${unlocked?'':'<span class="lockIcon">🔒</span>'}
+    </button>`;
+  }).join('');
+  mineTabsEl.querySelectorAll('[data-mine]').forEach(btn=>{
+    btn.addEventListener('click', ()=> switchMine(+btn.dataset.mine));
+  });
+}
+function switchMine(idx){
+  if(idx === (state.mineAreaIdx||0)) return;
+  if(!MINES[idx]) return;
+  state.mineAreaIdx = idx;
+  currentNode = null;
+  renderMineHero();
+  saveGame();
+}
+function renderMineLockedCard(){
+  const idx = state.mineAreaIdx||0;
+  const mine = MINES[idx];
+  if(!mineLockedCardEl || !mine) return;
+  const reqIdx = mine.unlockReqPickaxeId ? pickaxeIdxById(mine.unlockReqPickaxeId) : -1;
+  const reqOk = reqIdx < 0 || state.pickaxeIdx >= reqIdx;
+  const goldOk = state.gold >= mine.unlockCost;
+  const canUnlock = reqOk && goldOk;
+  mineLockedCardEl.innerHTML = `
+    <div class="mineLockedCard">
+      <div class="mlcIcon">${mine.icon}</div>
+      <div class="mlcTitle">${mine.name} (미개방 광산)</div>
+      <div class="mlcDesc">${mine.desc||''}</div>
+      ${reqIdx>=0 ? `<div class="mlcReq">${reqOk?'✅':'🔒'} 필요 장비: ${PICKAXES[reqIdx].name}</div>` : ''}
+      <div class="mlcReq">${goldOk?'✅':'🔒'} 개방 비용: ${fmt(mine.unlockCost)} Gold</div>
+      <button class="playBtn" id="mineUnlockBtn" style="margin:14px auto 0;"${canUnlock?'':' disabled'}>⛏️ 광산 개방하기</button>
+    </div>
+  `;
+  const btn = document.getElementById('mineUnlockBtn');
+  if(btn) btn.addEventListener('click', ()=>{
+    if(state.gold < mine.unlockCost || !reqOk) return;
+    state.gold -= mine.unlockCost;
+    state.goldSpentTotal = (state.goldSpentTotal||0) + mine.unlockCost;
+    state.unlockedMines = state.unlockedMines || {0:true};
+    state.unlockedMines[idx] = true;
+    showToast(`⛏️ ${mine.name} 광산을 개방했습니다!`);
+    if(window.Sound && window.Sound.rareFanfare) Sound.rareFanfare(5);
+    if(window.megaConfetti) megaConfetti();
+    renderTop();
+    renderMineHero();
+  });
+}
+function renderMineHero(){
+  renderMineTabs();
+  const idx = state.mineAreaIdx||0;
+  const unlocked = isMineUnlocked(idx);
+  if(mineZone) mineZone.style.display = unlocked ? '' : 'none';
+  if(mineLockedCardEl) mineLockedCardEl.style.display = unlocked ? 'none' : 'block';
+  if(unlocked){
+    if(!currentNode) newOreNode();
+  } else {
+    renderMineLockedCard();
+  }
+}
+
 function onRockClick(){
   if(!currentNode) newOreNode();
   bumpComboIdleTimer();
@@ -3822,7 +4062,7 @@ function onRockClick(){
   state.gold += value;
   state.ores[node.ore.id] = (state.ores[node.ore.id]||0) + 1;
 
-  state.lifetimeOres = state.lifetimeOres || {stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0};
+  state.lifetimeOres = state.lifetimeOres || {stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0};
   state.lifetimeOres[node.ore.id] = (state.lifetimeOres[node.ore.id]||0) + 1;
   state.totalOresMined = (state.totalOresMined||0) + 1;
   const curHour = new Date().getHours();
@@ -3865,6 +4105,15 @@ function onRockClick(){
   renderShop();
 }
 rockWrap.addEventListener('click', onRockClick);
+/* 채굴 영역에서 우클릭 메뉴(구글 검색/렌즈), 텍스트 선택, 드래그 차단 */
+['contextmenu','selectstart','dragstart','dblclick'].forEach(function(evt){
+  mineZone.addEventListener(evt, function(e){ e.preventDefault(); });
+});
+mineZone.addEventListener('mousedown', function(e){
+  e.preventDefault();
+  var sel = window.getSelection && window.getSelection();
+  if(sel && sel.removeAllRanges) sel.removeAllRanges();
+});
 
 /* ============================ SHOP (곡괭이 제작 · 필요 광물) ============================ */
 const ORE_NAME_BY_ID = Object.fromEntries(ORES.map(o=>[o.id,o.name]));
@@ -4238,6 +4487,7 @@ document.getElementById('rpsPlay').addEventListener('click', ()=>{
         burstConfetti(24);
       } else if(outcome==='tie'){
         state.coins += bet;
+        state.coinSpentTotal = Math.max(0,(state.coinSpentTotal||0) - bet);
         banner.textContent = `${RPS_LABEL[state.rpsChoice]} vs ${RPS_LABEL[cpuChoice]} → 비겼습니다! 베팅 반환`;
         banner.className='resultBanner';
       } else {
@@ -5273,6 +5523,7 @@ function bjSettle(outcome){
     burstConfetti(24);
   } else if(outcome==='push'){
     state.coins += bjBetAmt;
+    state.coinSpentTotal = Math.max(0,(state.coinSpentTotal||0) - bjBetAmt);
     banner.textContent = '푸시(무승부) · 베팅금 반환';
     banner.className='resultBanner';
   } else {
@@ -5496,6 +5747,7 @@ document.getElementById('bacPlay').addEventListener('click', async ()=>{
     burstConfetti(outcome==='tie'?50:24);
   } else if(outcome==='tie'){
     state.coins += bet;
+    state.coinSpentTotal = Math.max(0,(state.coinSpentTotal||0) - bet);
     banner.textContent = `타이(무승부)! 베팅금 반환 (Push)`;
     banner.className = 'resultBanner';
   } else {
@@ -5523,7 +5775,8 @@ const BG_ITEMS = [
   {id:'bg_nebula', name:'성운 배경',          cls:'bg_nebula', cost:95000},
 ];
 const TITLES = [
-  {id:'title_legend',    name:'🏆 전설의 광부',   req:'최고 등급 곡괭이(차원 균열 곡괭이) 장착', check:()=> state.pickaxeIdx >= PICKAXES.length-1},
+  {id:'title_legend',    name:'🏆 전설의 광부',   req:'최고 등급 곡괭이(공허 파쇄자) 장착', check:()=> state.pickaxeIdx >= PICKAXES.length-1},
+  {id:'title_void',      name:'🕳️ 심연의 지배자', req:'공허의 파편 누적 20개 채굴', check:()=> (state.lifetimeOres||{}).voidshard >= 20},
   {id:'title_diamond',   name:'💎 다이아몬드 손', req:'다이아몬드 누적 100개 채굴', check:()=> (state.lifetimeOres||{}).diamond >= 100},
   {id:'title_highroller',name:'🎰 하이롤러',      req:'Coin 누적 100,000 소모', check:()=> (state.coinSpentTotal||0) >= 100000},
   {id:'title_lucky',     name:'🍀 행운의 사나이', req:'슬롯머신 잭팟(7 7 7 7 7) 1회 달성', check:()=> !!(state.achievements||{}).slotJackpotHit},
@@ -5774,7 +6027,7 @@ function loadRankingData(){
   }
 
   if(rankingDbRef){ rankingDbRef.off(); }
-  rankingDbRef = database.ref('leaderboard').orderByChild('gold').limitToLast(10);
+  rankingDbRef = database.ref('leaderboard').orderByChild('totalValue').limitToLast(10);
 
   rankingDbRef.on('value', (snap)=>{
     const rows = [];
@@ -5785,15 +6038,19 @@ function loadRankingData(){
       const rank = i+1;
       const crown = rank===1 ? '👑' : rank===2 ? '🥈' : rank===3 ? '🥉' : (rank+'.');
       const isMe = me && r.name===me;
+      const coinGoldValue = (typeof r.coinGoldValue === 'number') ? r.coinGoldValue : Math.round((r.coins||0)*RATE*(1-EXCHANGE_FEE));
+      const totalValue = (typeof r.totalValue === 'number') ? r.totalValue : ((r.gold||0)+coinGoldValue);
       return `<div class="pick-card${isMe?' current':''}">
         <div class="picon">${crown}</div>
         <div class="info">
           <div class="name">${r.name||'익명'}${isMe?' (나)':''}</div>
-          <div class="stats">보유 Gold ${fmt(r.gold||0)} · Gold 소모 ${fmt(r.goldSpentTotal||0)} · Coin 소모 ${fmt(r.coinSpentTotal||0)}</div>
+          <div class="stats">🏆 총 자산 ${fmt(totalValue)} Gold</div>
+          <div class="stats">💰 Gold ${fmt(r.gold||0)} · 🪙 Coin ${fmt(r.coins||0)} <span style="color:var(--sub);">(환전 시 ${fmt(coinGoldValue)} Gold, 수수료 5%)</span></div>
+          <div class="stats">Gold 소모 ${fmt(r.goldSpentTotal||0)} · Coin 소모 ${fmt(r.coinSpentTotal||0)}</div>
         </div>
       </div>`;
     }).join('') || '<div class="resultBanner">아직 랭킹 데이터가 없습니다.</div>';
-    if(bannerEl) bannerEl.textContent = '보유 Gold 기준 실시간 랭킹입니다 · 1~3위는 왕관 아이콘을 획득합니다';
+    if(bannerEl) bannerEl.textContent = '보유 Gold + Coin 환전 가치(수수료 5% 적용) 합산 총 자산 기준 실시간 랭킹입니다 · 1~3위는 왕관 아이콘을 획득합니다';
   }, ()=>{
     listEl.innerHTML = '<div class="resultBanner">랭킹 정보를 불러오지 못했습니다.</div>';
   });
@@ -5920,16 +6177,60 @@ if (sessionStorage.getItem('passed_auth') !== 'true') {
   sessionStorage.setItem('passed_auth', 'true');
 }
 
-/* 관리자용 서버 초기화 (Firebase의 users/leaderboard 전체 삭제 + 내 로컬 저장도 초기화) */
-if(document.getElementById('adminResetBtn')) document.getElementById('adminResetBtn').addEventListener('click', ()=>{
+/* ============================ 관리자 모드 ============================ */
+/* 비밀번호(ADMIN_RESET_PASSWORD)는 그대로 사용합니다. 한 번 인증하면 이 페이지를 닫기 전까지 다시 묻지 않습니다. */
+let adminUnlocked = false;
+function adminEsc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function adminMsg(text, cls){
+  const el = document.getElementById('adminMsg');
+  if(!el) return;
+  el.textContent = text;
+  el.className = 'resultBanner' + (cls ? (' ' + cls) : '');
+  el.style.display = 'block';
+}
+function adminLoadUsers(){
+  const sel = document.getElementById('adminTarget');
+  if(!sel) return;
+  if(typeof database === 'undefined' || !database){ sel.innerHTML = '<option value="">서버 미연결</option>'; return; }
+  sel.innerHTML = '<option value="">불러오는 중...</option>';
+  database.ref('leaderboard').once('value').then(snap=>{
+    const names = [];
+    snap.forEach(ch=>{ const v = ch.val(); if(v && v.name) names.push(v.name); });
+    names.sort((a,b)=>a.localeCompare(b,'ko'));
+    sel.innerHTML = '<option value="__ALL__">👥 전체 유저 (' + names.length + '명)</option>'
+      + names.map(n=>`<option value="${adminEsc(n)}">${adminEsc(n)}</option>`).join('');
+  }).catch(()=>{ sel.innerHTML = '<option value="">목록을 불러오지 못했어요</option>'; });
+}
+function adminGive(){
+  if(typeof database === 'undefined' || !database) return adminMsg('❌ 서버(Firebase)가 연결되지 않았습니다.', 'lose');
+  const sel = document.getElementById('adminTarget');
+  const target = sel ? sel.value : '';
+  const gold = Math.max(0, Math.floor(+document.getElementById('adminGoldInput').value || 0));
+  const coins = Math.max(0, Math.floor(+document.getElementById('adminCoinInput').value || 0));
+  if(!target) return adminMsg('지급할 대상을 선택하세요.', 'lose');
+  if(gold <= 0 && coins <= 0) return adminMsg('지급할 Gold 또는 Coin 수량을 입력하세요.', 'lose');
+  let names;
+  if(target === '__ALL__'){
+    names = Array.from(sel.options).map(o=>o.value).filter(v=>v && v !== '__ALL__');
+    if(!names.length) return adminMsg('지급할 유저가 없습니다.', 'lose');
+  } else {
+    names = [target];
+  }
+  const gift = { gold: gold, coins: coins, at: Date.now() };
+  Promise.all(names.map(n=>database.ref('adminGifts/' + n).push(gift))).then(()=>{
+    const who = target === '__ALL__' ? `전체 ${names.length}명` : `${target} 님`;
+    adminMsg(`✅ ${who}에게 Gold ${fmt(gold)} / Coin ${fmt(coins)} 지급 완료! (접속 중이면 바로, 아니면 다음 접속 때 받아요)`, 'win');
+  }).catch(err=>{
+    adminMsg('❌ 지급 실패: ' + (err && err.message), 'lose');
+  });
+}
+function adminServerReset(){
   if(!confirm('⚠️ 정말로 서버의 모든 유저 데이터와 랭킹을 초기화하시겠습니까?\n(모든 플레이어의 진행 상황이 사라지며 되돌릴 수 없습니다!)')) return;
-  const pw = prompt('관리자 비밀번호를 입력하세요:');
-  if(pw === null) return;
-  if(pw !== ADMIN_RESET_PASSWORD){ alert('❌ 비밀번호가 일치하지 않습니다.'); return; }
   if(typeof database === 'undefined' || !database){ alert('❌ 서버(Firebase)가 연결되지 않았습니다.'); return; }
   Promise.all([
     database.ref('users').remove(),
-    database.ref('leaderboard').remove()
+    database.ref('leaderboard').remove(),
+    database.ref('adminGifts').remove()
   ]).then(()=>{
     alert('✅ 서버 초기화가 완료되었습니다. 페이지를 새로고침합니다.');
     localStorage.clear();
@@ -5937,7 +6238,60 @@ if(document.getElementById('adminResetBtn')) document.getElementById('adminReset
   }).catch(err=>{
     alert('❌ 초기화 중 오류가 발생했습니다: ' + (err && err.message));
   });
+}
+function openAdminModal(){
+  const m = document.getElementById('adminModal');
+  if(!m) return;
+  const msg = document.getElementById('adminMsg'); if(msg) msg.style.display = 'none';
+  m.classList.add('show');
+  adminLoadUsers();
+}
+function closeAdminModal(){
+  const m = document.getElementById('adminModal');
+  if(m) m.classList.remove('show');
+}
+if(document.getElementById('adminResetBtn')) document.getElementById('adminResetBtn').addEventListener('click', ()=>{
+  if(!adminUnlocked){
+    const pw = prompt('관리자 비밀번호를 입력하세요:');
+    if(pw === null) return;
+    if(pw !== ADMIN_RESET_PASSWORD){ alert('❌ 비밀번호가 일치하지 않습니다.'); return; }
+    adminUnlocked = true;
+  }
+  openAdminModal();
 });
+if(document.getElementById('adminModalClose')) document.getElementById('adminModalClose').addEventListener('click', closeAdminModal);
+if(document.getElementById('adminModal')) document.getElementById('adminModal').addEventListener('click', (e)=>{ if(e.target.id === 'adminModal') closeAdminModal(); });
+if(document.getElementById('adminRefreshUsers')) document.getElementById('adminRefreshUsers').addEventListener('click', adminLoadUsers);
+if(document.getElementById('adminGiveBtn')) document.getElementById('adminGiveBtn').addEventListener('click', adminGive);
+if(document.getElementById('adminServerResetBtn')) document.getElementById('adminServerResetBtn').addEventListener('click', adminServerReset);
+
+/* 관리자가 보낸 선물(adminGifts/내아이디)을 받아서 내 Gold/Coin에 반영. 트랜잭션으로 한 번만 처리됩니다. */
+let adminGiftRef = null;
+function listenAdminGifts(){
+  if(typeof database === 'undefined' || !database) return;
+  const user = currentUserName();
+  if(!user) return;
+  if(adminGiftRef){ try{ adminGiftRef.off(); }catch(e){} }
+  adminGiftRef = database.ref('adminGifts/' + user);
+  adminGiftRef.on('child_added', (snap)=>{
+    const g = snap.val() || {};
+    snap.ref.transaction(cur => cur ? null : undefined, (err, committed)=>{
+      if(err || !committed) return;
+      const gold = Math.max(0, Math.floor(+g.gold || 0));
+      const coins = Math.max(0, Math.floor(+g.coins || 0));
+      if(!gold && !coins) return;
+      state.gold += gold;
+      state.coins += coins;
+      renderTop();
+      saveGame();
+      const parts = [];
+      if(gold) parts.push('Gold ' + fmt(gold));
+      if(coins) parts.push('Coin ' + fmt(coins));
+      showToast('🎁 관리자가 ' + parts.join(' + ') + '을(를) 지급했어요!');
+      try{ if(coins) coinRain(30); else burstConfetti(30); }catch(e){}
+    });
+  });
+}
 
 function startGame(){
   loadGame();
@@ -5951,6 +6305,7 @@ function startGame(){
   checkAttendance(true);
   applyCustomization();
   loadRankingData();
+  listenAdminGifts();
   setInterval(checkRelief, RELIEF_CHECK_TICK_MS);
   setInterval(renderMineBoost, 1000);
 }
@@ -6155,8 +6510,8 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
 
 /* ============================================================================
    1) 반응속도 대결 (reactionRooms/{roomId})
-   room = { status:'lobby'|'live'|'finished', hostPid, players:{pid:{name,ready,reactMs,falseStart}},
-            liveAt(serverTs), winnerPid, roundId }
+   room = { status:'lobby'|'playing'|'finished', hostPid, players:{pid:{name,ready,reactMs,falseStart}},
+            liveAt(서버 시각 기준 GO 시각), winnerPid, roundId }
 ============================================================================ */
 (function reactionGame(){
   const lobbyEl = document.getElementById('reactLobby');
@@ -6186,8 +6541,27 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
   const btnRematch = document.getElementById('btnReactRematch');
   if(!lobbyEl) return;
 
-  let roomId = null, dbRef = null, myPid = mgPid(), signalSeenAt = 0, clickedThisRound = false, curStatus = null;
-  let curAgreedBet = 0, processedBetRoundId = null;
+  const RULE_TEXT = '신호가 초록색(GO!)으로 바뀌면 최대한 빨리 클릭하세요! 반응속도(ms)가 가장 빠른 사람이 승리하고, 너무 일찍 누르면 실격입니다. 진 사람이 이긴 사람에게 베팅금을 지불합니다.';
+  const MIN_HUMAN_MS = 100;         // 이보다 빠른 기록은 사람이 낼 수 없는 값(예측 클릭/매크로)이므로 실격 처리
+  const RESOLVE_TIMEOUT_MS = 4000;  // GO 이후 이 시간이 지나도 기록을 안 낸 사람이 있으면 미제출로 보고 집계
+
+  /* ---------- 서버 시간 동기화: 방장/참가자 모두 같은 '서버 시각' 기준으로 신호를 받는다 ---------- */
+  let srvOffset = 0;
+  try{
+    if(mgDbOk()) database.ref('.info/serverTimeOffset').on('value', s=>{ srvOffset = s.val()||0; });
+  }catch(e){}
+  function sNow(){ return Date.now() + srvOffset; }
+
+  let roomId = null, dbRef = null, myPid = mgPid(), curStatus = null;
+  let curAgreedBet = 0, processedPayKey = null;
+  let lastRoom = null, roundKey = null, curLiveAt = 0, goShown = false, clickedThisRound = false;
+  let goTimer = null, resolveTimer = null, falseMsg = '실격! 너무 빨리 눌렀습니다';
+
+  function clearRoundState(){
+    clearTimeout(goTimer); clearTimeout(resolveTimer);
+    goTimer = null; resolveTimer = null;
+    roundKey = null; goShown = false; clickedThisRound = false; curLiveAt = 0;
+  }
 
   function leaveRoom(silent){
     if(dbRef){
@@ -6195,12 +6569,14 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
       try{ dbRef.off(); }catch(e){}
       try{ dbRef.remove(); }catch(e){}
     }
-    dbRef = null; roomId = null;
+    dbRef = null; roomId = null; lastRoom = null;
     window.__mpActiveRoom = null;
     if(gameAreaEl) gameAreaEl.style.display = 'none';
     if(statusDiv) statusDiv.innerHTML = '방을 생성하거나 참가하세요. 2명 이상 모이면 시작할 수 있습니다.';
     if(roomInput) roomInput.value = '';
     curStatus = null;
+    processedPayKey = null;   // 다른 방에서 같은 roundId가 나와도 정산이 누락되지 않도록 초기화
+    clearRoundState();
     if(!silent) mgToast('방에서 나갔습니다.');
   }
   if(btnLeave) btnLeave.onclick = ()=>{ if(dbRef) leaveRoom(false); };
@@ -6251,7 +6627,7 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
     const ref = database.ref('reactionRooms/'+id);
     ref.once('value').then(snap=>{
       if(snap.exists()) return mgAlert('이미 사용 중인 방 번호입니다.\n다른 번호를 입력하거나, 상대방에게 이 번호를 알려주고 "참가"를 눌러달라고 해주세요.');
-      roomId = id; dbRef = ref;
+      roomId = id; dbRef = ref; processedPayKey = null; clearRoundState();
       const players = {}; players[myPid] = freshPlayer();
       dbRef.set({ status:'lobby', hostPid: myPid, players, winnerPid:null, roundId:0, liveAt:null, agreedBet:0 }).then(()=>{
         dbRef.onDisconnect().remove();
@@ -6271,7 +6647,7 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
       if(!snap.exists()) return mgAlert('존재하지 않는 방입니다!');
       const room = snap.val();
       if(room.status!=='lobby') return mgAlert('이미 진행 중인 라운드가 있습니다. 라운드 종료 후 참가해주세요.');
-      roomId = id; dbRef = ref;
+      roomId = id; dbRef = ref; processedPayKey = null; clearRoundState();
       dbRef.child('players/'+myPid).set(freshPlayer()).then(()=>{
         dbRef.onDisconnect().remove();
         window.__mpActiveRoom = {pane:'reaction'};
@@ -6297,39 +6673,87 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
       const allReady = ids.every(pid=>room.players[pid].ready);
       if(!allReady) return room;
       ids.forEach(pid=>{ room.players[pid].reactMs=null; room.players[pid].falseStart=false; });
-      room.status = 'countdown';
-      room.liveAt = Date.now() + 1800 + Math.floor(Math.random()*3200); // 대략적인 지연(클라이언트 추정, 실제 신호는 liveAt 도달 시 status:'live'로 전환)
+      room.status = 'playing';
+      room.winnerPid = null;
+      // GO 신호 시각(서버 시각 기준). 모든 참가자가 이 '같은 시각'에 각자 화면에서 GO를 띄운다 → 방장 유리함 없음
+      room.liveAt = sNow() + 2500 + Math.floor(Math.random()*3500);
       return room;
     });
   };
 
-  function submitClick(isEarly){
-    if(!dbRef || clickedThisRound) return;
-    clickedThisRound = true;
-    if(isEarly){
-      dbRef.child('players/'+myPid).update({ falseStart:true, reactMs:-1 });
-      pad.className = 'reactPad wait';
-      padMain.textContent = '실격! 너무 빨리 눌렀습니다';
-      padSub.textContent = '다음 라운드를 기다려주세요';
-      return;
-    }
-    const ms = Date.now() - signalSeenAt;
-    dbRef.child('players/'+myPid).update({ reactMs: ms });
-    // 아직 아무도 승자로 확정되지 않았다면 내가 첫 유효 클릭자로 즉시 승리를 선점 시도
+  /* ---------- 결과 집계: '먼저 도착한 클릭'이 아니라 '반응속도(ms)가 가장 빠른 사람'이 승리 ---------- */
+  function tryResolve(){
+    if(!dbRef) return;
     dbRef.transaction(room=>{
-      if(!room) return room;
-      if(room.status==='live' && !room.winnerPid){
-        room.winnerPid = myPid;
-        room.status = 'finished';
-      }
+      if(!room || room.status!=='playing') return room;
+      const ids = Object.keys(room.players||{});
+      const allDone = ids.every(pid=>{ const p=room.players[pid]; return p.falseStart || typeof p.reactMs==='number'; });
+      if(!allDone && sNow() < (room.liveAt||0) + RESOLVE_TIMEOUT_MS) return room;
+      let best = null, bestMs = Infinity;
+      ids.forEach(pid=>{
+        const p = room.players[pid];
+        if(p.falseStart) return;
+        if(typeof p.reactMs!=='number' || p.reactMs < MIN_HUMAN_MS) return;
+        if(p.reactMs < bestMs){ bestMs = p.reactMs; best = pid; }
+      });
+      room.winnerPid = best;   // 유효 기록이 하나도 없으면 null(무승부, 돈 이동 없음)
+      room.status = 'finished';
       return room;
     });
   }
-  if(pad) pad.addEventListener('click', ()=>{
-    if(!dbRef || curStatus==null) return;
-    if(curStatus==='countdown') submitClick(true);
-    else if(curStatus==='live') submitClick(false);
+
+  function submitClick(){
+    if(!dbRef || clickedThisRound || !lastRoom || lastRoom.status!=='playing') return;
+    clickedThisRound = true;
+    const meRef = dbRef.child('players/'+myPid);
+    // 아직 내 화면에 GO가 뜨기 전 → 실격
+    if(!goShown){
+      falseMsg = '실격! 너무 빨리 눌렀습니다';
+      meRef.update({ falseStart:true, reactMs:-1 }).then(tryResolve);
+      return;
+    }
+    const ms = Math.round(sNow() - curLiveAt);
+    if(ms < MIN_HUMAN_MS){
+      falseMsg = '실격! 사람이 낼 수 없는 반응속도입니다';
+      meRef.update({ falseStart:true, reactMs:-1 }).then(tryResolve);
+      return;
+    }
+    meRef.update({ reactMs: ms }).then(tryResolve);
+  }
+  if(pad) pad.addEventListener('pointerdown', ()=>{
+    if(!dbRef || curStatus!=='playing') return;
+    submitClick();
   });
+
+  // 내 상태(실격/제출완료/GO/대기)에 맞춰 패드 표시 — 화면 상태는 DB 값 + 로컬 GO 타이머로만 결정
+  function renderPad(){
+    const room = lastRoom;
+    if(!room || room.status!=='playing') return;
+    const me = (room.players||{})[myPid];
+    if(!me) return;
+    resultBanner.className = 'resultBanner';
+    if(me.falseStart){
+      pad.className = 'reactPad wait';
+      padMain.textContent = falseMsg;
+      padSub.textContent = '다른 참가자의 결과를 기다려주세요';
+      resultBanner.textContent = '결과를 집계 중입니다...';
+    } else if(typeof me.reactMs==='number'){
+      pad.className = 'reactPad wait';
+      padMain.textContent = '기록 제출 완료!';
+      padSub.textContent = `${me.reactMs}ms · 결과를 집계 중...`;
+      resultBanner.textContent = '결과를 집계 중입니다...';
+    } else if(goShown){
+      pad.className = 'reactPad go';
+      padMain.textContent = 'GO! 지금 클릭!';
+      padSub.textContent = '';
+      resultBanner.textContent = '지금 클릭하세요!';
+    } else {
+      pad.className = 'reactPad wait';
+      padMain.textContent = '준비...';
+      padSub.textContent = '신호를 기다리세요 (너무 일찍 누르면 실격!)';
+      resultBanner.textContent = '곧 신호가 옵니다...';
+    }
+  }
 
   function listen(){
     if(!dbRef) return;
@@ -6342,16 +6766,18 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
       const players = room.players || {};
       if(!players[myPid]) return; // 아직 내 노드가 반영 안됐거나 제거된 경우
       curStatus = room.status;
+      lastRoom = room;
 
       renderMgPlayerGrid(playerGrid, players, myPid, {
         hostPid: room.hostPid,
         winnerPid: room.status==='finished' ? room.winnerPid : null,
         metaLabelFn: (p)=>{
           if(room.status==='finished'){
-            if(p.falseStart) return '실격';
+            if(p.falseStart || (typeof p.reactMs==='number' && p.reactMs>=0 && p.reactMs<MIN_HUMAN_MS)) return '실격';
             if(typeof p.reactMs==='number' && p.reactMs>=0) return p.reactMs+'ms';
             return '미제출';
           }
+          if(room.status==='playing') return '진행 중';
           return p.ready ? '준비완료' : '대기중';
         }
       });
@@ -6364,6 +6790,7 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
       const betOk = amt>0 && ids.length>=2 && ids.every(pid=>players[pid].betAgreed);
 
       if(room.status==='lobby'){
+        clearRoundState();
         rematchRow.style.display='none';
         document.getElementById('reactReadyRow').style.display='flex';
         btnReady.style.display = players[myPid].ready ? 'none' : 'inline-block';
@@ -6383,9 +6810,8 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
         pad.className = 'reactPad wait';
         padMain.textContent = '대기 중...';
         padSub.textContent = ids.length<2 ? '2명 이상 모여야 시작할 수 있어요' : (!betOk ? '베팅금 합의가 필요해요' : (allReady ? (amHost?'모두 준비됨 · 시작 버튼을 눌러주세요':'방장이 곧 시작합니다') : '모두 "준비 완료"를 눌러주세요'));
-        resultBanner.textContent = '신호가 초록색(GO!)으로 바뀌면 최대한 빨리 클릭하세요! 너무 일찍 누르면 실격입니다. 진 사람이 이긴 사람에게 베팅금을 지불합니다.';
+        resultBanner.textContent = RULE_TEXT;
         resultBanner.className = 'resultBanner';
-        clickedThisRound = false;
         return;
       }
 
@@ -6395,54 +6821,50 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
         else betInfoRowEl.style.display='none';
       }
 
-      if(room.status==='countdown'){
+      if(room.status==='playing'){
         document.getElementById('reactReadyRow').style.display='none';
         rematchRow.style.display='none';
-        pad.className = 'reactPad wait';
-        padMain.textContent = '준비...';
-        padSub.textContent = '신호를 기다리세요 (너무 일찍 누르면 실격!)';
-        resultBanner.textContent = '곧 신호가 옵니다...';
-        resultBanner.className = 'resultBanner';
-        clickedThisRound = players[myPid].falseStart || false;
-
-        // 신호 시각(liveAt)에 도달하면 방장이 status를 live로 전환한다 (호스트만 트리거하여 중복 방지)
-        if(amHost && room.liveAt && Date.now() >= room.liveAt){
-          dbRef.update({ status:'live' });
-        } else if(amHost && room.liveAt){
-          const wait = room.liveAt - Date.now();
-          setTimeout(()=>{ if(dbRef) dbRef.transaction(r=>{ if(r && r.status==='countdown') r.status='live'; return r; }); }, Math.max(0,wait)+20);
+        // 라운드가 새로 시작되면 (liveAt이 바뀌면) 로컬 GO 타이머와 집계 타이머를 준비한다.
+        // GO는 방장이 보내는 신호가 아니라 '서버 시각 liveAt'에 각자 화면에서 동시에 뜬다.
+        const key = String(room.liveAt);
+        if(roundKey !== key){
+          roundKey = key; goShown = false; clickedThisRound = false;
+          clearTimeout(goTimer); clearTimeout(resolveTimer);
+          curLiveAt = room.liveAt || 0;
+          const wait = curLiveAt - sNow();
+          if(wait <= 0) goShown = true;
+          else goTimer = setTimeout(()=>{
+            goShown = true;
+            if(window.Sound && typeof window.Sound.tick==='function') window.Sound.tick();
+            renderPad();
+          }, wait);
+          resolveTimer = setTimeout(tryResolve, Math.max(0, curLiveAt + RESOLVE_TIMEOUT_MS - sNow()) + 50);
         }
-        return;
-      }
-
-      if(room.status==='live'){
-        document.getElementById('reactReadyRow').style.display='none';
-        if(signalSeenAt===0 || signalSeenAt < (room.liveAt||0)) signalSeenAt = Date.now();
-        pad.className = 'reactPad go';
-        padMain.textContent = 'GO! 지금 클릭!';
-        padSub.textContent = '';
-        if(typeof window.Sound!=='function' && window.Sound && window.Sound.tick) window.Sound.tick();
+        renderPad();
+        const allDone = ids.every(pid=>{ const p=players[pid]; return p.falseStart || typeof p.reactMs==='number'; });
+        if(allDone) tryResolve();
         return;
       }
 
       if(room.status==='finished'){
+        clearRoundState();
         document.getElementById('reactReadyRow').style.display='none';
-        signalSeenAt = 0;
         const winner = players[room.winnerPid];
         pad.className = 'reactPad wait';
-        padMain.textContent = winner ? `🏆 ${winner.name} 승리!` : '라운드 종료';
-        padSub.textContent = (typeof winner?.reactMs==='number' ? winner.reactMs+'ms' : '');
+        padMain.textContent = winner ? `🏆 ${winner.name} 승리!` : '승자 없음';
+        padSub.textContent = winner ? (winner.reactMs+'ms') : '유효한 기록이 없어 베팅금 이동 없이 종료됩니다';
         if(room.winnerPid===myPid && resultBanner.dataset.roundId !== String(room.roundId)){
           resultBanner.dataset.roundId = String(room.roundId);
           if(window.burstConfetti) window.burstConfetti(30);
           if(window.Sound && window.Sound.win) window.Sound.win();
         }
-        resultBanner.textContent = winner ? `🏆 ${mgEscape(winner.name)}님이 ${winner.reactMs}ms로 승리했습니다!` : '결과를 집계 중입니다...';
+        resultBanner.textContent = winner ? `🏆 ${mgEscape(winner.name)}님이 ${winner.reactMs}ms로 승리했습니다!` : '모두 실격 또는 미제출이라 무승부로 종료되었습니다.';
         resultBanner.className = 'resultBanner win';
         rematchRow.style.display = 'flex';
 
-        if(processedBetRoundId !== room.roundId){
-          processedBetRoundId = room.roundId;
+        const payKey = roomId + ':' + (room.roundId||0) + ':' + (room.liveAt||0);
+        if(processedPayKey !== payKey){
+          processedPayKey = payKey;
           if(amt>0){
             let delta = 0;
             if(room.winnerPid===myPid) delta = amt*(ids.length-1);
@@ -6492,12 +6914,199 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
   if(!lobbyEl) return;
 
   const MAX_PLAYERS = 16;
-  const MIN_EXPLODE_MS = 4000, MAX_EXPLODE_MS = 9000;
+  const MIN_EXPLODE_MS = 10000, MAX_EXPLODE_MS = 20000; // 미션을 풀 시간을 위해 폭발 시간을 늘림
+  const MIN_HOLD_MS = 7000; // 폭탄을 넘겨받은 사람에게 최소한 보장되는 미션 수행 시간
 
   let roomId = null, dbRef = null, myPid = mgPid(), curStatus = null;
   let curAgreedBet = 0, processedBetRoundId = null, hostTickTimer = null, shakeTimer = null;
+  let missionKey = null, missionCleared = false, missionCancel = null, wasAlive = true;
+  const missionBox = document.getElementById('bombMissionBox');
+
+  /* ---------------------------- 폭탄 미션 ---------------------------- */
+  function rnd(n){ return Math.floor(Math.random()*n); }
+  function pick(arr){ return arr[rnd(arr.length)]; }
+  function shuffle(a){ a = a.slice(); for(let i=a.length-1;i>0;i--){ const j = rnd(i+1); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function mk(tag, cls, text){ const e = document.createElement(tag); if(cls) e.className = cls; if(text!=null) e.textContent = text; return e; }
+  function shakeEl(el){ el.classList.remove('bmShake'); void el.offsetWidth; el.classList.add('bmShake'); }
+  function flashBad(btn){ btn.classList.add('bad'); setTimeout(()=>btn.classList.remove('bad'), 350); }
+  const U = { rnd, pick, shuffle, mk, shakeEl, flashBad };
+
+  /* 각 미션: run(body, clear, ctx, U) — 성공하면 clear() 호출 */
+  const MISSIONS = [
+    { title:'연타 폭풍!', run(body, clear){
+      const need = 10 + rnd(7); let n = 0;
+      body.appendChild(mk('div','bmDesc', `버튼을 ${need}번 연타하세요!`));
+      const cnt = mk('div','bmPrompt', `0 / ${need}`);
+      const btn = mk('button','bmBtn big','💥 연타!');
+      btn.onclick = ()=>{ n++; cnt.textContent = `${n} / ${need}`; if(n>=need) clear(); };
+      body.appendChild(cnt); body.appendChild(btn);
+    }},
+    { title:'암산 해체', run(body, clear, ctx){
+      const op = pick(['+','-','×']); let a, b, ans;
+      if(op==='+'){ a = 10+rnd(40); b = 10+rnd(40); ans = a+b; }
+      else if(op==='-'){ a = 30+rnd(60); b = 10+rnd(a-10); ans = a-b; }
+      else { a = 3+rnd(8); b = 3+rnd(8); ans = a*b; }
+      body.appendChild(mk('div','bmDesc','정답을 입력하고 확인을 누르세요!'));
+      body.appendChild(mk('div','bmPrompt', `${a} ${op} ${b} = ?`));
+      const row = mk('div',''); const inp = mk('input','bmInput'); inp.type = 'text'; inp.inputMode = 'numeric'; inp.autocomplete = 'off';
+      const ok = mk('button','bmBtn','확인');
+      const submit = ()=>{ if(parseInt(inp.value,10) === ans) clear(); else { shakeEl(row); inp.value = ''; inp.focus(); } };
+      ok.onclick = submit; inp.addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.isComposing) submit(); });
+      row.appendChild(inp); row.appendChild(ok); body.appendChild(row);
+      ctx.timeout(()=>inp.focus(), 50);
+    }},
+    { title:'글자 색깔 맞추기', run(body, clear){
+      const colors = [{n:'빨강',c:'#ff4d6a'},{n:'파랑',c:'#3fa9ff'},{n:'초록',c:'#3fe07a'},{n:'노랑',c:'#ffd23f'}];
+      const need = 2; let ok = 0;
+      const desc = mk('div','bmDesc'); const prompt = mk('div','bmPrompt'); const row = mk('div','bmRow');
+      body.appendChild(desc); body.appendChild(prompt); body.appendChild(row);
+      function newQ(){
+        const word = pick(colors); let ink; do{ ink = pick(colors); }while(ink===word);
+        desc.textContent = `글자의 "색깔"을 고르세요! (글자 뜻이 아니에요) ${ok}/${need}`;
+        prompt.textContent = word.n; prompt.style.color = ink.c;
+        row.innerHTML = '';
+        colors.forEach(c=>{
+          const b = mk('button','bmBtn',c.n);
+          b.onclick = ()=>{
+            if(c===ink){ ok++; if(ok>=need) clear(); else newQ(); }
+            else { ok = 0; shakeEl(body); newQ(); }
+          };
+          row.appendChild(b);
+        });
+      }
+      newQ();
+    }},
+    { title:'숫자 순서대로 누르기', run(body, clear){
+      const N = 6; let next = 1;
+      body.appendChild(mk('div','bmDesc', `1부터 ${N}까지 순서대로 누르세요!`));
+      const row = mk('div','bmRow');
+      shuffle([1,2,3,4,5,6]).forEach(v=>{
+        const b = mk('button','bmBtn',String(v));
+        b.onclick = ()=>{
+          if(v===next){ b.classList.add('done'); b.disabled = true; next++; if(next>N) clear(); }
+          else { flashBad(b); shakeEl(row); }
+        };
+        row.appendChild(b);
+      });
+      body.appendChild(row);
+    }},
+    { title:'따라 치기', run(body, clear, ctx){
+      const word = pick(['폭탄해체','뒷산보석','황금곡괭이','다이아몬드','행운의코인','잭팟대박','슬롯머신','광부출동']);
+      body.appendChild(mk('div','bmDesc','아래 단어를 똑같이 입력하세요!'));
+      body.appendChild(mk('div','bmPrompt', word));
+      const row = mk('div',''); const inp = mk('input','bmInput'); inp.type = 'text'; inp.autocomplete = 'off';
+      const ok = mk('button','bmBtn','확인');
+      const submit = ()=>{ if(inp.value.trim() === word) clear(); else { shakeEl(row); inp.select(); } };
+      ok.onclick = submit; inp.addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.isComposing) submit(); });
+      row.appendChild(inp); row.appendChild(ok); body.appendChild(row);
+      ctx.timeout(()=>inp.focus(), 50);
+    }},
+    { title:'다른 그림 찾기', run(body, clear){
+      const pair = pick([['🍎','🍏'],['😀','😃'],['🐶','🐱'],['🌕','🌑'],['🔴','🟠'],['⭐','🌟'],['🐵','🙈'],['🔷','🔹']]);
+      const flip = rnd(2); const base = pair[flip], odd = pair[1-flip]; const oddIdx = rnd(12);
+      body.appendChild(mk('div','bmDesc','하나만 다른 그림을 찾아 누르세요!'));
+      const grid = mk('div','bmGrid');
+      for(let i=0;i<12;i++){
+        const b = mk('button','bmBtn emo', i===oddIdx ? odd : base);
+        b.onclick = ()=>{ if(i===oddIdx) clear(); else { flashBad(b); shakeEl(grid); } };
+        grid.appendChild(b);
+      }
+      body.appendChild(grid);
+    }},
+    { title:'기억력 테스트', run(body, clear, ctx){
+      const code = String(1000 + rnd(9000));
+      body.appendChild(mk('div','bmDesc','숫자를 잠깐 보여드려요. 잘 외우세요!'));
+      const prompt = mk('div','bmPrompt', code); body.appendChild(prompt);
+      ctx.timeout(()=>{
+        body.innerHTML = '';
+        body.appendChild(mk('div','bmDesc','방금 본 4자리 숫자를 입력하세요!'));
+        const row = mk('div',''); const inp = mk('input','bmInput'); inp.type = 'text'; inp.inputMode = 'numeric'; inp.autocomplete = 'off';
+        const ok = mk('button','bmBtn','확인');
+        const submit = ()=>{ if(inp.value.trim() === code) clear(); else { shakeEl(row); inp.value = ''; inp.focus(); } };
+        ok.onclick = submit; inp.addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.isComposing) submit(); });
+        row.appendChild(inp); row.appendChild(ok); body.appendChild(row);
+        inp.focus();
+      }, 1600);
+    }},
+    { title:'타이밍 맞추기', run(body, clear, ctx){
+      const zoneW = 24, zoneL = 10 + rnd(56);
+      body.appendChild(mk('div','bmDesc','움직이는 막대가 초록 구간에 있을 때 멈춰!를 누르세요!'));
+      const bar = mk('div','bmBar'); const zone = mk('div','zone'); const cur = mk('div','cursor');
+      zone.style.left = zoneL + '%'; zone.style.width = zoneW + '%';
+      bar.appendChild(zone); bar.appendChild(cur); body.appendChild(bar);
+      let pos = 0, dir = 1;
+      ctx.interval(()=>{ pos += dir*1.7; if(pos>=100){ pos = 100; dir = -1; } if(pos<=0){ pos = 0; dir = 1; } cur.style.left = `calc(${pos}% - 3px)`; }, 16);
+      const btn = mk('button','bmBtn big','🛑 멈춰!');
+      btn.onclick = ()=>{ if(pos >= zoneL-1 && pos <= zoneL+zoneW+1) clear(); else shakeEl(bar); };
+      body.appendChild(btn);
+    }},
+    { title:'가위바위보 이기기', run(body, clear){
+      const hands = [{e:'✊',beat:'✋'},{e:'✋',beat:'✌️'},{e:'✌️',beat:'✊'}];
+      const desc = mk('div','bmDesc','상대가 낸 손을 이기는 손을 고르세요!'); const prompt = mk('div','bmPrompt'); const row = mk('div','bmRow');
+      body.appendChild(desc); body.appendChild(prompt); body.appendChild(row);
+      function newQ(){
+        const h = pick(hands); prompt.textContent = h.e; row.innerHTML = '';
+        ['✊','✋','✌️'].forEach(e=>{
+          const b = mk('button','bmBtn',e); b.style.fontSize = '26px';
+          b.onclick = ()=>{ if(e===h.beat) clear(); else { shakeEl(body); newQ(); } };
+          row.appendChild(b);
+        });
+      }
+      newQ();
+    }},
+    { title:'짝수만 누르기', run(body, clear){
+      const evenCount = 3 + rnd(2); const evenIdx = new Set(shuffle([0,1,2,3,4,5,6,7,8]).slice(0, evenCount));
+      let left = evenCount;
+      body.appendChild(mk('div','bmDesc','짝수만 모두 누르세요! (홀수를 누르면 안 돼요)'));
+      const grid = mk('div','bmGrid'); grid.style.gridTemplateColumns = 'repeat(3,1fr)'; grid.style.maxWidth = '240px';
+      for(let i=0;i<9;i++){
+        let v = 1 + rnd(99); if(evenIdx.has(i)){ if(v%2) v = v===99 ? 98 : v+1; } else { if(v%2===0) v = v-1 || 1; }
+        const isEven = v%2===0;
+        const b = mk('button','bmBtn',String(v));
+        b.onclick = ()=>{
+          if(isEven){ if(!b.disabled){ b.classList.add('done'); b.disabled = true; left--; if(left<=0) clear(); } }
+          else { flashBad(b); shakeEl(grid); }
+        };
+        grid.appendChild(b);
+      }
+      body.appendChild(grid);
+    }},
+  ];
+
+  function stopMission(){
+    if(missionCancel){ missionCancel(); missionCancel = null; }
+    if(missionBox){ missionBox.style.display = 'none'; missionBox.innerHTML = ''; }
+  }
+  function startMission(){
+    stopMission();
+    if(!missionBox){ missionCleared = true; return; }
+    const def = pick(MISSIONS);
+    const timers = []; let alive = true;
+    const ctx = {
+      interval:(fn,ms)=>{ const id = setInterval(fn,ms); timers.push(id); return id; },
+      timeout:(fn,ms)=>{ const id = setTimeout(fn,ms); timers.push(id); return id; },
+    };
+    missionCancel = ()=>{ alive = false; timers.forEach(id=>{ clearInterval(id); clearTimeout(id); }); };
+    missionBox.innerHTML = '';
+    missionBox.style.display = 'block';
+    missionBox.appendChild(mk('div','bmTitle','🎯 미션: ' + def.title));
+    const body = mk('div',''); missionBox.appendChild(body);
+    if(dbRef){ try{ dbRef.child('mission').set({ pid: myPid, text: def.title }); }catch(e){} }
+    const clear = ()=>{
+      if(!alive || missionCleared) return;
+      missionCleared = true;
+      if(missionCancel) missionCancel();
+      body.innerHTML = '';
+      body.appendChild(mk('div','bmClear','✅ 미션 성공! 폭탄을 넘기세요!'));
+      if(window.Sound && window.Sound.tick) window.Sound.tick();
+      btnPass.style.display = 'inline-block';
+      bombHolderText.textContent = '✅ 미션 성공! 얼른 넘기세요!';
+    };
+    def.run(body, clear, ctx, U);
+  }
 
   function leaveRoom(silent){
+    stopMission(); missionKey = null; missionCleared = false; wasAlive = true;
     if(hostTickTimer){ clearInterval(hostTickTimer); hostTickTimer = null; }
     if(shakeTimer){ clearInterval(shakeTimer); shakeTimer = null; }
     if(dbRef){
@@ -6525,6 +7134,8 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
       room.order = null;
       room.currentHolderPid = null;
       room.explodeAt = null;
+      room.holderSeq = 0;
+      room.mission = null;
       Object.keys(room.players||{}).forEach(pid=>{
         room.players[pid].ready = false;
         room.players[pid].alive = true;
@@ -6623,6 +7234,8 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
       ids.forEach(pid=>{ room.players[pid].alive = true; });
       room.order = order;
       room.currentHolderPid = order[0];
+      room.holderSeq = 1;
+      room.mission = null;
       room.explodeAt = Date.now() + MIN_EXPLODE_MS + Math.floor(Math.random()*(MAX_EXPLODE_MS-MIN_EXPLODE_MS));
       room.status = 'live';
       return room;
@@ -6641,6 +7254,7 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
 
   if(btnPass) btnPass.onclick = ()=>{
     if(!dbRef) return;
+    if(!missionCleared) return; // 미션을 깨야만 넘길 수 있다
     dbRef.transaction(room=>{
       if(!room || room.status!=='live') return room;
       if(room.currentHolderPid !== myPid) return room;
@@ -6648,8 +7262,13 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
       const next = nextAliveAfter(room.order||[], room.players||{}, myPid);
       if(!next) return room;
       room.currentHolderPid = next;
+      room.holderSeq = (room.holderSeq||0) + 1;
+      room.mission = null;
+      // 받은 사람이 미션을 풀 수 있도록 최소 시간을 보장
+      room.explodeAt = Math.max(room.explodeAt, Date.now() + MIN_HOLD_MS);
       return room;
     });
+    btnPass.style.display = 'none';
   };
 
   // 호스트만 주기적으로 폭발 여부를 체크한다 (중복 방지를 위해 트랜잭션 사용)
@@ -6671,6 +7290,8 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
         } else {
           const next = nextAliveAfter(room.order||[], room.players||{}, holder) || aliveIds[0];
           room.currentHolderPid = next;
+          room.holderSeq = (room.holderSeq||0) + 1;
+          room.mission = null;
           room.explodeAt = Date.now() + MIN_EXPLODE_MS + Math.floor(Math.random()*(MAX_EXPLODE_MS-MIN_EXPLODE_MS));
         }
         return room;
@@ -6708,6 +7329,8 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
       const betOk = amt>0 && ids.length>=2 && ids.every(pid=>players[pid].betAgreed);
 
       if(room.status==='lobby'){
+        wasAlive = true;
+        if(missionKey!==null || missionBox){ stopMission(); missionKey = null; missionCleared = false; }
         rematchRow.style.display='none';
         document.getElementById('bombReadyRow').style.display='flex';
         btnReady.style.display = players[myPid].ready ? 'none' : 'inline-block';
@@ -6728,7 +7351,7 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
         bombHolderText.textContent = '';
         btnPass.style.display = 'none';
         if(shakeTimer){ clearInterval(shakeTimer); shakeTimer = null; }
-        resultBanner.textContent = ids.length<2 ? '2명 이상 모여야 시작할 수 있어요' : `${ids.length}명 참가 중 · 방장이 시작하면 무작위로 첫 소지자가 정해집니다!`;
+        resultBanner.textContent = ids.length<2 ? '2명 이상 모여야 시작할 수 있어요' : `${ids.length}명 참가 중 · 방장이 시작하면 무작위로 첫 소지자가 정해집니다! 폭탄을 받으면 미션을 깨야 넘길 수 있어요.`;
         resultBanner.className = 'resultBanner';
         return;
       }
@@ -6747,10 +7370,35 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
         const holder = room.currentHolderPid;
         const holderName = players[holder] ? players[holder].name : '???';
         const amHolding = holder === myPid;
-        bombHolderText.textContent = amHolding ? '🔥 당신이 폭탄을 들고 있습니다! 얼른 넘기세요!' : `${mgEscape(holderName)}님이 폭탄을 들고 있습니다...`;
-        btnPass.style.display = amHolding ? 'inline-block' : 'none';
-        resultBanner.textContent = '폭탄이 터지기 전에 넘기세요! 언제 터질지는 아무도 모릅니다.';
-        resultBanner.className = 'resultBanner';
+        const iAmAlive = !!(players[myPid] && players[myPid].alive);
+        const seqKey = (room.roundId||0) + ':' + (room.holderSeq||0);
+
+        if(amHolding){
+          // 폭탄을 새로 받을 때마다 새 미션 시작 (같은 소지 구간에서는 다시 시작하지 않음)
+          if(missionKey !== seqKey){ missionKey = seqKey; missionCleared = false; startMission(); }
+          bombHolderText.textContent = missionCleared ? '✅ 미션 성공! 얼른 넘기세요!' : '🔥 폭탄을 받았습니다! 미션을 성공해야 넘길 수 있어요!';
+          btnPass.style.display = missionCleared ? 'inline-block' : 'none';
+        } else {
+          if(missionKey !== null){ stopMission(); missionKey = null; missionCleared = false; }
+          const m = room.mission;
+          bombHolderText.textContent = (m && m.pid===holder && m.text)
+            ? `${holderName}님이 미션 수행 중... (${m.text})`
+            : `${holderName}님이 폭탄을 들고 있습니다...`;
+          btnPass.style.display = 'none';
+        }
+
+        if(wasAlive && !iAmAlive){
+          wasAlive = false;
+          mgToast('💥 폭탄이 터졌습니다! 탈락했어요...');
+          if(window.Sound && window.Sound.lose) window.Sound.lose();
+        }
+        if(!iAmAlive){
+          resultBanner.textContent = '💥 탈락했어요! 남은 사람들의 대결을 지켜보세요.';
+          resultBanner.className = 'resultBanner lose';
+        } else {
+          resultBanner.textContent = '폭탄이 터지기 전에 미션을 깨고 넘기세요! 언제 터질지는 아무도 모릅니다.';
+          resultBanner.className = 'resultBanner';
+        }
         if(!shakeTimer){
           shakeTimer = setInterval(()=>{
             const heldMs = Date.now() - (room.explodeAt - MAX_EXPLODE_MS); // 대략적인 경과 시간 추정(연출용)
@@ -6774,8 +7422,14 @@ function renderMgPlayerGrid(gridEl, players, myPid, opts){
           if(window.burstConfetti) window.burstConfetti(30);
           if(window.Sound && window.Sound.win) window.Sound.win();
         }
-        resultBanner.textContent = winner ? `🏆 ${mgEscape(winner.name)}님이 최후의 생존자입니다!` : '라운드 종료';
-        resultBanner.className = 'resultBanner win';
+        stopMission(); missionKey = null; missionCleared = false;
+        if(room.winnerPid===myPid){
+          resultBanner.textContent = '🏆 축하해요! 당신이 최후의 생존자입니다!';
+          resultBanner.className = 'resultBanner win';
+        } else {
+          resultBanner.textContent = winner ? `💥 폭탄이 터져 탈락했어요... 최후의 생존자: ${winner.name}` : '💥 폭탄이 터져 탈락했어요...';
+          resultBanner.className = 'resultBanner lose';
+        }
         rematchRow.style.display = 'flex';
 
         if(processedBetRoundId !== room.roundId){
