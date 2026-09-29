@@ -968,186 +968,209 @@ input{font-family:inherit;}
 .wcTimerFill.danger{background:linear-gradient(90deg,var(--lose),#ff8a4a);}
 .wcHint{font-size:11px;color:var(--sub);text-align:center;margin-bottom:8px;}
 
-/* ---------- 끄투코리아 스타일 끝말잇기 스킨 (신버전 UI) ---------- */
+/* ---------- 끝말잇기 스킨 (게임 공통 다크 UI · 한 화면 맞춤) ---------- */
 .kkRoom{
-  position:relative;
-  background:
-    repeating-linear-gradient(45deg, rgba(255,255,255,.55) 0 26px, rgba(255,255,255,0) 26px 52px),
-    repeating-linear-gradient(-45deg, rgba(255,255,255,.35) 0 26px, rgba(255,255,255,0) 26px 52px),
-    linear-gradient(180deg,#e7f5df,#dcefd2);
-  border:2px solid #bcdcae;border-radius:16px;padding:10px 12px 16px;
-  font-family:"Malgun Gothic","Apple SD Gothic Neo",ui-sans-serif,sans-serif;
-  color:#33413a;
-  box-shadow:inset 0 2px 0 rgba(255,255,255,.8), 0 12px 30px -16px rgba(0,0,0,.6);
+  position:relative;display:flex;flex-direction:column;gap:6px;
+  height:var(--wcH,auto);overflow-x:hidden;overflow-y:auto;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border:1px solid rgba(192,75,255,.28);border-radius:14px;padding:8px 10px 10px;
+  color:var(--text);
+  box-shadow:0 14px 40px -18px rgba(0,0,0,.7), inset 0 0 44px -30px rgba(192,75,255,.4);
 }
+.kkRoom > *{flex:0 0 auto;min-width:0;}
+.kkRoom .betRow,.kkRoom .mpLobby,.kkRoom .bjActions{margin:0;}
 .kkTitleBar{
   display:flex;align-items:center;gap:8px;
-  background:rgba(255,255,255,.82);border:1px solid #c6ddb8;border-radius:999px;
-  padding:6px 12px;font-size:11.5px;font-weight:800;color:#3d5145;backdrop-filter:blur(4px);
+  background:#0c0f16;border:1px solid var(--line);border-radius:999px;
+  padding:5px 12px;font-size:11.5px;font-weight:800;color:var(--text);
 }
-.kkTitleBar .kkTitleCenter{flex:1;text-align:center;color:#5c7a67;font-weight:800;}
-.kkTitleBar .kkTitleRight{color:#5c7a67;font-weight:700;font-family:var(--mono);font-size:11px;}
+.kkTitleBar .kkTitleCenter{flex:1;text-align:center;color:var(--brass-glow);font-weight:800;}
+.kkTitleBar .kkTitleRight{color:var(--sub);font-weight:700;font-family:var(--mono);font-size:11px;}
 #btnWcLeave.kkExitBtn{
-  background:linear-gradient(180deg,#ff8fa3,#ec4664);border:0;color:#fff;border-radius:999px;
+  background:linear-gradient(180deg,#ff6b84,#d92c4b);border:0;color:#fff;border-radius:999px;
   padding:4px 12px;font-size:11px;font-weight:800;margin-left:4px;min-width:0;
-  box-shadow:0 2px 6px -2px rgba(236,70,100,.8);
+  box-shadow:0 2px 10px -3px rgba(255,77,106,.8);
 }
 
-/* ===== 보드 ===== */
-.kkBoardWrap{display:flex;justify-content:center;padding:26px 0 6px;}
+/* ===== 보드 (라운드 시간 · 시작 글자 원반은 보드 오른쪽) ===== */
+.kkBoardWrap{display:flex;justify-content:center;align-items:stretch;gap:10px;}
 .kkBoard{
-  position:relative;width:min(600px,100%);
-  background:linear-gradient(180deg,#e8ab48,#d9973a);
-  border:3px solid #c07f26;border-radius:26px;padding:12px;
-  box-shadow:0 10px 24px -14px rgba(0,0,0,.65);
+  position:relative;flex:1 1 auto;max-width:560px;min-width:0;
+  background:linear-gradient(180deg,#1b1526,#0f0c17);
+  border:1px solid var(--brass-dim);border-radius:16px;padding:8px;
+  box-shadow:0 0 26px -10px rgba(224,165,66,.5), inset 0 0 24px -14px rgba(224,165,66,.4);
 }
-.kkPegs{position:absolute;top:-17px;left:14px;right:14px;display:flex;justify-content:space-between;pointer-events:none;}
-.kkPeg{
-  width:34px;height:34px;border-radius:50%;background:linear-gradient(180deg,#f0b24f,#dc9a38);
-  border:3px solid #c07f26;display:flex;align-items:center;justify-content:center;
-}
-.kkPeg::after{content:"";width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:inset 0 2px 3px rgba(0,0,0,.35);}
-.kkDots{position:absolute;top:4px;left:50%;transform:translateX(-50%);display:flex;gap:7px;}
-.kkDots i{width:5px;height:5px;border-radius:50%;background:rgba(90,55,10,.5);display:block;}
+.kkPegs,.kkDots{display:none;}
 .kkPlate{
-  position:relative;background:linear-gradient(180deg,#6b4a1c,#4e3413);
-  border-radius:14px;min-height:112px;display:flex;align-items:center;justify-content:center;
-  padding:22px 16px 20px;overflow:hidden;box-shadow:inset 0 3px 10px rgba(0,0,0,.45);
+  position:relative;background:radial-gradient(ellipse at 50% 40%,#1c1420 0%,#0b0d13 75%);
+  border:1px solid var(--line);border-radius:12px;
+  min-height:clamp(62px,11vh,96px);display:flex;align-items:center;justify-content:center;
+  padding:12px 16px 24px;overflow:hidden;
 }
 #wcBoardWord{
-  font-size:46px;font-weight:900;color:#fff;letter-spacing:4px;line-height:1.15;text-align:center;
-  text-shadow:0 3px 0 rgba(0,0,0,.35);
+  font-size:clamp(26px,5.5vh,42px);font-weight:900;color:#fff;letter-spacing:4px;line-height:1.1;text-align:center;
+  text-shadow:0 0 16px rgba(255,200,107,.45);
 }
-#wcBoardWord.small{font-size:22px;letter-spacing:0;color:#f0dcb6;text-shadow:none;}
+#wcBoardWord.small{font-size:clamp(15px,2.6vh,20px);letter-spacing:0;color:var(--sub);text-shadow:none;}
 .kkPlateInner{display:flex;flex-direction:column;align-items:center;gap:2px;}
-.kkPrevWord{font-size:12px;font-weight:700;color:#e3cb9c;opacity:.85;min-height:15px;}
+.kkPrevWord{font-size:11.5px;font-weight:700;color:var(--sub);min-height:14px;}
 .kkRoundBadge{
-  position:absolute;left:10px;top:10px;width:24px;height:24px;border-radius:7px;
-  background:linear-gradient(180deg,#ff9f43,#f07b1b);transform:rotate(45deg);
-  display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px -1px rgba(0,0,0,.45);
+  position:absolute;left:11px;top:9px;width:22px;height:22px;border-radius:7px;
+  background:linear-gradient(180deg,#e05fff,#a020e0);transform:rotate(45deg);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px -2px rgba(192,75,255,.9);
 }
-.kkRoundBadge b{transform:rotate(-45deg);color:#fff;font-size:12px;font-weight:900;}
+.kkRoundBadge b{transform:rotate(-45deg);color:#fff;font-size:11.5px;font-weight:900;}
 .kkTimeBar{
-  position:absolute;left:50%;bottom:0;height:17px;background:rgba(0,0,0,.28);
-  width:100%;transform:translateX(-50%);transition:width .3s ease;border-radius:2px;
+  position:absolute;left:50%;bottom:0;height:16px;background:#0c0f16;border-top:1px solid var(--line);
+  width:100%;transform:translateX(-50%);transition:width .3s ease;
 }
-.kkTimeBar #wcTimerFill{height:100%;width:100%;background:linear-gradient(180deg,#ffe97a,#f2cf2f);transition:width .12s linear;}
-.kkTimeBar #wcTimerFill.danger{background:linear-gradient(180deg,#ffb27a,#ef6a3b);}
+.kkTimeBar #wcTimerFill{height:100%;width:100%;background:linear-gradient(90deg,#a97a2e,var(--brass-glow));transition:width .12s linear;}
+.kkTimeBar #wcTimerFill.danger{background:linear-gradient(90deg,var(--lose),#ff8a4a);}
 .kkTimeText{
   position:absolute;right:8px;top:0;height:100%;display:flex;align-items:center;
-  font-size:11.5px;font-weight:800;color:#4e3413;font-family:var(--mono);
+  font-size:11px;font-weight:800;color:#fff;font-family:var(--mono);text-shadow:0 1px 3px rgba(0,0,0,.9);
 }
 .kkChainBadge{
-  position:absolute;right:10px;top:10px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
-  color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 9px;letter-spacing:1px;
+  position:absolute;right:10px;top:9px;background:rgba(192,75,255,.16);border:1px solid rgba(192,75,255,.5);
+  color:var(--coin-txt);font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 9px;letter-spacing:1px;
 }
+.kkDiscRow{display:flex;flex-direction:column;justify-content:center;gap:6px;flex:0 0 auto;}
+.kkDisc{
+  min-width:96px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:16px;padding:0 12px;font-family:var(--mono);background:#0c0f16;
+}
+.kkDisc.time{border:1px solid rgba(63,224,255,.55);color:var(--neon2);text-shadow:0 0 10px rgba(63,224,255,.6);box-shadow:0 0 14px -6px rgba(63,224,255,.6);}
+.kkDisc.time small{font-size:11px;margin-left:1px;}
+.kkDisc.char{border:1px solid rgba(224,165,66,.55);color:var(--brass-glow);text-shadow:0 0 10px rgba(255,200,107,.5);box-shadow:0 0 14px -6px rgba(224,165,66,.6);}
 
 /* ===== 차례 표시 + 입력 ===== */
-.kkTurnPillWrap{display:flex;justify-content:center;margin:22px 0 -9px;}
+.kkTurnPillWrap{display:flex;justify-content:center;}
 #wcTurnPill{
-  background:#3aa17e;color:#fff;font-size:11.5px;font-weight:800;border-radius:6px;padding:4px 12px;
-  box-shadow:0 3px 8px -3px rgba(0,0,0,.4);
+  background:linear-gradient(180deg,#e05fff,#a020e0);color:#fff;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 14px;
+  box-shadow:0 4px 14px -4px rgba(192,75,255,.8);
 }
-#wcTurnPill.other{background:#ffffff;color:#3d5145;border:1px solid #c6ddb8;}
-.kkInputWrap{position:relative;width:min(800px,100%);margin:0 auto;}
+#wcTurnPill.other{background:#0c0f16;color:var(--sub);border:1px solid var(--line);box-shadow:none;}
+.kkInputWrap{position:relative;width:min(720px,100%);margin:0 auto;}
 #wcInputRow.kkInput{
-  display:flex;gap:0;background:#fff;border:3px solid #4bc3a3;border-radius:12px 12px 0 0;
-  overflow:hidden;box-shadow:0 6px 16px -12px rgba(0,0,0,.6);
+  display:flex;gap:0;margin:0;background:#0c0f16;border:2px solid var(--neon2);border-bottom:0;border-radius:11px 11px 0 0;
+  overflow:hidden;box-shadow:0 0 18px -8px rgba(63,224,255,.6);
 }
-#wcInputRow.kkInput.off{border-color:#c9a7e6;}
+#wcInputRow.kkInput.off{border-color:var(--line);box-shadow:none;}
 #wcInputRow.kkInput #wcWordInput{
-  flex:1;border:0;background:transparent;color:#2b3a32;text-align:center;
-  padding:14px 12px;font-size:18px;font-weight:700;outline:none;box-shadow:none;
+  flex:1;width:auto;min-width:0;border:0;background:transparent;color:var(--text);font-family:inherit;text-align:center;
+  padding:8px 12px;font-size:17px;font-weight:700;outline:none;box-shadow:none;border-radius:0;
 }
-#wcInputRow.kkInput #wcWordInput::placeholder{color:#9db2a6;font-weight:600;}
-#wcInputRow.kkInput #wcSubmit{
-  flex:0 0 auto;min-width:86px;margin:0;border:0;border-radius:0;font-weight:800;font-size:13px;
-  background:linear-gradient(180deg,#ffffff,#eef3ef);color:#3d5145;border-left:2px solid #dde8e1;box-shadow:none;
-}
+#wcInputRow.kkInput #wcWordInput::placeholder{color:var(--sub);font-weight:600;}
+#wcInputRow.kkInput #wcSubmit{flex:0 0 auto;min-width:84px;margin:0;border-radius:0;padding:0 16px;font-size:13px;}
 .kkGauge{
-  position:relative;height:19px;border-radius:0 0 12px 12px;overflow:hidden;
-  background:linear-gradient(90deg,#1f3fa8,#5c2fa8);
+  position:relative;height:16px;border-radius:0 0 11px 11px;overflow:hidden;
+  background:#12141c;border:1px solid var(--line);
 }
-.kkGauge #wcGaugeFill{height:100%;width:0%;background:linear-gradient(90deg,#4f8bff,#a86bff);transition:width .25s ease;}
+.kkGauge #wcGaugeFill{height:100%;width:0%;background:linear-gradient(90deg,#7a3bff,var(--neon));transition:width .25s ease;}
 .kkGauge .kkGaugeText{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:800;color:#fff;font-family:var(--mono);letter-spacing:.5px;
+  font-size:10.5px;font-weight:800;color:#fff;font-family:var(--mono);letter-spacing:.5px;text-shadow:0 1px 2px rgba(0,0,0,.8);
 }
 
-/* ===== 원반(라운드 시간 · 시작 글자) ===== */
-.kkDiscRow{display:flex;justify-content:center;gap:14px;margin:16px 0 4px;flex-wrap:wrap;}
-.kkDisc{
-  min-width:150px;height:44px;border-radius:50%/50%;display:flex;align-items:center;justify-content:center;
-  font-weight:900;font-size:17px;box-shadow:0 8px 14px -10px rgba(0,0,0,.8);padding:0 18px;
+/* ===== 플레이어: 한 줄로, 인원이 늘면 오른쪽으로 ===== */
+#wcPlayerGrid.kkPlayers{
+  display:flex;flex-direction:row;flex-wrap:nowrap;gap:8px;justify-content:flex-start;align-items:stretch;
+  overflow-x:auto;overflow-y:hidden;margin:0;padding:12px 2px 4px;
 }
-.kkDisc.time{background:linear-gradient(180deg,#4e97e0,#2f6fc4);color:#fff;border-bottom:5px solid #24559b;}
-.kkDisc.time small{font-size:12px;margin-left:1px;}
-.kkDisc.char{background:linear-gradient(180deg,#fdf1b8,#f5e28a);color:#6b5a16;border-bottom:5px solid #ddc768;min-width:110px;}
-
-/* ===== 플레이어 카드 ===== */
-#wcPlayerGrid.kkPlayers{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:18px 0 10px;}
-.kkP{position:relative;width:170px;padding-top:56px;}
-.kkP .kkPAvatar{
-  position:absolute;top:-6px;left:50%;transform:translateX(-50%);
-  font-size:52px;line-height:1;filter:drop-shadow(0 8px 6px rgba(0,0,0,.18));transition:transform .2s ease;
+.kkP{
+  position:relative;flex:0 1 168px;min-width:104px;display:flex;flex-direction:column;gap:5px;
+  background:#0d1119;border:1px solid var(--line);border-radius:12px;padding:8px 10px 9px;
+  transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
-.kkP .kkPBody{
-  background:rgba(255,255,255,.95);border-radius:14px 14px 10px 10px;padding:34px 12px 12px;text-align:center;
-  box-shadow:0 10px 20px -14px rgba(0,0,0,.6), inset 0 1px 0 #fff;
-}
-.kkP .kkPName{font-size:13px;font-weight:800;color:#3d5145;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.kkP .kkPHead{display:flex;align-items:center;gap:7px;min-width:0;}
+.kkP .kkPAvatar{font-size:26px;line-height:1;flex:0 0 auto;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4));}
+.kkP .kkPName{font-size:12.5px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
 .kkP .kkPScore{
-  background:#f3f7f4;border-radius:10px;padding:8px 6px;font-family:var(--mono);font-size:26px;font-weight:800;
-  color:#2f7d66;letter-spacing:1px;
+  background:#0a0c12;border-radius:8px;padding:4px 6px;text-align:center;font-family:var(--mono);font-size:22px;font-weight:800;
+  color:var(--gold-txt);letter-spacing:1px;text-shadow:0 0 10px rgba(255,210,63,.45);
 }
-.kkP .kkPScore .z{color:#c8d6cd;}
-.kkP.neg .kkPScore{color:#2f4f7d;}
-.kkP .kkPBar{position:relative;margin-top:8px;height:19px;border-radius:999px;overflow:hidden;background:#13224e;}
-.kkP .kkPBarFill{height:100%;background:linear-gradient(90deg,#4f8bff,#a86bff);transition:width .25s ease;}
-.kkP .kkPBarText{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:#fff;font-family:var(--mono);}
+.kkP .kkPScore .z{color:#333a48;text-shadow:none;}
+.kkP.neg .kkPScore{color:var(--lose);text-shadow:0 0 10px rgba(255,77,106,.45);}
+.kkP .kkPBar{position:relative;height:14px;border-radius:999px;overflow:hidden;background:#12141c;border:1px solid var(--line);}
+.kkP .kkPBarFill{height:100%;background:linear-gradient(90deg,#7a3bff,var(--neon));transition:width .25s ease;}
+.kkP .kkPBarText{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;color:#fff;font-family:var(--mono);text-shadow:0 1px 2px rgba(0,0,0,.8);}
 .kkP .kkPLead{
-  display:inline-block;margin-top:6px;background:linear-gradient(180deg,#ffcf6b,#f0a929);color:#6b4a00;
-  font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 10px;
+  position:absolute;top:-9px;right:8px;background:linear-gradient(180deg,var(--brass-glow),var(--brass));color:#1a1206;
+  font-size:10px;font-weight:800;border-radius:999px;padding:1px 8px;box-shadow:0 0 10px -2px rgba(255,200,107,.7);
 }
 .kkP .kkPGain{
-  position:absolute;top:2px;right:8px;font-size:17px;font-weight:900;color:#2f7d66;
-  text-shadow:0 1px 0 #fff;animation:kkFloat 1.2s ease-out both;
+  position:absolute;top:-11px;left:8px;font-size:14px;font-weight:900;color:var(--win);
+  text-shadow:0 0 8px rgba(63,224,122,.6);animation:kkFloat 1.2s ease-out both;
 }
-.kkP .kkPGain.minus{color:#e0455f;}
-@keyframes kkFloat{0%{transform:translateY(10px);opacity:0;}30%{opacity:1;}100%{transform:translateY(-10px);opacity:.9;}}
-.kkP.turn .kkPAvatar{transform:translateX(-50%) translateY(-6px) scale(1.06);}
-.kkP.turn .kkPBody{box-shadow:0 0 0 3px #4bc3a3, 0 10px 20px -14px rgba(0,0,0,.6);}
-.kkP.me .kkPName{color:#2f7d66;}
-.kkP.winner .kkPBody{box-shadow:0 0 0 3px #f0a929, 0 10px 24px -12px rgba(240,169,41,.9);}
-.kkP .kkPReady{position:absolute;top:10px;left:8px;font-size:15px;}
+.kkP .kkPGain.minus{color:var(--lose);text-shadow:0 0 8px rgba(255,77,106,.6);}
+@keyframes kkFloat{0%{transform:translateY(10px);opacity:0;}30%{opacity:1;}100%{transform:translateY(-6px);opacity:.9;}}
+.kkP .kkPReady{position:absolute;top:-11px;left:8px;font-size:14px;}
+.kkP.me{border-color:var(--neon2);box-shadow:0 0 12px -5px rgba(63,224,255,.6);}
+.kkP.turn{border-color:var(--brass-glow);box-shadow:0 0 0 1px var(--brass-glow), 0 0 18px -4px rgba(255,200,107,.6);transform:translateY(-2px);}
+.kkP.winner{border-color:var(--gold-txt);background:linear-gradient(180deg,#241a06,#0d1119);box-shadow:0 0 18px -4px rgba(255,210,63,.7);}
 
-/* ===== 채팅 · 배너 · 설정 ===== */
-.kkChatBox{background:rgba(255,255,255,.95);border:1px solid #c6ddb8;border-radius:12px;overflow:hidden;margin-top:6px;}
-.kkChatHead{font-size:11px;font-weight:800;color:#5c7a67;background:#eef7e8;padding:5px 10px;border-bottom:1px solid #d9ead0;}
-#wcLog.kkChat{flex-direction:column;background:transparent;border:0;border-radius:0;max-height:180px;min-height:104px;padding:8px 12px;margin:0;overflow-y:auto;gap:3px;}
-#wcLog.kkChat .wcEntry{font-family:inherit;font-size:13px;color:#33413a;border-bottom:0;padding:2px 0;}
-#wcLog.kkChat .wcEntry .wcName{color:#2f7d66;font-weight:800;}
-#wcLog.kkChat .wcEntry.bad{color:#d34b62;}
-#wcLog.kkChat .wcEntry.sys{color:#7b8f83;font-size:12px;}
-#wcResult{
-  background:rgba(255,255,255,.95);border:1px solid #c6ddb8;border-radius:10px;
-  color:#3d5145;font-size:12.5px;font-weight:700;margin-top:9px;
-}
-#wcResult.win{background:linear-gradient(180deg,#fff6d8,#ffeab0);border-color:#f0c96b;color:#6b4a00;}
-.kkRoom .mpLobby{background:rgba(255,255,255,.95);border:1px solid #c6ddb8;box-shadow:none;}
-.kkRoom .mpLobby .mpLobbyTitle{color:#3d5145;}
-.kkRoom .mpLobby .mpLobbyStatus,.kkRoom .mpBetLabel,.kkRoom .mpBetTag,.kkSetLabel{color:#5c7a67;}
-.kkRoom .mpLobby input,.kkRoom .betRow input,.kkRoom select{background:#fff;border:1px solid #c6ddb8;color:#2b3a32;border-radius:8px;padding:7px 9px;font-weight:700;font-size:12.5px;}
+/* ===== 로비 설정 · 채팅 · 배너 ===== */
+.kkLobbyRow{display:flex;gap:8px;flex-wrap:wrap;}
+.kkLobbyRow > .mpLobby{flex:1 1 320px;padding:10px 12px;}
+.kkRoom .mpLobbyTitle{margin-bottom:6px;}
+.kkRoom .mpLobbyRow{margin-bottom:6px;}
+.kkRoom select{background:#0c0f16;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 8px;font-weight:700;font-size:12.5px;}
 .kkRoom select:disabled{opacity:.55;}
-.kkSetLabel{font-size:12px;font-weight:700;align-self:center;}
-.kkHint{font-size:11px;color:#5c7a67;text-align:center;margin:8px 0;}
+.kkSetLabel{font-size:12px;font-weight:700;align-self:center;color:var(--sub);}
+.kkHint{font-size:10.5px;color:var(--sub);text-align:center;line-height:1.4;}
+.kkChatBox{
+  display:flex;flex-direction:column;flex:1 1 60px;min-height:56px;
+  background:#0a0c12;border:1px solid var(--line);border-radius:10px;overflow:hidden;
+}
+.kkChatHead{flex:0 0 auto;font-size:10.5px;font-weight:800;color:var(--sub);background:#0c0f16;padding:4px 10px;border-bottom:1px solid var(--line);}
+#wcLog.kkChat{
+  flex:1 1 auto;min-height:0;flex-direction:column;background:transparent;border:0;border-radius:0;
+  max-height:none;padding:6px 10px;margin:0;overflow-y:auto;gap:2px;
+}
+#wcLog.kkChat .wcEntry{font-family:inherit;font-size:12.5px;color:var(--text);border-bottom:0;padding:1px 0;}
+#wcLog.kkChat .wcEntry .wcName{color:var(--neon2);font-weight:800;}
+#wcLog.kkChat .wcEntry.bad{color:var(--lose);}
+#wcLog.kkChat .wcEntry.sys{color:var(--sub);font-size:11.5px;}
+#wcResult{margin:0;padding:5px 12px;font-size:12px;}
 .kkShake{animation:kkShake .3s;}
 @keyframes kkShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
-@media (max-width:560px){
-  #wcBoardWord{font-size:32px;}
-  .kkP{width:calc(50% - 8px);}
-  .kkP .kkPScore{font-size:21px;}
-  .kkDisc{min-width:120px;font-size:15px;}
+
+/* 대기실에서는 보드/입력창을 숨겨 설정·플레이어가 한 화면에 들어오게 */
+.kkRoom[data-status="lobby"] .kkBoardWrap,
+.kkRoom[data-status="lobby"] .kkTurnPillWrap,
+.kkRoom[data-status="lobby"] .kkInputWrap{display:none;}
+.kkRoom:not([data-status="lobby"]) .kkLobbyRow,
+.kkRoom:not([data-status="lobby"]) .kkHint{display:none;}
+
+/* 방에 들어가 있는 동안: 상단 UI를 줄이고 한 화면에 맞춤 (다른 탭은 어차피 잠겨 있음) */
+#app:has(#wcGameArea[style*="block"]){padding-top:8px;padding-bottom:8px;}
+#app:has(#wcGameArea[style*="block"]) #topbar{position:relative;top:0;margin-bottom:8px;padding:8px 14px;gap:8px;}
+#app:has(#wcGameArea[style*="block"]) .navBtn{padding-top:6px;padding-bottom:6px;}
+#app:has(#wcGameArea[style*="block"]) .panel.casino{max-width:1100px;padding:8px 10px;}
+#app:has(#wcGameArea[style*="block"]) .panel.casino > h2,
+#app:has(#wcGameArea[style*="block"]) #tabbar,
+#app:has(#wcGameArea[style*="block"]) #wcLobby,
+#app:has(#wcGameArea[style*="block"]) .footNote{display:none;}
+
+.kkRoom input[type="number"]{
+  width:110px;background:#0c0f16;border:1px solid var(--line);color:var(--neon2);
+  font-family:var(--mono);font-weight:700;font-size:14px;border-radius:8px;padding:8px 10px;
+}
+/* 화면 높이가 낮은 노트북(크롬북 등)용 추가 압축 */
+@media (max-height:640px){
+  #app:has(#wcGameArea[style*="block"]) .navRow{display:none;}
+  .kkPlate{min-height:54px;padding-top:8px;}
+  #wcBoardWord{font-size:26px;}
+  .kkPrevWord{display:none;}
+  .kkChatHead{display:none;}
+  .kkP{padding:6px 8px 7px;gap:4px;}
+  .kkP .kkPAvatar{font-size:20px;}
+  .kkP .kkPScore{font-size:18px;padding:2px 6px;}
+}
+@media (max-width:640px){
+  .kkBoardWrap{flex-direction:column;}
+  .kkDiscRow{flex-direction:row;justify-content:center;}
+  #wcBoardWord{font-size:30px;}
 }
 
 /* ---------- 폭탄 돌리기 미션 ---------- */
@@ -1311,6 +1334,7 @@ input{font-family:inherit;}
       <div class="shopList" id="shopList"></div>
       <div id="mineBoostSlot"></div>
       <div id="mineLevelSlot"></div>
+      <div id="nameTicketSlot"></div>
     </div>
   </div>
 
@@ -3020,6 +3044,10 @@ if (btnDouble) {
           </div>
         </div>
       </div>
+      <div class="kkDiscRow">
+        <div class="kkDisc time" id="wcRoundDisc">0<small>초</small></div>
+        <div class="kkDisc char" id="wcStartDisc">-</div>
+      </div>
     </div>
 
     <div class="kkTurnPillWrap"><span id="wcTurnPill">대기 중</span></div>
@@ -3034,13 +3062,9 @@ if (btnDouble) {
       </div>
     </div>
 
-    <div class="kkDiscRow">
-      <div class="kkDisc time" id="wcRoundDisc">0<small>초</small></div>
-      <div class="kkDisc char" id="wcStartDisc">-</div>
-    </div>
-
     <div class="mpPlayerGrid kkPlayers" id="wcPlayerGrid"></div>
 
+    <div class="kkLobbyRow">
     <div class="mpLobby" id="wcSettingsBox">
       <h3 class="mpLobbyTitle">⚙️ 방 설정 (방장만 변경 가능)</h3>
       <div class="mpLobbyRow">
@@ -3081,6 +3105,8 @@ if (btnDouble) {
       </div>
     </div>
 
+    </div>
+
     <div class="betRow" id="wcBetInfoRow" style="display:none;">
       <span class="mpBetLabel">합의된 베팅금:</span>
       <span class="mpBetTag" id="wcAgreedBetDisplay"></span>
@@ -3091,14 +3117,14 @@ if (btnDouble) {
       <button class="playBtn mpBtn" id="btnWcStart" style="display:none;">게임 시작 (방장)</button>
     </div>
 
-    <div class="kkHint">긴 단어일수록 · 빨리 입력할수록 높은 점수 · 턴 시간 안에는 몇 번이든 다시 시도할 수 있어요 · 시간 초과 시 라운드 점수의 절반(200점 미만이면 100점)이 깎이고, 죽은 사람이 새 글자를 받아 다시 시작합니다</div>
+    <div class="kkHint">긴 단어일수록 · 빨리 입력할수록 높은 점수 · 턴 시간 안에는 몇 번이든 다시 시도할 수 있어요 · 라운드가 진행될수록 턴 제한시간이 점점 짧아져요 · 시간 초과 시 라운드 점수의 절반(200점 미만이면 100점)이 깎이고 라운드가 끝납니다</div>
 
     <div class="kkChatBox">
       <div class="kkChatHead">💬 채팅 / 단어 기록</div>
       <div class="wordChainLog kkChat" id="wcLog"></div>
     </div>
 
-    <div class="bjActions" id="wcRematchRow" style="display:none;justify-content:center;margin-top:10px;">
+    <div class="bjActions" id="wcRematchRow" style="display:none;justify-content:center;">
       <button class="chipbtn bjAct" id="btnWcRematch" style="border-color:var(--win);color:var(--win);">🔁 다시하기</button>
     </div>
 
@@ -3165,9 +3191,9 @@ if (btnDouble) {
   <div class="attnModalBox" style="max-width:440px;">
     <button class="attnModalClose" id="adminModalClose" aria-label="닫기">✕</button>
     <div class="attnModalTitle"><span class="welcome">🛠️ 관리자 모드</span></div>
-    <div class="attnModalSub">유저에게 Gold / Coin을 지급하거나 서버를 초기화할 수 있어요.</div>
+    <div class="attnModalSub">유저에게 Gold / Coin을 지급·회수하거나, 유저의 게임 데이터를 초기화할 수 있어요. 접속 중이면 바로, 오프라인이면 다음 접속 때 적용돼요.</div>
 
-    <div class="adminLabel">지급 대상</div>
+    <div class="adminLabel">대상 유저</div>
     <div style="display:flex;gap:8px;">
       <select id="adminTarget" class="adminField" style="flex:1;"></select>
       <button type="button" id="adminRefreshUsers" class="chipbtn" title="유저 목록 새로고침">🔄</button>
@@ -3183,12 +3209,32 @@ if (btnDouble) {
         <input type="number" id="adminCoinInput" class="adminField" min="0" value="0">
       </div>
     </div>
-    <button class="playBtn" id="adminGiveBtn" type="button" style="width:100%;margin:14px 0 0;">🎁 지급하기</button>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="playBtn" id="adminGiveBtn" type="button" style="flex:1;margin:0;">🎁 지급하기</button>
+      <button class="playBtn" id="adminTakeBtn" type="button" style="flex:1;margin:0;background:linear-gradient(180deg,#ffb04a,#d9691a);box-shadow:0 6px 18px -6px rgba(255,150,60,.7);">💸 회수하기</button>
+    </div>
+    <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--sub);cursor:pointer;">
+      <input type="checkbox" id="adminTakeAll"> 회수 시 수량 무시하고 Gold·Coin 전부 0으로 만들기
+    </label>
     <div class="resultBanner" id="adminMsg" style="display:none;"></div>
 
     <div class="adminDivider"></div>
     <div class="adminLabel" style="color:var(--lose);">⚠️ 위험 구역</div>
+    <button class="playBtn" id="adminUserResetBtn" type="button" style="width:100%;margin:0 0 8px;background:linear-gradient(180deg,#ff8a6b,#c8442b);box-shadow:0 6px 18px -6px rgba(255,120,80,.7);">♻️ 선택한 유저 게임 데이터 초기화</button>
     <button class="playBtn" id="adminServerResetBtn" type="button" style="width:100%;margin:0;background:linear-gradient(180deg,#ff6b81,#c0223b);box-shadow:0 6px 18px -6px rgba(255,77,106,.7);">🗑️ 서버 초기화 (모든 유저 데이터 삭제)</button>
+    <div style="font-size:11px;color:var(--sub);margin-top:6px;line-height:1.5;">초기화는 접속 중인 유저 화면에서도 즉시 적용되고(자동 새로고침), 오프라인 유저는 다음 접속 때 적용돼요. 아이디·비밀번호는 유지돼요.</div>
+  </div>
+</div>
+
+<div class="attnModal" id="nameChangeModal" style="z-index:3200;">
+  <div class="attnModalBox" style="max-width:380px;">
+    <button class="attnModalClose" id="nameChangeClose" aria-label="닫기">✕</button>
+    <div class="attnModalTitle"><span class="welcome">🎫 이름 변경</span></div>
+    <div class="attnModalSub">2~12자(한글/영문/숫자). 진행 상황과 비밀번호는 그대로 유지되고, 변경 후 페이지가 새로고침돼요.<br>다른 기기에서는 새 이름으로 다시 로그인해야 해요.</div>
+    <input type="text" id="nameChangeInput" maxlength="12" placeholder="새 이름 입력" autocomplete="off"
+      style="width:100%;box-sizing:border-box;padding:11px 12px;border-radius:9px;border:1px solid var(--line);background:#0c0f16;color:var(--text);font-size:14px;">
+    <div class="resultBanner" id="nameChangeMsg" style="display:none;"></div>
+    <button class="playBtn" id="nameChangeConfirm" type="button" style="width:100%;margin:12px 0 0;">이름 변경하기 (변경권 1장 사용)</button>
   </div>
 </div>
 
@@ -3357,6 +3403,7 @@ const state = {
   achievements: {},
   lifetimeOres: {stone:0, iron:0, silver:0, gold:0, diamond:0, dark:0, mithril:0, obsidian:0, voidshard:0},
   totalOresMined: 0,
+  nameTickets: 0,
 };
 
 /* ---- Coin 소모량 자동 집계: state.coins가 줄어들 때마다 coinSpentTotal에 누적 (베팅/구매/환전 등 모든 감소 포함) ---- */
@@ -3518,6 +3565,7 @@ function loadGame(){
       if(saved.achievements) state.achievements = saved.achievements;
       if(saved.lifetimeOres) state.lifetimeOres = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0}, saved.lifetimeOres);
       if(typeof saved.totalOresMined==='number') state.totalOresMined = saved.totalOresMined;
+      if(typeof saved.nameTickets==='number') state.nameTickets = saved.nameTickets;
     }
   }catch(e){ console.error("로컬 로드 중 에러:", e); }
 
@@ -3531,7 +3579,7 @@ function loadGame(){
     if (typeof database !== 'undefined' && database !== null) {
       const currentUser = sessionStorage.getItem('current_user') || localStorage.getItem('current_user');
       if (currentUser) {
-        database.ref('users/' + currentUser + '/gameData').once('value')
+        window.__cloudSyncPromise = database.ref('users/' + currentUser + '/gameData').once('value')
           .then((snapshot) => {
             if (snapshot.exists()) {
               const cloudData = snapshot.val();
@@ -3569,6 +3617,7 @@ function loadGame(){
                 if(cloudData.achievements) state.achievements = cloudData.achievements;
                 if(cloudData.lifetimeOres) state.lifetimeOres = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0}, cloudData.lifetimeOres);
                 if(typeof cloudData.totalOresMined==='number') state.totalOresMined = cloudData.totalOresMined;
+                if(typeof cloudData.nameTickets==='number') state.nameTickets = cloudData.nameTickets;
                 try { state.pickaxeIdx = Math.max(0, Math.min(state.pickaxeIdx, PICKAXES.length-1)); } catch(err) {}
                 localStorage.setItem(ACTUAL_SAVE_KEY, JSON.stringify(cloudData));
                 if (typeof updateUI === 'function') updateUI();
@@ -3582,7 +3631,9 @@ function loadGame(){
 
 function saveGame(){
   const ACTUAL_SAVE_KEY = 'deeprockMine_save_v3';
-  if (typeof state === 'undefined') return;
+  if (typeof state === 'undefined') return Promise.resolve();
+  if (window.__adminResetting) return Promise.resolve();   // 관리자 초기화 진행 중에는 옛 데이터를 다시 올리지 않음
+  const __jobs = [];
   try{
     const snap = {
       gold: state.gold, coins: state.coins, pickaxeIdx: state.pickaxeIdx, mineLevel: state.mineLevel,
@@ -3595,24 +3646,26 @@ function saveGame(){
       ownedTitles: state.ownedTitles, ownedBorders: state.ownedBorders, equippedTitle: state.equippedTitle,
       equippedBorder: state.equippedBorder, equippedBg: state.equippedBg,
       achievements: state.achievements, lifetimeOres: state.lifetimeOres, totalOresMined: state.totalOresMined,
+      nameTickets: state.nameTickets||0,
       savedAt: Date.now(),
     };
     localStorage.setItem(ACTUAL_SAVE_KEY, JSON.stringify(snap));
     if (typeof database !== 'undefined' && database !== null) {
       const currentUser = sessionStorage.getItem('current_user') || localStorage.getItem('current_user');
       if (currentUser) {
-        database.ref('users/' + currentUser + '/gameData').set(snap).catch((err) => {});
+        __jobs.push(database.ref('users/' + currentUser + '/gameData').set(snap).catch((err) => {}));
         /* 랭킹 순위는 "보유 Gold + 보유 Coin을 Gold로 환전했을 때 가치(수수료 5% 반영)"의 합산 총 자산 기준 */
         const coinGoldValue = Math.max(0, Math.round((state.coins||0) * RATE * (1 - EXCHANGE_FEE)));
         const totalValue = (state.gold||0) + coinGoldValue;
-        database.ref('leaderboard/' + currentUser).set({
+        __jobs.push(database.ref('leaderboard/' + currentUser).set({
           name: currentUser, gold: state.gold, coins: state.coins||0,
           coinGoldValue: coinGoldValue, totalValue: totalValue,
           goldSpentTotal: state.goldSpentTotal||0, coinSpentTotal: state.coinSpentTotal||0, updatedAt: Date.now()
-        }).catch((err)=>{});
+        }).catch((err)=>{}));
       }
     }
   }catch(e){}
+  return Promise.all(__jobs);
 }
 
 window.addEventListener('load', function() {
@@ -4179,6 +4232,7 @@ function renderShop(){
   renderOreInventory();
   renderMineLevel();
   renderMineBoost();
+  if(typeof renderNameTicket === 'function') renderNameTicket();
 }
 
 /* ============================ 채굴 부스터 UI (깜빡임 방지: 상태 변경 시에만 DOM 재생성) ============================ */
@@ -4274,6 +4328,7 @@ function switchView(id){
   }
   document.querySelectorAll('.navBtn').forEach(b=>b.classList.toggle('active', b.dataset.view===id));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.dataset.view===id));
+  if(id==='shop' && typeof renderShop === 'function') renderShop();   // 상점 진입 시 최신 보유 골드 기준으로 버튼 상태 갱신
   if(id==='exchangeView'){
     loadRankingData();
     checkAttendance();
@@ -6193,48 +6248,86 @@ function adminLoadUsers(){
   if(!sel) return;
   if(typeof database === 'undefined' || !database){ sel.innerHTML = '<option value="">서버 미연결</option>'; return; }
   sel.innerHTML = '<option value="">불러오는 중...</option>';
-  database.ref('leaderboard').once('value').then(snap=>{
-    const names = [];
-    snap.forEach(ch=>{ const v = ch.val(); if(v && v.name) names.push(v.name); });
-    names.sort((a,b)=>a.localeCompare(b,'ko'));
+  /* 랭킹에 없는 유저(아직 저장 전인 계정)도 나오도록 accounts + leaderboard 를 합쳐서 목록을 만든다 */
+  Promise.all([
+    database.ref('accounts').once('value').catch(()=>null),
+    database.ref('leaderboard').once('value').catch(()=>null)
+  ]).then(([accSnap, lbSnap])=>{
+    const set = new Set();
+    if(accSnap) accSnap.forEach(ch=>{ if(ch.key) set.add(ch.key); });
+    if(lbSnap) lbSnap.forEach(ch=>{ const v = ch.val(); if(v && v.name) set.add(v.name); });
+    const names = Array.from(set).sort((a,b)=>a.localeCompare(b,'ko'));
     sel.innerHTML = '<option value="__ALL__">👥 전체 유저 (' + names.length + '명)</option>'
       + names.map(n=>`<option value="${adminEsc(n)}">${adminEsc(n)}</option>`).join('');
   }).catch(()=>{ sel.innerHTML = '<option value="">목록을 불러오지 못했어요</option>'; });
 }
-function adminGive(){
-  if(typeof database === 'undefined' || !database) return adminMsg('❌ 서버(Firebase)가 연결되지 않았습니다.', 'lose');
+function adminTargets(){
   const sel = document.getElementById('adminTarget');
   const target = sel ? sel.value : '';
+  if(!target) return { target:'', names:[] };
+  if(target === '__ALL__') return { target, names: Array.from(sel.options).map(o=>o.value).filter(v=>v && v !== '__ALL__') };
+  return { target, names:[target] };
+}
+/* mode: 'give'(지급) | 'take'(회수) */
+function adminGive(mode){
+  if(typeof database === 'undefined' || !database) return adminMsg('❌ 서버(Firebase)가 연결되지 않았습니다.', 'lose');
+  const take = mode === 'take';
+  const takeAll = take && document.getElementById('adminTakeAll').checked;
   const gold = Math.max(0, Math.floor(+document.getElementById('adminGoldInput').value || 0));
   const coins = Math.max(0, Math.floor(+document.getElementById('adminCoinInput').value || 0));
-  if(!target) return adminMsg('지급할 대상을 선택하세요.', 'lose');
-  if(gold <= 0 && coins <= 0) return adminMsg('지급할 Gold 또는 Coin 수량을 입력하세요.', 'lose');
-  let names;
-  if(target === '__ALL__'){
-    names = Array.from(sel.options).map(o=>o.value).filter(v=>v && v !== '__ALL__');
-    if(!names.length) return adminMsg('지급할 유저가 없습니다.', 'lose');
-  } else {
-    names = [target];
+  const { target, names } = adminTargets();
+  if(!target) return adminMsg('대상 유저를 선택하세요.', 'lose');
+  if(!names.length) return adminMsg('대상 유저가 없습니다.', 'lose');
+  if(!takeAll && gold <= 0 && coins <= 0) return adminMsg((take?'회수':'지급') + '할 Gold 또는 Coin 수량을 입력하세요.', 'lose');
+  const who = target === '__ALL__' ? `전체 ${names.length}명` : `${target} 님`;
+  if(take){
+    const what = takeAll ? 'Gold·Coin 전부' : `Gold ${fmt(gold)} / Coin ${fmt(coins)}`;
+    if(!confirm(`💸 ${who}에게서 ${what}을(를) 회수할까요?`)) return;
   }
-  const gift = { gold: gold, coins: coins, at: Date.now() };
+  const gift = takeAll
+    ? { zero:true, gold:0, coins:0, at:Date.now() }
+    : { gold: (take?-1:1)*gold, coins: (take?-1:1)*coins, at: Date.now() };
   Promise.all(names.map(n=>database.ref('adminGifts/' + n).push(gift))).then(()=>{
-    const who = target === '__ALL__' ? `전체 ${names.length}명` : `${target} 님`;
-    adminMsg(`✅ ${who}에게 Gold ${fmt(gold)} / Coin ${fmt(coins)} 지급 완료! (접속 중이면 바로, 아니면 다음 접속 때 받아요)`, 'win');
+    const what = takeAll ? 'Gold·Coin 전부' : `Gold ${fmt(gold)} / Coin ${fmt(coins)}`;
+    adminMsg(`✅ ${who}${take?'에게서':'에게'} ${what} ${take?'회수':'지급'} 완료! (접속 중이면 바로, 아니면 다음 접속 때 적용돼요)`, 'win');
   }).catch(err=>{
-    adminMsg('❌ 지급 실패: ' + (err && err.message), 'lose');
+    adminMsg('❌ ' + (take?'회수':'지급') + ' 실패: ' + (err && err.message), 'lose');
+  });
+}
+function adminNewToken(){ return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+/* 선택한 유저 한 명의 게임 데이터 초기화 — 그 유저 화면에서도 즉시(오프라인이면 다음 접속 때) 적용됨 */
+function adminUserReset(){
+  if(typeof database === 'undefined' || !database) return adminMsg('❌ 서버(Firebase)가 연결되지 않았습니다.', 'lose');
+  const { target, names } = adminTargets();
+  if(!target) return adminMsg('대상 유저를 선택하세요.', 'lose');
+  if(target === '__ALL__') return adminMsg('전체 초기화는 아래의 "서버 초기화" 버튼을 사용하세요.', 'lose');
+  if(!confirm(`⚠️ ${target} 님의 게임 데이터(골드·코인·곡괭이·아이템 등)를 전부 초기화할까요?\n되돌릴 수 없어요. (아이디·비밀번호는 유지)`)) return;
+  const name = names[0];
+  Promise.all([
+    database.ref('adminResets/' + name).set(adminNewToken()),
+    database.ref('users/' + name).remove(),
+    database.ref('leaderboard/' + name).remove(),
+    database.ref('adminGifts/' + name).remove()
+  ]).then(()=>{
+    adminMsg(`✅ ${name} 님 초기화 완료! (접속 중이면 바로, 아니면 다음 접속 때 적용돼요)`, 'win');
+    adminLoadUsers();
+  }).catch(err=>{
+    adminMsg('❌ 초기화 실패: ' + (err && err.message), 'lose');
   });
 }
 function adminServerReset(){
   if(!confirm('⚠️ 정말로 서버의 모든 유저 데이터와 랭킹을 초기화하시겠습니까?\n(모든 플레이어의 진행 상황이 사라지며 되돌릴 수 없습니다!)')) return;
   if(typeof database === 'undefined' || !database){ alert('❌ 서버(Firebase)가 연결되지 않았습니다.'); return; }
   Promise.all([
+    database.ref('adminResets/__ALL__').set(adminNewToken()),   // 접속 중/오프라인 모든 유저에게 "초기화하라"는 신호
     database.ref('users').remove(),
     database.ref('leaderboard').remove(),
     database.ref('adminGifts').remove()
   ]).then(()=>{
-    alert('✅ 서버 초기화가 완료되었습니다. 페이지를 새로고침합니다.');
-    localStorage.clear();
-    location.reload();
+    adminMsg('✅ 서버 초기화 완료! 접속 중인 유저는 자동으로 초기화되며 새로고침돼요.', 'win');
+    /* 관리자 본인 화면은 아래 감시자(watchAdminResets)가 초기화 후 새로고침함. 혹시 감시자가 없을 때를 대비한 안전장치 */
+    setTimeout(()=>{ if(!window.__adminResetting){ try{ localStorage.removeItem('deeprockMine_save_v3'); }catch(e){} location.reload(); } }, 3000);
   }).catch(err=>{
     alert('❌ 초기화 중 오류가 발생했습니다: ' + (err && err.message));
   });
@@ -6262,10 +6355,171 @@ if(document.getElementById('adminResetBtn')) document.getElementById('adminReset
 if(document.getElementById('adminModalClose')) document.getElementById('adminModalClose').addEventListener('click', closeAdminModal);
 if(document.getElementById('adminModal')) document.getElementById('adminModal').addEventListener('click', (e)=>{ if(e.target.id === 'adminModal') closeAdminModal(); });
 if(document.getElementById('adminRefreshUsers')) document.getElementById('adminRefreshUsers').addEventListener('click', adminLoadUsers);
-if(document.getElementById('adminGiveBtn')) document.getElementById('adminGiveBtn').addEventListener('click', adminGive);
+if(document.getElementById('adminGiveBtn')) document.getElementById('adminGiveBtn').addEventListener('click', ()=>adminGive('give'));
+if(document.getElementById('adminTakeBtn')) document.getElementById('adminTakeBtn').addEventListener('click', ()=>adminGive('take'));
+if(document.getElementById('adminUserResetBtn')) document.getElementById('adminUserResetBtn').addEventListener('click', adminUserReset);
 if(document.getElementById('adminServerResetBtn')) document.getElementById('adminServerResetBtn').addEventListener('click', adminServerReset);
 
-/* 관리자가 보낸 선물(adminGifts/내아이디)을 받아서 내 Gold/Coin에 반영. 트랜잭션으로 한 번만 처리됩니다. */
+/* ============================ 이름 변경권 (상점) ============================ */
+const NAME_TICKET_PRICE = 10000000;   // Gold 기준 (천만 Gold)
+function renderNameTicket(){
+  const slot = document.getElementById('nameTicketSlot');
+  if(!slot) return;
+  const n = state.nameTickets || 0;
+  slot.innerHTML = `
+    <div class="pick-card${n>0?' owned':''}" style="margin-top:12px;">
+      <div class="picon">🎫</div>
+      <div class="info">
+        <div class="name">이름 변경권 <span style="color:var(--brass-glow);font-size:11.5px;font-weight:800;">보유 ${n}장</span></div>
+        <div class="stats">사용하면 아이디(랭킹·계정에 표시되는 이름)를 새 이름으로 바꿀 수 있어요. 진행 상황과 비밀번호는 그대로예요.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <button id="nameTicketBuy"${state.gold<NAME_TICKET_PRICE?' disabled':''}>${fmt(NAME_TICKET_PRICE)} G</button>
+        <button id="nameTicketUse"${n<1?' disabled':''}>사용하기</button>
+      </div>
+    </div>`;
+  const buy = document.getElementById('nameTicketBuy');
+  if(buy) buy.addEventListener('click', ()=>{
+    if(state.gold < NAME_TICKET_PRICE) return showToast('Gold가 부족해요. (필요: ' + fmt(NAME_TICKET_PRICE) + ' Gold)');
+    state.gold -= NAME_TICKET_PRICE;
+    state.goldSpentTotal = (state.goldSpentTotal||0) + NAME_TICKET_PRICE;
+    state.nameTickets = (state.nameTickets||0) + 1;
+    try{ Sound.rareFanfare(3); }catch(e){}
+    showToast('🎫 이름 변경권을 구매했어요! "사용하기"로 이름을 바꿀 수 있어요.');
+    renderTop(); renderShop();
+  });
+  const use = document.getElementById('nameTicketUse');
+  if(use) use.addEventListener('click', openNameChangeModal);
+}
+function nameChangeMsg(text, cls){
+  const el = document.getElementById('nameChangeMsg');
+  if(!el) return;
+  el.textContent = text;
+  el.className = 'resultBanner' + (cls ? (' ' + cls) : '');
+  el.style.display = 'block';
+}
+function openNameChangeModal(){
+  if((state.nameTickets||0) < 1) return showToast('이름 변경권이 없어요. 먼저 구매해주세요.');
+  if(window.__mpActiveRoom) return showToast('🔒 멀티플레이 방에서 나온 뒤에 사용할 수 있어요.');
+  const m = document.getElementById('nameChangeModal'); if(!m) return;
+  const msg = document.getElementById('nameChangeMsg'); if(msg) msg.style.display = 'none';
+  const inp = document.getElementById('nameChangeInput'); if(inp){ inp.value = ''; setTimeout(()=>inp.focus(), 50); }
+  m.classList.add('show');
+}
+function closeNameChangeModal(){
+  const m = document.getElementById('nameChangeModal'); if(m) m.classList.remove('show');
+}
+let nameChanging = false;
+async function changeMyName(){
+  if(nameChanging) return;
+  const inp = document.getElementById('nameChangeInput');
+  const btn = document.getElementById('nameChangeConfirm');
+  const old = currentUserName();
+  const val = ((inp && inp.value) || '').trim();
+  if(!old) return nameChangeMsg('로그인 정보를 찾지 못했어요.', 'lose');
+  if(typeof database === 'undefined' || !database) return nameChangeMsg('서버(Firebase)가 연결되지 않았어요. 잠시 후 다시 시도해주세요.', 'lose');
+  if(window.__mpActiveRoom) return nameChangeMsg('멀티플레이 방에서 나온 뒤에 사용해주세요.', 'lose');
+  if((state.nameTickets||0) < 1) return nameChangeMsg('이름 변경권이 없어요.', 'lose');
+  if(!ID_PATTERN.test(val)) return nameChangeMsg('2~12자의 한글/영문/숫자만 사용할 수 있어요. 공백이나 특수문자는 안 돼요.', 'lose');
+  if(val === old) return nameChangeMsg('지금 쓰고 있는 이름과 같아요.', 'lose');
+
+  nameChanging = true;
+  if(btn){ btn.disabled = true; btn.textContent = '변경 중...'; }
+  const ref = (path)=>database.ref(path);
+  try{
+    /* 1) 새 이름이 이미 쓰이고 있는지 확인 후, 새 계정 자리를 원자적으로 선점 */
+    const [lb, us] = await Promise.all([ ref('leaderboard/' + val).once('value'), ref('users/' + val + '/gameData').once('value') ]);
+    if(lb.exists() || us.exists()) throw new Error('taken');
+    const oldAcc = await ref('accounts/' + old).once('value');
+    const accData = oldAcc.exists() ? oldAcc.val() : { createdAt: Date.now() };
+    const tx = await ref('accounts/' + val).transaction(cur => cur ? undefined : accData);
+    if(!tx.committed) throw new Error('taken');
+  }catch(e){
+    nameChanging = false;
+    if(btn){ btn.disabled = false; btn.textContent = '이름 변경하기 (변경권 1장 사용)'; }
+    return nameChangeMsg(e && e.message === 'taken' ? '이미 사용 중인 이름이에요. 다른 이름을 입력해주세요.' : '변경 중 오류가 발생했어요. 네트워크를 확인하고 다시 시도해주세요.', 'lose');
+  }
+
+  /* 2) 여기서부터는 이름 전환 — 각 단계는 실패해도 끝까지 진행 */
+  try{ if(adminGiftRef) adminGiftRef.off(); }catch(e){}
+  state.nameTickets = Math.max(0, (state.nameTickets||0) - 1);
+  localStorage.setItem('current_user', val);
+  try{ if(sessionStorage.getItem('current_user')) sessionStorage.setItem('current_user', val); }catch(e){}
+  try{ localStorage.removeItem(adminResetSeenKey(old)); }catch(e){}
+  try{
+    const gifts = await ref('adminGifts/' + old).once('value');
+    const moves = [];
+    gifts.forEach(ch=>{ moves.push(ref('adminGifts/' + val).push(ch.val())); });
+    await Promise.all(moves);
+  }catch(e){}
+  try{ await saveGame(); }catch(e){}                       // 새 이름으로 users/·leaderboard/ 저장
+  try{
+    await Promise.all([
+      ref('users/' + old).remove(), ref('leaderboard/' + old).remove(),
+      ref('adminGifts/' + old).remove(), ref('accounts/' + old).remove()
+    ]);
+  }catch(e){}
+  showToast(`✅ 이름이 "${val}"(으)로 변경되었어요! 잠시 후 새로고침됩니다.`);
+  window.__mpActiveRoom = null;
+  setTimeout(()=>location.reload(), 900);
+}
+if(document.getElementById('nameChangeClose')) document.getElementById('nameChangeClose').addEventListener('click', closeNameChangeModal);
+if(document.getElementById('nameChangeModal')) document.getElementById('nameChangeModal').addEventListener('click', (e)=>{ if(e.target.id === 'nameChangeModal') closeNameChangeModal(); });
+if(document.getElementById('nameChangeConfirm')) document.getElementById('nameChangeConfirm').addEventListener('click', changeMyName);
+if(document.getElementById('nameChangeInput')) document.getElementById('nameChangeInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.isComposing) changeMyName(); });
+
+/* Firebase는 이 스크립트보다 나중에 로드되므로, 기존 계정(자동 로그인)은 startGame 시점에 database 가 아직 없다.
+   → 준비될 때까지 기다렸다가 서버 기능(초기화 감시 · 선물 수신 · 랭킹)을 시작한다. (예전엔 새 계정만 지급이 됐던 원인) */
+function whenDbReady(cb, tries){
+  tries = tries || 0;
+  if(typeof database !== 'undefined' && database){ cb(); return; }
+  if(tries > 100) return;   // 약 20초
+  setTimeout(()=>whenDbReady(cb, tries+1), 200);
+}
+
+/* ---- 관리자 초기화 감시: adminResets/__ALL__ 또는 adminResets/<내아이디> 값이 바뀌면 내 데이터를 지우고 새로고침 ---- */
+function adminResetSeenKey(u){ return 'admin_reset_seen_' + u; }
+function adminResetToken(all, usr){ return (all||'') + '|' + (usr||''); }
+async function applyAdminReset(user, token){
+  if(window.__adminResetting) return;
+  window.__adminResetting = true;                 // 이후 saveGame 이 옛 데이터를 서버에 다시 올리지 못하게 막음
+  try{
+    localStorage.setItem(adminResetSeenKey(user), token);
+    localStorage.removeItem('deeprockMine_save_v3');
+    showToast('🛠️ 관리자가 계정을 초기화했어요. 잠시 후 새로고침됩니다...');
+    await Promise.all([ database.ref('users/' + user).remove(), database.ref('leaderboard/' + user).remove() ]);
+  }catch(e){}
+  window.__mpActiveRoom = null;                   // 새로고침 경고창 방지
+  setTimeout(()=>location.reload(), 1200);
+}
+/* 반환값 true = 방금 초기화를 적용함(이후 서버 기능 시작 불필요) */
+async function watchAdminResets(){
+  const user = currentUserName();
+  if(!user || typeof database === 'undefined' || !database) return false;
+  const [aSnap, uSnap] = await Promise.all([
+    database.ref('adminResets/__ALL__').once('value'),
+    database.ref('adminResets/' + user).once('value')
+  ]);
+  let allV = aSnap.val(), usrV = uSnap.val();
+  const key = adminResetSeenKey(user);
+  const seen = localStorage.getItem(key);
+  const token = adminResetToken(allV, usrV);
+  if(seen === null){
+    localStorage.setItem(key, token);             // 이 기기에서 처음 확인 → 현재 상태를 기준으로 삼음
+  } else if(seen !== token){
+    await applyAdminReset(user, token);           // 내가 오프라인일 때 초기화가 있었음
+    return true;
+  }
+  const onChange = ()=>{
+    const t = adminResetToken(allV, usrV);
+    if(t !== localStorage.getItem(key)) applyAdminReset(user, t);
+  };
+  database.ref('adminResets/__ALL__').on('value', sn=>{ allV = sn.val(); onChange(); });
+  database.ref('adminResets/' + user).on('value', sn=>{ usrV = sn.val(); onChange(); });
+  return false;
+}
+
+/* 관리자가 보낸 선물(adminGifts/내아이디)을 받아서 내 Gold/Coin에 반영(지급 · 회수). 트랜잭션으로 한 번만 처리됩니다. */
 let adminGiftRef = null;
 function listenAdminGifts(){
   if(typeof database === 'undefined' || !database) return;
@@ -6277,19 +6531,41 @@ function listenAdminGifts(){
     const g = snap.val() || {};
     snap.ref.transaction(cur => cur ? null : undefined, (err, committed)=>{
       if(err || !committed) return;
-      const gold = Math.max(0, Math.floor(+g.gold || 0));
-      const coins = Math.max(0, Math.floor(+g.coins || 0));
-      if(!gold && !coins) return;
-      state.gold += gold;
-      state.coins += coins;
+      if(window.__adminResetting) return;
+      const beforeG = state.gold, beforeC = state.coins;
+      let newG, newC;
+      if(g.zero){ newG = 0; newC = 0; }
+      else {
+        newG = Math.max(0, Math.floor(beforeG + (Math.floor(+g.gold || 0))));
+        newC = Math.max(0, Math.floor(beforeC + (Math.floor(+g.coins || 0))));
+      }
+      const dG = newG - beforeG, dC = newC - beforeC;
+      if(!dG && !dC) return;
+      state.gold = newG;
+      state.__coinRaw(newC);                      // 관리자 지급/회수는 'Coin 소모'로 집계하지 않음
       renderTop();
       saveGame();
       const parts = [];
-      if(gold) parts.push('Gold ' + fmt(gold));
-      if(coins) parts.push('Coin ' + fmt(coins));
-      showToast('🎁 관리자가 ' + parts.join(' + ') + '을(를) 지급했어요!');
-      try{ if(coins) coinRain(30); else burstConfetti(30); }catch(e){}
+      if(dG) parts.push('Gold ' + (dG>0?'+':'-') + fmt(Math.abs(dG)));
+      if(dC) parts.push('Coin ' + (dC>0?'+':'-') + fmt(Math.abs(dC)));
+      const gained = (dG>0) || (dC>0);
+      showToast(gained ? ('🎁 관리자가 ' + parts.join(' · ') + ' 지급했어요!') : ('💸 관리자가 ' + parts.join(' · ') + ' 회수했어요.'));
+      try{ if(gained){ if(dC>0) coinRain(30); else burstConfetti(30); } }catch(e){}
     });
+  });
+}
+
+/* 서버 기능 시작: DB 준비 대기 → 초기화 확인 → 클라우드 저장 동기화 → 랭킹/선물 */
+function startCloudServices(){
+  whenDbReady(async ()=>{
+    try{ if(await watchAdminResets()) return; }catch(e){}
+    try{
+      loadGame();                                   // DB 준비 후 클라우드 세이브 동기화
+      if(window.__cloudSyncPromise) await window.__cloudSyncPromise;
+      renderTop(); renderShop();
+    }catch(e){}
+    loadRankingData();
+    listenAdminGifts();
   });
 }
 
@@ -6304,8 +6580,7 @@ function startGame(){
   checkDailyBonus();
   checkAttendance(true);
   applyCustomization();
-  loadRankingData();
-  listenAdminGifts();
+  startCloudServices();
   setInterval(checkRelief, RELIEF_CHECK_TICK_MS);
   setInterval(renderMineBoost, 1000);
 }
@@ -7559,10 +7834,23 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
   const settingsBox = $('wcSettingsBox'), settingsHint = $('wcSettingsHint');
   if(!lobbyEl) return;
 
+  /* 방 화면을 브라우저 높이에 맞춰 한 화면에 들어오게 함 (스크롤 없이) */
+  const kkRoomEl = gameAreaEl ? gameAreaEl.querySelector('.kkRoom') : null;
+  function wcFit(){
+    if(!kkRoomEl || !gameAreaEl || gameAreaEl.style.display==='none') return;
+    if(!kkRoomEl.dataset.fit){ kkRoomEl.dataset.fit='1'; window.scrollTo(0,0); }
+    const docTop = kkRoomEl.getBoundingClientRect().top + (window.pageYOffset||0);
+    const h = Math.max(360, Math.floor(window.innerHeight - docTop - 20));
+    kkRoomEl.style.setProperty('--wcH', h+'px');
+  }
+  window.addEventListener('resize', wcFit);
+
   const DEFAULT_SETTINGS = { rounds:3, roundMs:90000, turnMs:12000 };
   const MIN_PENALTY = 100;        // 최소 감점
   const PENALTY_THRESHOLD = 200;  // 이 점수 미만이면 50% 대신 최소 감점 적용
   const PREP_MS = 3000;           // 라운드 사이 준비 시간
+  const MIN_TURN_MS = 3000;       // 턴 제한시간이 줄어들 수 있는 최솟값
+  const TURN_SHRINK_END = 0.7;    // 라운드 시간의 70%가 지나면 턴 제한시간이 최솟값에 도달
   let roomId=null, dbRef=null, myPid=mgPid(), timerInterval=null, curRoom=null;
   let curAgreedBet = 0, processedBetRoundId = null, localMsg = '', localMsgAt = 0;
 
@@ -7588,6 +7876,13 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
     let i = 0; while(i<str.length-1 && str[i]==='0') i++;
     const zeros = str.slice(0,i), rest = str.slice(i);
     return (neg?'-':'') + (zeros?`<span class="z">${zeros}</span>`:'') + rest;
+  }
+  // Firebase가 배열을 객체로 돌려주는 경우까지 안전하게 턴 순서를 배열로 변환
+  function orderOf(room){
+    const t = room && room.turnOrder;
+    if(!t) return [];
+    if(Array.isArray(t)) return t;
+    return Object.keys(t).sort((x,y)=>Number(x)-Number(y)).map(k=>t[k]);
   }
   function settingsOf(room){
     const st = (room && room.settings) || {};
@@ -7622,11 +7917,16 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
     const rs = roundScore||0;
     return rs < PENALTY_THRESHOLD ? MIN_PENALTY : Math.ceil(rs/2);
   }
-  // 이번 턴에 실제로 주어지는 시간 = min(설정된 턴 제한시간, 라운드 남은 시간)
-  // → 라운드 시간이 줄어들수록 턴 제한시간도 함께 짧아진다.
+  // 이번 턴에 주어지는 시간: 라운드가 진행될수록 턴 제한시간이 선형으로 짧아지고,
+  // 라운드 시간의 70%가 지나면 최솟값(3초)에 도달한다. → 라운드 타이머가 끝나기 전에
+  // 턴 타이머 초과로 라운드가 끝나도록 유도. (라운드 남은 시간보다 길어지진 않음)
   function turnAllotFor(room, st, now){
     const remainRound = Math.max(0, (room.roundEndsAt||0) - now);
-    return Math.max(0, Math.min(st.turnMs, remainRound));
+    const progress = Math.max(0, Math.min(1, 1 - remainRound/Math.max(1, st.roundMs)));
+    const f = Math.max(0, 1 - progress/TURN_SHRINK_END);
+    const minMs = Math.min(MIN_TURN_MS, st.turnMs);
+    const allot = minMs + (st.turnMs - minMs) * f;
+    return Math.max(0, Math.min(allot, remainRound));
   }
 
   /* ---------- 방 입퇴장 ---------- */
@@ -7637,6 +7937,7 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
       try{ dbRef.remove(); }catch(e){}
     }
     dbRef=null; roomId=null; curRoom=null;
+    if(kkRoomEl){ delete kkRoomEl.dataset.fit; kkRoomEl.style.removeProperty('--wcH'); delete kkRoomEl.dataset.status; }
     window.__mpActiveRoom = null;
     if(gameAreaEl) gameAreaEl.style.display='none';
     if(statusDiv) statusDiv.innerHTML = '방을 생성하거나 참가하세요. 2명 이상 모이면 시작할 수 있습니다.';
@@ -7776,10 +8077,11 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
     resultBanner.classList.add('kkShake');
     setTimeout(()=>resultBanner.classList.remove('kkShake'), 320);
   }
+  let submitPending = false;
   function handleSubmitClick(){
-    if(!dbRef || !curRoom || curRoom.status!=='playing') return;
+    if(!dbRef || !curRoom || curRoom.status!=='playing' || submitPending) return;
     if(!wcReady) return flashError('단어장을 아직 불러오는 중입니다.');
-    const order = curRoom.turnOrder||[];
+    const order = orderOf(curRoom);
     if(order[curRoom.turnIdx] !== myPid) return;
     const word = (wordInput.value||'').trim();
     if(!word) return;
@@ -7790,15 +8092,18 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
     const allotted = curRoom.turnAllotted || st.turnMs;
     const remainRatio = curRoom.turnDeadline ? Math.max(0, Math.min(1, (curRoom.turnDeadline - wcNow())/Math.max(1,allotted))) : 0;
     wordInput.value='';
+    submitPending = true;
+    const pendingGuard = setTimeout(()=>{ submitPending = false; }, 8000);
     dbRef.transaction(room=>{
-      if(!room || room.status!=='playing') return room;
-      const ord = room.turnOrder||[];
-      if(ord[room.turnIdx] !== myPid) return room;
+      if(!room) return room;
+      if(room.status!=='playing') return;                 // 중단(abort) → 아래 콜백에서 안내
+      const ord = orderOf(room);
+      if(ord[room.turnIdx] !== myPid) return;
       room.usedWords = room.usedWords||{};
-      if(room.usedWords[word]) return room;
+      if(room.usedWords[word]) return;
       const prevWord = room.lastWord || room.curChar || '';
       const v = submitWord(word, { usedWordsSet: room.usedWords, lastWordValue: prevWord, commit:false });
-      if(!v.ok) return room;
+      if(!v.ok) return;
       const sc = wcScoreOf(word, remainRatio);
       const p = room.players[myPid];
       p.roundScore = (p.roundScore||0) + sc.total;
@@ -7811,9 +8116,18 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
       const settings = settingsOf(room);
       const now = wcNow();
       room.turnIdx = (room.turnIdx+1) % ord.length;
-      room.turnAllotted = turnAllotFor(room, settings, now);   // 남은 라운드 시간에 맞춰 다음 턴 시간 재계산(점점 짧아짐)
+      room.turnAllotted = turnAllotFor(room, settings, now);   // 라운드가 진행될수록 다음 턴 시간이 점점 짧아짐
       room.turnDeadline = now + room.turnAllotted;
       return room;
+    }, (err, committed)=>{
+      clearTimeout(pendingGuard);
+      submitPending = false;
+      if(err || !committed){
+        // 조용히 사라지지 않도록: 입력했던 단어를 되돌려주고 이유를 알려준다
+        if(curRoom && curRoom.status==='playing' && !wordInput.value) wordInput.value = word;
+        flashError(err ? '전송에 실패했어요. 다시 시도해주세요.' : '차례가 넘어갔거나 이미 사용된 단어예요.');
+        if(!wordInput.disabled) wordInput.focus();
+      }
     });
   }
   if(btnSubmit) btnSubmit.onclick = handleSubmitClick;
@@ -7828,8 +8142,8 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
     dbRef.transaction(room=>{
       if(!room || room.status!=='playing') return room;
       if(!room.turnDeadline || wcNow() < room.turnDeadline) return room;
-      const ord = (room.turnOrder||[]).filter(id=>room.players && room.players[id]);
-      if(ord.length !== (room.turnOrder||[]).length){
+      const ord = orderOf(room).filter(id=>room.players && room.players[id]);
+      if(ord.length !== orderOf(room).length){
         room.turnOrder = ord;
         if(room.turnIdx >= ord.length) room.turnIdx = 0;
       }
@@ -7900,7 +8214,7 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
       if(!room || room.status!=='prep') return room;
       if(!room.prepEndsAt || wcNow() < room.prepEndsAt) return room;
       const st = settingsOf(room);
-      room.turnOrder = (room.turnOrder||[]).filter(id=>room.players && room.players[id]);
+      room.turnOrder = orderOf(room).filter(id=>room.players && room.players[id]);
       if(room.turnOrder.length < 2){
         room.status='finished'; room.prepEndsAt=null;
         room.winnerPid = room.turnOrder[0] || null;
@@ -7935,8 +8249,8 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
       if(h.sys){ div.className='wcEntry sys'; div.textContent = h.text||''; }
       else if(h.ok){
         div.className='wcEntry';
-        const spd = h.speed ? ` <span style="color:#c58b1a;">(속도 +${h.speed})</span>` : '';
-        div.innerHTML = `<span class="wcName">${mgEscape(h.name)}</span> : ${mgEscape(h.word)} <b style="color:#2f7d66;">+${h.pts||0}</b>${spd}`;
+        const spd = h.speed ? ` <span style="color:var(--brass-glow);">(속도 +${h.speed})</span>` : '';
+        div.innerHTML = `<span class="wcName">${mgEscape(h.name)}</span> : ${mgEscape(h.word)} <b style="color:var(--win);">+${h.pts||0}</b>${spd}`;
       } else {
         div.className='wcEntry bad';
         div.innerHTML = `<span class="wcName">${mgEscape(h.name)}</span> : ${mgEscape(h.word)} <b>${mgEscape(h.reason||'실패')}</b>`;
@@ -7964,9 +8278,9 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
     playerGrid.className = 'mpPlayerGrid kkPlayers';
     playerGrid.innerHTML = '';
     const order = [];
-    (room.turnOrder||[]).forEach(pid=>{ if(players[pid]) order.push(pid); });
+    orderOf(room).forEach(pid=>{ if(players[pid]) order.push(pid); });
     Object.keys(players).forEach(pid=>{ if(order.indexOf(pid)<0) order.push(pid); });
-    const curPid = (room.status==='playing') ? (room.turnOrder||[])[room.turnIdx] : null;
+    const curPid = (room.status==='playing') ? orderOf(room)[room.turnIdx] : null;
     order.forEach(pid=>{
       const p = players[pid]; if(!p) return;
       const total = (p.score||0)+(p.roundScore||0);
@@ -7984,13 +8298,10 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
       const card = document.createElement('div');
       card.className = cls;
       card.innerHTML =
-        `<div class="kkPAvatar">${wcAvatarOf(pid)}</div>${gain}${ready}`+
-        `<div class="kkPBody">`+
-          `<div class="kkPName">${mgEscape(p.name||'익명')}${pid===room.hostPid?' 👑':''}</div>`+
-          `<div class="kkPScore">${fmtScore(total)}</div>`+
-          `<div class="kkPBar"><div class="kkPBarFill" style="width:${pct}%"></div><span class="kkPBarText">${Math.round(rs)} / ${goal}</span></div>`+
-          lead+
-        `</div>`;
+        `${gain}${ready}${lead}`+
+        `<div class="kkPHead"><span class="kkPAvatar">${wcAvatarOf(pid)}</span><span class="kkPName">${mgEscape(p.name||'익명')}${pid===room.hostPid?' 👑':''}</span></div>`+
+        `<div class="kkPScore">${fmtScore(total)}</div>`+
+        `<div class="kkPBar"><div class="kkPBarFill" style="width:${pct}%"></div><span class="kkPBarText">${Math.round(rs)} / ${goal}</span></div>`;
       playerGrid.appendChild(card);
     });
   }
@@ -8015,6 +8326,8 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
       const players = room.players||{};
       if(!players[myPid]) return;
       curRoom = room;
+      if(kkRoomEl) kkRoomEl.dataset.status = room.status;
+      wcFit();
       const st = settingsOf(room);
       const amHost = room.hostPid===myPid;
       const ids = Object.keys(players);
@@ -8033,7 +8346,7 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
         if(document.activeElement!==setRoundSecEl) setRoundSecEl.value = String(st.roundMs/1000);
         if(document.activeElement!==setTurnSecEl) setTurnSecEl.value = String(st.turnMs/1000);
         if(settingsHint) settingsHint.textContent = amHost
-          ? '라운드마다 시작 글자가 자동으로 하나 주어집니다. 라운드 시간이 줄어들수록 턴 제한시간도 함께 짧아져요.'
+          ? '라운드마다 시작 글자가 자동으로 하나 주어집니다. 라운드가 진행될수록 턴 제한시간이 점점 짧아져요.'
           : `방장이 설정한 규칙: ${st.rounds}라운드 · 라운드당 ${st.roundMs/1000}초 · 턴 최대 ${st.turnMs/1000}초`;
       }
 
@@ -8118,13 +8431,13 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
         rematchRow.style.display='none';
         inputRow.style.display='flex';
         renderLog(room.history);
-        const curPid = (room.turnOrder||[])[room.turnIdx];
+        const curPid = orderOf(room)[room.turnIdx];
         const myTurn = curPid===myPid;
         wordInput.disabled = !myTurn;
         btnSubmit.disabled = !myTurn;
         wordInput.placeholder = myTurn ? '단어를 입력하세요' : '다른 참가자의 차례입니다';
         if(inputRow) inputRow.classList.toggle('off', !myTurn);
-        if(myTurn) wordInput.focus();
+        if(myTurn && document.activeElement!==wordInput) wordInput.focus();
 
         // 시작 글자/직전단어/차례 표시
         const rc = reqChar(room);
@@ -8226,4 +8539,4 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
 })();
 </script>
 </body>
-  </html>
+      </html>
