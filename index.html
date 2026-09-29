@@ -1201,6 +1201,18 @@ input{font-family:inherit;}
 .adminTwo{display:flex;gap:10px;}
 .adminTwo > div{flex:1;}
 .adminDivider{height:1px;background:var(--line);margin:18px 0 6px;}
+.adminUserList{max-height:220px;overflow-y:auto;border:1px solid var(--line);border-radius:9px;background:#0c0f16;}
+.adminUserRow{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--line);font-size:12.5px;cursor:pointer;}
+.adminUserRow:last-child{border-bottom:none;}
+.adminUserRow:hover{background:rgba(255,255,255,.04);}
+.adminUserRow.sel{background:rgba(224,165,66,.12);}
+.adminUserRow .un{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.adminUserRow .ug{font-family:var(--mono);font-weight:700;color:var(--gold-txt);}
+.adminUserRow .uc{font-family:var(--mono);font-weight:700;color:var(--coin-txt);min-width:70px;text-align:right;}
+.adminUserRow.head{cursor:default;position:sticky;top:0;background:#141925;color:var(--sub);font-size:11px;font-weight:800;}
+.adminUserRow.head:hover{background:#141925;}
+.adminUserRow.head .ug,.adminUserRow.head .uc{color:var(--sub);}
+.adminUserEmpty{padding:14px;text-align:center;color:var(--sub);font-size:12px;}
 .pick-card .stats + .stats{margin-top:1px;}
 
 /* ---------- 광산 선택 탭 & 미개방 광산 카드 ---------- */
@@ -1334,7 +1346,6 @@ input{font-family:inherit;}
       <div class="shopList" id="shopList"></div>
       <div id="mineBoostSlot"></div>
       <div id="mineLevelSlot"></div>
-      <div id="nameTicketSlot"></div>
     </div>
   </div>
 
@@ -3156,6 +3167,9 @@ if (btnDouble) {
     <div class="attnModalTitle"><span class="welcome">🎭 스킨 인벤토리</span></div>
     <div class="attnModalSub">테두리 · 배경 · 이펙트는 Gold로 구매하고, 칭호는 업적을 달성하면 자동으로 잠금 해제돼요!</div>
 
+    <div style="margin-top:10px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">🎫 이름 변경권</div>
+    <div id="nameTicketSlot"></div>
+
     <div style="margin-top:10px;font-size:12.5px;font-weight:800;color:var(--brass-glow);">✨ Coin 칩 이펙트</div>
     <div class="shopList" id="coinFxList" style="margin-top:8px;"></div>
 
@@ -3188,7 +3202,7 @@ if (btnDouble) {
 </div>
 
 <div class="attnModal" id="adminModal" style="z-index:3500;">
-  <div class="attnModalBox" style="max-width:440px;">
+  <div class="attnModalBox" style="max-width:480px;max-height:92vh;overflow-y:auto;">
     <button class="attnModalClose" id="adminModalClose" aria-label="닫기">✕</button>
     <div class="attnModalTitle"><span class="welcome">🛠️ 관리자 모드</span></div>
     <div class="attnModalSub">유저에게 Gold / Coin을 지급·회수하거나, 유저의 게임 데이터를 초기화할 수 있어요. 접속 중이면 바로, 오프라인이면 다음 접속 때 적용돼요.</div>
@@ -3198,6 +3212,12 @@ if (btnDouble) {
       <select id="adminTarget" class="adminField" style="flex:1;"></select>
       <button type="button" id="adminRefreshUsers" class="chipbtn" title="유저 목록 새로고침">🔄</button>
     </div>
+
+    <div class="adminLabel" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>👥 유저별 보유량</span>
+      <span id="adminListStamp" style="font-size:10.5px;color:var(--sub);font-weight:600;"></span>
+    </div>
+    <div id="adminUserList" class="adminUserList"><div class="adminUserEmpty">불러오는 중...</div></div>
 
     <div class="adminTwo">
       <div>
@@ -3220,7 +3240,9 @@ if (btnDouble) {
 
     <div class="adminDivider"></div>
     <div class="adminLabel" style="color:var(--lose);">⚠️ 위험 구역</div>
+    <div id="adminSelLabel" style="font-size:12px;font-weight:800;margin:0 0 8px;color:var(--sub);">현재 선택: 없음 (위에서 유저를 선택하세요)</div>
     <button class="playBtn" id="adminUserResetBtn" type="button" style="width:100%;margin:0 0 8px;background:linear-gradient(180deg,#ff8a6b,#c8442b);box-shadow:0 6px 18px -6px rgba(255,120,80,.7);">♻️ 선택한 유저 게임 데이터 초기화</button>
+    <button class="playBtn" id="adminUserDeleteBtn" type="button" style="width:100%;margin:0 0 8px;background:linear-gradient(180deg,#b04bff,#6a1fa0);box-shadow:0 6px 18px -6px rgba(176,75,255,.7);">🚫 선택한 유저 계정 삭제 (아이디·비밀번호까지 삭제)</button>
     <button class="playBtn" id="adminServerResetBtn" type="button" style="width:100%;margin:0;background:linear-gradient(180deg,#ff6b81,#c0223b);box-shadow:0 6px 18px -6px rgba(255,77,106,.7);">🗑️ 서버 초기화 (모든 유저 데이터 삭제)</button>
     <div style="font-size:11px;color:var(--sub);margin-top:6px;line-height:1.5;">초기화는 접속 중인 유저 화면에서도 즉시 적용되고(자동 새로고침), 오프라인 유저는 다음 접속 때 적용돼요. 아이디·비밀번호는 유지돼요.</div>
   </div>
@@ -3528,6 +3550,46 @@ function oreWeights(){
   });
 }
 
+function applyCloudGameData(cloudData){
+  const ACTUAL_SAVE_KEY = 'deeprockMine_save_v3';
+  window.__applyingRemote = true;
+  try{
+                if(typeof cloudData.gold==='number') state.gold = cloudData.gold;
+                if(typeof cloudData.coins==='number') state.__coinRaw(cloudData.coins);
+                if(typeof cloudData.pickaxeIdx==='number') state.pickaxeIdx = cloudData.pickaxeIdx;
+                if(typeof cloudData.mineLevel==='number') state.mineLevel = cloudData.mineLevel;
+                if(typeof cloudData.mineAreaIdx==='number') state.mineAreaIdx = cloudData.mineAreaIdx;
+                if(cloudData.unlockedMines) state.unlockedMines = Object.assign({0:true}, cloudData.unlockedMines);
+                if (state.ores) state.ores = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0}, cloudData.ores||{});
+                state.lastDailyBonusDate = cloudData.lastDailyBonusDate || null;
+                if(typeof cloudData.dailyStreak==='number') state.dailyStreak = cloudData.dailyStreak;
+                if(typeof cloudData.oreBreakCount==='number') state.oreBreakCount = 0; // 콤보는 세션마다 초기화
+                if(typeof cloudData.boostUntil==='number') state.boostUntil = cloudData.boostUntil;
+                state.cosmetics = cloudData.cosmetics || {};
+                state.equippedCosmetic = cloudData.equippedCosmetic || null;
+                state.gachaItems = cloudData.gachaItems || {};
+                if(typeof cloudData.goldSpentTotal==='number') state.goldSpentTotal = cloudData.goldSpentTotal;
+                if(typeof cloudData.coinSpentTotal==='number') state.coinSpentTotal = cloudData.coinSpentTotal;
+                state.lastAttendanceDate = cloudData.lastAttendanceDate || null;
+                if(typeof cloudData.attendanceDay==='number') state.attendanceDay = cloudData.attendanceDay;
+                state.ownedTitles = cloudData.ownedTitles || {};
+                state.ownedBorders = cloudData.ownedBorders || {};
+                state.equippedTitle = cloudData.equippedTitle || null;
+                state.equippedBorder = cloudData.equippedBorder || null;
+                state.equippedBg = cloudData.equippedBg || null;
+                state.achievements = cloudData.achievements || {};
+                if(cloudData.lifetimeOres) state.lifetimeOres = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0}, cloudData.lifetimeOres);
+                if(typeof cloudData.totalOresMined==='number') state.totalOresMined = cloudData.totalOresMined;
+                if(typeof cloudData.nameTickets==='number') state.nameTickets = cloudData.nameTickets;
+                try { state.pickaxeIdx = Math.max(0, Math.min(state.pickaxeIdx, PICKAXES.length-1)); } catch(err) {}
+                localStorage.setItem(ACTUAL_SAVE_KEY, JSON.stringify(cloudData));
+    window.__lastSavedAt = cloudData.savedAt || 0;
+    markBase(cloudData);
+    try{ renderTop(); renderShop(); }catch(e){}
+    window.__lastSnapKey = buildSnapKey(buildSnap());
+  }finally{ window.__applyingRemote = false; }
+}
+
 function loadGame(){
   const ACTUAL_SAVE_KEY = 'deeprockMine_save_v3';
 
@@ -3585,43 +3647,14 @@ function loadGame(){
               const cloudData = snapshot.val();
               const localRaw = localStorage.getItem(ACTUAL_SAVE_KEY);
               let shouldUpdate = false;
-              if (!localRaw) { shouldUpdate = true; }
+              let dirty = null; try{ dirty = localStorage.getItem('sync_dirty_' + currentUser); }catch(e){}
+              if (!localRaw || !dirty) { shouldUpdate = true; }   // 서버에 못 올린 로컬 변경이 없으면 서버 데이터가 기준 (기기 시계 차이로 옛 데이터가 이기는 문제 방지)
               else {
                 const localData = JSON.parse(localRaw);
                 if (cloudData.savedAt && (!localData.savedAt || cloudData.savedAt > localData.savedAt)) shouldUpdate = true;
               }
-              if (shouldUpdate && typeof state !== 'undefined') {
-                if(typeof cloudData.gold==='number') state.gold = cloudData.gold;
-                if(typeof cloudData.coins==='number') state.__coinRaw(cloudData.coins);
-                if(typeof cloudData.pickaxeIdx==='number') state.pickaxeIdx = cloudData.pickaxeIdx;
-                if(typeof cloudData.mineLevel==='number') state.mineLevel = cloudData.mineLevel;
-                if(typeof cloudData.mineAreaIdx==='number') state.mineAreaIdx = cloudData.mineAreaIdx;
-                if(cloudData.unlockedMines) state.unlockedMines = Object.assign({0:true}, cloudData.unlockedMines);
-                if (state.ores) state.ores = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0}, cloudData.ores||{});
-                if(cloudData.lastDailyBonusDate) state.lastDailyBonusDate = cloudData.lastDailyBonusDate;
-                if(typeof cloudData.dailyStreak==='number') state.dailyStreak = cloudData.dailyStreak;
-                if(typeof cloudData.oreBreakCount==='number') state.oreBreakCount = 0; // 콤보는 세션마다 초기화
-                if(typeof cloudData.boostUntil==='number') state.boostUntil = cloudData.boostUntil;
-                if(cloudData.cosmetics) state.cosmetics = cloudData.cosmetics;
-                if(cloudData.equippedCosmetic) state.equippedCosmetic = cloudData.equippedCosmetic;
-                if(cloudData.gachaItems) state.gachaItems = cloudData.gachaItems;
-                if(typeof cloudData.goldSpentTotal==='number') state.goldSpentTotal = cloudData.goldSpentTotal;
-                if(typeof cloudData.coinSpentTotal==='number') state.coinSpentTotal = cloudData.coinSpentTotal;
-                if(cloudData.lastAttendanceDate) state.lastAttendanceDate = cloudData.lastAttendanceDate;
-                if(typeof cloudData.attendanceDay==='number') state.attendanceDay = cloudData.attendanceDay;
-                if(cloudData.ownedTitles) state.ownedTitles = cloudData.ownedTitles;
-                if(cloudData.ownedBorders) state.ownedBorders = cloudData.ownedBorders;
-                if(cloudData.equippedTitle) state.equippedTitle = cloudData.equippedTitle;
-                if(cloudData.equippedBorder) state.equippedBorder = cloudData.equippedBorder;
-                if(cloudData.equippedBg) state.equippedBg = cloudData.equippedBg;
-                if(cloudData.achievements) state.achievements = cloudData.achievements;
-                if(cloudData.lifetimeOres) state.lifetimeOres = Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0}, cloudData.lifetimeOres);
-                if(typeof cloudData.totalOresMined==='number') state.totalOresMined = cloudData.totalOresMined;
-                if(typeof cloudData.nameTickets==='number') state.nameTickets = cloudData.nameTickets;
-                try { state.pickaxeIdx = Math.max(0, Math.min(state.pickaxeIdx, PICKAXES.length-1)); } catch(err) {}
-                localStorage.setItem(ACTUAL_SAVE_KEY, JSON.stringify(cloudData));
-                if (typeof updateUI === 'function') updateUI();
-              }
+              if (shouldUpdate && typeof state !== 'undefined') { applyCloudGameData(cloudData); }
+              else if (typeof state !== 'undefined') { markBase(cloudData); }
             }
           }).catch((err) => {});
       }
@@ -3629,31 +3662,103 @@ function loadGame(){
   } catch(e) {}
 }
 
-function saveGame(){
+/* ---- 기기 식별 · 동기화 준비 상태 ---- */
+const DEVICE_ID = (function(){
+  let d = null;
+  try{ d = localStorage.getItem('device_id'); }catch(e){}
+  if(!d){
+    d = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+    try{ localStorage.setItem('device_id', d); }catch(e){}
+  }
+  return d;
+})();
+window.__cloudReady = false;      // 서버 데이터를 한 번 받아오기 전에는 저장하지 않음 (옛 로컬 데이터가 서버를 덮어쓰는 것 방지)
+window.__lastSnapKey = null;
+window.__lastSavedAt = 0;
+
+function buildSnap(){
+  return {
+    gold: state.gold, coins: state.coins, pickaxeIdx: state.pickaxeIdx, mineLevel: state.mineLevel,
+    mineAreaIdx: state.mineAreaIdx, unlockedMines: state.unlockedMines,
+    ores: state.ores, lastDailyBonusDate: state.lastDailyBonusDate, dailyStreak: state.dailyStreak,
+    oreBreakCount: state.oreBreakCount, boostUntil: state.boostUntil, cosmetics: state.cosmetics,
+    equippedCosmetic: state.equippedCosmetic, gachaItems: state.gachaItems, goldSpentTotal: state.goldSpentTotal,
+    coinSpentTotal: state.coinSpentTotal,
+    lastAttendanceDate: state.lastAttendanceDate, attendanceDay: state.attendanceDay,
+    ownedTitles: state.ownedTitles, ownedBorders: state.ownedBorders, equippedTitle: state.equippedTitle,
+    equippedBorder: state.equippedBorder, equippedBg: state.equippedBg,
+    achievements: state.achievements, lifetimeOres: state.lifetimeOres, totalOresMined: state.totalOresMined,
+    nameTickets: state.nameTickets||0,
+  };
+}
+/* 마지막으로 서버와 맞춘 시점의 값 — 다른 기기가 먼저 저장했을 때 (서버값 + 내가 바꾼 만큼)으로 합치는 기준 */
+window.__base = null;
+function markBase(d){
+  if(!d) return;
+  window.__base = { savedAt:+d.savedAt||0, gold:+d.gold||0, coins:+d.coins||0, gst:+d.goldSpentTotal||0, cst:+d.coinSpentTotal||0 };
+}
+function buildSnapKey(snap){ try{ return JSON.stringify(snap); }catch(e){ return String(Math.random()); } }
+
+/* force=true: 값이 그대로여도 무조건 저장 (이름 변경처럼 저장 위치가 바뀔 때) */
+function saveGame(force){
   const ACTUAL_SAVE_KEY = 'deeprockMine_save_v3';
   if (typeof state === 'undefined') return Promise.resolve();
-  if (window.__adminResetting) return Promise.resolve();   // 관리자 초기화 진행 중에는 옛 데이터를 다시 올리지 않음
+  if (window.__adminResetting) return Promise.resolve();   // 관리자 초기화·삭제 진행 중에는 옛 데이터를 다시 올리지 않음
+  if (window.__applyingRemote) return Promise.resolve();   // 다른 기기 데이터를 적용하는 중에는 되돌려 저장하지 않음
+  if (!window.__cloudReady && force !== true) return Promise.resolve();   // 서버 동기화 전에는 저장 보류
   const __jobs = [];
   try{
-    const snap = {
-      gold: state.gold, coins: state.coins, pickaxeIdx: state.pickaxeIdx, mineLevel: state.mineLevel,
-      mineAreaIdx: state.mineAreaIdx, unlockedMines: state.unlockedMines,
-      ores: state.ores, lastDailyBonusDate: state.lastDailyBonusDate, dailyStreak: state.dailyStreak,
-      oreBreakCount: state.oreBreakCount, boostUntil: state.boostUntil, cosmetics: state.cosmetics,
-      equippedCosmetic: state.equippedCosmetic, gachaItems: state.gachaItems, goldSpentTotal: state.goldSpentTotal,
-      coinSpentTotal: state.coinSpentTotal,
-      lastAttendanceDate: state.lastAttendanceDate, attendanceDay: state.attendanceDay,
-      ownedTitles: state.ownedTitles, ownedBorders: state.ownedBorders, equippedTitle: state.equippedTitle,
-      equippedBorder: state.equippedBorder, equippedBg: state.equippedBg,
-      achievements: state.achievements, lifetimeOres: state.lifetimeOres, totalOresMined: state.totalOresMined,
-      nameTickets: state.nameTickets||0,
-      savedAt: Date.now(),
-    };
+    const base = buildSnap();
+    const key = buildSnapKey(base);
+    if (force !== true && key === window.__lastSnapKey) return Promise.resolve();   // 바뀐 게 없으면 저장하지 않음 (놀고 있는 기기가 서버를 덮어쓰지 않도록)
+    window.__lastSnapKey = key;
+    const savedAt = Math.max(Date.now(), (window.__lastSavedAt||0) + 1);
+    window.__lastSavedAt = savedAt;
+    const snap = Object.assign({}, base, { savedAt: savedAt, deviceId: DEVICE_ID });
     localStorage.setItem(ACTUAL_SAVE_KEY, JSON.stringify(snap));
     if (typeof database !== 'undefined' && database !== null) {
       const currentUser = sessionStorage.getItem('current_user') || localStorage.getItem('current_user');
       if (currentUser) {
-        __jobs.push(database.ref('users/' + currentUser + '/gameData').set(snap).catch((err) => {}));
+        const dirtyKey = 'sync_dirty_' + currentUser;
+        try{ localStorage.setItem(dirtyKey, String(savedAt)); }catch(e){}
+        __jobs.push(new Promise((resolve)=>{
+          const gRef = database.ref('users/' + currentUser + '/gameData');
+          const b = window.__base || { savedAt:0, gold:snap.gold, coins:snap.coins, gst:snap.goldSpentTotal||0, cst:snap.coinSpentTotal||0 };
+          gRef.transaction((cur)=>{
+            if(!cur) return snap;
+            /* 내가 마지막으로 본 뒤에 다른 기기가 저장했다면, 덮어쓰지 않고 서버값 + 내가 바꾼 만큼으로 합침 */
+            if(cur.deviceId !== DEVICE_ID && (+cur.savedAt||0) > (b.savedAt||0)){
+              const m = Object.assign({}, snap);
+              m.gold  = Math.max(0, Math.floor((+cur.gold||0)  + (snap.gold  - b.gold)));
+              m.coins = Math.max(0, Math.floor((+cur.coins||0) + (snap.coins - b.coins)));
+              m.goldSpentTotal = Math.max(0, Math.floor((+cur.goldSpentTotal||0) + ((snap.goldSpentTotal||0) - b.gst)));
+              m.coinSpentTotal = Math.max(0, Math.floor((+cur.coinSpentTotal||0) + ((snap.coinSpentTotal||0) - b.cst)));
+              m.savedAt = Math.max(snap.savedAt, (+cur.savedAt||0) + 1);
+              return m;
+            }
+            return snap;
+          }, (err, committed, ss)=>{
+            try{
+              if(!err && committed && ss && ss.exists()){
+                const v = ss.val();
+                if(v.savedAt !== snap.savedAt){          // 합쳐진 경우 → 이 기기 화면에도 바로 반영
+                  window.__applyingRemote = true;
+                  try{
+                    state.gold = v.gold + (state.gold - snap.gold);
+                    state.__coinRaw(v.coins + (state.coins - snap.coins));
+                    state.goldSpentTotal = v.goldSpentTotal + ((state.goldSpentTotal||0) - (snap.goldSpentTotal||0));
+                    state.coinSpentTotal = v.coinSpentTotal + ((state.coinSpentTotal||0) - (snap.coinSpentTotal||0));
+                    window.__lastSavedAt = Math.max(window.__lastSavedAt||0, v.savedAt||0);
+                    renderTop(); renderShop();
+                  } finally { window.__applyingRemote = false; }
+                }
+                markBase(v);
+                try{ if(localStorage.getItem(dirtyKey) === String(snap.savedAt)) localStorage.removeItem(dirtyKey); }catch(e){}
+              }
+            }catch(e){}
+            resolve();
+          }, false);
+        }));
         /* 랭킹 순위는 "보유 Gold + 보유 Coin을 Gold로 환전했을 때 가치(수수료 5% 반영)"의 합산 총 자산 기준 */
         const coinGoldValue = Math.max(0, Math.round((state.coins||0) * RATE * (1 - EXCHANGE_FEE)));
         const totalValue = (state.gold||0) + coinGoldValue;
@@ -3666,6 +3771,35 @@ function saveGame(){
     }
   }catch(e){}
   return Promise.all(__jobs);
+}
+
+/* ---- 다른 기기에서 저장한 변경을 실시간으로 받아 적용 (같은 계정이면 어느 기기든 같은 Gold/Coin) ---- */
+let __gameSyncRef = null;
+let __pendingRemote = null;
+function startGameSync(){
+  if(typeof database === 'undefined' || !database) return;
+  const user = sessionStorage.getItem('current_user') || localStorage.getItem('current_user');
+  if(!user) return;
+  if(__gameSyncRef){ try{ __gameSyncRef.off(); }catch(e){} }
+  __gameSyncRef = database.ref('users/' + user + '/gameData');
+  __gameSyncRef.on('value', (snap)=>{
+    if(window.__adminResetting || !snap.exists()) return;
+    const d = snap.val();
+    if(!d || d.deviceId === DEVICE_ID) return;                     // 내가 저장한 것
+    if((d.savedAt||0) <= (window.__lastSavedAt||0)) return;        // 내 데이터가 더 최신
+    if(window.__mpActiveRoom){ __pendingRemote = d; return; }       // 멀티플레이 중에는 끝난 뒤에 적용
+    applyCloudGameData(d);
+    try{ showToast('🔄 다른 기기의 최신 진행 상황을 불러왔어요.'); }catch(e){}
+  });
+  const wake = ()=>{ try{ database.goOnline(); }catch(e){} };
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) wake(); });
+  window.addEventListener('online', wake);
+  setInterval(()=>{
+    if(__pendingRemote && !window.__mpActiveRoom && (__pendingRemote.savedAt||0) > (window.__lastSavedAt||0)){
+      const d = __pendingRemote; __pendingRemote = null;
+      applyCloudGameData(d);
+    } else if(__pendingRemote && !window.__mpActiveRoom){ __pendingRemote = null; }
+  }, 2000);
 }
 
 window.addEventListener('load', function() {
@@ -5972,6 +6106,7 @@ function renderSkinModal(){
   renderTitleSection();
   renderEquipSection('borderShopList', BORDERS, state.ownedBorders, 'equippedBorder', '🖼️');
   renderEmoteSection();
+  if(typeof renderNameTicket === 'function') renderNameTicket();
 }
 
 function renderTitleSection(){
@@ -6235,6 +6370,7 @@ if (sessionStorage.getItem('passed_auth') !== 'true') {
 /* ============================ 관리자 모드 ============================ */
 /* 비밀번호(ADMIN_RESET_PASSWORD)는 그대로 사용합니다. 한 번 인증하면 이 페이지를 닫기 전까지 다시 묻지 않습니다. */
 let adminUnlocked = false;
+let adminSel = '';   // 초기화·삭제 대상 유저 (목록에서 눌러 선택 — 드롭다운의 '전체 유저'와 무관)
 function adminEsc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function adminMsg(text, cls){
   const el = document.getElementById('adminMsg');
@@ -6247,7 +6383,9 @@ function adminLoadUsers(){
   const sel = document.getElementById('adminTarget');
   if(!sel) return;
   if(typeof database === 'undefined' || !database){ sel.innerHTML = '<option value="">서버 미연결</option>'; return; }
+  sel.dataset.keep = sel.value || sel.dataset.keep || '';
   sel.innerHTML = '<option value="">불러오는 중...</option>';
+  adminRenderUserList();
   /* 랭킹에 없는 유저(아직 저장 전인 계정)도 나오도록 accounts + leaderboard 를 합쳐서 목록을 만든다 */
   Promise.all([
     database.ref('accounts').once('value').catch(()=>null),
@@ -6257,9 +6395,68 @@ function adminLoadUsers(){
     if(accSnap) accSnap.forEach(ch=>{ if(ch.key) set.add(ch.key); });
     if(lbSnap) lbSnap.forEach(ch=>{ const v = ch.val(); if(v && v.name) set.add(v.name); });
     const names = Array.from(set).sort((a,b)=>a.localeCompare(b,'ko'));
-    sel.innerHTML = '<option value="__ALL__">👥 전체 유저 (' + names.length + '명)</option>'
+    if(adminSel && names.indexOf(adminSel) < 0) adminSel = '';
+    const prev = sel.dataset.keep || '';
+    sel.innerHTML = '<option value="">-- 유저를 선택하세요 --</option>'
+      + '<option value="__ALL__">👥 전체 유저 (' + names.length + '명)</option>'
       + names.map(n=>`<option value="${adminEsc(n)}">${adminEsc(n)}</option>`).join('');
+    if(prev && (prev === '__ALL__' || names.indexOf(prev) >= 0)) sel.value = prev;
+    adminUpdateSelLabel();
   }).catch(()=>{ sel.innerHTML = '<option value="">목록을 불러오지 못했어요</option>'; });
+}
+/* 유저별 Gold / Coin 보유량 목록 (leaderboard 데이터 기준, 접속 중인 유저는 저장될 때마다 갱신됨) */
+let adminListTimer = null;
+function adminRenderUserList(){
+  const box = document.getElementById('adminUserList');
+  if(!box) return;
+  if(typeof database === 'undefined' || !database){ box.innerHTML = '<div class="adminUserEmpty">서버 미연결</div>'; return; }
+  Promise.all([
+    database.ref('accounts').once('value').catch(()=>null),
+    database.ref('leaderboard').once('value').catch(()=>null)
+  ]).then(([accSnap, lbSnap])=>{
+    const map = {};
+    if(accSnap) accSnap.forEach(ch=>{ if(ch.key) map[ch.key] = null; });
+    if(lbSnap) lbSnap.forEach(ch=>{
+      const v = ch.val();
+      if(v && v.name) map[v.name] = { gold: +v.gold || 0, coins: +v.coins || 0, total: +v.totalValue || 0 };
+    });
+    const rows = Object.keys(map).map(n=>({ name:n, d:map[n] }))
+      .sort((a,b)=>((b.d?b.d.total:-1) - (a.d?a.d.total:-1)) || a.name.localeCompare(b.name,'ko'));
+    if(!rows.length){ box.innerHTML = '<div class="adminUserEmpty">유저가 없어요</div>'; return; }
+    const cur = adminSel;
+    box.innerHTML = '<div class="adminUserRow head"><span class="un">유저</span><span class="ug">💰 Gold</span><span class="uc">🪙 Coin</span></div>'
+      + rows.map(r=>`<div class="adminUserRow${cur===r.name?' sel':''}" data-user="${adminEsc(r.name)}">
+          <span class="un">${adminEsc(r.name)}</span>
+          <span class="ug">${r.d ? fmt(r.d.gold) : '-'}</span>
+          <span class="uc">${r.d ? fmt(r.d.coins) : '-'}</span>
+        </div>`).join('');
+    box.querySelectorAll('[data-user]').forEach(row=>{
+      row.addEventListener('click', ()=>{
+        adminPick(row.dataset.user);
+      });
+    });
+    const st = document.getElementById('adminListStamp');
+    if(st){ const d = new Date(); st.textContent = d.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' 기준'; }
+  }).catch(()=>{ box.innerHTML = '<div class="adminUserEmpty">목록을 불러오지 못했어요</div>'; });
+}
+function adminUpdateSelLabel(){
+  const sel = document.getElementById('adminTarget');
+  if(sel) sel.dataset.keep = sel.value || '';
+  const el = document.getElementById('adminSelLabel');
+  if(el){
+    if(adminSel){ el.textContent = '초기화·삭제 대상: ' + adminSel; el.style.color = 'var(--lose)'; }
+    else { el.textContent = '초기화·삭제 대상: 없음 (위 유저 목록에서 한 명을 눌러 선택하세요)'; el.style.color = 'var(--sub)'; }
+  }
+  const rb = document.getElementById('adminUserResetBtn'), db = document.getElementById('adminUserDeleteBtn');
+  if(rb) rb.textContent = adminSel ? '♻️ "' + adminSel + '" 게임 데이터 초기화' : '♻️ 선택한 유저 게임 데이터 초기화';
+  if(db) db.textContent = adminSel ? '🚫 "' + adminSel + '" 계정 삭제 (아이디·비밀번호까지)' : '🚫 선택한 유저 계정 삭제 (아이디·비밀번호까지 삭제)';
+  document.querySelectorAll('#adminUserList .adminUserRow[data-user]').forEach(r=>r.classList.toggle('sel', r.dataset.user === adminSel));
+}
+function adminPick(name){
+  adminSel = name || '';
+  const sel = document.getElementById('adminTarget');
+  if(sel && name){ for(const o of sel.options){ if(o.value === name){ sel.value = name; break; } } }
+  adminUpdateSelLabel();
 }
 function adminTargets(){
   const sel = document.getElementById('adminTarget');
@@ -6290,18 +6487,18 @@ function adminGive(mode){
   Promise.all(names.map(n=>database.ref('adminGifts/' + n).push(gift))).then(()=>{
     const what = takeAll ? 'Gold·Coin 전부' : `Gold ${fmt(gold)} / Coin ${fmt(coins)}`;
     adminMsg(`✅ ${who}${take?'에게서':'에게'} ${what} ${take?'회수':'지급'} 완료! (접속 중이면 바로, 아니면 다음 접속 때 적용돼요)`, 'win');
+    setTimeout(adminRenderUserList, 1500);
   }).catch(err=>{
     adminMsg('❌ ' + (take?'회수':'지급') + ' 실패: ' + (err && err.message), 'lose');
   });
 }
-function adminNewToken(){ return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function adminNewToken(){ return 'r' + Date.now() + '_' + Math.random().toString(36).slice(2,8); }
 
 /* 선택한 유저 한 명의 게임 데이터 초기화 — 그 유저 화면에서도 즉시(오프라인이면 다음 접속 때) 적용됨 */
 function adminUserReset(){
   if(typeof database === 'undefined' || !database) return adminMsg('❌ 서버(Firebase)가 연결되지 않았습니다.', 'lose');
-  const { target, names } = adminTargets();
-  if(!target) return adminMsg('대상 유저를 선택하세요.', 'lose');
-  if(target === '__ALL__') return adminMsg('전체 초기화는 아래의 "서버 초기화" 버튼을 사용하세요.', 'lose');
+  const target = adminSel, names = [adminSel];
+  if(!target) return adminMsg('초기화할 유저를 위 유저 목록에서 한 명 눌러 먼저 선택하세요.', 'lose');
   if(!confirm(`⚠️ ${target} 님의 게임 데이터(골드·코인·곡괭이·아이템 등)를 전부 초기화할까요?\n되돌릴 수 없어요. (아이디·비밀번호는 유지)`)) return;
   const name = names[0];
   Promise.all([
@@ -6312,9 +6509,39 @@ function adminUserReset(){
   ]).then(()=>{
     adminMsg(`✅ ${name} 님 초기화 완료! (접속 중이면 바로, 아니면 다음 접속 때 적용돼요)`, 'win');
     adminLoadUsers();
+    setTimeout(adminRenderUserList, 1500);
   }).catch(err=>{
     adminMsg('❌ 초기화 실패: ' + (err && err.message), 'lose');
   });
+}
+/* 선택한 유저 한 명의 계정을 통째로 삭제 — 아이디·비밀번호·게임 데이터·랭킹 전부. 접속 중인 기기는 즉시 로그아웃돼요. */
+function adminUserDelete(){
+  if(typeof database === 'undefined' || !database) return adminMsg('❌ 서버(Firebase)가 연결되지 않았습니다.', 'lose');
+  const target = adminSel, names = [adminSel];
+  if(!target) return adminMsg('삭제할 유저를 위 유저 목록에서 한 명 눌러 먼저 선택하세요.', 'lose');
+  const name = names[0];
+  if(!confirm(`🚫 "${name}" 계정을 완전히 삭제할까요?\n\n아이디·비밀번호·게임 데이터·랭킹이 모두 사라지고 되돌릴 수 없어요.\n접속 중이면 바로 로그아웃돼요.`)) return;
+  const typed = prompt(`확인을 위해 삭제할 아이디 "${name}" 를 그대로 입력하세요:`);
+  if(typed === null) return;
+  if(typed.trim() !== name) return adminMsg('❌ 아이디가 일치하지 않아 삭제를 취소했어요.', 'lose');
+  const cleanup = ()=>Promise.all([
+    database.ref('accounts/' + name).remove(),
+    database.ref('users/' + name).remove(),
+    database.ref('leaderboard/' + name).remove(),
+    database.ref('adminGifts/' + name).remove(),
+    database.ref('adminResets/' + name).remove()
+  ]);
+  /* 삭제 신호를 먼저 보내서(접속 중 기기가 더 이상 저장하지 않게) → 데이터 삭제 → 잠시 뒤 한 번 더 정리 */
+  database.ref('adminDeletes/' + name).set({ at: Date.now(), token: adminNewToken() })
+    .then(cleanup)
+    .then(()=>{
+      adminMsg(`✅ ${name} 계정을 삭제했어요. (접속 중이면 바로 로그아웃, 오프라인이면 다음 접속 때 로그아웃돼요)`, 'win');
+      const sel = document.getElementById('adminTarget'); if(sel) sel.dataset.keep = '';
+      adminSel = '';
+      adminLoadUsers();
+      setTimeout(()=>{ cleanup().then(adminRenderUserList).catch(()=>{}); }, 3000);
+    })
+    .catch(err=>{ adminMsg('❌ 계정 삭제 실패: ' + (err && err.message), 'lose'); });
 }
 function adminServerReset(){
   if(!confirm('⚠️ 정말로 서버의 모든 유저 데이터와 랭킹을 초기화하시겠습니까?\n(모든 플레이어의 진행 상황이 사라지며 되돌릴 수 없습니다!)')) return;
@@ -6338,10 +6565,13 @@ function openAdminModal(){
   const msg = document.getElementById('adminMsg'); if(msg) msg.style.display = 'none';
   m.classList.add('show');
   adminLoadUsers();
+  clearInterval(adminListTimer);
+  adminListTimer = setInterval(adminRenderUserList, 5000);   // 열려 있는 동안 5초마다 보유량 갱신
 }
 function closeAdminModal(){
   const m = document.getElementById('adminModal');
   if(m) m.classList.remove('show');
+  clearInterval(adminListTimer); adminListTimer = null;
 }
 if(document.getElementById('adminResetBtn')) document.getElementById('adminResetBtn').addEventListener('click', ()=>{
   if(!adminUnlocked){
@@ -6354,10 +6584,15 @@ if(document.getElementById('adminResetBtn')) document.getElementById('adminReset
 });
 if(document.getElementById('adminModalClose')) document.getElementById('adminModalClose').addEventListener('click', closeAdminModal);
 if(document.getElementById('adminModal')) document.getElementById('adminModal').addEventListener('click', (e)=>{ if(e.target.id === 'adminModal') closeAdminModal(); });
+if(document.getElementById('adminTarget')) document.getElementById('adminTarget').addEventListener('change', ()=>{
+  const v = document.getElementById('adminTarget').value;
+  if(v && v !== '__ALL__') adminPick(v); else adminUpdateSelLabel();
+});
 if(document.getElementById('adminRefreshUsers')) document.getElementById('adminRefreshUsers').addEventListener('click', adminLoadUsers);
 if(document.getElementById('adminGiveBtn')) document.getElementById('adminGiveBtn').addEventListener('click', ()=>adminGive('give'));
 if(document.getElementById('adminTakeBtn')) document.getElementById('adminTakeBtn').addEventListener('click', ()=>adminGive('take'));
 if(document.getElementById('adminUserResetBtn')) document.getElementById('adminUserResetBtn').addEventListener('click', adminUserReset);
+if(document.getElementById('adminUserDeleteBtn')) document.getElementById('adminUserDeleteBtn').addEventListener('click', adminUserDelete);
 if(document.getElementById('adminServerResetBtn')) document.getElementById('adminServerResetBtn').addEventListener('click', adminServerReset);
 
 /* ============================ 이름 변경권 (상점) ============================ */
@@ -6367,7 +6602,7 @@ function renderNameTicket(){
   if(!slot) return;
   const n = state.nameTickets || 0;
   slot.innerHTML = `
-    <div class="pick-card${n>0?' owned':''}" style="margin-top:12px;">
+    <div class="pick-card${n>0?' owned':''}" style="margin-top:8px;">
       <div class="picon">🎫</div>
       <div class="info">
         <div class="name">이름 변경권 <span style="color:var(--brass-glow);font-size:11.5px;font-weight:800;">보유 ${n}장</span></div>
@@ -6452,7 +6687,7 @@ async function changeMyName(){
     gifts.forEach(ch=>{ moves.push(ref('adminGifts/' + val).push(ch.val())); });
     await Promise.all(moves);
   }catch(e){}
-  try{ await saveGame(); }catch(e){}                       // 새 이름으로 users/·leaderboard/ 저장
+  try{ await saveGame(true); }catch(e){}                   // 새 이름으로 users/·leaderboard/ 저장 (값이 같아도 강제)
   try{
     await Promise.all([
       ref('users/' + old).remove(), ref('leaderboard/' + old).remove(),
@@ -6479,6 +6714,7 @@ function whenDbReady(cb, tries){
 
 /* ---- 관리자 초기화 감시: adminResets/__ALL__ 또는 adminResets/<내아이디> 값이 바뀌면 내 데이터를 지우고 새로고침 ---- */
 function adminResetSeenKey(u){ return 'admin_reset_seen_' + u; }
+function adminTokenTime(t){ const m = /^r(\d{11,})_/.exec(t||''); return m ? +m[1] : 0; }
 function adminResetToken(all, usr){ return (all||'') + '|' + (usr||''); }
 async function applyAdminReset(user, token){
   if(window.__adminResetting) return;
@@ -6505,7 +6741,11 @@ async function watchAdminResets(){
   const seen = localStorage.getItem(key);
   const token = adminResetToken(allV, usrV);
   if(seen === null){
-    localStorage.setItem(key, token);             // 이 기기에서 처음 확인 → 현재 상태를 기준으로 삼음
+    /* 이 기기에서 처음 확인: 초기화 이전에 저장된 옛 로컬 데이터가 남아 있으면 부활하지 않도록 지움 */
+    const rt = Math.max(adminTokenTime(allV), adminTokenTime(usrV));
+    let ls = 0; try{ const raw = localStorage.getItem('deeprockMine_save_v3'); if(raw) ls = (JSON.parse(raw).savedAt)||0; }catch(e){}
+    if(rt && ls && ls < rt){ await applyAdminReset(user, token); return true; }
+    localStorage.setItem(key, token);             // 현재 상태를 기준으로 삼음
   } else if(seen !== token){
     await applyAdminReset(user, token);           // 내가 오프라인일 때 초기화가 있었음
     return true;
@@ -6516,6 +6756,36 @@ async function watchAdminResets(){
   };
   database.ref('adminResets/__ALL__').on('value', sn=>{ allV = sn.val(); onChange(); });
   database.ref('adminResets/' + user).on('value', sn=>{ usrV = sn.val(); onChange(); });
+  return false;
+}
+
+/* ---- 관리자 계정 삭제 감시: adminDeletes/<내아이디> 가 내 로그인 시각 이후에 생기면 이 기기에서 로그아웃 ---- */
+function loginAtKey(u){ return 'login_at_' + u; }
+async function applyAccountDeleted(user){
+  if(window.__adminResetting) return;
+  window.__adminResetting = true;                 // 더 이상 서버에 저장하지 않음
+  try{
+    localStorage.removeItem('deeprockMine_save_v3');
+    localStorage.removeItem('current_user');
+    sessionStorage.removeItem('current_user');
+    localStorage.removeItem(loginAtKey(user));
+    localStorage.removeItem(adminResetSeenKey(user));
+  }catch(e){}
+  try{ alert('🚫 관리자가 이 계정을 삭제했어요. 다시 시작하려면 새로 등록해주세요.'); }catch(e){}
+  window.__mpActiveRoom = null;
+  location.reload();
+}
+async function watchAccountDelete(){
+  const user = currentUserName();
+  if(!user || typeof database === 'undefined' || !database) return false;
+  const check = (v)=>{
+    if(!v || !v.at) return false;
+    const loginAt = +localStorage.getItem(loginAtKey(user)) || 0;
+    return v.at > loginAt;
+  };
+  const snap = await database.ref('adminDeletes/' + user).once('value');
+  if(check(snap.val())){ await applyAccountDeleted(user); return true; }
+  database.ref('adminDeletes/' + user).on('value', sn=>{ if(check(sn.val())) applyAccountDeleted(user); });
   return false;
 }
 
@@ -6556,14 +6826,32 @@ function listenAdminGifts(){
 }
 
 /* 서버 기능 시작: DB 준비 대기 → 초기화 확인 → 클라우드 저장 동기화 → 랭킹/선물 */
+let __postSyncDone = false;
+/* 서버 동기화가 끝난(또는 포기한) 뒤 딱 한 번: 저장 허용 + 일일 보너스·출석 확인 (동기화 전에 하면 기기마다 중복 수령됨) */
+function finishInitialSync(){
+  if(__postSyncDone) return;
+  __postSyncDone = true;
+  window.__cloudReady = true;
+  if(!window.__base){ try{ const s0 = buildSnap(); markBase({ savedAt: window.__lastSavedAt||0, gold:s0.gold, coins:s0.coins, goldSpentTotal:s0.goldSpentTotal, coinSpentTotal:s0.coinSpentTotal }); }catch(e){} }
+  try{ window.__lastSnapKey = window.__lastSnapKey || buildSnapKey(buildSnap()); }catch(e){}
+  try{ checkDailyBonus(); }catch(e){}
+  try{ checkAttendance(true); }catch(e){}
+  try{ renderTop(); renderShop(); }catch(e){}
+}
 function startCloudServices(){
+  /* DB 를 끝내 못 쓰는 환경(오프라인 등)에서도 게임은 계속 저장되도록 안전장치 */
+  setTimeout(()=>{ if(!__postSyncDone) finishInitialSync(); }, 12000);
   whenDbReady(async ()=>{
+    try{ if(await watchAccountDelete()) return; }catch(e){}
     try{ if(await watchAdminResets()) return; }catch(e){}
     try{
       loadGame();                                   // DB 준비 후 클라우드 세이브 동기화
       if(window.__cloudSyncPromise) await window.__cloudSyncPromise;
-      renderTop(); renderShop();
     }catch(e){}
+    /* 서버 기준으로 맞춘 현재 상태를 "마지막 저장 상태"로 삼아, 바뀐 게 없으면 서버를 덮어쓰지 않게 함 */
+    try{ window.__lastSnapKey = buildSnapKey(buildSnap()); }catch(e){}
+    finishInitialSync();
+    startGameSync();
     loadRankingData();
     listenAdminGifts();
   });
@@ -6577,8 +6865,6 @@ function startGame(){
   renderTabs();
   scopedWire();
   switchView('mine');
-  checkDailyBonus();
-  checkAttendance(true);
   applyCustomization();
   startCloudServices();
   setInterval(checkRelief, RELIEF_CHECK_TICK_MS);
@@ -6655,6 +6941,8 @@ if(savedUserId){
           await database.ref('accounts/'+val).set({ passwordHash: pwHash, createdAt: Date.now() });
         }
       }
+      localStorage.removeItem('deeprockMine_save_v3');          // 이 기기의 예전 세이브가 새 로그인에 섞이지 않게 (서버 데이터를 기준으로 불러옴)
+      localStorage.setItem(loginAtKey(val), String(Date.now()));   // 이 시각 이후에 삭제된 경우에만 로그아웃 처리
       localStorage.setItem('current_user', val);
       if(idModal) idModal.classList.remove('show');
       startGame();
@@ -8539,4 +8827,4 @@ initWordChain(); // 페이지 로드 시점에 바로 단어장 불러오기 시
 })();
 </script>
 </body>
-      </html>
+  </html>
