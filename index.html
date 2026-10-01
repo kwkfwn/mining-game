@@ -813,6 +813,8 @@
         <input type="text" id="adminNoticeInput" class="adminField" maxlength="120" placeholder="접속 중인 모든 유저 화면 위에 띄울 공지 (최대 120자)" autocomplete="off">
         <button class="playBtn" id="adminNoticeBtn" type="button" style="width:100%;margin:8px 0 0;">📢 공지 보내기</button>
         <div class="admHint">지금 접속 중인 유저에게만 보여요. 화면 위쪽에 15초간 떠 있고, 누르면 닫혀요.</div>
+        <button class="playBtn" id="adminReloadBtn" type="button" style="width:100%;margin:10px 0 0;background:linear-gradient(180deg,#4aa8ff,#1f6fd0);box-shadow:0 6px 18px -6px rgba(31,111,208,.6);">🔄 접속 중인 모든 유저 새로고침</button>
+        <div class="admHint">이 버전을 이미 열어둔 유저는 3초 뒤 자동으로 새로고침돼요(저장 후 이동, 멀티플레이 중이면 끝날 때까지 대기). 예전 버전을 열어둔 유저는 공지만 뜨고 직접 새로고침해야 해요.</div>
         <div class="resultBanner" id="adminNoticeMsg" style="display:none;"></div>
       </div>
     </details>
@@ -1233,13 +1235,27 @@ function adminShowNotice(text){
   el.textContent="📢 "+text;el.style.display="block";
   clearTimeout(window.__noticeTimer);window.__noticeTimer=setTimeout(()=>{el.style.display="none"},15e3);
 }
+function adminSendReload(){
+  const M="adminNoticeMsg";
+  if(typeof T>"u"||!T)return admMsg(M,"❌ 서버(Firebase)가 연결되지 않았습니다.","lose");
+  if(!confirm("🔄 지금 접속 중인 모든 유저를 새로고침시킬까요?\n(진행 상황은 저장 후 이동해요. 이 버전이 열려 있는 유저만 자동으로 새로고침돼요.)"))return;
+  const id=wa();window.__reloadSelfId=id;
+  T.ref("adminNotice").set({text:"🔄 업데이트가 있어요! 3초 뒤 자동으로 새로고침돼요. (안 되면 직접 새로고침 해주세요)",id:id,at:Date.now(),reload:true}).then(()=>{admMsg(M,"✅ 새로고침 신호를 보냈어요!","win")}).catch(e=>{admMsg(M,"❌ 실패: "+(e&&e.message),"lose")});
+}
+function adminForceReload(){
+  if(window.__reloading)return;
+  if(window.__mpActiveRoom){setTimeout(adminForceReload,5e3);return}
+  window.__reloading=!0;
+  const go=()=>{try{const u=new URL(location.href);u.searchParams.set("_r",String(Date.now()));location.replace(u.toString())}catch{location.reload()}};
+  setTimeout(()=>{let done=!1;const f=()=>{if(!done){done=!0;go()}};try{Promise.resolve(Be(!0)).then(f,f)}catch{f()}setTimeout(f,2500)},3e3);
+}
 function adminNoticeBind(){
   if(window.__noticeBound||typeof T>"u"||!T)return;
   window.__noticeBound=!0;let seen;
   T.ref("adminNotice").on("value",sn=>{
     const v=sn.val(),id=v&&v.id;
     if(seen===void 0){seen=id||null;return}
-    if(id&&id!==seen){seen=id;adminShowNotice(String(v.text||""))}
+    if(id&&id!==seen){seen=id;adminShowNotice(String(v.text||""));if(v.reload&&id!==window.__reloadSelfId)adminForceReload()}
   });
 }
 
@@ -1250,7 +1266,7 @@ function adminNoticeBind(){
   on("adminItemBtn","click",adminDoItem);on("adminSetBtn","click",adminSetGC);
   on("adminRecAction","change",adminRecToggle);on("adminRecBtn","click",adminDoRec);
   on("adminPwBtn","click",adminResetPw);on("adminRenameBtn","click",adminRenameUser);
-  on("adminNoticeBtn","click",adminSendNotice);on("adminOwnedRefresh","click",adminLoadOwned);
+  on("adminNoticeBtn","click",adminSendNotice);on("adminReloadBtn","click",adminSendReload);on("adminOwnedRefresh","click",adminLoadOwned);
 })();
 try{adminRenderItem();adminRecToggle()}catch{}
 const Vn=1e7;function ma(){const t=document.getElementById("nameTicketSlot");if(!t)return;const n=s.nameTickets||0;t.innerHTML=`
@@ -1278,7 +1294,7 @@ function wkEarned(){return wkBase==null?0:Math.max(0,Math.round(wkE()-wkBase))}
 function wkAdj(d){try{if(!d||wkBase==null||wkId<0)return;wkBase+=d;const u=qn();u&&T.ref("weeklyBoard/"+wkId+"/"+u+"/base").transaction(b=>b==null?void 0:b+d)}catch{}}
 function wkPush(f){try{if(wkBase==null||wkId<0)return;const u=qn();if(!u)return;const e=wkEarned(),n=Date.now();if(!f&&(e===wkLastE||n-wkLastPush<300))return;wkLastE=e;wkLastPush=n;T.ref("weeklyBoard/"+wkId+"/"+u).update({name:u,earned:e,title:s.equippedTitle||null,updatedAt:n}).catch(()=>{})}catch{}}
 function wkRow(v,k,me){const ic=k===0?"👑":k===1?"🥈":k===2?"🥉":k+1+".",tt=v.title?On.find(z=>z.id===v.title):null,tb=tt?`<span class="rankTitle tier_${tt.tier||"common"}">${wkEsc(tt.name)}</span>`:"",rw=WK_RW[k]?`<div class="stats">🎁 보상 Gold ${A(WK_RW[k].g)} + Coin ${A(WK_RW[k].c)}</div>`:"";return`<div class="pick-card${me?" current":""}"><div class="picon">${ic}</div><div class="info"><div class="name">${tb}${wkEsc(v.name||"익명")}${me?" (나)":""}</div><div class="stats">📈 이번 주 번 돈 +${A(v.earned||0)} Gold</div>${rw}</div></div>`}
-function wkListen(id){try{wkRef&&wkRef.off()}catch{}wkRef=T.ref("weeklyBoard/"+id).orderByChild("earned").limitToLast(10);wkRef.on("value",sn=>{const a=[];sn.forEach(x=>{const v=x.val()||{};(v.earned||0)>0&&a.push(v)});a.sort((p,q)=>(q.earned||0)-(p.earned||0));const me=qn(),el=wkEl("weeklyRankList");el&&(el.innerHTML=a.map((v,k)=>wkRow(v,k,v.name===me)).join("")||'<div class="resultBanner" style="font-size:11px;">아직 이번 주 기록이 없어요. 채굴해서 1등에 도전하세요!</div>')},()=>{const el=wkEl("weeklyRankList");el&&(el.innerHTML='<div class="resultBanner" style="font-size:11px;">주간 랭킹을 불러오지 못했어요.</div>')})}
+function wkListen(id){try{wkRef&&wkRef.off()}catch{}wkRef=T.ref("weeklyBoard/"+id).orderByChild("earned").limitToLast(10);wkRef.on("value",sn=>{const a=[];sn.forEach(x=>{const v=x.val()||{};v.name&&typeof v.earned=="number"&&a.push(v)});a.sort((p,q)=>(q.earned||0)-(p.earned||0));const me=qn(),el=wkEl("weeklyRankList");el&&(el.innerHTML=a.map((v,k)=>wkRow(v,k,v.name===me)).join("")||'<div class="resultBanner" style="font-size:11px;">아직 이번 주 기록이 없어요. 채굴해서 1등에 도전하세요!</div>')},()=>{const el=wkEl("weeklyRankList");el&&(el.innerHTML='<div class="resultBanner" style="font-size:11px;">주간 랭킹을 불러오지 못했어요.</div>')})}
 async function wkTop(id,n){const sn=await T.ref("weeklyBoard/"+id).orderByChild("earned").limitToLast(n).once("value"),a=[];sn.forEach(x=>{const v=x.val()||{};(v.earned||0)>0&&a.push({u:x.key,e:v.earned||0})});a.sort((p,q)=>q.e-p.e);return a}
 async function wkLast(id){try{const a=await wkTop(id-1,3),el=wkEl("weeklyLast");el&&(el.innerHTML=a.length?"📜 지난 주 결과: "+a.map((v,k)=>["👑","🥈","🥉"][k]+" "+wkEsc(v.u)+" (+"+A(v.e)+")").join(" · "):"📜 지난 주 결과: 기록 없음")}catch{}}
 async function wkClaim(cur){const u=qn();if(!u)return;let again=false;for(let k=1;k<=3;k++){const pid=cur-k;try{if(wkNow()<wkStart(pid+1)+12e4){again=true;continue}const ref=T.ref("weeklyClaims/"+pid+"/"+u),cl=await ref.once("value");if(cl.exists())continue;const a=await wkTop(pid,3),r=a.findIndex(x=>x.u===u);if(r<0){await ref.set({rank:0,at:Date.now()});continue}const tx=await ref.transaction(c=>c==null?{rank:r+1,at:Date.now()}:void 0);if(!tx.committed)continue;const rw=WK_RW[r];s.gold=(s.gold||0)+rw.g;s.coins=(s.coins||0)+rw.c;wkAdj(rw.g+Math.round(rw.c*Ge*(1-ce)));try{R()}catch{}try{Be(!0)}catch{}try{Ae("🏆 주간 랭킹 "+(r+1)+"위! 보상 Gold "+A(rw.g)+" + Coin "+A(rw.c)+" 지급!");Mt(90);Pa(30)}catch{}}catch{again=true}}wkNextClaim=again?Date.now()+6e4:0}
