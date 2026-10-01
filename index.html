@@ -772,6 +772,17 @@
       </div>
     </details>
 
+    <details class="admSec" open>
+      <summary>🏆 랭킹보드 · 소모량 삭제</summary>
+      <div class="admBody">
+        <button class="playBtn" id="adminRankDelBtn" type="button" style="width:100%;margin:0 0 8px;background:linear-gradient(180deg,#ff8a6b,#c8442b);box-shadow:0 6px 18px -6px rgba(255,120,80,.7);">🗑️ 랭킹보드에서 삭제</button>
+        <button class="playBtn" id="adminGoldSpentBtn" type="button" style="width:100%;margin:0 0 8px;background:linear-gradient(180deg,#ffb04a,#d9691a);box-shadow:0 6px 18px -6px rgba(255,150,60,.7);">💰 Gold 소모량 삭제 (0으로)</button>
+        <button class="playBtn" id="adminCoinSpentBtn" type="button" style="width:100%;margin:0;background:linear-gradient(180deg,#b04bff,#6a1fa0);box-shadow:0 6px 18px -6px rgba(176,75,255,.7);">🪙 Coin 소모량 삭제 (0으로)</button>
+        <div class="admHint">위에서 선택한 유저(또는 "전체 유저")에게 적용돼요. 랭킹보드 삭제는 명예의 전당 기록만 지우고 Gold·Coin·게임 데이터는 그대로예요(접속 중인 유저는 다음 저장 때 다시 올라올 수 있어요). 소모량 삭제는 누적 소모 기록만 0으로 만들고 보유량은 그대로예요. 랭킹보드에도 바로 반영돼요.</div>
+        <div class="resultBanner" id="adminRankMsg" style="display:none;"></div>
+      </div>
+    </details>
+
     <details class="admSec">
       <summary>📅 출석 · 접속 기록</summary>
       <div class="admBody">
@@ -975,6 +986,7 @@ function adminLoadOwned(){
     const bl=Math.max(0,(+d.boostUntil||0)-Date.now());
     el.innerHTML=
       row("💰 Gold",A(Math.floor(+d.gold||0)))+row("🪙 Coin",A(Math.floor(+d.coins||0)))
+      +row("💰 Gold 소모",A(Math.floor(+d.goldSpentTotal||0)))+row("🪙 Coin 소모",A(Math.floor(+d.coinSpentTotal||0)))
       +row("⛏️ 곡괭이",da(pk.name))+row("⛰️ 광산 레벨","Lv."+(+d.mineLevel||1))
       +row("🕳️ 개방한 광산",da(mines))+row("⚡ 부스터",bl>0?Math.ceil(bl/6e4)+"분 남음":"없음")
       +row("🎫 이름 변경권",(+d.nameTickets||0)+"장")+row("🏅 칭호",Object.keys(d.ownedTitles||{}).length+" / "+On.length)
@@ -1124,6 +1136,10 @@ function adminApplyRec(r){
   if(r.a==="att_reset"){s.attendanceDay=0;s.lastAttendanceDate=null;out.push("📅 출석 기록이 초기화됐어요. 1일차부터 다시 받을 수 있어요")}
   else if(r.a==="att_day"){const n=Math.max(0,Math.min(le,Math.floor(+r.n||0)));s.attendanceDay=n;s.lastAttendanceDate=n>0?yk:null;out.push("📅 출석 "+n+"일차까지 완료로 처리됐어요. 오늘 "+(n>=le?1:n+1)+"일차 보상을 받을 수 있어요")}
   else if(r.a==="daily_reset"){s.dailyStreak=0;s.lastDailyBonusDate=null;out.push("☀️ 연속 접속 기록이 초기화됐어요. 다음 접속 때 1일차 보너스를 받아요")}
+  else if(r.a==="spent_gold"||r.a==="spent_coin"){
+    if(r.a==="spent_gold"){const o=+s.goldSpentTotal||0;s.goldSpentTotal=0;admAdjWeekly(-o);out.push("💰 Gold 소모량이 0으로 초기화됐어요")}
+    else{s.coinSpentTotal=0;out.push("🪙 Coin 소모량이 0으로 초기화됐어요")}
+  }
   if(!out.length)return;
   try{pt()}catch{}try{R()}catch{}
   Be(!0);
@@ -1259,6 +1275,36 @@ function adminNoticeBind(){
   });
 }
 
+/* ── 랭킹보드 · 소모량 삭제 ── */
+function admAdjWeekly(d){
+  if(!d)return;
+  if(wkBase!=null&&wkId>=0&&!wkBusy){wkAdj(d);return}
+  let n=0;const t=setInterval(()=>{if(wkBase!=null&&wkId>=0&&!wkBusy){clearInterval(t);wkAdj(d)}else if(++n>40)clearInterval(t)},500);
+}
+function adminRankCtx(){
+  const M="adminRankMsg";
+  if(typeof T>"u"||!T){admMsg(M,"❌ 서버(Firebase)가 연결되지 않았습니다.","lose");return null}
+  const {target:f,names:k}=oo();
+  if(!f){admMsg(M,"대상 유저를 선택하세요.","lose");return null}
+  if(!k.length){admMsg(M,"대상 유저가 없습니다.","lose");return null}
+  return {M:M,f:f,k:k,who:f==="__ALL__"?"전체 "+k.length+"명":f+" 님"};
+}
+function adminRankDelete(){
+  const c=adminRankCtx();if(!c)return;
+  if(!confirm("🗑️ "+c.who+"을(를) 랭킹보드에서 삭제할까요?\n(게임 데이터·Gold·Coin은 그대로예요. 접속 중인 유저는 다음 저장 때 다시 올라올 수 있어요.)"))return;
+  (c.f==="__ALL__"?T.ref("leaderboard").remove():T.ref("leaderboard/"+c.f).remove()).then(()=>{
+    admMsg(c.M,"✅ "+c.who+"을(를) 랭킹보드에서 삭제했어요.","win");setTimeout(ta,1500);
+  }).catch(e=>{admMsg(c.M,"❌ 랭킹 삭제 실패: "+(e&&e.message),"lose")});
+}
+function adminSpentReset(kind){
+  const c=adminRankCtx();if(!c)return;
+  const lab=kind==="gold"?"Gold 소모량":"Coin 소모량",fld=kind==="gold"?"goldSpentTotal":"coinSpentTotal",at=Date.now();
+  if(!confirm("🧹 "+c.who+"의 "+lab+"을(를) 0으로 삭제할까요?\n(보유 Gold·Coin은 그대로예요. 랭킹보드 표시도 0으로 바뀌어요.)"))return;
+  Promise.all(c.k.map(u=>Promise.resolve(T.ref("adminGifts/"+u).push({rec:{a:"spent_"+kind},at:at})).then(()=>T.ref("leaderboard/"+u).once("value")).then(sn=>{if(sn.exists()){const o={};o[fld]=0;return T.ref("leaderboard/"+u).update(o)}}))).then(()=>{
+    admMsg(c.M,"✅ "+c.who+"의 "+lab+"을(를) 삭제했어요! (접속 중이면 바로, 아니면 다음 접속 때 적용돼요)","win");setTimeout(ta,1500);setTimeout(()=>{try{adminLoadOwned()}catch{}},2500);
+  }).catch(e=>{admMsg(c.M,"❌ "+lab+" 삭제 실패: "+(e&&e.message),"lose")});
+}
+
 /* ── 이벤트 연결 ── */
 (function(){
   const on=(id,ev,fn)=>{const e=document.getElementById(id);e&&e.addEventListener(ev,fn)};
@@ -1266,6 +1312,7 @@ function adminNoticeBind(){
   on("adminItemBtn","click",adminDoItem);on("adminSetBtn","click",adminSetGC);
   on("adminRecAction","change",adminRecToggle);on("adminRecBtn","click",adminDoRec);
   on("adminPwBtn","click",adminResetPw);on("adminRenameBtn","click",adminRenameUser);
+  on("adminRankDelBtn","click",adminRankDelete);on("adminGoldSpentBtn","click",()=>adminSpentReset("gold"));on("adminCoinSpentBtn","click",()=>adminSpentReset("coin"));
   on("adminNoticeBtn","click",adminSendNotice);on("adminReloadBtn","click",adminSendReload);on("adminOwnedRefresh","click",adminLoadOwned);
 })();
 try{adminRenderItem();adminRecToggle()}catch{}
@@ -1361,4 +1408,4 @@ function Fa(){if(!ya){if(ya=!0,window.__cloudReady=!0,po(),wkInit(),!window.__ba
 })();
 </script>
 </body>
-</html>
+  </html>
