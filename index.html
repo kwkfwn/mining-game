@@ -674,11 +674,27 @@
     <button id="adminResetBtn" type="button" style="margin-top:8px;background:none;border:none;color:var(--sub);font-size:10px;text-decoration:underline;cursor:pointer;opacity:.75;">🛠️ 관리자 모드</button>
   </div>
 </div>
+<style>
+.admSec{border:1px solid var(--line);border-radius:11px;background:#0c0f16;margin:10px 0;overflow:hidden}
+.admSec>summary{cursor:pointer;padding:11px 13px;font-size:13px;font-weight:800;color:var(--brass-glow);list-style:none;display:flex;align-items:center;justify-content:space-between;user-select:none}
+.admSec>summary::-webkit-details-marker{display:none}
+.admSec>summary::after{content:"▾";color:var(--sub);transition:transform .15s ease}
+.admSec[open]>summary::after{transform:rotate(180deg)}
+.admSec>.admBody{padding:0 13px 14px}
+.admSec.danger>summary{color:var(--lose)}
+.admInfo{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;font-size:12px}
+.admInfo>div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line);padding:5px 0}
+.admInfo>div.wide{grid-column:1/-1}
+.admInfo span{color:var(--sub);white-space:nowrap}
+.admInfo b{color:var(--text);font-family:var(--mono);font-weight:700;text-align:right;word-break:keep-all}
+.admHint{font-size:11px;color:var(--sub);line-height:1.5;margin-top:6px}
+@media(max-width:520px){.admInfo{grid-template-columns:1fr}}
+</style>
 <div class="attnModal" id="adminModal" style="z-index:3500;">
-  <div class="attnModalBox" style="max-width:480px;max-height:92vh;overflow-y:auto;">
+  <div class="attnModalBox" style="max-width:580px;max-height:92vh;overflow-y:auto;">
     <button class="attnModalClose" id="adminModalClose" aria-label="닫기">✕</button>
     <div class="attnModalTitle"><span class="welcome">🛠️ 관리자 모드</span></div>
-    <div class="attnModalSub">유저에게 Gold / Coin을 지급·회수하거나, 곡괭이·이름 변경권·칭호·스킨을 회수하거나, 유저의 게임 데이터를 초기화할 수 있어요. 접속 중이면 바로, 오프라인이면 다음 접속 때 적용돼요.</div>
+    <div class="attnModalSub">유저에게 Gold·Coin·곡괭이·칭호·스킨 등을 지급·회수하고, 출석 기록·비밀번호·아이디를 관리하고, 공지를 보내고, 게임 데이터를 초기화할 수 있어요. 접속 중이면 바로, 오프라인이면 다음 접속 때 적용돼요.</div>
     <div class="adminLabel">대상 유저</div>
     <div style="display:flex;gap:8px;">
       <select id="adminTarget" class="adminField" style="flex:1;"></select>
@@ -689,48 +705,136 @@
       <span id="adminListStamp" style="font-size:10.5px;color:var(--sub);font-weight:600;"></span>
     </div>
     <div id="adminUserList" class="adminUserList"><div class="adminUserEmpty">불러오는 중...</div></div>
-    <div class="adminTwo">
-      <div>
-        <div class="adminLabel">💰 Gold</div>
-        <input type="number" id="adminGoldInput" class="adminField" min="0" value="0">
+    <details class="admSec" open>
+      <summary>📋 선택한 유저 상세 현황</summary>
+      <div class="admBody">
+        <div id="adminOwnedInfo" class="admInfo"><div style="grid-column:1/-1;border:none;color:var(--sub)">위 목록에서 유저를 한 명 누르면 상세 현황이 표시돼요.</div></div>
+        <div style="text-align:right;margin-top:8px;"><button type="button" id="adminOwnedRefresh" class="chipbtn">🔄 현황 새로고침</button></div>
+        <div class="admHint">유저가 게임을 저장한 시점의 데이터라 몇 초 늦을 수 있어요.</div>
       </div>
-      <div>
-        <div class="adminLabel">🪙 Coin</div>
-        <input type="number" id="adminCoinInput" class="adminField" min="0" value="0">
+    </details>
+
+    <details class="admSec" open>
+      <summary>💰 Gold / Coin</summary>
+      <div class="admBody">
+        <div class="adminTwo">
+          <div>
+            <div class="adminLabel">💰 Gold</div>
+            <input type="number" id="adminGoldInput" class="adminField" min="0" value="0">
+          </div>
+          <div>
+            <div class="adminLabel">🪙 Coin</div>
+            <input type="number" id="adminCoinInput" class="adminField" min="0" value="0">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <button class="playBtn" id="adminGiveBtn" type="button" style="flex:1;margin:0;">🎁 지급하기</button>
+          <button class="playBtn" id="adminTakeBtn" type="button" style="flex:1;margin:0;background:linear-gradient(180deg,#ffb04a,#d9691a);box-shadow:0 6px 18px -6px rgba(255,150,60,.7);">💸 회수하기</button>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--sub);cursor:pointer;">
+          <input type="checkbox" id="adminTakeAll"> 회수 시 수량 무시하고 Gold·Coin 전부 0으로 만들기
+        </label>
+        <button class="playBtn" id="adminSetBtn" type="button" style="width:100%;margin:10px 0 0;background:linear-gradient(180deg,#4aa8ff,#1f6fd0);box-shadow:0 6px 18px -6px rgba(31,111,208,.6);">🎯 위 입력값으로 정확히 설정하기</button>
+        <div class="admHint">"설정"은 지급·회수와 달리 입력한 Gold / Coin 값이 그대로 최종 보유량이 돼요. (0이면 0으로)</div>
+        <div class="resultBanner" id="adminMsg" style="display:none;"></div>
       </div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:14px;">
-      <button class="playBtn" id="adminGiveBtn" type="button" style="flex:1;margin:0;">🎁 지급하기</button>
-      <button class="playBtn" id="adminTakeBtn" type="button" style="flex:1;margin:0;background:linear-gradient(180deg,#ffb04a,#d9691a);box-shadow:0 6px 18px -6px rgba(255,150,60,.7);">💸 회수하기</button>
-    </div>
-    <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--sub);cursor:pointer;">
-      <input type="checkbox" id="adminTakeAll"> 회수 시 수량 무시하고 Gold·Coin 전부 0으로 만들기
-    </label>
-    <div class="resultBanner" id="adminMsg" style="display:none;"></div>
-    <div class="adminDivider"></div>
-    <div class="adminLabel">🧰 아이템 회수 (삭제)</div>
-    <div id="adminOwnedInfo" style="font-size:11.5px;color:var(--sub);line-height:1.5;margin-bottom:8px;">위 목록에서 유저를 한 명 누르면 그 유저의 보유 현황이 표시돼요.</div>
-    <select id="adminRevokeType" class="adminField">
-      <option value="pickaxe">⛏️ 곡괭이</option>
-      <option value="ticket">🎫 이름 변경권</option>
-      <option value="title">🏅 칭호</option>
-      <option value="skin">🎨 스킨 (이펙트 · 배경 · 테두리)</option>
-    </select>
-    <div id="adminRevokeBody" style="margin-top:8px;"></div>
-    <button class="playBtn" id="adminRevokeBtn" type="button" style="width:100%;margin:12px 0 0;background:linear-gradient(180deg,#ffb04a,#d9691a);box-shadow:0 6px 18px -6px rgba(255,150,60,.7);">🧹 선택한 아이템 회수하기</button>
-    <div class="resultBanner" id="adminRevokeMsg" style="display:none;"></div>
-    <div style="font-size:11px;color:var(--sub);margin-top:6px;line-height:1.5;">회수한 아이템은 환불 없이 사라지고, 유저가 다시 구매·획득할 수 있어요. 접속 중이면 바로, 오프라인이면 다음 접속 때 적용돼요. 위에서 "전체 유저"를 고르면 모든 유저에게 적용돼요.</div>
-    <div class="adminDivider"></div>
-    <div class="adminLabel">👤 유저 계정으로 접속</div>
+    </details>
+
+    <details class="admSec" open>
+      <summary>🎁 아이템 지급 / 회수</summary>
+      <div class="admBody">
+        <div class="adminTwo">
+          <div>
+            <div class="adminLabel">동작</div>
+            <select id="adminItemMode" class="adminField">
+              <option value="give">🎁 지급</option>
+              <option value="take">🧹 회수</option>
+            </select>
+          </div>
+          <div>
+            <div class="adminLabel">종류</div>
+            <select id="adminItemType" class="adminField">
+              <option value="pickaxe">⛏️ 곡괭이</option>
+              <option value="ticket">🎫 이름 변경권</option>
+              <option value="title">🏅 칭호</option>
+              <option value="skin">🎨 스킨 (이펙트·배경·테두리)</option>
+              <option value="ore">🪨 광석</option>
+              <option value="mlevel">⛰️ 개인 광산 레벨</option>
+              <option value="mine">🕳️ 광산 개방 (폐광 갱도)</option>
+              <option value="boost">⚡ 채굴 부스터</option>
+            </select>
+          </div>
+        </div>
+        <div id="adminItemBody" style="margin-top:10px;"></div>
+        <button class="playBtn" id="adminItemBtn" type="button" style="width:100%;margin:12px 0 0;">실행하기</button>
+        <div class="resultBanner" id="adminItemMsg" style="display:none;"></div>
+        <div class="admHint">회수한 아이템은 환불 없이 사라지고, 유저가 다시 구매·획득할 수 있어요. 접속 중이면 바로, 오프라인이면 다음 접속 때 적용돼요. 위에서 "전체 유저"를 고르면 모든 유저에게 적용돼요.</div>
+      </div>
+    </details>
+
+    <details class="admSec">
+      <summary>📅 출석 · 접속 기록</summary>
+      <div class="admBody">
+        <div class="adminLabel">작업</div>
+        <select id="adminRecAction" class="adminField">
+          <option value="att_reset">출석 기록 초기화 (1일차부터 다시)</option>
+          <option value="att_day">출석 일차 직접 지정</option>
+          <option value="daily_reset">연속 접속 보너스 기록 초기화</option>
+        </select>
+        <div id="adminRecDayWrap" style="display:none;">
+          <div class="adminLabel">완료 처리할 일차 (0~14)</div>
+          <input type="number" id="adminRecDay" class="adminField" min="0" max="14" value="0">
+          <div class="admHint">예: 6을 넣으면 6일차까지 받은 것으로 처리되고, 오늘 7일차 보상을 받을 수 있어요.</div>
+        </div>
+        <button class="playBtn" id="adminRecBtn" type="button" style="width:100%;margin:12px 0 0;">실행하기</button>
+        <div class="resultBanner" id="adminRecMsg" style="display:none;"></div>
+      </div>
+    </details>
+
+    <details class="admSec">
+      <summary>🔑 계정 관리 (비밀번호 · 아이디 변경)</summary>
+      <div class="admBody">
+        <div class="adminLabel">비밀번호 재설정</div>
+        <input type="text" id="adminPwInput" class="adminField" maxlength="20" placeholder="새 비밀번호 (4~20자)" autocomplete="off">
+        <button class="playBtn" id="adminPwBtn" type="button" style="width:100%;margin:8px 0 0;">🔑 비밀번호 변경하기</button>
+        <div class="admHint">비밀번호를 잊은 유저를 도울 때 쓰세요. 접속 중인 유저는 로그아웃되지 않고, 다음 로그인부터 새 비밀번호를 써요.</div>
+        <div class="adminDivider"></div>
+        <div class="adminLabel">아이디(이름) 강제 변경</div>
+        <input type="text" id="adminNewName" class="adminField" maxlength="12" placeholder="새 아이디 (2~12자 한글/영문/숫자)" autocomplete="off">
+        <button class="playBtn" id="adminRenameBtn" type="button" style="width:100%;margin:8px 0 0;background:linear-gradient(180deg,#ffb04a,#d9691a);box-shadow:0 6px 18px -6px rgba(255,150,60,.7);">✏️ 아이디 변경하기</button>
+        <div class="admHint">게임 데이터·랭킹·비밀번호·대기 중인 지급이 새 아이디로 옮겨져요. 접속 중이면 바로 로그아웃되고, 새 아이디 + 기존 비밀번호로 다시 접속해야 해요. 이번 주 주간 랭킹 기록도 같이 옮겨요.</div>
+        <div class="resultBanner" id="adminAcctMsg" style="display:none;"></div>
+      </div>
+    </details>
+
+    <details class="admSec">
+      <summary>📢 전체 공지</summary>
+      <div class="admBody">
+        <input type="text" id="adminNoticeInput" class="adminField" maxlength="120" placeholder="접속 중인 모든 유저 화면 위에 띄울 공지 (최대 120자)" autocomplete="off">
+        <button class="playBtn" id="adminNoticeBtn" type="button" style="width:100%;margin:8px 0 0;">📢 공지 보내기</button>
+        <div class="admHint">지금 접속 중인 유저에게만 보여요. 화면 위쪽에 15초간 떠 있고, 누르면 닫혀요.</div>
+        <div class="resultBanner" id="adminNoticeMsg" style="display:none;"></div>
+      </div>
+    </details>
+
+    <details class="admSec">
+      <summary>👤 유저 계정으로 접속</summary>
+      <div class="admBody">
     <button class="playBtn" id="adminLoginAsBtn" type="button" style="width:100%;margin:0 0 6px;background:linear-gradient(180deg,#4aa8ff,#1f6fd0);box-shadow:0 6px 18px -6px rgba(31,111,208,.6);">👤 선택한 유저 계정으로 접속</button>
     <div style="font-size:11px;color:var(--sub);line-height:1.5;margin-bottom:6px;">위 목록에서 유저를 눌러 선택한 뒤 누르세요. 비밀번호 없이 그 유저로 접속하고, 접속 중에는 화면 왼쪽 아래의 버튼으로 내 계정으로 돌아올 수 있어요.</div>
-    <div class="adminDivider"></div>
-    <div class="adminLabel" style="color:var(--lose);">⚠️ 위험 구역</div>
+      </div>
+    </details>
+
+    <details class="admSec danger">
+      <summary>⚠️ 위험 구역</summary>
+      <div class="admBody">
     <div id="adminSelLabel" style="font-size:12px;font-weight:800;margin:0 0 8px;color:var(--sub);">현재 선택: 없음 (위에서 유저를 선택하세요)</div>
     <button class="playBtn" id="adminUserResetBtn" type="button" style="width:100%;margin:0 0 8px;background:linear-gradient(180deg,#ff8a6b,#c8442b);box-shadow:0 6px 18px -6px rgba(255,120,80,.7);">♻️ 선택한 유저 게임 데이터 초기화</button>
     <button class="playBtn" id="adminUserDeleteBtn" type="button" style="width:100%;margin:0 0 8px;background:linear-gradient(180deg,#b04bff,#6a1fa0);box-shadow:0 6px 18px -6px rgba(176,75,255,.7);">🚫 선택한 유저 계정 삭제 (아이디·비밀번호까지 삭제)</button>
     <button class="playBtn" id="adminServerResetBtn" type="button" style="width:100%;margin:0;background:linear-gradient(180deg,#ff6b81,#c0223b);box-shadow:0 6px 18px -6px rgba(255,77,106,.7);">🗑️ 서버 초기화 (모든 유저 데이터 삭제)</button>
     <div style="font-size:11px;color:var(--sub);margin-top:6px;line-height:1.5;">초기화는 접속 중인 유저 화면에서도 즉시 적용되고(자동 새로고침), 오프라인 유저는 다음 접속 때 적용돼요. 아이디·비밀번호는 유지돼요.</div>
+      </div>
+    </details>
   </div>
 </div>
 <div class="attnModal" id="nameChangeModal" style="z-index:3200;">
@@ -763,7 +867,7 @@
             <button onclick="document.getElementById('rrCustomAlert').style.display='none'" style="background:#e17055; color:#fff; border:none; padding:10px 30px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px;">확인</button>
           `,L.style.display="block"}function ke(){return Wt.state&&typeof Wt.state.coins<"u"&&parseInt(Wt.state.coins)||0}function Fe(O){return typeof window.fmt=="function"?window.fmt(O):O}const ct=document.getElementById("btnRRSwitchSingle"),Le=document.getElementById("btnRRSwitchMulti"),Y=document.getElementById("rrSingleArea"),Ge=document.getElementById("rrMultiArea");ct&&Le&&Y&&Ge&&(ct.onclick=function(){if(window.__mpActiveRoom&&window.__mpActiveRoom.pane==="roulette-rr"){typeof window.__mpBlockedWarning=="function"?window.__mpBlockedWarning():alert('멀티플레이 방에 참여 중입니다. 먼저 "그만하기" 버튼으로 방을 나가주세요.');return}Y.style.display="block",Ge.style.display="none",ct.style.background="#6c5ce7",ct.style.color="#fff",Le.style.background="#3f3f4e",Le.style.color="#aaa"},Le.onclick=function(){Y.style.display="none",Ge.style.display="block",Le.style.background="#6c5ce7",Le.style.color="#fff",ct.style.background="#3f3f4e",ct.style.color="#aaa"});function ce(O,L,ge){typeof window.rrRenderCylinder=="function"&&window.rrRenderCylinder("rrMultiCylinder",[0,1,2,3,4,5],O,new Set(L||[]),ge)}function s(){return{betAgreed:!1,proposedBet:0,rematchVote:null}}let z=null,A=null,N=null,_e=!1,me=!1,dt=null;const e=document.getElementById("btnRRCreateRoom"),y=document.getElementById("btnRRJoinRoom"),mt=document.getElementById("rrRoomInput"),Je=document.getElementById("rrStatusDiv"),ut=document.getElementById("rrGameArea"),bt=document.getElementById("rrBetNegotiate"),X=document.getElementById("rrMultiBetInfoRow"),M=document.getElementById("rrProposeInput"),oe=document.getElementById("rrNegotiateStatus"),se=document.getElementById("btnRRProposeBet"),he=document.getElementById("btnRRAgreeBet"),de=document.getElementById("btnRRProposePlus1"),xe=document.getElementById("btnRRProposePlus10"),fe=document.getElementById("rrMultiActionRow"),Be=document.getElementById("rrMultiTrigger"),je=document.getElementById("rrRematchVoteRow"),ze=document.getElementById("btnRRRematchYes"),Me=document.getElementById("btnRRRematchNo"),Oe=document.getElementById("btnRRLeaveRoom");function Ae(O){if(N){try{N.onDisconnect().cancel()}catch{}try{N.off()}catch{}try{N.remove()}catch{}}N=null,A=null,z=null,dt=null,_e=!1,me=!1,window.__mpActiveRoom=null,ut&&(ut.style.display="none"),Je&&(Je.innerHTML="방을 생성하거나 기존 방 번호를 입력해 참여하세요."),mt&&(mt.value=""),O||nt("방에서 나갔습니다 · 방 코드가 초기화되었습니다.")}function nt(O){typeof window.showToast=="function"&&window.showToast(O)}function $e(){!N&&!A||(B(`상대방이 방을 나가 게임이 종료되었습니다.
 방 코드가 초기화되었습니다.`),Ae(!0))}Oe&&(Oe.onclick=function(){!N||!A||Ae(!1)}),de&&(de.onclick=function(){M.value=(parseInt(M.value)||0)+1}),xe&&(xe.onclick=function(){M.value=(parseInt(M.value)||0)+10}),e&&(e.onclick=function(){const O=mt.value.trim();if(!O)return B("방 번호를 입력하세요!");if(typeof T>"u"||!T)return B("서버(Firebase)가 연결되지 않았습니다.");const L=T.ref("rrRooms/"+O);L.once("value",ge=>{if(ge.exists()){B(`이미 사용 중인 방 번호입니다.
-다른 번호를 입력하거나, 상대방에게 이 번호를 알려주고 "참가"를 눌러달라고 해주세요.`);return}z=O,A="p1",N=L,N.set({roomId:O,status:"betting",roundId:0,p1:s(),p2:s(),p2Joined:!1,agreedBet:0,bulletPos:null,cylinderPos:0,spentChambers:[],turn:null,winner:null}).then(()=>{N.onDisconnect().remove(),window.__mpActiveRoom={pane:"roulette-rr"},Je&&(Je.innerHTML=`🏠 <strong>방 생성 성공!</strong> 방 번호: <span style="color:#00b894">${O}</span> (상대방 대기 중)`),ut&&(ut.style.display="block"),wt()})})}),y&&(y.onclick=function(){const O=mt.value.trim();if(!O)return B("방 번호를 입력하세요!");if(typeof T>"u"||!T)return B("서버가 연결되지 않았습니다.");const L=T.ref("rrRooms/"+O);L.once("value",ge=>{if(!ge.exists()){B("존재하지 않는 방입니다!");return}if(ge.val().status==="playing"){B("게임이 한창 진행 중인 방입니다. 라운드가 끝난 뒤 다시 시도해주세요.");return}L.child("p2Joined").transaction(qe=>qe?void 0:!0).then(qe=>{if(!qe.committed){B("이미 다른 상대가 참가한 방입니다.");return}z=O,A="p2",N=L,N.onDisconnect().remove(),window.__mpActiveRoom={pane:"roulette-rr"},Je&&(Je.innerHTML=`🎮 <strong>방 입장 성공!</strong> 방 번호: <span style="color:#74b9ff">${O}</span>`),ut&&(ut.style.display="block"),wt()})})}),se&&(se.onclick=function(){if(!N||!A)return;const O=parseInt(M.value);if(isNaN(O)||O<=0){B("1 이상의 베팅금을 입력하세요!");return}const L=ke();if(L<O){B(`❌ 보유 코인(${Fe(L)}개)보다 많은 금액을 제안할 수 없습니다.`);return}const ge=A==="p1"?"p2":"p1";N.update({agreedBet:O,[A+"/proposedBet"]:O,[A+"/betAgreed"]:!0,[ge+"/betAgreed"]:!1})}),he&&(he.onclick=function(){!N||!A||N.once("value",O=>{const L=O.val();if(!L)return;const ge=L.agreedBet||0;if(ge<=0)return;const De=ke();if(De<ge){B(`❌ 보유 코인(${Fe(De)}개)보다 많은 금액에는 동의할 수 없습니다.`);return}N.child(A).update({betAgreed:!0})})}),Be&&(Be.onclick=function(){!N||!A||(Be.disabled=!0,N.transaction(O=>{if(!O||O.status!=="playing"||O.turn!==A)return O;const L=O.cylinderPos,ge=(O.spentChambers||[]).concat([L]);return L===O.bulletPos?(O.status="finished",O.winner=A==="p1"?"p2":"p1",O.spentChambers=ge,O.p1&&(O.p1.rematchVote=null),O.p2&&(O.p2.rematchVote=null)):(O.spentChambers=ge,O.cylinderPos=(L+1)%6,O.turn=A==="p1"?"p2":"p1"),O}))}),ze&&(ze.onclick=function(){!N||!A||(ze.disabled=!0,Me&&(Me.disabled=!0),N.child(A).update({rematchVote:"yes"}))}),Me&&(Me.onclick=function(){!N||!A||Ae(!1)});function wt(){N&&N.on("value",O=>{if(!O.exists()){N&&$e();return}const L=O.val();if(!L.p1||!L.p2)return;const ge=A==="p1"?L.p1:L.p2,De=A==="p1"?L.p2:L.p1,qe=L.roundId||0,Ee=document.getElementById("rrOppName"),le=document.getElementById("rrOppStatus"),Qe=document.getElementById("rrMyStatus"),pe=document.getElementById("rrMultiResult"),we=document.getElementById("rrMultiStatusText");if(Ee&&(Ee.innerText=A==="p1"?"상대방 (Player 2)":"방장 (Player 1)"),L.status==="betting"){bt&&(bt.style.display="block"),X&&(X.style.display="none"),fe&&(fe.style.display="none"),je&&(je.style.display="none"),ze&&(ze.disabled=!1),Me&&(Me.disabled=!1);const R=L.agreedBet||0;if(R>0?(document.activeElement!==M&&(M.value=R),he&&(he.style.display=ge.betAgreed?"none":"inline-block"),ge.betAgreed&&!De.betAgreed?oe.textContent=`${Fe(R)} Coin 제안 완료! 상대방의 동의를 기다리는 중...`:!ge.betAgreed&&De.betAgreed?oe.textContent=`상대방이 ${Fe(R)} Coin을 제안했습니다. 동의하시겠습니까?`:oe.textContent="두 사람이 같은 금액에 동의하면 게임이 시작됩니다."):(he&&(he.style.display="none"),oe.textContent="베팅금을 제안해 협상을 시작하세요."),ce(-1,[],-1),we&&(we.textContent="상대방과 번갈아 방아쇠를 당깁니다 · 맞는 사람이 패배합니다"),Qe&&(Qe.innerText=ge.betAgreed?"동의함":"협상 중",Qe.className="mpStatusTag"+(ge.betAgreed?" ready":"")),le&&(le.innerText=De.betAgreed?"동의함":"협상 중",le.className="mpStatusTag"+(De.betAgreed?" ready":"")),pe&&(pe.innerText="방에 입장하면 먼저 베팅금을 합의합니다 · 승자가 상금을 모두 가져갑니다 (2배)"),L.p1.betAgreed&&L.p2.betAgreed&&R>0&&A==="p1"&&!_e){_e=!0;const ve=Math.floor(Math.random()*6),at=Math.random()<.5?"p1":"p2";N.update({status:"playing",roundId:qe+1,bulletPos:ve,cylinderPos:0,spentChambers:[],turn:at,winner:null}).then(()=>{_e=!1})}return}if(bt&&(bt.style.display="none"),X){X.style.display="flex";const R=document.getElementById("rrAgreedBetDisplay");R&&(R.textContent=`🪙 ${Fe(L.agreedBet||0)}`)}const pt=L.status==="finished"?L.bulletPos:-1;ce(L.status==="playing"?L.cylinderPos:-1,L.spentChambers||[],pt);function Xe(R,ve){return ve?"bust":L.status==="finished"?R?"":"done":R?"busy":""}const yt=L.turn===A,xt=L.turn===(A==="p1"?"p2":"p1"),_=L.status==="finished"&&L.winner===(A==="p1"?"p2":"p1"),J=L.status==="finished"&&L.winner===A;if(Qe&&(Qe.innerText=L.status==="finished"?_?"💥 사망":"🏆 생존":yt?"내 차례":"대기 중",Qe.className="mpStatusTag "+Xe(yt,_)),le&&(le.innerText=L.status==="finished"?J?"💥 사망":"🏆 생존":xt?"상대 차례":"대기 중",le.className="mpStatusTag "+Xe(xt,J)),L.status==="playing"&&(je&&(je.style.display="none"),we&&(we.textContent=yt?"내 차례입니다! 방아쇠를 당기세요":"상대방의 차례를 기다리는 중..."),pe&&(pe.innerText=yt?"🔫 지금 방아쇠를 당길 차례입니다":"⏳ 상대방이 방아쇠를 당기는 중..."),fe&&(fe.style.display="flex"),Be&&(Be.disabled=!yt)),L.status==="finished"){if(fe&&(fe.style.display="none"),je&&(je.style.display=ge.rematchVote?"none":"flex"),ze&&(ze.disabled=!!ge.rematchVote),Me&&(Me.disabled=!!ge.rematchVote),we&&(we.textContent=_?"💥 빵! 총알에 맞았습니다...":"🏆 상대방이 총알에 맞았습니다! 승리!"),dt!==qe){dt=qe;const at=L.agreedBet||0;let Ze,Ie;L.winner===A?(Ze=at,Ie=`🏆 승리! 상대방이 총알에 맞았습니다. +${Fe(Ze)} Coin`):(Ze=-at,Ie=`💥 빵! 총알에 맞았습니다... -${Fe(at)} Coin`),Wt.state&&typeof Wt.state.coins<"u"&&(Wt.state.coins+=Ze,typeof window.renderTop=="function"&&window.renderTop(),typeof window.saveGame=="function"&&window.saveGame()),Ze>0?(window.Sound&&window.Sound.win&&window.Sound.win(),typeof window.burstConfetti=="function"&&window.burstConfetti(30)):window.Sound&&window.Sound.rrBang?window.Sound.rrBang():window.Sound&&window.Sound.lose&&window.Sound.lose(),pe&&(pe.innerHTML=`🏁 ${Ie} · 다시 대결할지 선택해주세요.`),B(Ie)}else pe&&(ge.rematchVote&&!De.rematchVote?pe.innerText="🏁 상대방의 재대결 선택을 기다리는 중...":ge.rematchVote||(pe.innerText="🏁 다시 대결할지 선택해주세요."));const R=ge.rematchVote,ve=De.rematchVote;if(R&&ve&&A==="p1"&&!me&&(me=!0,R==="yes"&&ve==="yes")){const at=L.agreedBet||0;N.update({status:"betting",winner:null,agreedBet:at,bulletPos:null,cylinderPos:0,spentChambers:[],turn:null,"p1/betAgreed":!1,"p1/proposedBet":0,"p1/rematchVote":null,"p2/betAgreed":!1,"p2/proposedBet":0,"p2/rematchVote":null}).then(()=>{me=!1})}}})}})(),(function(){"use strict";const B=document.getElementById("bgCanvas");if(!B||!B.getContext)return;const ke=B.getContext("2d");let Fe=0,ct=0;function Le(){Fe=B.width=window.innerWidth,ct=B.height=window.innerHeight}Le(),window.addEventListener("resize",Le);const Y=["#3fe0ff","#c04bff","#ffd23f","#3fe07a"],Ge=Math.max(24,Math.min(70,Math.floor(window.innerWidth*window.innerHeight/16e3))),ce=Array.from({length:Ge},function(){return{x:Math.random()*Fe,y:Math.random()*ct,r:.6+Math.random()*1.7,vx:(Math.random()-.5)*.14,vy:(Math.random()-.5)*.14,a:.12+Math.random()*.3,c:Y[Math.floor(Math.random()*Y.length)],p:Math.random()*Math.PI*2}});function s(){ke.clearRect(0,0,Fe,ct);for(let z=0;z<ce.length;z++){const A=ce[z];A.x+=A.vx,A.y+=A.vy,A.p+=.012,A.x<-5&&(A.x=Fe+5),A.x>Fe+5&&(A.x=-5),A.y<-5&&(A.y=ct+5),A.y>ct+5&&(A.y=-5);const N=A.a*(.55+.45*Math.sin(A.p));ke.beginPath(),ke.fillStyle=A.c,ke.globalAlpha=N,ke.arc(A.x,A.y,A.r,0,Math.PI*2),ke.fill()}ke.globalAlpha=1,requestAnimationFrame(s)}requestAnimationFrame(s)})(),(function(){"use strict";const B=[{id:"stone",name:"돌멩이",min:1,max:1,weight:56,color:"#9a9aa2",glow:0},{id:"iron",name:"철광석",min:1,max:2,weight:29,color:"#c98a5a",glow:0},{id:"silver",name:"은광석",min:2,max:4,weight:9.3,color:"#dfe2e8",glow:6},{id:"gold",name:"금광석",min:6,max:14,weight:3.9,color:"#f4b942",glow:10},{id:"diamond",name:"다이아몬드",min:25,max:55,weight:1.1,color:"#7ee8fa",glow:16},{id:"dark",name:"암흑물질 광석",min:120,max:300,weight:.15,color:"#c04bff",glow:24},{id:"mithril",name:"미스릴 원석",min:18,max:40,weight:10,color:"#7fffd4",glow:14,mine:1},{id:"obsidian",name:"흑요석",min:70,max:150,weight:3.2,color:"#3a2a55",glow:18,mine:1},{id:"voidshard",name:"공허의 파편",min:300,max:650,weight:.4,color:"#0b0014",glow:26,mine:1}],ke=[{id:"wood",name:"나무 곡괭이",cost:0,mult:1,rare:0,crit:.03,power:1,requires:{}},{id:"stonepk",name:"돌 곡괭이",cost:1500,mult:1.15,rare:2,crit:.035,power:1,requires:{stone:40}},{id:"ironpk",name:"철 곡괭이",cost:6e3,mult:1.4,rare:6,crit:.045,power:2,requires:{stone:30,iron:25}},{id:"steelpk",name:"강철 곡괭이",cost:18e3,mult:1.7,rare:9,crit:.06,power:2,requires:{iron:35,silver:10}},{id:"goldpk",name:"황금 곡괭이",cost:5e4,mult:2.1,rare:13,crit:.08,power:3,requires:{iron:20,silver:35}},{id:"platpk",name:"백금 곡괭이",cost:13e4,mult:2.6,rare:17,crit:.1,power:4,requires:{silver:25,gold:15}},{id:"diapk",name:"다이아 곡괭이",cost:32e4,mult:3.3,rare:22,crit:.12,power:5,requires:{silver:20,gold:30}},{id:"orichpk",name:"오리하르콘 곡괭이",cost:8e5,mult:4.2,rare:29,crit:.15,power:7,requires:{gold:25,diamond:15}},{id:"rift",name:"차원 균열 곡괭이",cost:22e5,mult:5.5,rare:38,crit:.2,power:10,requires:{gold:20,diamond:28,dark:5}},{id:"mithrilpk",name:"미스릴 곡괭이",cost:5e6,mult:7,rare:45,crit:.24,power:12,requires:{dark:15,mithril:25}},{id:"obsidianpk",name:"흑요석 곡괭이",cost:14e6,mult:9,rare:58,crit:.28,power:16,requires:{mithril:30,obsidian:15}},{id:"voidpk",name:"공허 파쇄자",cost:35e6,mult:12,rare:75,crit:.33,power:22,requires:{obsidian:25,voidshard:10}}],Fe=[{id:"backyard",icon:"🏞️",name:"뒷산",desc:"모든 광부의 시작점. 돌멩이부터 암흑물질 광석까지 캘 수 있어요.",unlockCost:0,unlockReqPickaxeId:null},{id:"abyss",icon:"🕳️",name:"폐광 갱도",desc:"차원 균열 곡괭이를 손에 넣은 자만 들어갈 수 있는 심연의 갱도. 미스릴부터 공허의 파편까지 잠들어 있습니다.",unlockCost:3e6,unlockReqPickaxeId:"rift"}];function ct(t){return ke.findIndex(n=>n.id===t)}function Le(t){return t===0||!!(s.unlockedMines&&s.unlockedMines[t])}const Y=[{sym:"🍒",weight:35,pay3:1,pay4:3,pay5:10},{sym:"🍋",weight:25,pay3:2,pay4:5,pay5:20},{sym:"🔔",weight:12,pay3:4,pay4:10,pay5:40},{sym:"💎",weight:4,pay3:8,pay4:25,pay5:100},{sym:"7",weight:.5,pay3:80,pay4:150,pay5:2e3,seven:!0}],Ge=1e3,ce=.05,s={gold:500,coins:0,pickaxeIdx:0,mineLevel:1,mineAreaIdx:0,unlockedMines:{0:!0},diceChoice:"odd",ladderChoice:0,ores:{stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0},brokeSince:null,lastDailyBonusDate:null,dailyStreak:0,oreBreakCount:0,boostUntil:0,cosmetics:{},equippedCosmetic:null,gachaItems:{},goldSpentTotal:0,coinSpentTotal:0,lastAttendanceDate:null,attendanceDay:0,ownedTitles:{},ownedBorders:{},equippedTitle:null,equippedBorder:null,equippedBg:null,achievements:{},lifetimeOres:{stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0},totalOresMined:0,nameTickets:0};(function(){let t=s.coins;Object.defineProperty(s,"coins",{enumerable:!0,configurable:!0,get(){return t},set(n){typeof n=="number"&&typeof t=="number"&&n<t&&(s.coinSpentTotal=(s.coinSpentTotal||0)+(t-n)),t=n}}),Object.defineProperty(s,"__coinRaw",{enumerable:!1,value:function(n){t=n}})})();const z=(function(){let t=null;function n(){return t||(t=new(window.AudioContext||window.webkitAudioContext)),t.state==="suspended"&&t.resume(),t}function i(d,f,k,x,S){const G=n(),te=G.currentTime+(S||0),ie=G.createOscillator(),Ne=G.createGain();return ie.type=k||"sine",ie.frequency.setValueAtTime(d,te),Ne.gain.setValueAtTime(0,te),Ne.gain.linearRampToValueAtTime(x||.2,te+.008),Ne.gain.exponentialRampToValueAtTime(1e-4,te+f),ie.connect(Ne),Ne.connect(G.destination),ie.start(te),ie.stop(te+f+.02),ie}function c(d,f,k,x,S){const G=n(),te=G.currentTime,ie=G.createOscillator(),Ne=G.createGain();ie.type=x||"sawtooth",ie.frequency.setValueAtTime(d,te),ie.frequency.exponentialRampToValueAtTime(Math.max(f,20),te+k),Ne.gain.setValueAtTime(S||.18,te),Ne.gain.exponentialRampToValueAtTime(1e-4,te+k),ie.connect(Ne),Ne.connect(G.destination),ie.start(te),ie.stop(te+k+.02)}return{mineHit(){i(520,.06,"square",.12),i(760,.05,"square",.08,.02)},chip(){i(900,.035,"square",.07)},rareFanfare(d){(d>=5?[523,659,784,1046,1318]:d>=4?[523,659,784,1046]:[523,659,784]).forEach((k,x)=>i(k,.22,"triangle",.14,x*.075))},tick(){i(1e3,.03,"triangle",.06)},win(){for(let d=0;d<14;d++)i(700+Math.random()*900,.12,"triangle",.09,d*.035)},lose(){c(420,90,.5,"sawtooth",.14)},jackpot(){[523,659,784,1046,1318,1568,2093].forEach((f,k)=>i(f,.3,"triangle",.16,k*.09));for(let f=0;f<24;f++)i(600+Math.random()*1200,.16,"triangle",.08,.4+f*.045)},coinFlip(){i(1200,.05,"square",.08),i(1500,.05,"square",.08,.08)},rrTick(){i(300,.02,"square",.05)},rrBang(){const d=n(),f=d.currentTime,k=d.createOscillator(),x=d.createGain();k.type="square",k.frequency.setValueAtTime(120,f),k.frequency.exponentialRampToValueAtTime(30,f+.35),x.gain.setValueAtTime(.35,f),x.gain.exponentialRampToValueAtTime(1e-4,f+.4),k.connect(x),x.connect(d.destination),k.start(f),k.stop(f+.42),c(200,40,.45,"sawtooth",.2)}}})();function A(t){return t=Math.floor(t),t.toLocaleString("en-US")}function N(t,n){const i=t.reduce((d,f)=>d+f[n||"weight"],0);let c=Math.random()*i;for(const d of t)if(c-=d[n||"weight"],c<=0)return d;return t[t.length-1]}function _e(t,n){const i=t.replace("#",""),c=i.length===3?i.split("").map(S=>S+S).join(""):i,d=parseInt(c,16),f=d>>16&255,k=d>>8&255,x=d&255;return"rgba("+f+","+k+","+x+","+n+")"}function me(){return ke[s.pickaxeIdx]}const dt=4;function e(t){return Math.round(6*Math.pow(1.55,t-1))}const y=25,mt=60,Je=4e3,ut=1.8,bt=90*1e3;function X(){return 2500+s.pickaxeIdx*2200}function M(){const n=me().rare+(s.mineLevel-1)*dt,i=s.mineAreaIdx||0,c=[];return B.forEach((d,f)=>{(d.mine||0)===i&&c.push(f)}),B.map((d,f)=>{if((d.mine||0)!==i)return 0;const k=c.indexOf(f);return k<=1?Math.max(1,d.weight-n*1.05):d.weight+n*(k-1)*.42})}function oe(t){const n="deeprockMine_save_v3";window.__applyingRemote=!0;try{typeof t.gold=="number"&&(s.gold=t.gold),typeof t.coins=="number"&&s.__coinRaw(t.coins),typeof t.pickaxeIdx=="number"&&(s.pickaxeIdx=t.pickaxeIdx),typeof t.mineLevel=="number"&&(s.mineLevel=t.mineLevel),typeof t.mineAreaIdx=="number"&&(s.mineAreaIdx=t.mineAreaIdx),t.unlockedMines&&(s.unlockedMines=Object.assign({0:!0},t.unlockedMines)),s.ores&&(s.ores=Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0},t.ores||{})),s.lastDailyBonusDate=t.lastDailyBonusDate||null,typeof t.dailyStreak=="number"&&(s.dailyStreak=t.dailyStreak),typeof t.oreBreakCount=="number"&&(s.oreBreakCount=0),typeof t.boostUntil=="number"&&(s.boostUntil=t.boostUntil),s.cosmetics=t.cosmetics||{},s.equippedCosmetic=t.equippedCosmetic||null,s.gachaItems=t.gachaItems||{},typeof t.goldSpentTotal=="number"&&(s.goldSpentTotal=t.goldSpentTotal),typeof t.coinSpentTotal=="number"&&(s.coinSpentTotal=t.coinSpentTotal),s.lastAttendanceDate=t.lastAttendanceDate||null,typeof t.attendanceDay=="number"&&(s.attendanceDay=t.attendanceDay),s.ownedTitles=t.ownedTitles||{},s.ownedBorders=t.ownedBorders||{},s.equippedTitle=t.equippedTitle||null,s.equippedBorder=t.equippedBorder||null,s.equippedBg=t.equippedBg||null,s.achievements=t.achievements||{},t.lifetimeOres&&(s.lifetimeOres=Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0},t.lifetimeOres)),typeof t.totalOresMined=="number"&&(s.totalOresMined=t.totalOresMined),typeof t.nameTickets=="number"&&(s.nameTickets=t.nameTickets);try{s.pickaxeIdx=Math.max(0,Math.min(s.pickaxeIdx,ke.length-1))}catch{}localStorage.setItem(n,JSON.stringify(t)),window.__lastSavedAt=t.savedAt||0,xe(t);try{R(),rt()}catch{}window.__lastSnapKey=fe(de())}finally{window.__applyingRemote=!1}try{ya&&typeof sa=="function"&&sa()}catch{}}function se(){const t="deeprockMine_save_v3";if(!(typeof s>"u")){try{const n=localStorage.getItem(t);if(n){const i=JSON.parse(n);typeof i.gold=="number"&&(s.gold=i.gold),typeof i.coins=="number"&&s.__coinRaw(i.coins),typeof i.pickaxeIdx=="number"&&(s.pickaxeIdx=i.pickaxeIdx),typeof i.mineLevel=="number"&&(s.mineLevel=i.mineLevel),typeof i.mineAreaIdx=="number"&&(s.mineAreaIdx=i.mineAreaIdx),i.unlockedMines&&(s.unlockedMines=Object.assign({0:!0},i.unlockedMines)),s.ores&&(s.ores=Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0},i.ores||{})),i.lastDailyBonusDate&&(s.lastDailyBonusDate=i.lastDailyBonusDate),typeof i.dailyStreak=="number"&&(s.dailyStreak=i.dailyStreak),typeof i.oreBreakCount=="number"&&(s.oreBreakCount=0),typeof i.boostUntil=="number"&&(s.boostUntil=i.boostUntil),i.cosmetics&&(s.cosmetics=i.cosmetics),i.equippedCosmetic&&(s.equippedCosmetic=i.equippedCosmetic),i.gachaItems&&(s.gachaItems=i.gachaItems),typeof i.goldSpentTotal=="number"&&(s.goldSpentTotal=i.goldSpentTotal),typeof i.coinSpentTotal=="number"&&(s.coinSpentTotal=i.coinSpentTotal),i.lastAttendanceDate&&(s.lastAttendanceDate=i.lastAttendanceDate),typeof i.attendanceDay=="number"&&(s.attendanceDay=i.attendanceDay),i.ownedTitles&&(s.ownedTitles=i.ownedTitles),i.ownedBorders&&(s.ownedBorders=i.ownedBorders),i.equippedTitle&&(s.equippedTitle=i.equippedTitle),i.equippedBorder&&(s.equippedBorder=i.equippedBorder),i.equippedBg&&(s.equippedBg=i.equippedBg),i.achievements&&(s.achievements=i.achievements),i.lifetimeOres&&(s.lifetimeOres=Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0},i.lifetimeOres)),typeof i.totalOresMined=="number"&&(s.totalOresMined=i.totalOresMined),typeof i.nameTickets=="number"&&(s.nameTickets=i.nameTickets)}}catch(n){console.error("로컬 로드 중 에러:",n)}try{typeof ke<"u"&&ke.length>0&&typeof s<"u"&&(s.pickaxeIdx=Math.max(0,Math.min(s.pickaxeIdx,ke.length-1)))}catch{}try{if(typeof T<"u"&&T!==null){const n=sessionStorage.getItem("current_user")||localStorage.getItem("current_user");n&&(window.__cloudSyncPromise=T.ref("users/"+n+"/gameData").once("value").then(i=>{if(i.exists()){const c=i.val(),d=localStorage.getItem(t);let f=!1,k=null;try{k=localStorage.getItem("sync_dirty_"+n)}catch{}if(!d||!k)f=!0;else{const x=JSON.parse(d);c.savedAt&&(!x.savedAt||c.savedAt>x.savedAt)&&(f=!0)}f&&typeof s<"u"?oe(c):typeof s<"u"&&xe(c)}}).catch(i=>{}))}}catch{}}}const he=(function(){let t=null;try{t=localStorage.getItem("device_id")}catch{}if(!t){t="d"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);try{localStorage.setItem("device_id",t)}catch{}}return t})();window.__cloudReady=!1,window.__lastSnapKey=null,window.__lastSavedAt=0;function de(){return{gold:s.gold,coins:s.coins,pickaxeIdx:s.pickaxeIdx,mineLevel:s.mineLevel,mineAreaIdx:s.mineAreaIdx,unlockedMines:s.unlockedMines,ores:s.ores,lastDailyBonusDate:s.lastDailyBonusDate,dailyStreak:s.dailyStreak,oreBreakCount:s.oreBreakCount,boostUntil:s.boostUntil,cosmetics:s.cosmetics,equippedCosmetic:s.equippedCosmetic,gachaItems:s.gachaItems,goldSpentTotal:s.goldSpentTotal,coinSpentTotal:s.coinSpentTotal,lastAttendanceDate:s.lastAttendanceDate,attendanceDay:s.attendanceDay,ownedTitles:s.ownedTitles,ownedBorders:s.ownedBorders,equippedTitle:s.equippedTitle,equippedBorder:s.equippedBorder,equippedBg:s.equippedBg,achievements:s.achievements,lifetimeOres:s.lifetimeOres,totalOresMined:s.totalOresMined,nameTickets:s.nameTickets||0}}window.__base=null;function xe(t){t&&(window.__base={savedAt:+t.savedAt||0,gold:+t.gold||0,coins:+t.coins||0,gst:+t.goldSpentTotal||0,cst:+t.coinSpentTotal||0})}function fe(t){try{return JSON.stringify(t)}catch{return String(Math.random())}}function Be(t){const n="deeprockMine_save_v3";if(typeof s>"u"||window.__adminResetting||window.__applyingRemote||!window.__cloudReady&&t!==!0)return Promise.resolve();const i=[];try{const c=de(),d=fe(c);if(t!==!0&&d===window.__lastSnapKey)return Promise.resolve();window.__lastSnapKey=d;const f=Math.max(Date.now(),(window.__lastSavedAt||0)+1);window.__lastSavedAt=f;const k=Object.assign({},c,{savedAt:f,deviceId:he});if(localStorage.setItem(n,JSON.stringify(k)),typeof T<"u"&&T!==null){const x=sessionStorage.getItem("current_user")||localStorage.getItem("current_user");if(x){const S="sync_dirty_"+x;try{localStorage.setItem(S,String(f))}catch{}i.push(new Promise(ie=>{const Ne=T.ref("users/"+x+"/gameData"),jt=window.__base||{savedAt:0,gold:k.gold,coins:k.coins,gst:k.goldSpentTotal||0,cst:k.coinSpentTotal||0};Ne.transaction(Kt=>{if(!Kt)return k;if(Kt.deviceId!==he&&(+Kt.savedAt||0)>(jt.savedAt||0)){const kn=Object.assign({},k);return kn.gold=Math.max(0,Math.floor((+Kt.gold||0)+(k.gold-jt.gold))),kn.coins=Math.max(0,Math.floor((+Kt.coins||0)+(k.coins-jt.coins))),kn.goldSpentTotal=Math.max(0,Math.floor((+Kt.goldSpentTotal||0)+((k.goldSpentTotal||0)-jt.gst))),kn.coinSpentTotal=Math.max(0,Math.floor((+Kt.coinSpentTotal||0)+((k.coinSpentTotal||0)-jt.cst))),kn.savedAt=Math.max(k.savedAt,(+Kt.savedAt||0)+1),kn}return k},(Kt,kn,Ba)=>{try{if(!Kt&&kn&&Ba&&Ba.exists()){const An=Ba.val();if(An.savedAt!==k.savedAt){window.__applyingRemote=!0;try{s.gold=An.gold+(s.gold-k.gold),s.__coinRaw(An.coins+(s.coins-k.coins)),s.goldSpentTotal=An.goldSpentTotal+((s.goldSpentTotal||0)-(k.goldSpentTotal||0)),s.coinSpentTotal=An.coinSpentTotal+((s.coinSpentTotal||0)-(k.coinSpentTotal||0)),window.__lastSavedAt=Math.max(window.__lastSavedAt||0,An.savedAt||0),R(),rt()}finally{window.__applyingRemote=!1}}xe(An);try{localStorage.getItem(S)===String(k.savedAt)&&localStorage.removeItem(S)}catch{}}}catch{}ie()},!1)}));const G=Math.max(0,Math.round((s.coins||0)*Ge*(1-ce))),te=(s.gold||0)+G;i.push(T.ref("leaderboard/"+x).set({name:x,gold:s.gold,coins:s.coins||0,coinGoldValue:G,totalValue:te,goldSpentTotal:s.goldSpentTotal||0,coinSpentTotal:s.coinSpentTotal||0,title:s.equippedTitle||null,updatedAt:Date.now()}).catch(ie=>{}))}}}catch{}return Promise.all(i)}let je=null,ze=null;function Me(){if(typeof T>"u"||!T)return;const t=sessionStorage.getItem("current_user")||localStorage.getItem("current_user");if(!t)return;if(je)try{je.off()}catch{}je=T.ref("users/"+t+"/gameData"),je.on("value",i=>{if(window.__adminResetting||!i.exists())return;const c=i.val();if(!(!c||c.deviceId===he)&&!((c.savedAt||0)<=(window.__lastSavedAt||0))){if(window.__mpActiveRoom){ze=c;return}oe(c);try{Ae("🔄 다른 기기의 최신 진행 상황을 불러왔어요.")}catch{}}});const n=()=>{try{T.goOnline()}catch{}};document.addEventListener("visibilitychange",()=>{document.hidden||n()}),window.addEventListener("online",n),setInterval(()=>{if(ze&&!window.__mpActiveRoom&&(ze.savedAt||0)>(window.__lastSavedAt||0)){const i=ze;ze=null,oe(i)}else ze&&!window.__mpActiveRoom&&(ze=null)},2e3)}window.addEventListener("load",function(){try{typeof se=="function"&&se(),typeof updateUI=="function"&&updateUI()}catch{}});let Oe=null;function Ae(t){let n=document.getElementById("toastEl");n||(n=document.createElement("div"),n.id="toastEl",n.className="toast",document.body.appendChild(n)),n.textContent=t,clearTimeout(Oe),n.classList.remove("show"),n.offsetWidth,n.classList.add("show"),Oe=setTimeout(()=>n.classList.remove("show"),3200)}const nt=300*1e3,$e=80,wt=15*1e3;function O(){if(s.gold>0||s.coins>0){s.brokeSince=null;return}const t=Date.now();s.brokeSince||(s.brokeSince=t),t-s.brokeSince>=nt&&(s.gold+=$e,s.brokeSince=t,R(),Ae(`🎁 지원금 ${A($e)}G가 지급되었습니다.`))}const L=150,ge=45,De=10;function qe(){const t=new Date,n=t.toLocaleDateString("en-CA");if(s.lastDailyBonusDate!==n){const i=new Date(t);i.setDate(t.getDate()-1);const c=i.toLocaleDateString("en-CA");s.dailyStreak=s.lastDailyBonusDate===c?(s.dailyStreak||0)+1:1,s.lastDailyBonusDate=n;const d=Math.min(s.dailyStreak,De),f=L+(d-1)*ge;s.gold+=f,R(),Ae(`☀️ ${s.dailyStreak}일 연속 접속 보너스 +${A(f)}G`)}}const Ee=[{icon:"🎁",label:"신규 지원금<br>300G",type:"gold",amount:300},{icon:"🎟️",label:"Coin x3",type:"coin",amount:3},{icon:"💰",label:"Gold 600",type:"gold",amount:600},{icon:"⚡",label:"채굴 부스터<br>10분",type:"boost",amount:10},{icon:"📦",label:"Gold 1,000",type:"gold",amount:1e3},{icon:"🎟️",label:"Coin x5",type:"coin",amount:5},{icon:"🏆",label:"주간 보너스<br>Gold 3,000",type:"gold",amount:3e3,special:!0},{icon:"💰",label:"Gold 1,500",type:"gold",amount:1500},{icon:"🎟️",label:"Coin x8",type:"coin",amount:8},{icon:"⚡",label:"채굴 부스터<br>20분",type:"boost",amount:20},{icon:"📦",label:"Gold 2,500",type:"gold",amount:2500},{icon:"🎟️",label:"Coin x12",type:"coin",amount:12},{icon:"💎",label:"Gold 4,000",type:"gold",amount:4e3},{icon:"👑",label:"최종 보상!<br>Gold 10,000+Coin x20",type:"jackpot",amount:0,special:!0}],le=Ee.length;function Qe(t){return t.type==="gold"?`+${A(t.amount)}G`:t.type==="coin"?`Coin x${t.amount}`:t.type==="boost"?`채굴 부스터 ${t.amount}분`:t.type==="jackpot"?"Gold 10,000 + Coin x20":""}function pe(t){t.type==="gold"?s.gold+=t.amount:t.type==="coin"?s.coins+=t.amount:t.type==="boost"?s.boostUntil=Math.max(s.boostUntil||0,Date.now())+t.amount*60*1e3:t.type==="jackpot"&&(s.gold+=1e4,s.coins+=20)}function we(){const t=new Date,n=t.toLocaleDateString("en-CA"),i=s.lastAttendanceDate!==n;let c=s.attendanceDay||0;if(i){const d=new Date(t);d.setDate(t.getDate()-1);const f=d.toLocaleDateString("en-CA");c=s.lastAttendanceDate===f?(s.attendanceDay||0)+1:1,c>le&&(c=1)}return{canClaim:i,claimDay:c,todayKey:n}}function pt(){const t=we(),n=document.getElementById("attendancePips"),i=document.getElementById("attendanceBanner"),c=document.getElementById("attnDayGrid"),d=s.attendanceDay||0,f=t.canClaim?t.claimDay:d;if(n){n.innerHTML="";for(let x=1;x<=le;x++){const S=document.createElement("div");S.className="attnPip"+(x<=d?" done":x===f?" today":""),S.style.cssText="width:22px;height:22px;font-size:9.5px;",S.textContent=Ee[x-1].special?"★":x,n.appendChild(S)}}i&&(i.textContent=t.canClaim?`🎁 ${t.claimDay}일차 출석 보상이 도착했어요! 아래에서 "받기" 버튼을 눌러 수령하세요.`:d===le?"14일차 최종 보상까지 모두 받았습니다! 내일부터 다시 1일차로 시작합니다.":`오늘 ${d}일차 보상을 받았습니다 · 내일 다시 접속해서 스트릭을 이어가세요! (총 ${le}일)`),c&&(c.innerHTML="",Ee.forEach((x,S)=>{const G=S+1,te=document.createElement("div");let ie="attnDayCard";x.special&&(ie+=" special");const Ne=G<=d,jt=t.canClaim&&G===t.claimDay;Ne?ie+=" done":jt||G===f?ie+=" today":ie+=" locked",te.className=ie,te.innerHTML=`
+다른 번호를 입력하거나, 상대방에게 이 번호를 알려주고 "참가"를 눌러달라고 해주세요.`);return}z=O,A="p1",N=L,N.set({roomId:O,status:"betting",roundId:0,p1:s(),p2:s(),p2Joined:!1,agreedBet:0,bulletPos:null,cylinderPos:0,spentChambers:[],turn:null,winner:null}).then(()=>{N.onDisconnect().remove(),window.__mpActiveRoom={pane:"roulette-rr"},Je&&(Je.innerHTML=`🏠 <strong>방 생성 성공!</strong> 방 번호: <span style="color:#00b894">${O}</span> (상대방 대기 중)`),ut&&(ut.style.display="block"),wt()})})}),y&&(y.onclick=function(){const O=mt.value.trim();if(!O)return B("방 번호를 입력하세요!");if(typeof T>"u"||!T)return B("서버가 연결되지 않았습니다.");const L=T.ref("rrRooms/"+O);L.once("value",ge=>{if(!ge.exists()){B("존재하지 않는 방입니다!");return}if(ge.val().status==="playing"){B("게임이 한창 진행 중인 방입니다. 라운드가 끝난 뒤 다시 시도해주세요.");return}L.child("p2Joined").transaction(qe=>qe?void 0:!0).then(qe=>{if(!qe.committed){B("이미 다른 상대가 참가한 방입니다.");return}z=O,A="p2",N=L,N.onDisconnect().remove(),window.__mpActiveRoom={pane:"roulette-rr"},Je&&(Je.innerHTML=`🎮 <strong>방 입장 성공!</strong> 방 번호: <span style="color:#74b9ff">${O}</span>`),ut&&(ut.style.display="block"),wt()})})}),se&&(se.onclick=function(){if(!N||!A)return;const O=parseInt(M.value);if(isNaN(O)||O<=0){B("1 이상의 베팅금을 입력하세요!");return}const L=ke();if(L<O){B(`❌ 보유 코인(${Fe(L)}개)보다 많은 금액을 제안할 수 없습니다.`);return}const ge=A==="p1"?"p2":"p1";N.update({agreedBet:O,[A+"/proposedBet"]:O,[A+"/betAgreed"]:!0,[ge+"/betAgreed"]:!1})}),he&&(he.onclick=function(){!N||!A||N.once("value",O=>{const L=O.val();if(!L)return;const ge=L.agreedBet||0;if(ge<=0)return;const De=ke();if(De<ge){B(`❌ 보유 코인(${Fe(De)}개)보다 많은 금액에는 동의할 수 없습니다.`);return}N.child(A).update({betAgreed:!0})})}),Be&&(Be.onclick=function(){!N||!A||(Be.disabled=!0,N.transaction(O=>{if(!O||O.status!=="playing"||O.turn!==A)return O;const L=O.cylinderPos,ge=(O.spentChambers||[]).concat([L]);return L===O.bulletPos?(O.status="finished",O.winner=A==="p1"?"p2":"p1",O.spentChambers=ge,O.p1&&(O.p1.rematchVote=null),O.p2&&(O.p2.rematchVote=null)):(O.spentChambers=ge,O.cylinderPos=(L+1)%6,O.turn=A==="p1"?"p2":"p1"),O}))}),ze&&(ze.onclick=function(){!N||!A||(ze.disabled=!0,Me&&(Me.disabled=!0),N.child(A).update({rematchVote:"yes"}))}),Me&&(Me.onclick=function(){!N||!A||Ae(!1)});function wt(){N&&N.on("value",O=>{if(!O.exists()){N&&$e();return}const L=O.val();if(!L.p1||!L.p2)return;const ge=A==="p1"?L.p1:L.p2,De=A==="p1"?L.p2:L.p1,qe=L.roundId||0,Ee=document.getElementById("rrOppName"),le=document.getElementById("rrOppStatus"),Qe=document.getElementById("rrMyStatus"),pe=document.getElementById("rrMultiResult"),we=document.getElementById("rrMultiStatusText");if(Ee&&(Ee.innerText=A==="p1"?"상대방 (Player 2)":"방장 (Player 1)"),L.status==="betting"){bt&&(bt.style.display="block"),X&&(X.style.display="none"),fe&&(fe.style.display="none"),je&&(je.style.display="none"),ze&&(ze.disabled=!1),Me&&(Me.disabled=!1);const R=L.agreedBet||0;if(R>0?(document.activeElement!==M&&(M.value=R),he&&(he.style.display=ge.betAgreed?"none":"inline-block"),ge.betAgreed&&!De.betAgreed?oe.textContent=`${Fe(R)} Coin 제안 완료! 상대방의 동의를 기다리는 중...`:!ge.betAgreed&&De.betAgreed?oe.textContent=`상대방이 ${Fe(R)} Coin을 제안했습니다. 동의하시겠습니까?`:oe.textContent="두 사람이 같은 금액에 동의하면 게임이 시작됩니다."):(he&&(he.style.display="none"),oe.textContent="베팅금을 제안해 협상을 시작하세요."),ce(-1,[],-1),we&&(we.textContent="상대방과 번갈아 방아쇠를 당깁니다 · 맞는 사람이 패배합니다"),Qe&&(Qe.innerText=ge.betAgreed?"동의함":"협상 중",Qe.className="mpStatusTag"+(ge.betAgreed?" ready":"")),le&&(le.innerText=De.betAgreed?"동의함":"협상 중",le.className="mpStatusTag"+(De.betAgreed?" ready":"")),pe&&(pe.innerText="방에 입장하면 먼저 베팅금을 합의합니다 · 승자가 상금을 모두 가져갑니다 (2배)"),L.p1.betAgreed&&L.p2.betAgreed&&R>0&&A==="p1"&&!_e){_e=!0;const ve=Math.floor(Math.random()*6),at=Math.random()<.5?"p1":"p2";N.update({status:"playing",roundId:qe+1,bulletPos:ve,cylinderPos:0,spentChambers:[],turn:at,winner:null}).then(()=>{_e=!1})}return}if(bt&&(bt.style.display="none"),X){X.style.display="flex";const R=document.getElementById("rrAgreedBetDisplay");R&&(R.textContent=`🪙 ${Fe(L.agreedBet||0)}`)}const pt=L.status==="finished"?L.bulletPos:-1;ce(L.status==="playing"?L.cylinderPos:-1,L.spentChambers||[],pt);function Xe(R,ve){return ve?"bust":L.status==="finished"?R?"":"done":R?"busy":""}const yt=L.turn===A,xt=L.turn===(A==="p1"?"p2":"p1"),_=L.status==="finished"&&L.winner===(A==="p1"?"p2":"p1"),J=L.status==="finished"&&L.winner===A;if(Qe&&(Qe.innerText=L.status==="finished"?_?"💥 사망":"🏆 생존":yt?"내 차례":"대기 중",Qe.className="mpStatusTag "+Xe(yt,_)),le&&(le.innerText=L.status==="finished"?J?"💥 사망":"🏆 생존":xt?"상대 차례":"대기 중",le.className="mpStatusTag "+Xe(xt,J)),L.status==="playing"&&(je&&(je.style.display="none"),we&&(we.textContent=yt?"내 차례입니다! 방아쇠를 당기세요":"상대방의 차례를 기다리는 중..."),pe&&(pe.innerText=yt?"🔫 지금 방아쇠를 당길 차례입니다":"⏳ 상대방이 방아쇠를 당기는 중..."),fe&&(fe.style.display="flex"),Be&&(Be.disabled=!yt)),L.status==="finished"){if(fe&&(fe.style.display="none"),je&&(je.style.display=ge.rematchVote?"none":"flex"),ze&&(ze.disabled=!!ge.rematchVote),Me&&(Me.disabled=!!ge.rematchVote),we&&(we.textContent=_?"💥 빵! 총알에 맞았습니다...":"🏆 상대방이 총알에 맞았습니다! 승리!"),dt!==qe){dt=qe;const at=L.agreedBet||0;let Ze,Ie;L.winner===A?(Ze=at,Ie=`🏆 승리! 상대방이 총알에 맞았습니다. +${Fe(Ze)} Coin`):(Ze=-at,Ie=`💥 빵! 총알에 맞았습니다... -${Fe(at)} Coin`),Wt.state&&typeof Wt.state.coins<"u"&&(Wt.state.coins+=Ze,typeof window.renderTop=="function"&&window.renderTop(),typeof window.saveGame=="function"&&window.saveGame()),Ze>0?(window.Sound&&window.Sound.win&&window.Sound.win(),typeof window.burstConfetti=="function"&&window.burstConfetti(30)):window.Sound&&window.Sound.rrBang?window.Sound.rrBang():window.Sound&&window.Sound.lose&&window.Sound.lose(),pe&&(pe.innerHTML=`🏁 ${Ie} · 다시 대결할지 선택해주세요.`),B(Ie)}else pe&&(ge.rematchVote&&!De.rematchVote?pe.innerText="🏁 상대방의 재대결 선택을 기다리는 중...":ge.rematchVote||(pe.innerText="🏁 다시 대결할지 선택해주세요."));const R=ge.rematchVote,ve=De.rematchVote;if(R&&ve&&A==="p1"&&!me&&(me=!0,R==="yes"&&ve==="yes")){const at=L.agreedBet||0;N.update({status:"betting",winner:null,agreedBet:at,bulletPos:null,cylinderPos:0,spentChambers:[],turn:null,"p1/betAgreed":!1,"p1/proposedBet":0,"p1/rematchVote":null,"p2/betAgreed":!1,"p2/proposedBet":0,"p2/rematchVote":null}).then(()=>{me=!1})}}})}})(),(function(){"use strict";const B=document.getElementById("bgCanvas");if(!B||!B.getContext)return;const ke=B.getContext("2d");let Fe=0,ct=0;function Le(){Fe=B.width=window.innerWidth,ct=B.height=window.innerHeight}Le(),window.addEventListener("resize",Le);const Y=["#3fe0ff","#c04bff","#ffd23f","#3fe07a"],Ge=Math.max(24,Math.min(70,Math.floor(window.innerWidth*window.innerHeight/16e3))),ce=Array.from({length:Ge},function(){return{x:Math.random()*Fe,y:Math.random()*ct,r:.6+Math.random()*1.7,vx:(Math.random()-.5)*.14,vy:(Math.random()-.5)*.14,a:.12+Math.random()*.3,c:Y[Math.floor(Math.random()*Y.length)],p:Math.random()*Math.PI*2}});function s(){ke.clearRect(0,0,Fe,ct);for(let z=0;z<ce.length;z++){const A=ce[z];A.x+=A.vx,A.y+=A.vy,A.p+=.012,A.x<-5&&(A.x=Fe+5),A.x>Fe+5&&(A.x=-5),A.y<-5&&(A.y=ct+5),A.y>ct+5&&(A.y=-5);const N=A.a*(.55+.45*Math.sin(A.p));ke.beginPath(),ke.fillStyle=A.c,ke.globalAlpha=N,ke.arc(A.x,A.y,A.r,0,Math.PI*2),ke.fill()}ke.globalAlpha=1,requestAnimationFrame(s)}requestAnimationFrame(s)})(),(function(){"use strict";const B=[{id:"stone",name:"돌멩이",min:1,max:1,weight:56,color:"#9a9aa2",glow:0},{id:"iron",name:"철광석",min:1,max:2,weight:29,color:"#c98a5a",glow:0},{id:"silver",name:"은광석",min:2,max:4,weight:9.3,color:"#dfe2e8",glow:6},{id:"gold",name:"금광석",min:6,max:14,weight:3.9,color:"#f4b942",glow:10},{id:"diamond",name:"다이아몬드",min:25,max:55,weight:1.1,color:"#7ee8fa",glow:16},{id:"dark",name:"암흑물질 광석",min:120,max:300,weight:.15,color:"#c04bff",glow:24},{id:"mithril",name:"미스릴 원석",min:18,max:40,weight:10,color:"#7fffd4",glow:14,mine:1},{id:"obsidian",name:"흑요석",min:70,max:150,weight:3.2,color:"#3a2a55",glow:18,mine:1},{id:"voidshard",name:"공허의 파편",min:300,max:650,weight:.4,color:"#0b0014",glow:26,mine:1}],ke=[{id:"wood",name:"나무 곡괭이",cost:0,mult:1,rare:0,crit:.03,power:1,requires:{}},{id:"stonepk",name:"돌 곡괭이",cost:1500,mult:1.15,rare:2,crit:.035,power:1,requires:{stone:40}},{id:"ironpk",name:"철 곡괭이",cost:6e3,mult:1.4,rare:6,crit:.045,power:2,requires:{stone:30,iron:25}},{id:"steelpk",name:"강철 곡괭이",cost:18e3,mult:1.7,rare:9,crit:.06,power:2,requires:{iron:35,silver:10}},{id:"goldpk",name:"황금 곡괭이",cost:5e4,mult:2.1,rare:13,crit:.08,power:3,requires:{iron:20,silver:35}},{id:"platpk",name:"백금 곡괭이",cost:13e4,mult:2.6,rare:17,crit:.1,power:4,requires:{silver:25,gold:15}},{id:"diapk",name:"다이아 곡괭이",cost:32e4,mult:3.3,rare:22,crit:.12,power:5,requires:{silver:20,gold:30}},{id:"orichpk",name:"오리하르콘 곡괭이",cost:8e5,mult:4.2,rare:29,crit:.15,power:7,requires:{gold:25,diamond:15}},{id:"rift",name:"차원 균열 곡괭이",cost:22e5,mult:5.5,rare:38,crit:.2,power:10,requires:{gold:20,diamond:28,dark:5}},{id:"mithrilpk",name:"미스릴 곡괭이",cost:5e6,mult:7,rare:45,crit:.24,power:12,requires:{dark:15,mithril:25}},{id:"obsidianpk",name:"흑요석 곡괭이",cost:14e6,mult:9,rare:58,crit:.28,power:16,requires:{mithril:30,obsidian:15}},{id:"voidpk",name:"공허 파쇄자",cost:35e6,mult:12,rare:75,crit:.33,power:22,requires:{obsidian:25,voidshard:10}}],Fe=[{id:"backyard",icon:"🏞️",name:"뒷산",desc:"모든 광부의 시작점. 돌멩이부터 암흑물질 광석까지 캘 수 있어요.",unlockCost:0,unlockReqPickaxeId:null},{id:"abyss",icon:"🕳️",name:"폐광 갱도",desc:"차원 균열 곡괭이를 손에 넣은 자만 들어갈 수 있는 심연의 갱도. 미스릴부터 공허의 파편까지 잠들어 있습니다.",unlockCost:3e6,unlockReqPickaxeId:"rift"}];function ct(t){return ke.findIndex(n=>n.id===t)}function Le(t){return t===0||!!(s.unlockedMines&&s.unlockedMines[t])}const Y=[{sym:"🍒",weight:35,pay3:1,pay4:3,pay5:10},{sym:"🍋",weight:25,pay3:2,pay4:5,pay5:20},{sym:"🔔",weight:12,pay3:4,pay4:10,pay5:40},{sym:"💎",weight:4,pay3:8,pay4:25,pay5:100},{sym:"7",weight:.5,pay3:80,pay4:150,pay5:2e3,seven:!0}],Ge=1e3,ce=.05,s={gold:500,coins:0,pickaxeIdx:0,mineLevel:1,mineAreaIdx:0,unlockedMines:{0:!0},diceChoice:"odd",ladderChoice:0,ores:{stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0},brokeSince:null,lastDailyBonusDate:null,dailyStreak:0,oreBreakCount:0,boostUntil:0,cosmetics:{},equippedCosmetic:null,gachaItems:{},goldSpentTotal:0,coinSpentTotal:0,lastAttendanceDate:null,attendanceDay:0,ownedTitles:{},ownedBorders:{},equippedTitle:null,equippedBorder:null,equippedBg:null,achievements:{},lifetimeOres:{stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0},totalOresMined:0,nameTickets:0};(function(){let t=s.coins;Object.defineProperty(s,"coins",{enumerable:!0,configurable:!0,get(){return t},set(n){typeof n=="number"&&typeof t=="number"&&n<t&&(s.coinSpentTotal=(s.coinSpentTotal||0)+(t-n)),t=n}}),Object.defineProperty(s,"__coinRaw",{enumerable:!1,value:function(n){t=n}})})();const z=(function(){let t=null;function n(){return t||(t=new(window.AudioContext||window.webkitAudioContext)),t.state==="suspended"&&t.resume(),t}function i(d,f,k,x,S){const G=n(),te=G.currentTime+(S||0),ie=G.createOscillator(),Ne=G.createGain();return ie.type=k||"sine",ie.frequency.setValueAtTime(d,te),Ne.gain.setValueAtTime(0,te),Ne.gain.linearRampToValueAtTime(x||.2,te+.008),Ne.gain.exponentialRampToValueAtTime(1e-4,te+f),ie.connect(Ne),Ne.connect(G.destination),ie.start(te),ie.stop(te+f+.02),ie}function c(d,f,k,x,S){const G=n(),te=G.currentTime,ie=G.createOscillator(),Ne=G.createGain();ie.type=x||"sawtooth",ie.frequency.setValueAtTime(d,te),ie.frequency.exponentialRampToValueAtTime(Math.max(f,20),te+k),Ne.gain.setValueAtTime(S||.18,te),Ne.gain.exponentialRampToValueAtTime(1e-4,te+k),ie.connect(Ne),Ne.connect(G.destination),ie.start(te),ie.stop(te+k+.02)}return{mineHit(){i(520,.06,"square",.12),i(760,.05,"square",.08,.02)},chip(){i(900,.035,"square",.07)},rareFanfare(d){(d>=5?[523,659,784,1046,1318]:d>=4?[523,659,784,1046]:[523,659,784]).forEach((k,x)=>i(k,.22,"triangle",.14,x*.075))},tick(){i(1e3,.03,"triangle",.06)},win(){for(let d=0;d<14;d++)i(700+Math.random()*900,.12,"triangle",.09,d*.035)},lose(){c(420,90,.5,"sawtooth",.14)},jackpot(){[523,659,784,1046,1318,1568,2093].forEach((f,k)=>i(f,.3,"triangle",.16,k*.09));for(let f=0;f<24;f++)i(600+Math.random()*1200,.16,"triangle",.08,.4+f*.045)},coinFlip(){i(1200,.05,"square",.08),i(1500,.05,"square",.08,.08)},rrTick(){i(300,.02,"square",.05)},rrBang(){const d=n(),f=d.currentTime,k=d.createOscillator(),x=d.createGain();k.type="square",k.frequency.setValueAtTime(120,f),k.frequency.exponentialRampToValueAtTime(30,f+.35),x.gain.setValueAtTime(.35,f),x.gain.exponentialRampToValueAtTime(1e-4,f+.4),k.connect(x),x.connect(d.destination),k.start(f),k.stop(f+.42),c(200,40,.45,"sawtooth",.2)}}})();function A(t){return t=Math.floor(t),t.toLocaleString("en-US")}function N(t,n){const i=t.reduce((d,f)=>d+f[n||"weight"],0);let c=Math.random()*i;for(const d of t)if(c-=d[n||"weight"],c<=0)return d;return t[t.length-1]}function _e(t,n){const i=t.replace("#",""),c=i.length===3?i.split("").map(S=>S+S).join(""):i,d=parseInt(c,16),f=d>>16&255,k=d>>8&255,x=d&255;return"rgba("+f+","+k+","+x+","+n+")"}function me(){return ke[s.pickaxeIdx]}const dt=4;function e(t){return Math.round(6*Math.pow(1.55,t-1))}const y=25,mt=60,Je=4e3,ut=1.8,bt=90*1e3;function X(){return 2500+s.pickaxeIdx*2200}function M(){const n=me().rare+(s.mineLevel-1)*dt,i=s.mineAreaIdx||0,c=[];return B.forEach((d,f)=>{(d.mine||0)===i&&c.push(f)}),B.map((d,f)=>{if((d.mine||0)!==i)return 0;const k=c.indexOf(f);return k<=1?Math.max(1,d.weight-n*1.05):d.weight+n*(k-1)*.42})}function oe(t){const n="deeprockMine_save_v3";window.__applyingRemote=!0;try{typeof t.gold=="number"&&(s.gold=t.gold),typeof t.coins=="number"&&s.__coinRaw(t.coins),typeof t.pickaxeIdx=="number"&&(s.pickaxeIdx=t.pickaxeIdx),typeof t.mineLevel=="number"&&(s.mineLevel=t.mineLevel),typeof t.mineAreaIdx=="number"&&(s.mineAreaIdx=t.mineAreaIdx),t.unlockedMines&&(s.unlockedMines=Object.assign({0:!0},t.unlockedMines)),s.ores&&(s.ores=Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0},t.ores||{})),s.lastDailyBonusDate=t.lastDailyBonusDate||null,typeof t.dailyStreak=="number"&&(s.dailyStreak=t.dailyStreak),typeof t.oreBreakCount=="number"&&(s.oreBreakCount=0),typeof t.boostUntil=="number"&&(s.boostUntil=t.boostUntil),s.cosmetics=t.cosmetics||{},s.equippedCosmetic=t.equippedCosmetic||null,s.gachaItems=t.gachaItems||{},typeof t.goldSpentTotal=="number"&&(s.goldSpentTotal=t.goldSpentTotal),typeof t.coinSpentTotal=="number"&&(s.coinSpentTotal=t.coinSpentTotal),s.lastAttendanceDate=t.lastAttendanceDate||null,typeof t.attendanceDay=="number"&&(s.attendanceDay=t.attendanceDay),s.ownedTitles=t.ownedTitles||{},s.ownedBorders=t.ownedBorders||{},s.equippedTitle=t.equippedTitle||null,s.equippedBorder=t.equippedBorder||null,s.equippedBg=t.equippedBg||null,s.achievements=t.achievements||{},t.lifetimeOres&&(s.lifetimeOres=Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0},t.lifetimeOres)),typeof t.totalOresMined=="number"&&(s.totalOresMined=t.totalOresMined),typeof t.nameTickets=="number"&&(s.nameTickets=t.nameTickets);try{s.pickaxeIdx=Math.max(0,Math.min(s.pickaxeIdx,ke.length-1))}catch{}localStorage.setItem(n,JSON.stringify(t)),window.__lastSavedAt=t.savedAt||0,xe(t);try{R(),rt()}catch{}window.__lastSnapKey=fe(de())}finally{window.__applyingRemote=!1}try{ya&&typeof sa=="function"&&sa()}catch{}}function se(){const t="deeprockMine_save_v3";if(!(typeof s>"u")){try{const n=localStorage.getItem(t);if(n){const i=JSON.parse(n);typeof i.gold=="number"&&(s.gold=i.gold),typeof i.coins=="number"&&s.__coinRaw(i.coins),typeof i.pickaxeIdx=="number"&&(s.pickaxeIdx=i.pickaxeIdx),typeof i.mineLevel=="number"&&(s.mineLevel=i.mineLevel),typeof i.mineAreaIdx=="number"&&(s.mineAreaIdx=i.mineAreaIdx),i.unlockedMines&&(s.unlockedMines=Object.assign({0:!0},i.unlockedMines)),s.ores&&(s.ores=Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0},i.ores||{})),i.lastDailyBonusDate&&(s.lastDailyBonusDate=i.lastDailyBonusDate),typeof i.dailyStreak=="number"&&(s.dailyStreak=i.dailyStreak),typeof i.oreBreakCount=="number"&&(s.oreBreakCount=0),typeof i.boostUntil=="number"&&(s.boostUntil=i.boostUntil),i.cosmetics&&(s.cosmetics=i.cosmetics),i.equippedCosmetic&&(s.equippedCosmetic=i.equippedCosmetic),i.gachaItems&&(s.gachaItems=i.gachaItems),typeof i.goldSpentTotal=="number"&&(s.goldSpentTotal=i.goldSpentTotal),typeof i.coinSpentTotal=="number"&&(s.coinSpentTotal=i.coinSpentTotal),i.lastAttendanceDate&&(s.lastAttendanceDate=i.lastAttendanceDate),typeof i.attendanceDay=="number"&&(s.attendanceDay=i.attendanceDay),i.ownedTitles&&(s.ownedTitles=i.ownedTitles),i.ownedBorders&&(s.ownedBorders=i.ownedBorders),i.equippedTitle&&(s.equippedTitle=i.equippedTitle),i.equippedBorder&&(s.equippedBorder=i.equippedBorder),i.equippedBg&&(s.equippedBg=i.equippedBg),i.achievements&&(s.achievements=i.achievements),i.lifetimeOres&&(s.lifetimeOres=Object.assign({stone:0,iron:0,silver:0,gold:0,diamond:0,dark:0,mithril:0,obsidian:0,voidshard:0},i.lifetimeOres)),typeof i.totalOresMined=="number"&&(s.totalOresMined=i.totalOresMined),typeof i.nameTickets=="number"&&(s.nameTickets=i.nameTickets)}}catch(n){console.error("로컬 로드 중 에러:",n)}try{typeof ke<"u"&&ke.length>0&&typeof s<"u"&&(s.pickaxeIdx=Math.max(0,Math.min(s.pickaxeIdx,ke.length-1)))}catch{}try{if(typeof T<"u"&&T!==null){const n=sessionStorage.getItem("current_user")||localStorage.getItem("current_user");n&&(window.__cloudSyncPromise=T.ref("users/"+n+"/gameData").once("value").then(i=>{if(i.exists()){const c=i.val(),d=localStorage.getItem(t);let f=!1,k=null;try{k=localStorage.getItem("sync_dirty_"+n)}catch{}if(!d||!k)f=!0;else{const x=JSON.parse(d);c.savedAt&&(!x.savedAt||c.savedAt>x.savedAt)&&(f=!0)}f&&typeof s<"u"?oe(c):typeof s<"u"&&xe(c)}}).catch(i=>{}))}}catch{}}}const he=(function(){let t=null;try{t=localStorage.getItem("device_id")}catch{}if(!t){t="d"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);try{localStorage.setItem("device_id",t)}catch{}}return t})();window.__cloudReady=!1,window.__lastSnapKey=null,window.__lastSavedAt=0;function de(){return{gold:s.gold,coins:s.coins,pickaxeIdx:s.pickaxeIdx,mineLevel:s.mineLevel,mineAreaIdx:s.mineAreaIdx,unlockedMines:s.unlockedMines,ores:s.ores,lastDailyBonusDate:s.lastDailyBonusDate,dailyStreak:s.dailyStreak,oreBreakCount:s.oreBreakCount,boostUntil:s.boostUntil,cosmetics:s.cosmetics,equippedCosmetic:s.equippedCosmetic,gachaItems:s.gachaItems,goldSpentTotal:s.goldSpentTotal,coinSpentTotal:s.coinSpentTotal,lastAttendanceDate:s.lastAttendanceDate,attendanceDay:s.attendanceDay,ownedTitles:s.ownedTitles,ownedBorders:s.ownedBorders,equippedTitle:s.equippedTitle,equippedBorder:s.equippedBorder,equippedBg:s.equippedBg,achievements:s.achievements,lifetimeOres:s.lifetimeOres,totalOresMined:s.totalOresMined,nameTickets:s.nameTickets||0}}window.__base=null;function xe(t){t&&(window.__base={savedAt:+t.savedAt||0,gold:+t.gold||0,coins:+t.coins||0,gst:+t.goldSpentTotal||0,cst:+t.coinSpentTotal||0})}function fe(t){try{return JSON.stringify(t)}catch{return String(Math.random())}}function Be(t){const n="deeprockMine_save_v3";if(typeof s>"u"||window.__adminResetting||window.__applyingRemote||!window.__cloudReady&&t!==!0)return Promise.resolve();const i=[];try{const c=de(),d=fe(c);if(t!==!0&&d===window.__lastSnapKey)return Promise.resolve();window.__lastSnapKey=d;const f=Math.max(Date.now(),(window.__lastSavedAt||0)+1);window.__lastSavedAt=f;const k=Object.assign({},c,{savedAt:f,deviceId:he});if(localStorage.setItem(n,JSON.stringify(k)),typeof T<"u"&&T!==null){const x=sessionStorage.getItem("current_user")||localStorage.getItem("current_user");if(x){const S="sync_dirty_"+x;try{localStorage.setItem(S,String(f))}catch{}i.push(new Promise(ie=>{const Ne=T.ref("users/"+x+"/gameData"),jt=window.__base||{savedAt:0,gold:k.gold,coins:k.coins,gst:k.goldSpentTotal||0,cst:k.coinSpentTotal||0};Ne.transaction(Kt=>{if(!Kt)return k;if(Kt.deviceId!==he&&(+Kt.savedAt||0)>(jt.savedAt||0)){const kn=Object.assign({},k);return kn.gold=Math.max(0,Math.floor((+Kt.gold||0)+(k.gold-jt.gold))),kn.coins=Math.max(0,Math.floor((+Kt.coins||0)+(k.coins-jt.coins))),kn.goldSpentTotal=Math.max(0,Math.floor((+Kt.goldSpentTotal||0)+((k.goldSpentTotal||0)-jt.gst))),kn.coinSpentTotal=Math.max(0,Math.floor((+Kt.coinSpentTotal||0)+((k.coinSpentTotal||0)-jt.cst))),kn.savedAt=Math.max(k.savedAt,(+Kt.savedAt||0)+1),kn}return k},(Kt,kn,Ba)=>{try{if(!Kt&&kn&&Ba&&Ba.exists()){const An=Ba.val();if(An.savedAt!==k.savedAt){window.__applyingRemote=!0;try{s.gold=An.gold+(s.gold-k.gold),s.__coinRaw(An.coins+(s.coins-k.coins)),s.goldSpentTotal=An.goldSpentTotal+((s.goldSpentTotal||0)-(k.goldSpentTotal||0)),s.coinSpentTotal=An.coinSpentTotal+((s.coinSpentTotal||0)-(k.coinSpentTotal||0)),window.__lastSavedAt=Math.max(window.__lastSavedAt||0,An.savedAt||0),R(),rt()}finally{window.__applyingRemote=!1}}xe(An);try{localStorage.getItem(S)===String(k.savedAt)&&localStorage.removeItem(S)}catch{}}}catch{}ie()},!1)}));const G=Math.max(0,Math.round((s.coins||0)*Ge*(1-ce))),te=(s.gold||0)+G;i.push(T.ref("leaderboard/"+x).set({name:x,gold:s.gold,coins:s.coins||0,coinGoldValue:G,totalValue:te,goldSpentTotal:s.goldSpentTotal||0,coinSpentTotal:s.coinSpentTotal||0,title:s.equippedTitle||null,updatedAt:Date.now()}).catch(ie=>{}))}}}catch{}return Promise.all(i)}let je=null,ze=null;function Me(){if(typeof T>"u"||!T)return;const t=sessionStorage.getItem("current_user")||localStorage.getItem("current_user");if(!t)return;if(je)try{je.off()}catch{}je=T.ref("users/"+t+"/gameData"),je.on("value",i=>{if(window.__adminResetting||!i.exists())return;const c=i.val();if(!(!c||c.deviceId===he)&&!((c.savedAt||0)<=(window.__lastSavedAt||0))){if(window.__mpActiveRoom){ze=c;return}oe(c);try{Ae("🔄 다른 기기의 최신 진행 상황을 불러왔어요.")}catch{}}});const n=()=>{try{T.goOnline()}catch{}};document.addEventListener("visibilitychange",()=>{document.hidden||n()}),window.addEventListener("online",n),setInterval(()=>{if(ze&&!window.__mpActiveRoom&&(ze.savedAt||0)>(window.__lastSavedAt||0)){const i=ze;ze=null,oe(i)}else ze&&!window.__mpActiveRoom&&(ze=null)},2e3)}window.addEventListener("load",function(){try{typeof se=="function"&&se(),typeof updateUI=="function"&&updateUI()}catch{}});let Oe=null;function Ae(t){let n=document.getElementById("toastEl");n||(n=document.createElement("div"),n.id="toastEl",n.className="toast",document.body.appendChild(n)),n.textContent=t,clearTimeout(Oe),n.classList.remove("show"),n.offsetWidth,n.classList.add("show"),Oe=setTimeout(()=>n.classList.remove("show"),3200)}const nt=300*1e3,$e=80,wt=15*1e3;function O(){if(s.gold>0||s.coins>0){s.brokeSince=null;return}const t=Date.now();s.brokeSince||(s.brokeSince=t),t-s.brokeSince>=nt&&(s.gold+=$e,s.brokeSince=t,R(),Ae(`🎁 지원금 ${A($e)}G가 지급되었습니다.`))}const L=750,ge=225,De=10;function qe(){const t=new Date,n=t.toLocaleDateString("en-CA");if(s.lastDailyBonusDate!==n){const i=new Date(t);i.setDate(t.getDate()-1);const c=i.toLocaleDateString("en-CA");s.dailyStreak=s.lastDailyBonusDate===c?(s.dailyStreak||0)+1:1,s.lastDailyBonusDate=n;const d=Math.min(s.dailyStreak,De),f=L+(d-1)*ge;s.gold+=f,R(),Ae(`☀️ ${s.dailyStreak}일 연속 접속 보너스 +${A(f)}G`)}}const Ee=[{icon:"🎁",label:"신규 지원금<br>1,500G",type:"gold",amount:1500},{icon:"🎟️",label:"Coin x15",type:"coin",amount:15},{icon:"💰",label:"Gold 3,000",type:"gold",amount:3e3},{icon:"⚡",label:"채굴 부스터<br>20분",type:"boost",amount:20},{icon:"📦",label:"Gold 5,000",type:"gold",amount:5e3},{icon:"🎟️",label:"Coin x25",type:"coin",amount:25},{icon:"🏆",label:"주간 보너스<br>Gold 15,000",type:"gold",amount:15e3,special:!0},{icon:"💰",label:"Gold 7,500",type:"gold",amount:7500},{icon:"🎟️",label:"Coin x40",type:"coin",amount:40},{icon:"⚡",label:"채굴 부스터<br>40분",type:"boost",amount:40},{icon:"📦",label:"Gold 12,500",type:"gold",amount:12500},{icon:"🎟️",label:"Coin x60",type:"coin",amount:60},{icon:"💎",label:"Gold 20,000",type:"gold",amount:2e4},{icon:"👑",label:"최종 보상!<br>Gold 50,000+Coin x100",type:"jackpot",amount:0,special:!0}],le=Ee.length;function Qe(t){return t.type==="gold"?`+${A(t.amount)}G`:t.type==="coin"?`Coin x${t.amount}`:t.type==="boost"?`채굴 부스터 ${t.amount}분`:t.type==="jackpot"?"Gold 50,000 + Coin x100":""}function pe(t){t.type==="gold"?s.gold+=t.amount:t.type==="coin"?s.coins+=t.amount:t.type==="boost"?s.boostUntil=Math.max(s.boostUntil||0,Date.now())+t.amount*60*1e3:t.type==="jackpot"&&(s.gold+=5e4,s.coins+=100)}function we(){const t=new Date,n=t.toLocaleDateString("en-CA"),i=s.lastAttendanceDate!==n;let c=s.attendanceDay||0;if(i){const d=new Date(t);d.setDate(t.getDate()-1);const f=d.toLocaleDateString("en-CA");c=s.lastAttendanceDate===f?(s.attendanceDay||0)+1:1,c>le&&(c=1)}return{canClaim:i,claimDay:c,todayKey:n}}function pt(){const t=we(),n=document.getElementById("attendancePips"),i=document.getElementById("attendanceBanner"),c=document.getElementById("attnDayGrid"),d=s.attendanceDay||0,f=t.canClaim?t.claimDay:d;if(n){n.innerHTML="";for(let x=1;x<=le;x++){const S=document.createElement("div");S.className="attnPip"+(x<=d?" done":x===f?" today":""),S.style.cssText="width:22px;height:22px;font-size:9.5px;",S.textContent=Ee[x-1].special?"★":x,n.appendChild(S)}}i&&(i.textContent=t.canClaim?`🎁 ${t.claimDay}일차 출석 보상이 도착했어요! 아래에서 "받기" 버튼을 눌러 수령하세요.`:d===le?"14일차 최종 보상까지 모두 받았습니다! 내일부터 다시 1일차로 시작합니다.":`오늘 ${d}일차 보상을 받았습니다 · 내일 다시 접속해서 스트릭을 이어가세요! (총 ${le}일)`),c&&(c.innerHTML="",Ee.forEach((x,S)=>{const G=S+1,te=document.createElement("div");let ie="attnDayCard";x.special&&(ie+=" special");const Ne=G<=d,jt=t.canClaim&&G===t.claimDay;Ne?ie+=" done":jt||G===f?ie+=" today":ie+=" locked",te.className=ie,te.innerHTML=`
         <span class="attnDayNum">${G}회차</span>
         <span class="attnDayIcon">${x.icon}</span>
         <span class="attnDayLabel">${x.label}</span>
@@ -844,119 +948,311 @@
 
 아이디·비밀번호·게임 데이터·랭킹이 모두 사라지고 되돌릴 수 없어요.
 접속 중이면 바로 로그아웃돼요.`))return;const c=prompt(`확인을 위해 삭제할 아이디 "${i}" 를 그대로 입력하세요:`);if(c===null)return;if(c.trim()!==i)return Rt("❌ 아이디가 일치하지 않아 삭제를 취소했어요.","lose");const d=()=>Promise.all([T.ref("accounts/"+i).remove(),T.ref("users/"+i).remove(),T.ref("leaderboard/"+i).remove(),T.ref("adminGifts/"+i).remove(),T.ref("adminResets/"+i).remove()]);T.ref("adminDeletes/"+i).set({at:Date.now(),token:wa()}).then(d).then(()=>{Rt(`✅ ${i} 계정을 삭제했어요. (접속 중이면 바로 로그아웃, 오프라인이면 다음 접속 때 로그아웃돼요)`,"win");const f=document.getElementById("adminTarget");f&&(f.dataset.keep=""),Bt="",ua(),setTimeout(()=>{d().then(ta).catch(()=>{})},3e3)}).catch(f=>{Rt("❌ 계정 삭제 실패: "+(f&&f.message),"lose")})}function lo(){if(confirm(`⚠️ 정말로 서버의 모든 유저 데이터와 랭킹을 초기화하시겠습니까?
-(모든 플레이어의 진행 상황이 사라지며 되돌릴 수 없습니다!)`)){if(typeof T>"u"||!T){alert("❌ 서버(Firebase)가 연결되지 않았습니다.");return}Promise.all([T.ref("adminResets/__ALL__").set(wa()),T.ref("users").remove(),T.ref("leaderboard").remove(),T.ref("adminGifts").remove()]).then(()=>{Rt("✅ 서버 초기화 완료! 접속 중인 유저는 자동으로 초기화되며 새로고침돼요.","win"),setTimeout(()=>{if(!window.__adminResetting){try{localStorage.removeItem("deeprockMine_save_v3")}catch{}location.reload()}},3e3)}).catch(t=>{alert("❌ 초기화 중 오류가 발생했습니다: "+(t&&t.message))})}}function ro(){const t=document.getElementById("adminModal");if(!t)return;const n=document.getElementById("adminMsg");n&&(n.style.display="none"),t.classList.add("show"),ua(),clearInterval(fa),fa=setInterval(ta,5e3);try{adminRenderRevoke()}catch{}}function Ha(){const t=document.getElementById("adminModal");t&&t.classList.remove("show"),clearInterval(fa),fa=null}document.getElementById("adminResetBtn")&&document.getElementById("adminResetBtn").addEventListener("click",()=>{if(!La){const t=prompt("관리자 비밀번호를 입력하세요:");if(t===null)return;if(Ia(t)!==ao){alert("❌ 비밀번호가 일치하지 않습니다.");return}La=!0}ro()}),document.getElementById("adminModalClose")&&document.getElementById("adminModalClose").addEventListener("click",Ha),document.getElementById("adminModal")&&document.getElementById("adminModal").addEventListener("click",t=>{t.target.id==="adminModal"&&Ha()}),document.getElementById("adminTarget")&&document.getElementById("adminTarget").addEventListener("change",()=>{const t=document.getElementById("adminTarget").value;t&&t!=="__ALL__"?ja(t):Aa()}),document.getElementById("adminRefreshUsers")&&document.getElementById("adminRefreshUsers").addEventListener("click",ua),document.getElementById("adminGiveBtn")&&document.getElementById("adminGiveBtn").addEventListener("click",()=>Wa("give")),document.getElementById("adminTakeBtn")&&document.getElementById("adminTakeBtn").addEventListener("click",()=>Wa("take")),document.getElementById("adminUserResetBtn")&&document.getElementById("adminUserResetBtn").addEventListener("click",io),document.getElementById("adminUserDeleteBtn")&&document.getElementById("adminUserDeleteBtn").addEventListener("click",so),document.getElementById("adminServerResetBtn")&&document.getElementById("adminServerResetBtn").addEventListener("click",lo);
-function adminOwnedData(){const o=window.__adminOwned;return o&&o.name===Bt?o.d:null}
+(모든 플레이어의 진행 상황이 사라지며 되돌릴 수 없습니다!)`)){if(typeof T>"u"||!T){alert("❌ 서버(Firebase)가 연결되지 않았습니다.");return}Promise.all([T.ref("adminResets/__ALL__").set(wa()),T.ref("users").remove(),T.ref("leaderboard").remove(),T.ref("adminGifts").remove()]).then(()=>{Rt("✅ 서버 초기화 완료! 접속 중인 유저는 자동으로 초기화되며 새로고침돼요.","win"),setTimeout(()=>{if(!window.__adminResetting){try{localStorage.removeItem("deeprockMine_save_v3")}catch{}location.reload()}},3e3)}).catch(t=>{alert("❌ 초기화 중 오류가 발생했습니다: "+(t&&t.message))})}}function ro(){const t=document.getElementById("adminModal");if(!t)return;const n=document.getElementById("adminMsg");n&&(n.style.display="none"),t.classList.add("show"),ua(),clearInterval(fa),fa=setInterval(ta,5e3);try{adminRenderItem();adminRecToggle()}catch{}}function Ha(){const t=document.getElementById("adminModal");t&&t.classList.remove("show"),clearInterval(fa),fa=null}document.getElementById("adminResetBtn")&&document.getElementById("adminResetBtn").addEventListener("click",()=>{if(!La){const t=prompt("관리자 비밀번호를 입력하세요:");if(t===null)return;if(Ia(t)!==ao){alert("❌ 비밀번호가 일치하지 않습니다.");return}La=!0}ro()}),document.getElementById("adminModalClose")&&document.getElementById("adminModalClose").addEventListener("click",Ha),document.getElementById("adminModal")&&document.getElementById("adminModal").addEventListener("click",t=>{t.target.id==="adminModal"&&Ha()}),document.getElementById("adminTarget")&&document.getElementById("adminTarget").addEventListener("change",()=>{const t=document.getElementById("adminTarget").value;t&&t!=="__ALL__"?ja(t):Aa()}),document.getElementById("adminRefreshUsers")&&document.getElementById("adminRefreshUsers").addEventListener("click",ua),document.getElementById("adminGiveBtn")&&document.getElementById("adminGiveBtn").addEventListener("click",()=>Wa("give")),document.getElementById("adminTakeBtn")&&document.getElementById("adminTakeBtn").addEventListener("click",()=>Wa("take")),document.getElementById("adminUserResetBtn")&&document.getElementById("adminUserResetBtn").addEventListener("click",io),document.getElementById("adminUserDeleteBtn")&&document.getElementById("adminUserDeleteBtn").addEventListener("click",so),document.getElementById("adminServerResetBtn")&&document.getElementById("adminServerResetBtn").addEventListener("click",lo);
+function adminCur(){const o=oo();return o.target&&o.target!=="__ALL__"?o.target:""}
+function admMsg(id,m,c){const e=document.getElementById(id);e&&(e.textContent=m,e.className="resultBanner"+(c?" "+c:""),e.style.display="block")}
+function adminOwnedData(){const o=window.__adminOwned,n=adminCur();return o&&n&&o.name===n?o.d:null}
 function adminLoadOwned(){
   const el=document.getElementById("adminOwnedInfo");if(!el)return;
-  if(!Bt||typeof T>"u"||!T){window.__adminOwned=null;el.textContent="위 목록에서 유저를 한 명 누르면 그 유저의 보유 현황이 표시돼요.";adminRenderRevoke();return}
-  const who=Bt;el.textContent=who+" 님 보유 현황을 불러오는 중...";
+  const who=adminCur(),note=x=>'<div class="wide" style="border:none;color:var(--sub)">'+x+'</div>';
+  if(!who||typeof T>"u"||!T){
+    window.__adminOwned=null;
+    el.innerHTML=note(oo().target==="__ALL__"?"전체 유저를 선택 중이에요. 한 명을 고르면 상세 현황이 보여요.":"위 목록에서 유저를 한 명 누르면 상세 현황이 표시돼요.");
+    adminRenderItem();return;
+  }
+  el.innerHTML=note(da(who)+" 님 현황을 불러오는 중...");
   T.ref("users/"+who+"/gameData").once("value").then(sn=>{
-    if(who!==Bt)return;
+    if(who!==adminCur())return;
     const d=sn.exists()?sn.val():null;
     window.__adminOwned=d?{name:who,d:d}:null;
-    if(!d)el.textContent=who+" 님: 저장된 게임 데이터가 없어요.";
-    else{
-      const pk=ke[Math.max(0,Math.min(ke.length-1,+d.pickaxeIdx||0))];
-      el.textContent=who+" 님 · ⛏️ "+pk.name+" · 🎫 이름 변경권 "+(+d.nameTickets||0)+"장 · 🏅 칭호 "+Object.keys(d.ownedTitles||{}).length+"개 · 🎨 스킨 "+(Object.keys(d.cosmetics||{}).length+Object.keys(d.ownedBorders||{}).length)+"개";
-    }
-    adminRenderRevoke();
-  }).catch(()=>{if(who===Bt)el.textContent=who+" 님 보유 현황을 불러오지 못했어요."});
+    if(!d){el.innerHTML=note(da(who)+" 님: 저장된 게임 데이터가 없어요.");adminRenderItem();return}
+    const row=(k,v,w)=>'<div'+(w?' class="wide"':"")+'><span>'+k+'</span><b>'+v+'</b></div>';
+    const pk=ke[Math.max(0,Math.min(ke.length-1,+d.pickaxeIdx||0))];
+    const ores=d.ores||{},oreTxt=B.filter(o=>(+ores[o.id]||0)>0).map(o=>o.name+" "+A(+ores[o.id])).join(" · ")||"없음";
+    const um=d.unlockedMines||{},mines=Object.keys(um).filter(k=>+k>0&&um[k]).map(k=>Fe[k]?Fe[k].name:k).join(", ")||"없음";
+    const bl=Math.max(0,(+d.boostUntil||0)-Date.now());
+    el.innerHTML=
+      row("💰 Gold",A(Math.floor(+d.gold||0)))+row("🪙 Coin",A(Math.floor(+d.coins||0)))
+      +row("⛏️ 곡괭이",da(pk.name))+row("⛰️ 광산 레벨","Lv."+(+d.mineLevel||1))
+      +row("🕳️ 개방한 광산",da(mines))+row("⚡ 부스터",bl>0?Math.ceil(bl/6e4)+"분 남음":"없음")
+      +row("🎫 이름 변경권",(+d.nameTickets||0)+"장")+row("🏅 칭호",Object.keys(d.ownedTitles||{}).length+" / "+On.length)
+      +row("🎨 스킨",(Object.keys(d.cosmetics||{}).length+Object.keys(d.ownedBorders||{}).length)+" / "+(Nn.length+Gn.length+Dn.length))
+      +row("📅 출석",(+d.attendanceDay||0)+" / "+le+"일차")
+      +row("☀️ 연속 접속",(+d.dailyStreak||0)+"일")+row("🕒 마지막 저장",d.savedAt?new Date(d.savedAt).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}):"-")
+      +row("🪨 광석",da(oreTxt),!0);
+    adminRenderItem();
+  }).catch(()=>{if(who===adminCur())el.innerHTML=note(da(who)+" 님 현황을 불러오지 못했어요.")});
 }
-function adminRenderRevoke(){
-  const body=document.getElementById("adminRevokeBody"),ty=document.getElementById("adminRevokeType");if(!body||!ty)return;
-  const o=adminOwnedData(),prevEl=document.getElementById("adminRevokeSel"),prev=prevEl?prevEl.value:"";
-  const hint=x=>'<div style="font-size:11px;color:var(--sub);line-height:1.5;margin-top:6px;">'+x+'</div>';
-  const t=ty.value;let h="";
+
+/* ── 아이템 지급/회수 UI ── */
+function adminRenderItem(){
+  const body=document.getElementById("adminItemBody"),ty=document.getElementById("adminItemType"),md=document.getElementById("adminItemMode"),btn=document.getElementById("adminItemBtn");
+  if(!body||!ty||!md)return;
+  const give=md.value==="give",o=adminOwnedData(),prevEl=document.getElementById("adminItemSel"),prev=prevEl?prevEl.value:"",t=ty.value;
+  const hint=x=>'<div class="admHint">'+x+'</div>',ck=v=>v?"✓ ":"";
+  const qty=(label,val)=>'<div class="adminLabel">'+label+'</div><input type="number" id="adminItemQty" class="adminField" min="1" value="'+val+'">';
+  let h="";
   if(t==="pickaxe"){
     const cur=o?Math.max(0,Math.min(ke.length-1,+o.pickaxeIdx||0)):-1;
-    h='<select id="adminRevokeSel" class="adminField">'+ke.map((p,i)=>i?'<option value="'+i+'">'+(i<=cur?"✓ ":"")+da(p.name)+(i===cur?" (장착중)":"")+'</option>':"").join("")+'</select>'
-      +hint('곡괭이는 단계별로 이어져 있어서, 고른 곡괭이와 그보다 높은 곡괭이가 모두 회수돼요. 회수 후 장착은 한 단계 아래 곡괭이로 바뀌고, 나무 곡괭이는 회수되지 않아요. (✓ = 보유 중)');
+    h='<div class="adminLabel">곡괭이 선택</div><select id="adminItemSel" class="adminField">'+ke.map((p,i)=>i?'<option value="'+i+'">'+ck(i<=cur)+da(p.name)+(i===cur?" (장착중)":"")+'</option>':"").join("")+'</select>'
+      +hint(give?'고른 곡괭이를 지급하고 바로 장착해요. 곡괭이는 단계식이라 그보다 낮은 곡괭이도 함께 보유한 것으로 처리돼요. (✓ = 보유 중)':'곡괭이는 단계식이라 고른 곡괭이와 그보다 높은 곡괭이가 모두 회수돼요. 장착은 한 단계 아래로 바뀌고, 나무 곡괭이는 회수되지 않아요. (✓ = 보유 중)');
   }else if(t==="ticket"){
     const n=o?(+o.nameTickets||0):null;
-    h='<input type="number" id="adminRevokeQty" class="adminField" min="1" value="1">'
-      +'<label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--sub);cursor:pointer;"><input type="checkbox" id="adminRevokeAll"> 수량 무시하고 이름 변경권 전부 회수</label>'
-      +hint(n===null?'유저를 선택하면 보유 수량이 표시돼요.':'현재 보유: '+n+'장');
+    h=qty("수량",1)+(give?"":'<label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--sub);cursor:pointer;"><input type="checkbox" id="adminItemAll"> 수량 무시하고 이름 변경권 전부 회수</label>')
+      +hint(n===null?"유저를 선택하면 보유 수량이 표시돼요.":"현재 보유: "+n+"장");
   }else if(t==="title"){
     const own=o?(o.ownedTitles||{}):{};
-    h='<select id="adminRevokeSel" class="adminField"><option value="__ALL__">🏅 모든 칭호 회수</option>'+On.map(x=>'<option value="'+da(x.id)+'">'+(own[x.id]?"✓ ":"")+'['+String(x.tier||"common").toUpperCase()+'] '+da(x.name)+'</option>').join("")+'</select>'
-      +hint('칭호는 업적 달성형이라, 조건을 아직 만족하고 있으면 잠시 후 다시 자동으로 얻어요. 장착 중이던 칭호는 해제돼요. (✓ = 보유 중)');
-  }else{
-    const oc=o?(o.cosmetics||{}):{},ob=o?(o.ownedBorders||{}):{};
-    const opt=(v,own,name)=>'<option value="'+v+'">'+(own?"✓ ":"")+da(name)+'</option>';
-    h='<select id="adminRevokeSel" class="adminField"><option value="__ALL__">🎨 모든 스킨 회수 (이펙트·배경·테두리)</option>'
+    h='<div class="adminLabel">칭호 선택</div><select id="adminItemSel" class="adminField"><option value="__ALL__">🏅 모든 칭호</option>'+On.map(x=>'<option value="'+da(x.id)+'">'+ck(own[x.id])+"["+String(x.tier||"common").toUpperCase()+"] "+da(x.name)+'</option>').join("")+'</select>'
+      +hint(give?"지급한 칭호는 업적 조건과 관계없이 바로 보유돼요. (✓ = 보유 중)":"칭호는 업적 달성형이라, 조건을 아직 만족하고 있으면 잠시 후 다시 자동으로 얻어요. 장착 중이던 칭호는 해제돼요. (✓ = 보유 중)");
+  }else if(t==="skin"){
+    const oc=o?(o.cosmetics||{}):{},ob=o?(o.ownedBorders||{}):{},opt=(v,own,name)=>'<option value="'+v+'">'+ck(own)+da(name)+'</option>';
+    h='<div class="adminLabel">스킨 선택</div><select id="adminItemSel" class="adminField"><option value="__ALL__">🎨 모든 스킨 (이펙트·배경·테두리)</option>'
       +'<optgroup label="코인 이펙트">'+Nn.map(x=>opt("c:"+x.id,oc[x.id],x.name)).join("")+'</optgroup>'
       +'<optgroup label="배경">'+Gn.map(x=>opt("c:"+x.id,oc[x.id],x.name)).join("")+'</optgroup>'
       +'<optgroup label="프로필 테두리">'+Dn.map(x=>opt("b:"+x.id,ob[x.id],x.name)).join("")+'</optgroup></select>'
-      +hint('장착 중이던 스킨은 해제돼요. (✓ = 보유 중)');
+      +hint(give?"지급한 스킨은 바로 보유 상태가 돼요. (✓ = 보유 중)":"장착 중이던 스킨은 해제돼요. (✓ = 보유 중)");
+  }else if(t==="ore"){
+    const oc=o?(o.ores||{}):{};
+    h='<div class="adminLabel">광석 선택</div><select id="adminItemSel" class="adminField"><option value="__ALL__">🪨 모든 광석</option>'+B.map(x=>'<option value="'+da(x.id)+'">'+da(x.name)+(o?" (보유 "+A(+oc[x.id]||0)+")":"")+'</option>').join("")+'</select>'
+      +qty("수량(개)",10)+hint("곡괭이 제작 재료로 쓰이는 광석 보유량이 바뀌어요. 회수는 0개 밑으로 내려가지 않아요.");
+  }else if(t==="mlevel"){
+    const lv=o?(+o.mineLevel||1):null;
+    h=qty("올리거나 내릴 레벨 수",1)+hint((lv===null?"":"현재 Lv."+lv+" · ")+"개인 광산 레벨은 희귀 광석 확률에 영향을 줘요. 회수는 Lv.1 밑으로 내려가지 않아요.");
+  }else if(t==="mine"){
+    const um=o?(o.unlockedMines||{}):{};
+    h='<div class="adminLabel">광산 선택</div><select id="adminItemSel" class="adminField">'+Fe.map((m,i)=>i?'<option value="'+i+'">'+ck(um[i])+da(m.name)+'</option>':"").join("")+'</select>'
+      +hint(give?"곡괭이 조건·개방 비용 없이 바로 열어줘요. (✓ = 개방됨)":"개방을 회수하면 다시 개방 비용을 내야 해요. 그 광산에 있던 유저는 뒷산으로 돌아가요. (✓ = 개방됨)");
+  }else if(t==="boost"){
+    h=give?qty("지급할 시간(분)",10)+hint("남은 부스터 시간 뒤에 이어서 더해져요."):hint("작동 중인 채굴 부스터를 즉시 끝내요.");
   }
   body.innerHTML=h;
-  const se=document.getElementById("adminRevokeSel");
+  if(btn)btn.textContent=give?"🎁 지급하기":"🧹 회수하기";
+  const se=document.getElementById("adminItemSel");
   if(se&&prev){for(const op of se.options)if(op.value===prev){se.value=prev;break}}
 }
-function adminRevokeMsgShow(m,c){const e=document.getElementById("adminRevokeMsg");e&&(e.textContent=m,e.className="resultBanner"+(c?" "+c:""),e.style.display="block")}
-function adminRevoke(){
-  if(typeof T>"u"||!T)return adminRevokeMsgShow("❌ 서버(Firebase)가 연결되지 않았습니다.","lose");
+function adminDoItem(){
+  const M="adminItemMsg";
+  if(typeof T>"u"||!T)return admMsg(M,"❌ 서버(Firebase)가 연결되지 않았습니다.","lose");
   const {target:f,names:k}=oo();
-  if(!f)return adminRevokeMsgShow("대상 유저를 선택하세요.","lose");
-  if(!k.length)return adminRevokeMsgShow("대상 유저가 없습니다.","lose");
-  const ty=document.getElementById("adminRevokeType").value,se=document.getElementById("adminRevokeSel");
-  let rv={},label="";
-  if(ty==="pickaxe"){
-    const v=+(se&&se.value);if(!(v>=1&&v<ke.length))return adminRevokeMsgShow("회수할 곡괭이를 선택하세요.","lose");
-    rv.pickaxe=v;label='곡괭이 "'+ke[v].name+'"'+(v<ke.length-1?" 및 그 이상 곡괭이":"");
-  }else if(ty==="ticket"){
-    const all=document.getElementById("adminRevokeAll").checked,q=Math.max(0,Math.floor(+document.getElementById("adminRevokeQty").value||0));
-    if(!all&&q<=0)return adminRevokeMsgShow("회수할 이름 변경권 수량을 입력하세요.","lose");
-    rv.tickets=all?"all":q;label=all?"이름 변경권 전부":"이름 변경권 "+q+"장";
-  }else if(ty==="title"){
-    const v=se&&se.value;if(!v)return adminRevokeMsgShow("회수할 칭호를 선택하세요.","lose");
-    if(v==="__ALL__"){rv.titles="all";label="모든 칭호"}else{rv.titles=[v];const x=On.find(z=>z.id===v);label='칭호 "'+(x?x.name:v)+'"'}
-  }else{
-    const v=se&&se.value;if(!v)return adminRevokeMsgShow("회수할 스킨을 선택하세요.","lose");
-    if(v==="__ALL__"){rv.skins="all";label="모든 스킨"}else{rv.skins=[v];const id=v.slice(2),x=Nn.concat(Gn,Dn).find(z=>z.id===id);label='스킨 "'+(x?x.name:id)+'"'}
-  }
+  if(!f)return admMsg(M,"대상 유저를 선택하세요.","lose");
+  if(!k.length)return admMsg(M,"대상 유저가 없습니다.","lose");
+  const give=document.getElementById("adminItemMode").value==="give",ty=document.getElementById("adminItemType").value;
+  const se=document.getElementById("adminItemSel"),qe_=document.getElementById("adminItemQty"),q=qe_?Math.max(0,Math.floor(+qe_.value||0)):0;
+  const verb=give?"지급":"회수";let op={m:give?"give":"take",t:ty},label="";
+  if(ty==="pickaxe"){const v=+(se&&se.value);if(!(v>=1&&v<ke.length))return admMsg(M,"곡괭이를 선택하세요.","lose");op.id=v;label='곡괭이 "'+ke[v].name+'"'+(!give&&v<ke.length-1?" 및 그 이상 곡괭이":"")}
+  else if(ty==="ticket"){const all=!give&&document.getElementById("adminItemAll")&&document.getElementById("adminItemAll").checked;if(!all&&q<=0)return admMsg(M,"수량을 입력하세요.","lose");op.q=all?"all":q;label=all?"이름 변경권 전부":"이름 변경권 "+q+"장"}
+  else if(ty==="title"){const v=se&&se.value;if(!v)return admMsg(M,"칭호를 선택하세요.","lose");op.id=v;const x=On.find(z=>z.id===v);label=v==="__ALL__"?"모든 칭호":'칭호 "'+(x?x.name:v)+'"'}
+  else if(ty==="skin"){const v=se&&se.value;if(!v)return admMsg(M,"스킨을 선택하세요.","lose");op.id=v;const x=Nn.concat(Gn,Dn).find(z=>z.id===v.slice(2));label=v==="__ALL__"?"모든 스킨":'스킨 "'+(x?x.name:v.slice(2))+'"'}
+  else if(ty==="ore"){const v=se&&se.value;if(!v)return admMsg(M,"광석을 선택하세요.","lose");if(q<=0)return admMsg(M,"수량을 입력하세요.","lose");op.id=v;op.q=q;const x=B.find(z=>z.id===v);label=(v==="__ALL__"?"모든 광석":(x?x.name:v))+" "+A(q)+"개"}
+  else if(ty==="mlevel"){if(q<=0)return admMsg(M,"레벨 수를 입력하세요.","lose");op.q=q;label="개인 광산 레벨 "+q+"단계"}
+  else if(ty==="mine"){const v=+(se&&se.value);if(!(v>=1&&v<Fe.length))return admMsg(M,"광산을 선택하세요.","lose");op.id=v;label='"'+Fe[v].name+'" 광산 개방'}
+  else if(ty==="boost"){if(give){if(q<=0)return admMsg(M,"시간(분)을 입력하세요.","lose");op.q=q;label="채굴 부스터 "+q+"분"}else label="채굴 부스터"}
+  else return;
   const who=f==="__ALL__"?"전체 "+k.length+"명":f+" 님";
-  if(!confirm("🧹 "+who+"에게서 "+label+"을(를) 회수할까요?\n환불은 없고, 다시 구매·획득할 수 있어요."))return;
+  if(!confirm((give?"🎁 ":"🧹 ")+who+(give?"에게 ":"에게서 ")+label+"을(를) "+verb+"할까요?"+(give?"":"\n환불은 없고, 다시 구매·획득할 수 있어요.")))return;
   const at=Date.now();
-  Promise.all(k.map(n=>T.ref("adminGifts/"+n).push({revoke:rv,at:at}))).then(()=>{
-    adminRevokeMsgShow("✅ "+who+"에게서 "+label+" 회수 완료! (접속 중이면 바로, 아니면 다음 접속 때 적용돼요)","win");
-    setTimeout(()=>{try{adminLoadOwned()}catch{}},2000);
-  }).catch(e=>{adminRevokeMsgShow("❌ 회수 실패: "+(e&&e.message),"lose")});
+  Promise.all(k.map(n=>T.ref("adminGifts/"+n).push({op:op,at:at}))).then(()=>{
+    admMsg(M,"✅ "+who+(give?"에게 ":"에게서 ")+label+" "+verb+" 완료! (접속 중이면 바로, 아니면 다음 접속 때 적용돼요)","win");
+    setTimeout(()=>{try{adminLoadOwned()}catch{}},2500);
+  }).catch(e=>{admMsg(M,"❌ "+verb+" 실패: "+(e&&e.message),"lose")});
 }
-function adminApplyRevoke(r){
-  if(!r)return;const msgs=[];
-  if(r.pickaxe!=null){
-    const idx=Math.max(1,Math.min(ke.length-1,Math.floor(+r.pickaxe||0)));
-    if(s.pickaxeIdx>=idx){const b=s.pickaxeIdx;s.pickaxeIdx=idx-1;msgs.push("⛏️ 곡괭이 "+ke[idx].name+(b>idx?" 외 "+(b-idx)+"개":""))}
+
+/* ── 유저 클라이언트에서 실행되는 처리 ── */
+function adminApplyOp(op){
+  if(!op)return;
+  const give=op.m==="give",out=[],vb=give?"지급":"회수";
+  s.ownedTitles=s.ownedTitles||{};s.cosmetics=s.cosmetics||{};s.ownedBorders=s.ownedBorders||{};s.ores=s.ores||{};
+  switch(op.t){
+    case"pickaxe":{
+      const idx=Math.max(1,Math.min(ke.length-1,Math.floor(+op.id||0)));
+      if(give){if((s.pickaxeIdx||0)<idx){s.pickaxeIdx=idx;out.push("⛏️ "+ke[idx].name+" (자동 장착)")}}
+      else if((s.pickaxeIdx||0)>=idx){const b=s.pickaxeIdx;s.pickaxeIdx=idx-1;out.push("⛏️ "+ke[idx].name+(b>idx?" 외 "+(b-idx)+"개":""))}
+      break}
+    case"ticket":{
+      const have=s.nameTickets||0;
+      if(give){const n=Math.max(0,Math.floor(+op.q||0));if(n>0){s.nameTickets=have+n;out.push("🎫 이름 변경권 "+n+"장")}}
+      else{const n=op.q==="all"?have:Math.min(have,Math.max(0,Math.floor(+op.q||0)));if(n>0){s.nameTickets=have-n;out.push("🎫 이름 변경권 "+n+"장")}}
+      break}
+    case"title":{
+      const ids=op.id==="__ALL__"?(give?On.map(x=>x.id):Object.keys(s.ownedTitles)):[op.id];let n=0;
+      ids.forEach(id=>{
+        if(give){if(!s.ownedTitles[id]&&On.some(x=>x.id===id)){s.ownedTitles[id]=!0;n++}}
+        else{if(s.ownedTitles[id]){delete s.ownedTitles[id];n++}if(s.equippedTitle===id)s.equippedTitle=null}
+      });
+      if(n)out.push("🏅 칭호 "+n+"개");break}
+    case"skin":{
+      const list=op.id==="__ALL__"
+        ?(give?Nn.concat(Gn).map(x=>"c:"+x.id).concat(Dn.map(x=>"b:"+x.id)):Object.keys(s.cosmetics).map(x=>"c:"+x).concat(Object.keys(s.ownedBorders).map(x=>"b:"+x)))
+        :[op.id];
+      let n=0;
+      list.forEach(v=>{
+        const id=String(v).slice(2),bd=String(v).charAt(0)==="b";
+        if(give){const ok=bd?Dn.some(x=>x.id===id):Nn.concat(Gn).some(x=>x.id===id),box=bd?s.ownedBorders:s.cosmetics;if(ok&&!box[id]){box[id]=!0;n++}}
+        else if(bd){if(s.ownedBorders[id]){delete s.ownedBorders[id];n++}if(s.equippedBorder===id)s.equippedBorder=null}
+        else{if(s.cosmetics[id]){delete s.cosmetics[id];n++}if(s.equippedCosmetic===id)s.equippedCosmetic=null;if(s.equippedBg===id)s.equippedBg=null}
+      });
+      if(n)out.push("🎨 스킨 "+n+"개");break}
+    case"ore":{
+      const q=Math.max(0,Math.floor(+op.q||0));if(!q)break;
+      const ids=op.id==="__ALL__"?B.map(x=>x.id):[op.id];let tot=0;
+      ids.forEach(id=>{const have=s.ores[id]||0,nv=give?have+q:Math.max(0,have-q);tot+=Math.abs(nv-have);s.ores[id]=nv});
+      if(tot)out.push("🪨 광석 "+A(tot)+"개");break}
+    case"mlevel":{
+      const q=Math.max(0,Math.floor(+op.q||0)),cur=Math.max(1,s.mineLevel||1),nv=give?cur+q:Math.max(1,cur-q);
+      if(q&&nv!==cur){s.mineLevel=nv;out.push("⛰️ 광산 레벨 Lv."+cur+" → Lv."+nv)}break}
+    case"mine":{
+      const idx=Math.floor(+op.id||0);if(!(idx>=1&&idx<Fe.length))break;
+      s.unlockedMines=Object.assign({0:!0},s.unlockedMines||{});
+      if(give){if(!s.unlockedMines[idx]){s.unlockedMines[idx]=!0;out.push("🕳️ "+Fe[idx].name+" 개방")}}
+      else if(s.unlockedMines[idx]){delete s.unlockedMines[idx];if((s.mineAreaIdx||0)===idx)s.mineAreaIdx=0;out.push("🕳️ "+Fe[idx].name+" 개방")}
+      break}
+    case"boost":{
+      if(give){const m=Math.max(0,Math.floor(+op.q||0));if(m){s.boostUntil=Math.max(s.boostUntil||0,Date.now())+m*6e4;out.push("⚡ 채굴 부스터 "+m+"분")}}
+      else if((s.boostUntil||0)>Date.now()){s.boostUntil=0;out.push("⚡ 채굴 부스터")}
+      break}
   }
-  if(r.tickets){
-    const have=s.nameTickets||0,n=r.tickets==="all"?have:Math.min(have,Math.max(0,Math.floor(+r.tickets||0)));
-    if(n>0){s.nameTickets=have-n;msgs.push("🎫 이름 변경권 "+n+"장")}
-  }
-  if(r.titles){
-    s.ownedTitles=s.ownedTitles||{};
-    const ids=r.titles==="all"?Object.keys(s.ownedTitles):[].concat(r.titles);let n=0;
-    ids.forEach(id=>{if(s.ownedTitles[id]){delete s.ownedTitles[id];n++}if(s.equippedTitle===id)s.equippedTitle=null});
-    if(n>0)msgs.push("🏅 칭호 "+n+"개");
-  }
-  if(r.skins){
-    s.cosmetics=s.cosmetics||{};s.ownedBorders=s.ownedBorders||{};
-    const list=r.skins==="all"?Object.keys(s.cosmetics).map(x=>"c:"+x).concat(Object.keys(s.ownedBorders).map(x=>"b:"+x)):[].concat(r.skins);let n=0;
-    list.forEach(v=>{
-      const id=String(v).slice(2);
-      if(String(v).charAt(0)==="b"){if(s.ownedBorders[id]){delete s.ownedBorders[id];n++}if(s.equippedBorder===id)s.equippedBorder=null}
-      else{if(s.cosmetics[id]){delete s.cosmetics[id];n++}if(s.equippedCosmetic===id)s.equippedCosmetic=null;if(s.equippedBg===id)s.equippedBg=null}
-    });
-    if(n>0)msgs.push("🎨 스킨 "+n+"개");
-  }
-  if(!msgs.length)return;
-  try{la()}catch{}try{vn()}catch{}try{R()}catch{}try{rt()}catch{}try{po()}catch{}
+  if(!out.length)return;
+  try{la()}catch{}try{vn()}catch{}try{R()}catch{}try{rt()}catch{}try{K()}catch{}try{In()}catch{}try{po()}catch{}
   Be(!0);
-  Ae("🧹 관리자가 아이템을 회수했어요: "+msgs.join(" · "));
+  Ae((give?"🎁 관리자가 지급했어요: ":"🧹 관리자가 회수했어요: ")+out.join(" · "));
+  try{give&&Mt(30)}catch{}
 }
-document.getElementById("adminRevokeType")&&document.getElementById("adminRevokeType").addEventListener("change",adminRenderRevoke);
-document.getElementById("adminRevokeBtn")&&document.getElementById("adminRevokeBtn").addEventListener("click",adminRevoke);
-try{adminRenderRevoke()}catch{}
+function adminApplyRec(r){
+  if(!r)return;const out=[],y=new Date;y.setDate(y.getDate()-1);const yk=y.toLocaleDateString("en-CA");
+  if(r.a==="att_reset"){s.attendanceDay=0;s.lastAttendanceDate=null;out.push("📅 출석 기록이 초기화됐어요. 1일차부터 다시 받을 수 있어요")}
+  else if(r.a==="att_day"){const n=Math.max(0,Math.min(le,Math.floor(+r.n||0)));s.attendanceDay=n;s.lastAttendanceDate=n>0?yk:null;out.push("📅 출석 "+n+"일차까지 완료로 처리됐어요. 오늘 "+(n>=le?1:n+1)+"일차 보상을 받을 수 있어요")}
+  else if(r.a==="daily_reset"){s.dailyStreak=0;s.lastDailyBonusDate=null;out.push("☀️ 연속 접속 기록이 초기화됐어요. 다음 접속 때 1일차 보너스를 받아요")}
+  if(!out.length)return;
+  try{pt()}catch{}try{R()}catch{}
+  Be(!0);
+  Ae("🛠️ 관리자: "+out.join(" · "));
+}
+
+/* ── Gold/Coin 정확히 설정 ── */
+function adminSetGC(){
+  if(typeof T>"u"||!T)return Rt("❌ 서버(Firebase)가 연결되지 않았습니다.","lose");
+  const c=Math.max(0,Math.floor(+document.getElementById("adminGoldInput").value||0)),d=Math.max(0,Math.floor(+document.getElementById("adminCoinInput").value||0)),{target:f,names:k}=oo();
+  if(!f)return Rt("대상 유저를 선택하세요.","lose");
+  if(!k.length)return Rt("대상 유저가 없습니다.","lose");
+  const x=f==="__ALL__"?"전체 "+k.length+"명":f+" 님";
+  if(!confirm("🎯 "+x+"의 Gold를 "+A(c)+", Coin을 "+A(d)+"(으)로 설정할까요?\n(입력칸의 값이 그대로 최종 보유량이 돼요)"))return;
+  Promise.all(k.map(n=>T.ref("adminGifts/"+n).push({set:!0,gold:c,coins:d,at:Date.now()}))).then(()=>{
+    Rt("✅ "+x+"의 Gold "+A(c)+" / Coin "+A(d)+" 설정 완료! (접속 중이면 바로, 아니면 다음 접속 때 적용돼요)","win");setTimeout(ta,1500);setTimeout(()=>{try{adminLoadOwned()}catch{}},2500);
+  }).catch(e=>{Rt("❌ 설정 실패: "+(e&&e.message),"lose")});
+}
+
+/* ── 출석/접속 기록 ── */
+function adminRecToggle(){const a=document.getElementById("adminRecAction"),w=document.getElementById("adminRecDayWrap");w&&a&&(w.style.display=a.value==="att_day"?"block":"none")}
+function adminDoRec(){
+  const M="adminRecMsg";
+  if(typeof T>"u"||!T)return admMsg(M,"❌ 서버(Firebase)가 연결되지 않았습니다.","lose");
+  const {target:f,names:k}=oo();
+  if(!f)return admMsg(M,"대상 유저를 선택하세요.","lose");
+  if(!k.length)return admMsg(M,"대상 유저가 없습니다.","lose");
+  const a=document.getElementById("adminRecAction").value,n=Math.max(0,Math.min(le,Math.floor(+document.getElementById("adminRecDay").value||0)));
+  const rec={a:a};let label="";
+  if(a==="att_reset")label="출석 기록을 초기화";
+  else if(a==="att_day"){rec.n=n;label="출석을 "+n+"일차까지 완료로 지정"}
+  else if(a==="daily_reset")label="연속 접속 보너스 기록을 초기화";
+  else return;
+  const who=f==="__ALL__"?"전체 "+k.length+"명":f+" 님";
+  if(!confirm("📅 "+who+"의 "+label+"할까요?"))return;
+  Promise.all(k.map(u=>T.ref("adminGifts/"+u).push({rec:rec,at:Date.now()}))).then(()=>{
+    admMsg(M,"✅ "+who+" "+label+" 완료! (접속 중이면 바로, 아니면 다음 접속 때 적용돼요)","win");setTimeout(()=>{try{adminLoadOwned()}catch{}},2500);
+  }).catch(e=>{admMsg(M,"❌ 실패: "+(e&&e.message),"lose")});
+}
+
+/* ── 계정: 비밀번호 / 아이디 변경 ── */
+async function adminResetPw(){
+  const M="adminAcctMsg";
+  if(typeof T>"u"||!T)return admMsg(M,"❌ 서버(Firebase)가 연결되지 않았습니다.","lose");
+  const n=adminCur(),inp=document.getElementById("adminPwInput"),pw=inp?inp.value:"";
+  if(!n)return admMsg(M,"위 목록에서 유저를 한 명 선택하세요. (전체 유저는 불가)","lose");
+  if(pw.length<4||pw.length>20)return admMsg(M,"비밀번호는 4~20자로 입력하세요.","lose");
+  if(!confirm('🔑 "'+n+'" 님의 비밀번호를 "'+pw+'"(으)로 바꿀까요?'))return;
+  try{
+    const sn=await T.ref("accounts/"+n).once("value");
+    if(!sn.exists())return admMsg(M,"계정 정보가 없어서 변경할 수 없어요.","lose");
+    await T.ref("accounts/"+n+"/passwordHash").set(await ho(pw));
+    inp.value="";
+    admMsg(M,'✅ "'+n+'" 님의 비밀번호를 변경했어요. 유저에게 새 비밀번호를 알려주세요.',"win");
+  }catch(e){admMsg(M,"❌ 비밀번호 변경 실패: "+(e&&e.message),"lose")}
+}
+async function adminRenameUser(){
+  const M="adminAcctMsg",btn=document.getElementById("adminRenameBtn");
+  if(typeof T>"u"||!T)return admMsg(M,"❌ 서버(Firebase)가 연결되지 않았습니다.","lose");
+  const old=adminCur(),inp=document.getElementById("adminNewName"),nn=(inp&&inp.value||"").trim();
+  if(!old)return admMsg(M,"위 목록에서 유저를 한 명 선택하세요. (전체 유저는 불가)","lose");
+  if(!Ka.test(nn))return admMsg(M,"새 아이디는 2~12자의 한글/영문/숫자만 쓸 수 있어요.","lose");
+  if(nn===old)return admMsg(M,"지금 아이디와 같아요.","lose");
+  if(!confirm('✏️ "'+old+'" → "'+nn+'" 으로 아이디를 바꿀까요?\n접속 중이면 바로 로그아웃되고, 새 아이디 + 기존 비밀번호로 다시 접속해야 해요.'))return;
+  btn&&(btn.disabled=!0);
+  const r=p=>T.ref(p);
+  try{
+    const wk="weeklyBoard/"+wkWeek(wkNow())+"/";
+    const [a1,l1,u1,w1,a0,l0,u0,g0,w0]=await Promise.all([
+      r("accounts/"+nn).once("value"),r("leaderboard/"+nn).once("value"),r("users/"+nn).once("value"),r(wk+nn).once("value"),
+      r("accounts/"+old).once("value"),r("leaderboard/"+old).once("value"),r("users/"+old).once("value"),r("adminGifts/"+old).once("value"),r(wk+old).once("value")
+    ]);
+    if(a1.exists()||l1.exists()||u1.exists()||w1.exists())throw new Error("taken");
+    if(!a0.exists())throw new Error("noacct");
+    const ws=[r("accounts/"+nn).set(a0.val())];
+    if(u0.exists())ws.push(r("users/"+nn).set(u0.val()));
+    if(l0.exists()){const v=l0.val()||{};v.name=nn;ws.push(r("leaderboard/"+nn).set(v))}
+    if(g0.exists())ws.push(r("adminGifts/"+nn).set(g0.val()));
+    if(w0.exists()){const v=w0.val()||{};v.name=nn;ws.push(r(wk+nn).set(v))}
+    await Promise.all(ws);
+    const rm=()=>Promise.all([r("accounts/"+old).remove(),r("users/"+old).remove(),r("leaderboard/"+old).remove(),r("adminGifts/"+old).remove(),r("adminResets/"+old).remove(),r(wk+old).remove()]);
+    await r("adminDeletes/"+old).set({at:Date.now(),token:wa(),renamedTo:nn});
+    await rm();
+    setTimeout(()=>{rm().catch(()=>{})},3e3);
+    admMsg(M,'✅ "'+old+'" → "'+nn+'" 변경 완료! 유저에게 새 아이디를 알려주세요. (비밀번호는 그대로예요)',"win");
+    inp&&(inp.value="");
+    const dd=document.getElementById("adminTarget");dd&&(dd.dataset.keep="");Bt="";ua();
+  }catch(e){
+    admMsg(M,e&&e.message==="taken"?"이미 사용 중인 아이디예요. 다른 아이디를 입력하세요.":e&&e.message==="noacct"?"계정 정보가 없어서 변경할 수 없어요.":"❌ 아이디 변경 중 오류: "+(e&&e.message),"lose");
+  }finally{btn&&(btn.disabled=!1)}
+}
+
+/* ── 전체 공지 ── */
+function adminSendNotice(){
+  const M="adminNoticeMsg";
+  if(typeof T>"u"||!T)return admMsg(M,"❌ 서버(Firebase)가 연결되지 않았습니다.","lose");
+  const inp=document.getElementById("adminNoticeInput"),text=(inp&&inp.value||"").trim().slice(0,120);
+  if(!text)return admMsg(M,"공지 내용을 입력하세요.","lose");
+  if(!confirm("📢 접속 중인 모든 유저에게 공지를 보낼까요?\n\n"+text))return;
+  T.ref("adminNotice").set({text:text,id:wa(),at:Date.now()}).then(()=>{admMsg(M,"✅ 공지를 보냈어요!","win");inp.value="";adminShowNotice(text)}).catch(e=>{admMsg(M,"❌ 공지 실패: "+(e&&e.message),"lose")});
+}
+function adminShowNotice(text){
+  let el=document.getElementById("adminNoticeBar");
+  if(!el){
+    el=document.createElement("div");el.id="adminNoticeBar";
+    el.style.cssText="position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:99998;max-width:min(92vw,560px);background:linear-gradient(180deg,#2a1d0c,#171009);border:1px solid var(--brass);color:var(--brass-glow);padding:12px 16px;border-radius:12px;font-weight:800;font-size:14px;line-height:1.5;box-shadow:0 12px 36px -8px rgba(0,0,0,.8);cursor:pointer;text-align:center";
+    el.addEventListener("click",()=>{el.style.display="none"});document.body.appendChild(el);
+  }
+  el.textContent="📢 "+text;el.style.display="block";
+  clearTimeout(window.__noticeTimer);window.__noticeTimer=setTimeout(()=>{el.style.display="none"},15e3);
+}
+function adminNoticeBind(){
+  if(window.__noticeBound||typeof T>"u"||!T)return;
+  window.__noticeBound=!0;let seen;
+  T.ref("adminNotice").on("value",sn=>{
+    const v=sn.val(),id=v&&v.id;
+    if(seen===void 0){seen=id||null;return}
+    if(id&&id!==seen){seen=id;adminShowNotice(String(v.text||""))}
+  });
+}
+
+/* ── 이벤트 연결 ── */
+(function(){
+  const on=(id,ev,fn)=>{const e=document.getElementById(id);e&&e.addEventListener(ev,fn)};
+  on("adminItemMode","change",adminRenderItem);on("adminItemType","change",adminRenderItem);
+  on("adminItemBtn","click",adminDoItem);on("adminSetBtn","click",adminSetGC);
+  on("adminRecAction","change",adminRecToggle);on("adminRecBtn","click",adminDoRec);
+  on("adminPwBtn","click",adminResetPw);on("adminRenameBtn","click",adminRenameUser);
+  on("adminNoticeBtn","click",adminSendNotice);on("adminOwnedRefresh","click",adminLoadOwned);
+})();
+try{adminRenderItem();adminRecToggle()}catch{}
 const Vn=1e7;function ma(){const t=document.getElementById("nameTicketSlot");if(!t)return;const n=s.nameTickets||0;t.innerHTML=`
     <div class="pick-card${n>0?" owned":""}" style="margin-top:8px;">
       <div class="picon">🎫</div>
@@ -968,8 +1264,8 @@ const Vn=1e7;function ma(){const t=document.getElementById("nameTicketSlot");if(
         <button id="nameTicketBuy"${s.gold<Vn?" disabled":""}>${A(Vn)} G</button>
         <button id="nameTicketUse"${n<1?" disabled":""}>사용하기</button>
       </div>
-    </div>`;const i=document.getElementById("nameTicketBuy");i&&i.addEventListener("click",()=>{if(s.gold<Vn)return Ae("Gold가 부족해요. (필요: "+A(Vn)+" Gold)");s.gold-=Vn,s.goldSpentTotal=(s.goldSpentTotal||0)+Vn,s.nameTickets=(s.nameTickets||0)+1;try{z.rareFanfare(3)}catch{}Ae('🎫 이름 변경권을 구매했어요! "사용하기"로 이름을 바꿀 수 있어요.'),R(),rt()});const c=document.getElementById("nameTicketUse");c&&c.addEventListener("click",co)}function Tn(t,n){const i=document.getElementById("nameChangeMsg");i&&(i.textContent=t,i.className="resultBanner"+(n?" "+n:""),i.style.display="block")}function co(){if((s.nameTickets||0)<1)return Ae("이름 변경권이 없어요. 먼저 구매해주세요.");if(window.__mpActiveRoom)return Ae("🔒 멀티플레이 방에서 나온 뒤에 사용할 수 있어요.");const t=document.getElementById("nameChangeModal");if(!t)return;const n=document.getElementById("nameChangeMsg");n&&(n.style.display="none");const i=document.getElementById("nameChangeInput");i&&(i.value="",setTimeout(()=>i.focus(),50)),t.classList.add("show")}function Na(){const t=document.getElementById("nameChangeModal");t&&t.classList.remove("show")}let Sa=!1;async function Ga(){if(Sa)return;const t=document.getElementById("nameChangeInput"),n=document.getElementById("nameChangeConfirm"),i=qn(),c=(t&&t.value||"").trim();if(!i)return Tn("로그인 정보를 찾지 못했어요.","lose");if(typeof T>"u"||!T)return Tn("서버(Firebase)가 연결되지 않았어요. 잠시 후 다시 시도해주세요.","lose");if(window.__mpActiveRoom)return Tn("멀티플레이 방에서 나온 뒤에 사용해주세요.","lose");if((s.nameTickets||0)<1)return Tn("이름 변경권이 없어요.","lose");if(!Ka.test(c))return Tn("2~12자의 한글/영문/숫자만 사용할 수 있어요. 공백이나 특수문자는 안 돼요.","lose");if(c===i)return Tn("지금 쓰고 있는 이름과 같아요.","lose");Sa=!0,n&&(n.disabled=!0,n.textContent="변경 중...");const d=f=>T.ref(f);try{const[f,k]=await Promise.all([d("leaderboard/"+c).once("value"),d("users/"+c+"/gameData").once("value")]);if(f.exists()||k.exists())throw new Error("taken");const x=await d("accounts/"+i).once("value"),S=x.exists()?x.val():{createdAt:Date.now()};if(!(await d("accounts/"+c).transaction(te=>te?void 0:S)).committed)throw new Error("taken")}catch(f){return Sa=!1,n&&(n.disabled=!1,n.textContent="이름 변경하기 (변경권 1장 사용)"),Tn(f&&f.message==="taken"?"이미 사용 중인 이름이에요. 다른 이름을 입력해주세요.":"변경 중 오류가 발생했어요. 네트워크를 확인하고 다시 시도해주세요.","lose")}try{Fn&&Fn.off()}catch{}s.nameTickets=Math.max(0,(s.nameTickets||0)-1),localStorage.setItem("current_user",c);try{sessionStorage.getItem("current_user")&&sessionStorage.setItem("current_user",c)}catch{}try{localStorage.removeItem(pa(i))}catch{}try{const f=await d("adminGifts/"+i).once("value"),k=[];f.forEach(x=>{k.push(d("adminGifts/"+c).push(x.val()))}),await Promise.all(k)}catch{}try{await Be(!0)}catch{}try{await Promise.all([d("users/"+i).remove(),d("leaderboard/"+i).remove(),d("adminGifts/"+i).remove(),d("accounts/"+i).remove()])}catch{}Ae(`✅ 이름이 "${c}"(으)로 변경되었어요! 잠시 후 새로고침됩니다.`),window.__mpActiveRoom=null,setTimeout(()=>location.reload(),900)}document.getElementById("nameChangeClose")&&document.getElementById("nameChangeClose").addEventListener("click",Na),document.getElementById("nameChangeModal")&&document.getElementById("nameChangeModal").addEventListener("click",t=>{t.target.id==="nameChangeModal"&&Na()}),document.getElementById("nameChangeConfirm")&&document.getElementById("nameChangeConfirm").addEventListener("click",Ga),document.getElementById("nameChangeInput")&&document.getElementById("nameChangeInput").addEventListener("keydown",t=>{t.key==="Enter"&&!t.isComposing&&Ga()});function Oa(t,n){if(n=n||0,typeof T<"u"&&T){t();return}n>100||setTimeout(()=>Oa(t,n+1),200)}function pa(t){return"admin_reset_seen_"+t}function Da(t){const n=/^r(\d{11,})_/.exec(t||"");return n?+n[1]:0}function qa(t,n){return(t||"")+"|"+(n||"")}async function Ea(t,n){if(!window.__adminResetting){window.__adminResetting=!0;try{localStorage.setItem(pa(t),n),localStorage.removeItem("deeprockMine_save_v3"),Ae("🛠️ 관리자가 계정을 초기화했어요. 잠시 후 새로고침됩니다..."),await Promise.all([T.ref("users/"+t).remove(),T.ref("leaderboard/"+t).remove()])}catch{}window.__mpActiveRoom=null,setTimeout(()=>location.reload(),1200)}}async function uo(){const t=qn();if(!t||typeof T>"u"||!T)return!1;const[n,i]=await Promise.all([T.ref("adminResets/__ALL__").once("value"),T.ref("adminResets/"+t).once("value")]);let c=n.val(),d=i.val();const f=pa(t),k=localStorage.getItem(f),x=qa(c,d);if(k===null){const G=Math.max(Da(c),Da(d));let te=0;try{const ie=localStorage.getItem("deeprockMine_save_v3");ie&&(te=JSON.parse(ie).savedAt||0)}catch{}if(G&&te&&te<G)return await Ea(t,x),!0;localStorage.setItem(f,x)}else if(k!==x)return await Ea(t,x),!0;const S=()=>{const G=qa(c,d);G!==localStorage.getItem(f)&&Ea(t,G)};return T.ref("adminResets/__ALL__").on("value",G=>{c=G.val(),S()}),T.ref("adminResets/"+t).on("value",G=>{d=G.val(),S()}),!1}function Ma(t){return"login_at_"+t}async function Va(t){if(!window.__adminResetting){window.__adminResetting=!0;try{localStorage.removeItem("deeprockMine_save_v3"),localStorage.removeItem("current_user"),sessionStorage.removeItem("current_user"),localStorage.removeItem(Ma(t)),localStorage.removeItem(pa(t))}catch{}try{alert("🚫 관리자가 이 계정을 삭제했어요. 다시 시작하려면 새로 등록해주세요.")}catch{}window.__mpActiveRoom=null,location.reload()}}async function fo(){const t=qn();if(!t||typeof T>"u"||!T)return!1;const n=c=>{if(!c||!c.at)return!1;const d=+localStorage.getItem(Ma(t))||0;return c.at>d},i=await T.ref("adminDeletes/"+t).once("value");return n(i.val())?(await Va(t),!0):(T.ref("adminDeletes/"+t).on("value",c=>{n(c.val())&&Va(t)}),!1)}let Fn=null;function mo(){if(typeof T>"u"||!T)return;const t=qn();if(t){if(Fn)try{Fn.off()}catch{}Fn=T.ref("adminGifts/"+t),Fn.on("child_added",n=>{const i=n.val()||{};n.ref.transaction(c=>c?null:void 0,(c,d)=>{if(c||!d||window.__adminResetting)return;if(i.revoke){try{adminApplyRevoke(i.revoke)}catch(e){console.error(e)}return}const f=s.gold,k=s.coins;let x,S;i.zero?(x=0,S=0):(x=Math.max(0,Math.floor(f+Math.floor(+i.gold||0))),S=Math.max(0,Math.floor(k+Math.floor(+i.coins||0))));const G=x-f,te=S-k;if(!G&&!te)return;s.gold=x,s.__coinRaw(S),wkAdj(G+Math.round(te*Ge*(1-ce))),R(),Be();const ie=[];G&&ie.push("Gold "+(G>0?"+":"-")+A(Math.abs(G))),te&&ie.push("Coin "+(te>0?"+":"-")+A(Math.abs(te)));const Ne=G>0||te>0;Ae(Ne?"🎁 관리자가 "+ie.join(" · ")+" 지급했어요!":"💸 관리자가 "+ie.join(" · ")+" 회수했어요.");try{Ne&&(te>0?Pa(30):Mt(30))}catch{}})})}}let ya=!1;function po(){try{const t=qn();if(!t||typeof T>"u"||!T)return;const n=s.equippedTitle||null;T.ref("leaderboard/"+t).once("value").then(i=>{i.exists()&&(i.val().title||null)!==n&&i.ref.child("title").set(n)}).catch(()=>{})}catch{}}/* ===== 주간 랭킹 (추가 기능) : 매주 월요일 00:00(KST) 초기화, 이번 주 번 돈 기준, 1~3위 보상 ===== */
-const WK_RW=[{g:200000,c:50},{g:100000,c:30},{g:50000,c:15}];
+    </div>`;const i=document.getElementById("nameTicketBuy");i&&i.addEventListener("click",()=>{if(s.gold<Vn)return Ae("Gold가 부족해요. (필요: "+A(Vn)+" Gold)");s.gold-=Vn,s.goldSpentTotal=(s.goldSpentTotal||0)+Vn,s.nameTickets=(s.nameTickets||0)+1;try{z.rareFanfare(3)}catch{}Ae('🎫 이름 변경권을 구매했어요! "사용하기"로 이름을 바꿀 수 있어요.'),R(),rt()});const c=document.getElementById("nameTicketUse");c&&c.addEventListener("click",co)}function Tn(t,n){const i=document.getElementById("nameChangeMsg");i&&(i.textContent=t,i.className="resultBanner"+(n?" "+n:""),i.style.display="block")}function co(){if((s.nameTickets||0)<1)return Ae("이름 변경권이 없어요. 먼저 구매해주세요.");if(window.__mpActiveRoom)return Ae("🔒 멀티플레이 방에서 나온 뒤에 사용할 수 있어요.");const t=document.getElementById("nameChangeModal");if(!t)return;const n=document.getElementById("nameChangeMsg");n&&(n.style.display="none");const i=document.getElementById("nameChangeInput");i&&(i.value="",setTimeout(()=>i.focus(),50)),t.classList.add("show")}function Na(){const t=document.getElementById("nameChangeModal");t&&t.classList.remove("show")}let Sa=!1;async function Ga(){if(Sa)return;const t=document.getElementById("nameChangeInput"),n=document.getElementById("nameChangeConfirm"),i=qn(),c=(t&&t.value||"").trim();if(!i)return Tn("로그인 정보를 찾지 못했어요.","lose");if(typeof T>"u"||!T)return Tn("서버(Firebase)가 연결되지 않았어요. 잠시 후 다시 시도해주세요.","lose");if(window.__mpActiveRoom)return Tn("멀티플레이 방에서 나온 뒤에 사용해주세요.","lose");if((s.nameTickets||0)<1)return Tn("이름 변경권이 없어요.","lose");if(!Ka.test(c))return Tn("2~12자의 한글/영문/숫자만 사용할 수 있어요. 공백이나 특수문자는 안 돼요.","lose");if(c===i)return Tn("지금 쓰고 있는 이름과 같아요.","lose");Sa=!0,n&&(n.disabled=!0,n.textContent="변경 중...");const d=f=>T.ref(f);try{const[f,k]=await Promise.all([d("leaderboard/"+c).once("value"),d("users/"+c+"/gameData").once("value")]);if(f.exists()||k.exists())throw new Error("taken");const x=await d("accounts/"+i).once("value"),S=x.exists()?x.val():{createdAt:Date.now()};if(!(await d("accounts/"+c).transaction(te=>te?void 0:S)).committed)throw new Error("taken")}catch(f){return Sa=!1,n&&(n.disabled=!1,n.textContent="이름 변경하기 (변경권 1장 사용)"),Tn(f&&f.message==="taken"?"이미 사용 중인 이름이에요. 다른 이름을 입력해주세요.":"변경 중 오류가 발생했어요. 네트워크를 확인하고 다시 시도해주세요.","lose")}try{Fn&&Fn.off()}catch{}s.nameTickets=Math.max(0,(s.nameTickets||0)-1),localStorage.setItem("current_user",c);try{sessionStorage.getItem("current_user")&&sessionStorage.setItem("current_user",c)}catch{}try{localStorage.removeItem(pa(i))}catch{}try{const f=await d("adminGifts/"+i).once("value"),k=[];f.forEach(x=>{k.push(d("adminGifts/"+c).push(x.val()))}),await Promise.all(k)}catch{}try{await Be(!0)}catch{}try{await Promise.all([d("users/"+i).remove(),d("leaderboard/"+i).remove(),d("adminGifts/"+i).remove(),d("accounts/"+i).remove()])}catch{}Ae(`✅ 이름이 "${c}"(으)로 변경되었어요! 잠시 후 새로고침됩니다.`),window.__mpActiveRoom=null,setTimeout(()=>location.reload(),900)}document.getElementById("nameChangeClose")&&document.getElementById("nameChangeClose").addEventListener("click",Na),document.getElementById("nameChangeModal")&&document.getElementById("nameChangeModal").addEventListener("click",t=>{t.target.id==="nameChangeModal"&&Na()}),document.getElementById("nameChangeConfirm")&&document.getElementById("nameChangeConfirm").addEventListener("click",Ga),document.getElementById("nameChangeInput")&&document.getElementById("nameChangeInput").addEventListener("keydown",t=>{t.key==="Enter"&&!t.isComposing&&Ga()});function Oa(t,n){if(n=n||0,typeof T<"u"&&T){t();return}n>100||setTimeout(()=>Oa(t,n+1),200)}function pa(t){return"admin_reset_seen_"+t}function Da(t){const n=/^r(\d{11,})_/.exec(t||"");return n?+n[1]:0}function qa(t,n){return(t||"")+"|"+(n||"")}async function Ea(t,n){if(!window.__adminResetting){window.__adminResetting=!0;try{localStorage.setItem(pa(t),n),localStorage.removeItem("deeprockMine_save_v3"),Ae("🛠️ 관리자가 계정을 초기화했어요. 잠시 후 새로고침됩니다..."),await Promise.all([T.ref("users/"+t).remove(),T.ref("leaderboard/"+t).remove()])}catch{}window.__mpActiveRoom=null,setTimeout(()=>location.reload(),1200)}}async function uo(){const t=qn();if(!t||typeof T>"u"||!T)return!1;const[n,i]=await Promise.all([T.ref("adminResets/__ALL__").once("value"),T.ref("adminResets/"+t).once("value")]);let c=n.val(),d=i.val();const f=pa(t),k=localStorage.getItem(f),x=qa(c,d);if(k===null){const G=Math.max(Da(c),Da(d));let te=0;try{const ie=localStorage.getItem("deeprockMine_save_v3");ie&&(te=JSON.parse(ie).savedAt||0)}catch{}if(G&&te&&te<G)return await Ea(t,x),!0;localStorage.setItem(f,x)}else if(k!==x)return await Ea(t,x),!0;const S=()=>{const G=qa(c,d);G!==localStorage.getItem(f)&&Ea(t,G)};return T.ref("adminResets/__ALL__").on("value",G=>{c=G.val(),S()}),T.ref("adminResets/"+t).on("value",G=>{d=G.val(),S()}),!1}function Ma(t){return"login_at_"+t}async function Va(t,o){if(!window.__adminResetting){window.__adminResetting=!0;try{localStorage.removeItem("deeprockMine_save_v3"),localStorage.removeItem("current_user"),sessionStorage.removeItem("current_user"),localStorage.removeItem(Ma(t)),localStorage.removeItem(pa(t))}catch{}try{alert(o&&o.renamedTo?"✏️ 관리자가 아이디를 \""+o.renamedTo+"\"(으)로 변경했어요. 새 아이디와 기존 비밀번호로 다시 접속해주세요.":"🚫 관리자가 이 계정을 삭제했어요. 다시 시작하려면 새로 등록해주세요.")}catch{}window.__mpActiveRoom=null,location.reload()}}async function fo(){const t=qn();if(!t||typeof T>"u"||!T)return!1;const n=c=>{if(!c||!c.at)return!1;const d=+localStorage.getItem(Ma(t))||0;return c.at>d},i=await T.ref("adminDeletes/"+t).once("value");return n(i.val())?(await Va(t,i.val()),!0):(T.ref("adminDeletes/"+t).on("value",c=>{n(c.val())&&Va(t,c.val())}),!1)}let Fn=null;function mo(){if(typeof T>"u"||!T)return;try{adminNoticeBind()}catch{}const t=qn();if(t){if(Fn)try{Fn.off()}catch{}Fn=T.ref("adminGifts/"+t),Fn.on("child_added",n=>{const i=n.val()||{};n.ref.transaction(c=>c?null:void 0,(c,d)=>{if(c||!d||window.__adminResetting)return;if(i.op){try{adminApplyOp(i.op)}catch(e){console.error(e)}return}if(i.rec){try{adminApplyRec(i.rec)}catch(e){console.error(e)}return}const f=s.gold,k=s.coins;let x,S;i.zero?(x=0,S=0):i.set?(x=Math.max(0,Math.floor(+i.gold||0)),S=Math.max(0,Math.floor(+i.coins||0))):(x=Math.max(0,Math.floor(f+Math.floor(+i.gold||0))),S=Math.max(0,Math.floor(k+Math.floor(+i.coins||0))));const G=x-f,te=S-k;if(!G&&!te)return;s.gold=x,s.__coinRaw(S),wkAdj(G+Math.round(te*Ge*(1-ce))),R(),Be();const ie=[];G&&ie.push("Gold "+(G>0?"+":"-")+A(Math.abs(G))),te&&ie.push("Coin "+(te>0?"+":"-")+A(Math.abs(te)));const Ne=G>0||te>0;Ae(Ne?"🎁 관리자가 "+ie.join(" · ")+" 지급했어요!":"💸 관리자가 "+ie.join(" · ")+" 회수했어요.");try{Ne&&(te>0?Pa(30):Mt(30))}catch{}})})}}let ya=!1;function po(){try{const t=qn();if(!t||typeof T>"u"||!T)return;const n=s.equippedTitle||null;T.ref("leaderboard/"+t).once("value").then(i=>{i.exists()&&(i.val().title||null)!==n&&i.ref.child("title").set(n)}).catch(()=>{})}catch{}}/* ===== 주간 랭킹 (추가 기능) : 매주 월요일 00:00(KST) 초기화, 이번 주 번 돈 기준, 1~3위 보상 ===== */
+const WK_RW=[{g:1000000,c:250},{g:500000,c:150},{g:250000,c:75}];
 let wkOff=0,wkBase=null,wkId=-1,wkLastE=-1,wkLastPush=0,wkInitDone=false,wkBusy=false,wkRef=null,wkNextClaim=0;
 function wkNow(){return Date.now()+wkOff}
 function wkWeek(t){return Math.floor((t+324e5-3456e5)/6048e5)}
