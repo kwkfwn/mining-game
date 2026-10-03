@@ -249,7 +249,7 @@ function renderGrid(){
 }
 function enterPortal(){
   $("gate").hidden=true; $("portal").hidden=false;
-  $("run").textContent="새 게임이 추가됐어요!  \u2605  SUPER PIXEL BROS.  \u2605  전설의 검 키우기 : 100강의 지배자  \u2605  뒷산에서 보석 캐기 업데이트  \u2605  게임은 계속 추가돼요";
+  $("run").textContent="새 게임이 추가됐어요!  \u2605  슈퍼 마리오  \u2605  전설의 검 키우기 : 100강의 지배자  \u2605  뒷산에서 보석 캐기 업데이트  \u2605  게임은 계속 추가돼요";
   renderTabs(); renderGrid();
   var id=(location.hash||"").replace("#","");
   if(id&&GAMES.some(function(g){return g.id===id;})) openGame(id,false);
