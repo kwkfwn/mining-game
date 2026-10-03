@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>(function(){try{if(sessionStorage.getItem('passed_auth')!=='83717400b191ff46f754cee4'){(window.top||window).location.replace('index.html');}}catch(e){}})();</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전설의 검 키우기 : 100강의 지배자</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background-color: #0b0f19;
+            color: #d2dae2;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .bg-layer {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at 50% 50%, #1a1e35 0%, #05070a 100%);
+            z-index: -2;
+        }
+
+        #game-wrapper {
+            display: flex;
+            gap: 20px;
+            max-width: 1100px;
+            width: 100%;
+            z-index: 1;
+        }
+        .panel {
+            background-color: rgba(20, 25, 40, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 15px rgba(255,255,255,0.05);
+            flex: 1.3;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #2c3e50;
+        }
+        h2 { margin-top: 0; margin-bottom: 15px; color: #f1c40f; text-shadow: 0 0 15px #f1c40f; letter-spacing: 2px; }
+
+        .status-bar {
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border: 1px solid #34495e;
+        }
+        .gold { color: #ffdd59; font-size: 22px; text-shadow: 0 0 10px #ffdd59; }
+        .item-protect { color: #00d8d6; }
+
+        /* ============== 검 비주얼 영역 ============== */
+        #sword-display-area {
+            position: relative;
+            height: 210px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+            overflow: visible;
+        }
+
+        #sword-visual {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: swordFloat 3.4s ease-in-out infinite;
+        }
+        @keyframes swordFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(2deg); }
+        }
+
+        /* 우주 배경 원반 (tier3, tier4 전용) */
+        .cosmic-disc {
+            opacity: 0;
+            fill: url(#cosmicGrad);
+            transition: opacity 0.8s ease;
+        }
+        .tier-3 .cosmic-disc, .tier-4 .cosmic-disc {
+            opacity: 0.55;
+            animation: cosmicSpin 10s linear infinite;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+        @keyframes cosmicSpin {
+            from { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.08); }
+            to { transform: rotate(360deg) scale(1); }
+        }
+
+        #sword-svg { height: 195px; width: auto; overflow: visible; position: relative; z-index: 2; }
+
+        .blade-group {
+            transform-box: fill-box;
+            transform-origin: center;
+            transition: filter 0.7s ease;
+        }
+        .tier-0 .blade-group { filter: drop-shadow(0 0 7px var(--sword-color)); }
+        .tier-0.level-0 .blade-group { filter: none; animation: none; }
+        .tier-0:not(.level-0) .blade-group { animation: bladeBreathe 4.4s ease-in-out infinite; }
+        .tier-1 .blade-group { filter: drop-shadow(0 0 8px var(--sword-color)); animation: bladeBreathe 3s ease-in-out infinite; }
+        .tier-2 .blade-group { filter: drop-shadow(0 0 14px var(--sword-color)) drop-shadow(0 0 26px var(--sword-color)); animation: bladeBreathe 2.2s ease-in-out infinite; }
+        .tier-3 .blade-group { filter: drop-shadow(0 0 22px var(--sword-color)) drop-shadow(0 0 46px #ffffff); animation: bladeSpinSlow 7s linear infinite; }
+        .tier-4 .blade-group { filter: drop-shadow(0 0 34px var(--sword-color)) drop-shadow(0 0 70px #ffffff) drop-shadow(0 0 100px #ffd700); animation: bladeSpinSlow 3.4s linear infinite; }
+        @keyframes bladeBreathe { 0%,100% { filter-opacity: 1; } 50% { transform: scale(1.03); } }
+        @keyframes bladeSpinSlow {
+            from { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.07); }
+            to { transform: rotate(360deg) scale(1); }
+        }
+
+        .blade-main {
+            fill: url(#bladeGrad);
+            stroke: rgba(255,255,255,0.35); stroke-width: 1.2;
+            transition: fill 0.4s ease, opacity 0.6s ease, stroke 0.4s ease;
+        }
+        .tier-0.level-0 .blade-main { stroke: rgba(255,255,255,0.3); }
+        .tier-2 .blade-main, .tier-3 .blade-main, .tier-4 .blade-main { opacity: 0.82; }
+
+        .blade-highlight { stroke: rgba(255,255,255,0.85); stroke-width: 1.6; stroke-linecap: round; opacity: 0.55; pointer-events: none; }
+        .level-0 .blade-highlight { opacity: 0.15; }
+
+        .ground-shadow { fill: #000000; opacity: 0.35; filter: blur(2px); transition: opacity 0.6s ease, fill 0.6s ease; }
+        .tier-0:not(.level-0) .ground-shadow { fill: var(--sword-color); opacity: 0.22; }
+        .tier-1 .ground-shadow { opacity: 0.3; }
+        .tier-2 .ground-shadow, .tier-3 .ground-shadow, .tier-4 .ground-shadow { fill: var(--sword-color); opacity: 0.28; }
+
+        .level-0 .crossguard, .level-0 .pommel { fill: #6b4423 !important; }
+
+        /* 1~19강: 이름 고유 색상을 살린 보석 장식(은은하게) */
+        .tier-0:not(.level-0) .guard-gem, .tier-0:not(.level-0) .pommel-gem { opacity: 0.8; }
+
+        .blade-fuller { opacity: 0.55; }
+        .blade-rune { opacity: 0; transition: opacity 0.6s ease; stroke: var(--sword-color); }
+        .tier-1 .blade-rune, .tier-2 .blade-rune, .tier-3 .blade-rune, .tier-4 .blade-rune { opacity: 0.9; }
+
+        .wing-left, .wing-right { opacity: 0; transition: opacity 0.6s ease; fill: url(#metalGrad); }
+        .tier-2 .wing-left, .tier-2 .wing-right,
+        .tier-3 .wing-left, .tier-3 .wing-right,
+        .tier-4 .wing-left, .tier-4 .wing-right { opacity: 1; }
+        .tier-3 .wing-left, .tier-3 .wing-right, .tier-4 .wing-left, .tier-4 .wing-right { fill: url(#voidMetalGrad); }
+
+        .guard-gem, .pommel-gem { opacity: 0; fill: var(--sword-color); transition: opacity 0.6s ease; }
+        .tier-1 .guard-gem, .tier-1 .pommel-gem,
+        .tier-2 .guard-gem, .tier-2 .pommel-gem,
+        .tier-3 .guard-gem, .tier-3 .pommel-gem,
+        .tier-4 .guard-gem, .tier-4 .pommel-gem { opacity: 1; }
+
+        .crossguard, .pommel { fill: url(#metalGrad); transition: fill 0.5s ease; }
+        .tier-3 .crossguard, .tier-3 .pommel { fill: url(#voidMetalGrad); }
+        .tier-4 .crossguard, .tier-4 .pommel { fill: url(#celestialGrad); }
+
+        /* 파티클 레이어 */
+        #particle-layer { position: absolute; top: 50%; left: 50%; width: 0; height: 0; z-index: 3; }
+        .particle { position: absolute; top: 0; left: 0; border-radius: 50%; pointer-events: none; }
+
+        .particle-spark {
+            width: 3px; height: 3px; background: var(--p-color); box-shadow: 0 0 6px var(--p-color);
+            animation-name: sparkTwinkle; animation-timing-function: ease-in-out; animation-iteration-count: infinite;
+        }
+        @keyframes sparkTwinkle { 0%, 100% { opacity: 0; transform: scale(0.4); } 50% { opacity: 1; transform: scale(1.4); } }
+
+        .particle-ember {
+            width: 4px; height: 4px; background: var(--p-color); box-shadow: 0 0 9px var(--p-color);
+            animation-name: emberRise; animation-timing-function: ease-out; animation-iteration-count: infinite;
+        }
+        @keyframes emberRise {
+            0% { transform: translate(0, 0) scale(1); opacity: 0; }
+            15% { opacity: 1; }
+            100% { transform: translate(var(--dx), -230px) scale(0.3); opacity: 0; }
+        }
+
+        .particle-orbit {
+            width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: var(--p-color);
+            box-shadow: 0 0 10px var(--p-color), 0 0 20px var(--p-color);
+            animation-name: orbitMove; animation-timing-function: linear; animation-iteration-count: infinite;
+        }
+        @keyframes orbitMove {
+            from { transform: rotate(0deg) translateX(var(--radius)) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(var(--radius)) rotate(-360deg); }
+        }
+
+        #sword-name {
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+            letter-spacing: -1px;
+        }
+
+        #sell-price { color: #ffdd59; font-size: 16px; margin-bottom: 5px; }
+        #cost-display { color: #ff7675; font-size: 15px; font-weight: bold; margin-bottom: 10px; }
+        #rate-display { color: #bdc3c7; font-size: 14px; margin-bottom: 15px; height: 40px; }
+
+        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        button {
+            border: none; padding: 15px; font-size: 16px; font-weight: bold;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        button:active { transform: scale(0.95); }
+        .btn-enhance { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; flex: 1.5; box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4); }
+        .btn-enhance:hover { filter: brightness(1.2); }
+        .btn-sell { background: linear-gradient(135deg, #f39c12, #d35400); color: white; flex: 1; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4); }
+        .btn-sell:hover { filter: brightness(1.2); }
+
+        .btn-buy, .btn-jump { border: none; padding: 10px; font-size: 13px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 5px; }
+        .btn-buy { background: linear-gradient(135deg, #0fb9b1, #019088); color: white; box-shadow: 0 4px 10px rgba(15, 185, 177, 0.3); }
+        .btn-buy:hover { filter: brightness(1.2); }
+        .btn-jump { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; }
+        .btn-jump:hover { filter: brightness(1.2); }
+        button:disabled { background: #555 !important; color: #888 !important; cursor: not-allowed; box-shadow: none; transform: none; }
+
+        .ui-area {
+            background-color: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px;
+            margin-bottom: 15px; border: 1px solid #34495e; text-align: left;
+        }
+        .checkbox-area { cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+
+        #log-container {
+            margin-top: auto; height: 160px; overflow-y: auto;
+            background-color: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px;
+            font-size: 13px; text-align: left; border: 1px solid #2c3e50;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+            line-height: 1.4;
+        }
+        .log-entry { margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; }
+        .success { color: #2ecc71; font-weight: bold; text-shadow: 0 0 5px #2ecc71; }
+        .fail { color: #e74c3c; }
+        .destroy { color: #ff4757; font-weight: bold; text-shadow: 0 0 8px #ff4757; }
+        .system { color: #f1c40f; }
+
+        .shop-panel { flex: 0.8; gap: 10px; max-height: 85vh; overflow-y: auto; }
+        .shop-item {
+            background-color: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px;
+            text-align: center; border: 1px solid #34495e;
+        }
+        .shop-item:hover { border-color: #f1c40f; }
+        .shop-item p { margin: 4px 0; font-size: 11px; line-height: 1.4; color: #bdc3c7; }
+        .shop-btn-grid { display: flex; flex-direction: column; gap: 5px; margin-top: 5px; }
+
+        select {
+            width: 100%; padding: 8px; margin-bottom: 6px; border-radius: 5px;
+            background-color: #1a1e21; color: white; border: 1px solid #9b59b6;
+            font-size: 13px; outline: none; font-weight: bold;
+        }
+
+        /* ============== 파괴 팝업 (뒤 클릭 가능 구조 유지) ============== */
+        #mock-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(2px);
+            opacity: 1;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        #mock-modal-content {
+            background: linear-gradient(135deg, #1e272e, #2c3e50);
+            padding: 30px 50px;
+            border-radius: 20px;
+            border: 3px solid #e74c3c;
+            box-shadow: 0 0 50px rgba(231, 76, 60, 0.6);
+            max-width: 500px;
+            text-align: center;
+            animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: auto;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        #mock-text-title {
+            color: #ff4757;
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+        }
+        #mock-text-message {
+            font-size: 20px;
+            font-weight: bold;
+            color: #f1c40f;
+            line-height: 1.5;
+        }
+
+        /* ============== 100강 신화급 축하 연출 ============== */
+        #victory-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 3000;
+            background: #000;
+            flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0;
+            transition: opacity 0.9s ease;
+            overflow: hidden;
+        }
+        #victory-overlay.show {
+            opacity: 1;
+            background: radial-gradient(circle at 50% 42%, rgba(45,20,70,0.96) 0%, rgba(0,0,0,0.99) 75%);
+        }
+        #confetti-layer { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+        .confetti-piece {
+            position: absolute; top: -20px; width: 9px; height: 15px;
+            animation: confettiFall var(--fall-duration) var(--fall-delay) linear infinite;
+            opacity: 0.95;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(-20px) translateX(0) rotate(0deg); opacity: 0; }
+            8% { opacity: 1; }
+            100% { transform: translateY(115vh) translateX(var(--drift)) rotate(var(--rot)); opacity: 0.85; }
+        }
+        #victory-burst-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 0; pointer-events: none; }
+        .victory-burst {
+            position: absolute; width: 60px; height: 60px; border-radius: 50%;
+            background: radial-gradient(circle, #ffffff 0%, #ffd700 28%, rgba(255,215,0,0) 70%);
+            animation: burstExpand 1.4s ease-out forwards;
+        }
+        @keyframes burstExpand { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(30); opacity: 0; } }
+
+        #victory-crown { font-size: 60px; z-index: 2; opacity: 0; margin-bottom: 6px; }
+        #victory-crown.pop { animation: crownDrop 0.9s cubic-bezier(.17,.89,.32,1.4) forwards; }
+        @keyframes crownDrop { 0% { transform: translateY(-80px) scale(0.5); opacity: 0; } 70% { opacity: 1; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+
+        #victory-title {
+            font-size: 40px; font-weight: 900; text-align: center; max-width: 90vw;
+            background: linear-gradient(90deg, #ffd700, #fff8dc, #ffd700, #ffb347);
+            background-size: 300% auto;
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            filter: drop-shadow(0 0 25px rgba(255,215,0,0.7));
+            z-index: 2; letter-spacing: 1px; padding: 0 20px; opacity: 0;
+        }
+        #victory-title.pop {
+            animation: titlePopIn 1s cubic-bezier(.17,.89,.32,1.4) forwards, titleShine 3s linear 1s infinite;
+        }
+        @keyframes titlePopIn { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes titleShine { to { background-position: 300% center; } }
+
+        #victory-sub { color: #e0c9ff; font-size: 15px; margin-top: 16px; letter-spacing: 1px; z-index: 2; opacity: 0; transition: opacity 1.2s ease 1.4s; }
+        #victory-sub.pop { opacity: 1; }
+
+        .victory-close-btn {
+            margin-top: 34px; padding: 12px 30px; border-radius: 30px; border: 2px solid #ffd700;
+            background: rgba(255,215,0,0.08); color: #ffd700; font-weight: bold; cursor: pointer;
+            z-index: 2; opacity: 0; transition: opacity 1s ease 1.8s; letter-spacing: 1px;
+        }
+        .victory-close-btn.pop { opacity: 1; }
+        .victory-close-btn:hover { background: rgba(255,215,0,0.2); }
+
+        /* ============== 커스텀 토스트 알림 (alert() 대체) ============== */
+        #toast-container {
+            position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+            z-index: 4000; display: flex; flex-direction: column; gap: 10px;
+            align-items: center; pointer-events: none; width: 90%; max-width: 440px;
+        }
+        .toast {
+            background: linear-gradient(135deg, #2c1810, #1a0f08);
+            border: 2px solid #ff4757;
+            color: #ffd97a;
+            padding: 14px 22px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 20px rgba(255,71,87,0.35);
+            text-align: center;
+            animation: toastIn 0.35s cubic-bezier(.17,.89,.32,1.4), toastOut 0.4s ease 2.6s forwards;
+            pointer-events: auto;
+        }
+        @keyframes toastIn { 0% { transform: translateY(-30px) scale(0.9); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes toastOut { to { transform: translateY(-20px) scale(0.95); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <div class="bg-layer"></div>
+    <div id="toast-container"></div>
+
+    <div id="mock-modal">
+        <div id="mock-modal-content">
+            <div style="font-size: 50px; margin-bottom: 10px;">💥</div>
+            <div id="mock-text-title">무기가 소멸했습니다!</div>
+            <div id="mock-text-message">메시지</div>
+        </div>
+    </div>
+
+    <div id="victory-overlay">
+        <div id="victory-burst-wrap"></div>
+        <div id="confetti-layer"></div>
+        <div id="victory-crown">👑</div>
+        <div id="victory-title">100강의 지배자, 신의 경지에 도달하다!</div>
+        <div id="victory-sub">창조신의 권능: 싱귤래리티 — 당신은 이제 세계의 법칙 그 자체입니다.</div>
+        <button class="victory-close-btn" onclick="closeVictoryOverlay()">여운을 뒤로하고 대장간으로 돌아가기</button>
+    </div>
+
+    <div id="game-wrapper">
+        <div class="panel">
+            <h2>🔥 100층의 신화 대장간 🔥</h2>
+
+            <div class="status-bar">
+                <div class="gold">💰 <span id="gold-display">2,000,000</span> G</div>
+                <div class="item-protect">🛡️ 파괴 방지권: <span id="scroll-display">0</span>개 보유</div>
+            </div>
+
+            <div id="sword-display-area">
+                <div id="sword-visual" class="tier-0">
+                    <div id="particle-layer"></div>
+                    <svg id="sword-svg" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="bladeGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="var(--blade-light)" />
+                                <stop offset="50%" stop-color="var(--sword-color)" />
+                                <stop offset="100%" stop-color="var(--blade-dark)" />
+                            </linearGradient>
+                            <linearGradient id="metalGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#eef0f5" />
+                                <stop offset="50%" stop-color="#94a0b4" />
+                                <stop offset="100%" stop-color="#4c5566" />
+                            </linearGradient>
+                            <linearGradient id="voidMetalGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#8a7fce" />
+                                <stop offset="50%" stop-color="#3a2f66" />
+                                <stop offset="100%" stop-color="#150f2e" />
+                            </linearGradient>
+                            <linearGradient id="celestialGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#fffbe8" />
+                                <stop offset="50%" stop-color="#ffd700" />
+                                <stop offset="100%" stop-color="#c9960a" />
+                            </linearGradient>
+                            <radialGradient id="cosmicGrad" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="var(--sword-color)" stop-opacity="0.55" />
+                                <stop offset="60%" stop-color="#3b2b73" stop-opacity="0.25" />
+                                <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+                            </radialGradient>
+                        </defs>
+
+                        <circle class="cosmic-disc" cx="100" cy="180" r="115" />
+
+                        <ellipse class="ground-shadow" cx="100" cy="388" rx="44" ry="7" />
+
+                        <path class="wing-left" d="M88,268 Q38,252 22,224 Q54,262 88,284 Z" />
+                        <path class="wing-right" d="M112,268 Q162,252 178,224 Q146,262 112,284 Z" />
+
+                        <g class="blade-group">
+                            <path class="blade-main" d="M100,6 L119,54 L111,292 L89,292 L81,54 Z" />
+                            <path class="blade-fuller" d="M100,22 L100,270" stroke="rgba(255,255,255,0.55)" stroke-width="2" fill="none" />
+                            <path class="blade-highlight" d="M93,26 L97,255" fill="none" />
+                            <path class="blade-rune" d="M91,78 Q100,90 109,78 M91,122 Q100,134 109,122 M91,166 Q100,178 109,166 M91,210 Q100,222 109,210" stroke-width="2.4" fill="none" stroke-linecap="round" />
+                        </g>
+
+                        <path class="crossguard" d="M54,292 Q100,279 146,292 L146,310 Q100,323 54,310 Z" />
+                        <circle class="guard-gem" cx="100" cy="300" r="7.5" />
+
+                        <rect class="grip" x="91" y="310" width="18" height="58" rx="5" fill="#4a3624" />
+                        <path class="grip-wrap" d="M91,320 L109,324 M91,332 L109,336 M91,344 L109,348 M91,356 L109,360" stroke="#241a10" stroke-width="2" />
+
+                        <circle class="pommel" cx="100" cy="374" r="15" />
+                        <circle class="pommel-gem" cx="100" cy="374" r="7" />
+                    </svg>
+                </div>
+            </div>
+
+            <div id="sword-name">+0 나무 막대기</div>
+            <div id="sell-price">판매가: 0 G</div>
+            <div id="cost-display">강화 비용: 무료</div>
+            <div id="rate-display">성공 100%<br>(실패 페널티 없음)</div>
+
+            <div class="ui-area">
+                <label class="checkbox-area">
+                    <input type="checkbox" id="use-scroll" style="transform: scale(1.3);">
+                    <span>🛡️ <strong id="scroll-demand-text">파괴 방지권 사용 (1개 소모)</strong></span>
+                </label>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-enhance" id="btn-enhance" onclick="enhanceSword()">강화 도전!</button>
+                <button class="btn-sell" id="btn-sell" onclick="sellSword()">판매 (즉시 정산)</button>
+            </div>
+
+            <div id="log-container">
+                <div class="log-entry system">시스템: 무기 파괴 페널티가 20강부터 시작되도록 대폭 완화되었습니다! (19강까지는 실패 시 하락만 적용)</div>
+            </div>
+        </div>
+
+        <div class="panel shop-panel">
+            <h2>차원 상점</h2>
+
+            <div class="shop-item" style="border-color: #00d8d6; background: rgba(0, 216, 214, 0.03);">
+                <div style="font-size: 28px;">📜</div>
+                <div style="font-weight: bold; font-size: 16px; color:#00d8d6;">파괴 방지권 상점</div>
+                <p>실패 패널티(파괴/하락) 완벽 차단!<br><span style="color:#ff7675; font-weight:bold;">※ 구간별 요구량이 완만하게 상승합니다!</span></p>
+                <div class="shop-btn-grid">
+                    <<button class="btn-buy" onclick="buyProtectScroll(1, 1000000)">📜 낱개 1장 ㆍ 1,000,000 G</button>
+                    <button class="btn-buy" style="background: linear-gradient(135deg, #05c46b, #0fb9b1);" onclick="buyProtectScroll(10, 9500000)">📦 견고한 가죽 주머니 [10개] ㆍ 9.5M G</button>
+                    <button class="btn-buy" style="background: linear-gradient(135deg, #718093, #2f3640);" onclick="buyProtectScroll(50, 45000000)">💼 강철 보급 상자 [50개] ㆍ 45M G</button>
+                    <button class="btn-buy" style="background: linear-gradient(135deg, #00d2d3, #5f27cd);" onclick="buyProtectScroll(100, 85000000)">💎 비밀 금고 묶음 [100개] ㆍ 85M</button>
+                    <button class="btn-buy" style="background: linear-gradient(135deg, #a55eea, #4b7bec);" onclick="buyProtectScroll(1000, 800000000)">🧰 고대 보물상자 [1,000개] ㆍ 800M G</button>
+                    <button class="btn-buy" style="background: linear-gradient(135deg, #222f3e, #10ac84);" onclick="buyProtectScroll(10000, 7500000000)">🌌 차원의 특이점 [10,000개] ㆍ 7.5B G</button>
+                </div>
+            </div>
+
+            <div class="shop-item" style="border-color: #9b59b6; background: rgba(155, 89, 182, 0.05);">
+                <div style="font-size: 28px;">🌀</div>
+                <div style="font-weight: bold; font-size: 16px; color:#e056fd;">차원 도약 장치 (7강~30강)</div>
+                <p>판매가보다 높은 기회비용으로 안전하게 원하는 구간을 도약합니다.</p>
+
+                <select id="jump-level-select" onchange="updateJumpPrice()">
+                </select>
+
+                <div id="jump-price-display" style="color: #ffdd59; font-weight: bold; font-size: 14px; margin: 4px 0;">
+                    필요 골드: 계산 중...
+                </div>
+                <button class="btn-jump" onclick="useJumpTeleport()">해당 차원으로 도약!</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        // 1. 검 프리셋 & 강화 데이터 (기존 로직 100% 유지)
+        // =====================================================================
+        const rawPreset = [
+            { n: "나무 막대기", c: "#a0522d" },
+            { n: "부러진 무쇠 조각", c: "#bdc3c7" },
+            { n: "녹슨 수련용 무디어진 단검", c: "#95a5a6" },
+            { n: "대장장이의 첫 번째 철검", c: "#7f8c8d" },
+            { n: "날카로운 숫돌로 벼린 숏소드", c: "#b2bec3" },
+            { n: "견고한 강철 롱소드", c: "#dfe6e9" },
+            { n: "기사단의 제식 광선검", c: "#74b9ff" },
+            { n: "은빛 광휘의 실버소드", c: "#0984e3" },
+            { n: "새겨진 룬 문자의 마검", c: "#a29bfe" },
+            { n: "핏빛을 갈구하는 바스타드", c: "#ff7675" },
+            { n: "무자비한 도살자의 대검", c: "#d63031" },
+            { n: "푸른 불꽃의 에스토크", c: "#fdcb6e" },
+            { n: "절대영도의 얼음 송곳", c: "#81ecec" },
+            { n: "번개를 휘감은 플람베르주", c: "#f1c40f" },
+            { n: "대지를 뒤흔드는 바위 파쇄기", c: "#e17055" },
+            { n: "바람을 가르는 사막의 시미터", c: "#55efc4" },
+            { n: "독기를 품은 아사신 카타르", c: "#2ecc71" },
+            { n: "심해의 부식된 타이탄 킬러", c: "#1e3799" },
+            { n: "황금 사자의 기사 단장검", c: "#f39c12" },
+            { n: "어둠 속의 그림자 섀도우 블레이드", c: "#2c3e50" },
+            { n: "용의 이빨로 제련한 드래곤 슬레이어", c: "#e74c3c" },
+            { n: "공허에서 피어난 흑색 카타나", c: "#8e44ad" },
+            { n: "유성우를 베어내는 메테오 스태프검", c: "#fd79a8" },
+            { n: "환영을 베어내는 일루전 레이피어", c: "#a55eea" },
+            { n: "새벽녘 이슬을 머금은 미스릴 소드", c: "#45aaf2" },
+            { n: "황혼의 장벽을 부수는 디스트로이어", c: "#f0932b" },
+            { n: "차원의 벽에 균열을 내는 크랙 블레이드", c: "#eb4d4b" },
+            { n: "중력을 거스르는 그래비티 코어 소드", c: "#6c5ce7" },
+            { n: "태양의 흑점을 담은 솔라 플레어", c: "#ffbe76" },
+            { n: "달그림자에 숨겨진 크레센트 블레이드", c: "#fcfc22" },
+            { n: "심연의 맹약이 깃든 아비스 소드", c: "#1e272e" },
+            { n: "성스러운 유골이 담긴 홀리 어벤저", c: "#ffffff" },
+            { n: "타락한 대천사의 잔혹한 검은 날개검", c: "#485460" },
+            { n: "지옥의 가시덤불로 뒤덮인 바인 소드", c: "#05c46b" },
+            { n: "음속을 돌파하는 소닉 마하 엣지", c: "#0fb9b1" },
+            { n: "절망의 연옥 불길을 지핀 자의 검", c: "#ff5e57" },
+            { n: "정령왕의 유지가 깃든 엘레멘탈 마스터", c: "#3c6382" },
+            { n: "모든 것을 녹여버리는 플라즈마 커터", c: "#ffa801" },
+            { n: "영원을 동결시키는 크라이오 챔버", c: "#0defff" },
+            { n: "영혼을 수확하는 사신의 리퍼 데스사이스", c: "#3d3d3d" },
+            { n: "천공의 지배자를 격추한 발키리의 창검", c: "#f1f2f6" },
+            { n: "초자연적 에너지를 방출하는 싱크 소드", c: "#10ac84" },
+            { n: "빛의 굴절로 모습을 감추는 프리즘 브레이커", c: "#ff9ff3" },
+            { n: "별자리들의 궤적을 잇는 아스트랄 소드", c: "#feca57" },
+            { n: "시공간의 실타래를 끊는 크로노스 대검", c: "#54a0ff" },
+            { n: "공간 왜곡을 유발하는 워프 드라이브", c: "#5f27cd" },
+            { n: "차원 전이 장치가 장착된 텔레포트 소드", c: "#00d2d3" },
+            { n: "수천억의 별들을 응축한 노바 크리스탈", c: "#ff6b6b" },
+            { n: "은하의 소용돌이를 형상화한 스파이럴", c: "#48dbfb" },
+            { n: "우주의 거대한 장벽 코스믹 실드 소드", c: "#1dd1a1" },
+            { n: "블랙홀의 사건의 지평선을 베어낸 마검", c: "#222f3e" },
+            { n: "화이트홀에서 분출된 순백의 광선검", c: "#c8d6e5" },
+            { n: "성운의 가루로 만든 네뷸라 하모니", c: "#f368e0" },
+            { n: "안드로메다의 축복을 받은 스페이스 가디언", c: "#ee5a24" },
+            { n: "오리온의 벨트에 걸쳐있던 거인의 대검", c: "#00a8ff" },
+            { n: "북극성의 영원한 이정표 폴라리스", c: "#9c88ff" },
+            { n: "태양계의 분노를 한곳에 모은 헬리오스", c: "#ffb142" },
+            { n: "은하수를 건너온 밀키웨이 스타더스트", c: "#ffffff" },
+            { n: "우주 대폭발의 충격파 빅뱅 레버넌트", c: "#ff5252" },
+            { n: "무한한 우주의 수수께끼 다크매터", c: "#333333" },
+            { n: "멀티버스의 경계선을 허무는 크로스오버", c: "#ffda79" },
+            { n: "평행세계의 빛을 굴절시키는 패러렐 미러", c: "#ccae62" },
+            { n: "양자역학의 확률적 중첩 슈뢰딩거 블레이드", c: "#84817a" },
+            { n: "나노 로봇으로 스스로 재생하는 나노 아머검", c: "#130f40" },
+            { n: "사이버네틱스 의지가 깃든 인공지능 마검", c: "#00ec47" },
+            { n: "가상현실의 코드를 조작하는 매트릭스 리퍼", c: "#706fd3" },
+            { n: "초끈이론의 진동을 검에 담은 스트링 마스터", c: "#ff793f" },
+            { n: "반물질의 파괴력을 극대화한 엔티매터", c: "#d1ccc0" },
+            { n: "엔트로피의 법칙을 역행하는 리버스 소드", c: "#34ace0" },
+            { n: "차원 붕괴의 잔해로 만든 디멘션 브레이크", c: "#ff5252" },
+            { n: "신들의 전쟁터에 남아있던 올림푸스의 성검", c: "#ffb142" },
+            { n: "천상의 나팔소리와 함께 강림한 가브리엘", c: "#ffffff" },
+            { n: "지옥의 옥좌를 지키는 루시퍼의 타락검", c: "#b33939" },
+            { n: "하데스의 죽음의 강을 건너온 스틱스", c: "#474787" },
+            { n: "포세이돈의 해일을 얼려 만든 트라이던트 엣지", c: "#227093" },
+            { n: "제우스의 번갯불을 한 자루의 검으로", c: "#ffb142" },
+            { n: "오딘의 궁극적 불패의 창 궁니르 소드", c: "#218c74" },
+            { n: "로키의 왜곡된 장난을 담은 트릭스터 소드", c: "#cd6133" },
+            { n: "토르의 묠니르 에너지를 흡수한 썬더 블레이드", c: "#706fd3" },
+            { n: "아누비스의 저울 위를 걷는 심판관의 대검", c: "#aaa69d" },
+            { n: "불사조의 잿더미에서 부활한 피닉스 하트", c: "#ff5252" },
+            { n: "절대적 진리를 기록한 아카식 레코드 소드", c: "#33d9b2" },
+            { n: "인과율의 법칙을 지워버리는 이레이저", c: "#34ace0" },
+            { n: "존재의 유무를 결정짓는 보이드 체임버", c: "#1c1c1c" },
+            { n: "영원한 고독 속에서 탄생한 이터니티", c: "#706fd3" },
+            { n: "무한 루프를 깨트리는 타임 브레이커", c: "#ff793f" },
+            { n: "시간의 영원한 수레바퀴 클락워크 마스터", c: "#ffb142" },
+            { n: "운명의 실타래를 임의로 조작하는 페이트 실버", c: "#ff9f43" },
+            { n: "세계선을 자유롭게 이동하는 다이버전스 소드", c: "#0abde3" },
+            { n: "모든 가능성의 수렴을 관측한 슈타인즈 게이트", c: "#10ac84" },
+            { n: "인피니티 스톤의 마력을 흡수한 인피니트 코어", c: "#feca57" },
+            { n: "우주의 모든 물질을 무(無)로 돌리는 언메이킹", c: "#222f3e" },
+            { n: "모든 수학적 차원을 초월한 하이퍼 큐브 소드", c: "#ff9ff3" },
+            { n: "현실의 법칙을 임의로 편집하는 리얼리티 에디터", c: "#54a0ff" },
+            { n: "개념적인 존재마저 지워버리는 이데아 킬러", c: "#5f27cd" },
+            { n: "우주가 새로 시작될 때 터질 시한폭탄 코어", c: "#ee5a24" },
+            { n: "초신성의 폭발 직전의 압축된 열량을 담은 무기", c: "#ff5252" },
+            { n: "은하가 통째로 붕괴할 때 발생하는 에너지 파동 소드", c: "#ffbe76" },
+            { n: "평행 우주들이 충돌할 때 떨어진 세계의 파편", c: "#00d2d3" },
+            { n: "창조신의 첫 번째 생각에서 기원된 태초의 빛 소드", c: "#ffffff" },
+            { n: "창조신의 권능: 싱귤래리티", c: "#ffffff" }
+        ];
+
+        const swordData = [];
+        const maxLevel = 100;
+
+        for (let i = 0; i <= maxLevel; i++) {
+            let preset = rawPreset[i];
+            let rate = 100;
+            let penalty = "none";
+            let price = 0;
+            let cost = 0;
+
+            if (i <= 4) { rate = 100; penalty = "none"; }
+            else if (i <= 14) { rate = 95 - (i - 5) * 1; penalty = "drop"; }
+            else if (i <= 19) { rate = 85; penalty = "drop"; }
+            else if (i <= 29) { rate = 80 - (i - 20) * 2; penalty = "destroy"; }
+            else if (i <= 49) { rate = 60 - (i - 30) * 1.5; penalty = "destroy"; }
+            else if (i <= 79) { rate = 30 - (i - 50) * 0.8; penalty = "destroy"; }
+            else if (i < 100) { rate = Math.max(5.0 - (i - 80) * 0.2, 0.1); penalty = "destroy"; }
+            else { rate = 0; penalty = "none"; }
+
+            if (i > 0) {
+                price = Math.floor(5000 * Math.pow(1.3, i));
+                if (i >= 15) price = Math.floor(price * 1.5);
+                if (i >= 20) price = Math.floor(price * 3);
+                if (i >= 30) price = Math.floor(price * 15); // 30강부터 지급 골드 대폭 상승
+                if (i >= 40) price = Math.floor(price * 5);
+
+                let costFactor = 0.05 + (i * 0.002);
+                if (costFactor > 0.25) costFactor = 0.25;
+                cost = Math.floor(price * costFactor);
+            }
+
+            swordData.push({
+                name: preset.n,
+                color: preset.c,
+                rate: parseFloat(rate.toFixed(2)),
+                penalty,
+                price,
+                cost
+            });
+        }
+
+        let currentLevel = 0;
+        let gold = 20000000000;
+        let protectScrolls = 0;
+        let mockTimeout;
+
+        const mockMessages = [
+            "에구구... 손이 좀 미끄러지셨나 봅니다? ㅋㅋㅋ",
+            "아이고! 파괴 방지권 값 아끼려다 전 재산을 날리셨네요~ 꿀잼!",
+            "깡으로 누르시다니, 야수의 심장이 결국 파멸을 불렀군요. 🤣",
+            "이래서 방지권을 넉넉히 사라고 제가 그렇게 외쳤거늘...",
+            "강화는 운빨입니다. 그리고 당신은 운이 없죠! 😝",
+            "펑! 아름다운 불꽃놀이였습니다. 처음부터 다시 시작하세요~",
+            "방지권 없이 덤비다니... 용감한 건지 무모한 건지~ '뉴비컷~'"
+        ];
+
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        const jumpPrices = {};
+        const selectEl = document.getElementById('jump-level-select');
+        for (let lvl = 7; lvl <= 30; lvl++) {
+            jumpPrices[lvl] = Math.floor(swordData[lvl].price * 1.35);
+
+            const opt = document.createElement('option');
+            opt.value = lvl;
+            opt.innerText = `목표: +${lvl} ${swordData[lvl].name}`;
+            selectEl.appendChild(opt);
+        }
+
+        function updateJumpPrice() {
+            const level = selectEl.value;
+            const price = jumpPrices[level];
+            document.getElementById('jump-price-display').innerText = `필요 골드: ${formatNumber(price)} G`;
+        }
+
+        function getRequiredScrollCount(level) {
+            if (level < 20) return 1;
+            if (level < 25) return 3;
+            if (level < 30) return 5;
+            if (level < 40) return 10;
+            if (level < 50) return 20;
+            if (level < 60) return 35;
+            if (level < 70) return 50;
+            if (level < 80) return 80;
+            if (level < 90) return 120;
+            if (level < 100) return 200;
+            return 1;
+        }
+
+        // =====================================================================
+        // 2. 검 비주얼 렌더링 (SVG + CSS 등급별 진화 + 파티클 오오라)
+        // =====================================================================
+        function getTier(level) {
+            if (level >= 100) return 4;
+            if (level >= 80) return 3;
+            if (level >= 50) return 2;
+            if (level >= 20) return 1;
+            return 0;
+        }
+
+        // 0~20강 전용 개별 검 실루엣 정의: [yFrac(0=검끝,1=손잡이쪽), 반너비, 중심축 오프셋]
+        // yFrac 0~1 구간을 검신 전체 길이로 매핑하여 각기 다른 칼날 윤곽을 생성한다.
+        const bladeProfiles = [
+            /* 0  나무 막대기        */ { points: [[0,6,0],[0.1,7,1],[0.35,6,-1],[0.6,7,1],[0.85,6,-1],[1,8,0]] },
+            /* 1  부러진 무쇠 조각   */ { points: [[0,3,4],[0.06,7,-3],[0.12,2,5],[0.18,8,-4],[0.25,3,2],[0.35,9,0],[0.6,11,0],[1,13,0]] },
+            /* 2  녹슨 무딘 단검     */ { points: [[0,9,0],[0.4,13,0],[0.75,15,0],[1,17,0]] },
+            /* 3  첫 번째 철검       */ { points: [[0,0,0],[0.18,8,0],[0.55,10,0],[1,12,0]] },
+            /* 4  숫돌로 벼린 숏소드 */ { points: [[0,0,0],[0.12,5,0],[0.38,12,0],[0.65,10,0],[1,11,0]] },
+            /* 5  강철 롱소드        */ { points: [[0,0,0],[0.1,4,0],[0.55,8,0],[1,10,0]] },
+            /* 6  제식 광선검        */ { points: [[0,0,0],[0.08,3,0],[0.5,5,0],[1,7,0]] },
+            /* 7  은빛 실버소드      */ { points: [[0,0,0],[0.15,7,0],[0.5,9,0],[0.85,12,0],[1,14,0]] },
+            /* 8  룬 문자의 마검     */ { points: [[0,0,0],[0.2,6,0],[0.45,7,0],[0.65,11,0],[0.85,9,0],[1,11,0]] },
+            /* 9  바스타드           */ { points: [[0,0,0],[0.15,9,0],[0.5,12,0],[1,16,0]] },
+            /* 10 도살자의 대검      */ { points: [[0,13,0],[0.3,16,0],[0.7,18,0],[1,19,0]] },
+            /* 11 푸른 불꽃 에스토크 */ { points: [[0,0,0],[0.3,3,0],[0.7,4,0],[1,5,0]] },
+            /* 12 얼음 송곳          */ { points: [[0,0,0],[0.4,2,0],[0.8,3,0],[1,4,0]] },
+            /* 13 플람베르주(파도날) */ { points: [[0,0,0],[0.15,7,3],[0.3,8,-3],[0.45,8,3],[0.6,8,-3],[0.75,8,3],[0.9,8,-2],[1,10,0]] },
+            /* 14 바위 파쇄기        */ { points: [[0,15,0],[0.4,18,0],[0.75,20,0],[1,21,0]] },
+            /* 15 사막의 시미터(곡도)*/ { points: [[0,0,5],[0.2,6,9],[0.5,8,6],[0.8,9,1],[1,11,0]] },
+            /* 16 아사신 카타르      */ { points: [[0,8,0],[0.3,13,0],[0.7,14,0],[1,15,0]] },
+            /* 17 타이탄 킬러(부식)  */ { points: [[0,0,0],[0.2,9,2],[0.4,7,-2],[0.6,10,2],[0.8,8,-2],[1,12,0]] },
+            /* 18 황금 사자 단장검   */ { points: [[0,0,0],[0.15,6,0],[0.55,8,0],[0.8,9,0],[0.9,15,0],[1,13,0]] },
+            /* 19 섀도우 블레이드    */ { points: [[0,0,-2],[0.3,5,-4],[0.6,9,-2],[0.85,13,3],[1,12,0]] },
+            /* 20 드래곤 슬레이어    */ { points: [[0,0,0],[0.1,8,3],[0.25,11,-2],[0.4,9,3],[0.55,12,-2],[0.7,10,3],[0.85,13,-1],[1,15,0]] }
+        ];
+        // 21강 이상: 매 강화마다 모양이 바뀌지 않도록 레벨을 시드로 쓰는 결정론적 난수 생성기
+        function mulberry32(seed) {
+            return function () {
+                seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+                let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+                t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            };
+        }
+        function jitter(rand, amount) { return (rand() * 2 - 1) * amount; }
+
+        // 21~99강용 "칼날 가문(family)" - 이름 컨셉에 맞춰 서로 다른 실루엣을 만들어내는 생성기 모음
+        const bladeFamilies = {
+            taper:    (r, s) => [[0,0,0],[0.15,(6+jitter(r,1))*s,0],[0.55,(9+jitter(r,1))*s,0],[1,(12+jitter(r,1.2))*s,0]],
+            leaf:     (r, s) => [[0,0,0],[0.12,(5+jitter(r,1))*s,0],[0.35,(13+jitter(r,1.5))*s,0],[0.65,(10+jitter(r,1))*s,0],[1,(12+jitter(r,1.2))*s,0]],
+            broad:    (r, s) => [[0,0,0],[0.1,(8+jitter(r,1))*s,0],[0.5,(11+jitter(r,1))*s,0],[1,(15+jitter(r,1.5))*s,0]],
+            ricasso:  (r, s) => [[0,0,0],[0.15,(6+jitter(r,1))*s,0],[0.55,(8+jitter(r,1))*s,0],[0.8,(9+jitter(r,1))*s,0],[0.9,(15+jitter(r,2))*s,0],[1,(13+jitter(r,1.5))*s,0]],
+            curved:   (r, s) => { const dir = r() > 0.5 ? 1 : -1; return [[0,0,5*s*dir],[0.2,(6+jitter(r,1))*s,9*s*dir],[0.5,(8+jitter(r,1))*s,6*s*dir],[0.8,(9+jitter(r,1))*s,1*s*dir],[1,(11+jitter(r,1.2))*s,0]]; },
+            serrated: (r, s) => [[0,0,0],[0.2,(9+jitter(r,1))*s,2*s],[0.4,(7+jitter(r,1))*s,-2*s],[0.6,(10+jitter(r,1))*s,2*s],[0.8,(8+jitter(r,1))*s,-2*s],[1,(12+jitter(r,1.5))*s,0]],
+            wavy:     (r, s) => { const amp = (3+r()*2)*s; return [[0,0,0],[0.15,7*s,amp],[0.3,8*s,-amp],[0.45,8*s,amp],[0.6,8*s,-amp],[0.75,8*s,amp*0.8],[0.9,8*s,-amp*0.6],[1,(10+jitter(r,1))*s,0]]; },
+            hooked:   (r, s) => [[0,0,-3*s],[0.25,(5+jitter(r,1))*s,-6*s],[0.5,(9+jitter(r,1))*s,-2*s],[0.75,(13+jitter(r,1.5))*s,4*s],[1,(12+jitter(r,1))*s,0]],
+            crystal:  (r, s) => [[0,0,0],[0.1,(5+jitter(r,1))*s,3*s],[0.22,(9+jitter(r,1))*s,-3*s],[0.35,(6+jitter(r,1))*s,3*s],[0.5,(11+jitter(r,1))*s,-2*s],[0.65,(7+jitter(r,1))*s,2*s],[0.8,(12+jitter(r,1))*s,-1*s],[1,(14+jitter(r,1.5))*s,0]],
+            kris:     (r, s) => [[0,0,-2*s],[0.15,(6+jitter(r,1))*s,3*s],[0.3,(5+jitter(r,1))*s,-3*s],[0.45,(7+jitter(r,1))*s,3*s],[0.6,(6+jitter(r,1))*s,-3*s],[0.75,(8+jitter(r,1))*s,2*s],[1,(10+jitter(r,1.2))*s,0]],
+            fork:     (r, s) => [[0,(4+jitter(r,0.5))*s,-4*s],[0.03,1*s,0],[0.06,(4+jitter(r,0.5))*s,4*s],[0.25,(7+jitter(r,1))*s,0],[0.6,(10+jitter(r,1))*s,0],[1,(13+jitter(r,1.5))*s,0]]
+        };
+
+        // 티어별로 어울리는 가문 목록 (숙련도가 오를수록 더 화려하고 이국적인 형태 위주로)
+        const tierFamilyPools = {
+            1: ['taper', 'leaf', 'broad', 'ricasso', 'curved', 'serrated'],
+            2: ['wavy', 'curved', 'hooked', 'crystal', 'serrated', 'leaf', 'fork'],
+            3: ['crystal', 'kris', 'hooked', 'wavy', 'fork', 'curved']
+        };
+
+        function generateProceduralProfile(level) {
+            const tier = getTier(level);
+            const pool = tierFamilyPools[tier] || tierFamilyPools[1];
+            const familyName = pool[level % pool.length];
+            const rand = mulberry32(level * 7919 + 13);
+            const scale = (tier === 1 ? 1.0 : tier === 2 ? 1.14 : 1.3) * (1 + (level - 20) * 0.0035);
+            return { points: bladeFamilies[familyName](rand, scale) };
+        }
+
+        // 100강 전용: 창조신의 권능 - 유일하게 수작업으로 그린 궁극의 형상
+        const godBladeProfile = { points: [[0,0,0],[0.08,9,0],[0.2,12,0],[0.35,9.5,0],[0.5,13,0],[0.65,10,0],[0.78,15,0],[0.9,17,0],[1,15,0]] };
+
+        function getBladeProfile(level) {
+            if (level >= 0 && level <= 20) return bladeProfiles[level];
+            if (level >= 100) return godBladeProfile;
+            return generateProceduralProfile(level);
+        }
+
+        function buildBladePath(points) {
+            const yTop = 6, yBase = 292;
+            const coords = points.map(p => ({ y: yTop + p[0] * (yBase - yTop), hw: p[1], cx: 100 + p[2] }));
+            let d = `M ${(coords[0].cx - coords[0].hw).toFixed(2)},${coords[0].y.toFixed(2)} `;
+            for (let i = 1; i < coords.length; i++) {
+                d += `L ${(coords[i].cx - coords[i].hw).toFixed(2)},${coords[i].y.toFixed(2)} `;
+            }
+            for (let i = coords.length - 1; i >= 0; i--) {
+                d += `L ${(coords[i].cx + coords[i].hw).toFixed(2)},${coords[i].y.toFixed(2)} `;
+            }
+            d += 'Z';
+            return d;
+        }
+
+        function shadeColor(hex, percent) {
+            hex = (hex || "#888888").replace('#', '');
+            if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+            const f = parseInt(hex, 16);
+            const t = percent < 0 ? 0 : 255;
+            const p = Math.abs(percent);
+            const R = f >> 16, G = (f >> 8) & 0x00FF, B = f & 0x0000FF;
+            return "#" + (
+                0x1000000 +
+                (Math.round((t - R) * p) + R) * 0x10000 +
+                (Math.round((t - G) * p) + G) * 0x100 +
+                (Math.round((t - B) * p) + B)
+            ).toString(16).slice(1);
+        }
+
+        function generateParticles(tier, color) {
+            const layer = document.getElementById('particle-layer');
+            layer.innerHTML = '';
+            let count = 0, style = '';
+
+            if (tier === 1) { count = 6; style = 'particle-spark'; }
+            else if (tier === 2) { count = 14; style = 'particle-ember'; }
+            else if (tier >= 3) { count = tier === 4 ? 30 : 22; style = 'particle-orbit'; }
+            else { return; }
+
+            const frag = document.createDocumentFragment();
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('span');
+                p.className = `particle ${style}`;
+                p.style.setProperty('--p-color', color);
+
+                if (style === 'particle-orbit') {
+                    const radius = 68 + Math.random() * 65;
+                    const duration = 4 + Math.random() * 5;
+                    p.style.setProperty('--radius', radius + 'px');
+                    p.style.animationDuration = duration + 's';
+                    p.style.animationDelay = (-Math.random() * duration) + 's';
+                } else if (style === 'particle-ember') {
+                    p.style.left = (Math.random() * 80 - 40) + 'px';
+                    p.style.top = (60 + Math.random() * 20) + 'px';
+                    p.style.setProperty('--dx', (Math.random() * 70 - 35) + 'px');
+                    const duration = 2 + Math.random() * 2.2;
+                    p.style.animationDuration = duration + 's';
+                    p.style.animationDelay = (-Math.random() * duration) + 's';
+                } else {
+                    p.style.left = (Math.random() * 140 - 70) + 'px';
+                    p.style.top = (Math.random() * 150 - 90) + 'px';
+                    const duration = 1.5 + Math.random() * 2;
+                    p.style.animationDuration = duration + 's';
+                    p.style.animationDelay = (-Math.random() * duration) + 's';
+                }
+                frag.appendChild(p);
+            }
+            layer.appendChild(frag);
+        }
+
+        function updateSwordVisual(level) {
+            const data = swordData[level];
+            const tier = getTier(level);
+            const visual = document.getElementById('sword-visual');
+            visual.className = `tier-${tier}` + (level === 0 ? ' level-0' : '');
+            visual.style.setProperty('--sword-color', data.color);
+            visual.style.setProperty('--blade-light', shadeColor(data.color, 0.55));
+            visual.style.setProperty('--blade-dark', shadeColor(data.color, -0.55));
+
+            const bladeMainEl = document.querySelector('#sword-svg .blade-main');
+            bladeMainEl.setAttribute('d', buildBladePath(getBladeProfile(level).points));
+
+            generateParticles(tier, data.color);
+        }
+
+        // =====================================================================
+        // 3. Web Audio API 신디사이저 효과음 시스템
+        // =====================================================================
+        let audioCtx = null;
+        function getAudioCtx() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(ctx, freq, type, startTime, duration, peakVol) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, startTime);
+            gain.gain.setValueAtTime(0.0001, startTime);
+            gain.gain.exponentialRampToValueAtTime(Math.max(peakVol, 0.001), startTime + 0.012);
+            gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(startTime);
+            osc.stop(startTime + duration + 0.05);
+        }
+
+        function playNoiseBurst(ctx, startTime, duration, vol, filterFreq, filterType) {
+            const bufferSize = Math.max(1, Math.floor(ctx.sampleRate * duration));
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+            }
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+            const filter = ctx.createBiquadFilter();
+            filter.type = filterType || 'highpass';
+            filter.frequency.value = filterFreq;
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(vol, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            noise.connect(filter).connect(gain).connect(ctx.destination);
+            noise.start(startTime);
+            noise.stop(startTime + duration + 0.05);
+        }
+
+        // 강화 버튼 클릭 - 모루를 내리치는 금속 타격음
+        function playHitSound() {
+            const ctx = getAudioCtx();
+            const now = ctx.currentTime;
+            [1800, 2650, 3400].forEach((f, idx) => {
+                playTone(ctx, f, 'triangle', now, 0.14 - idx * 0.015, 0.18 - idx * 0.04);
+            });
+            playNoiseBurst(ctx, now, 0.04, 0.22, 3800, 'highpass');
+        }
+
+        // 강화 성공 - 상승하는 청아한 차임
+        function playSuccessSound() {
+            const ctx = getAudioCtx();
+            const now = ctx.currentTime;
+            const notes = [523.25, 659.25, 783.99, 1046.5];
+            notes.forEach((f, i) => {
+                playTone(ctx, f, 'sine', now + i * 0.08, 0.26, 0.22);
+                playTone(ctx, f * 2, 'triangle', now + i * 0.08, 0.16, 0.05);
+            });
+            playNoiseBurst(ctx, now + 0.3, 0.18, 0.09, 6500, 'highpass');
+        }
+
+        // 강화 실패(하락/안전) - 둔탁하게 떨어지는 사운드
+        function playFailSound(soft) {
+            const ctx = getAudioCtx();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(soft ? 300 : 220, now);
+            osc.frequency.exponentialRampToValueAtTime(soft ? 140 : 70, now + 0.38);
+            gain.gain.setValueAtTime(soft ? 0.16 : 0.28, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(now); osc.stop(now + 0.46);
+            playNoiseBurst(ctx, now, 0.14, soft ? 0.04 : 0.08, 300, 'lowpass');
+        }
+
+        // 무기 파괴 - 유리 파열음 + 대장장이의 조소
+        function playDestroySound() {
+            const ctx = getAudioCtx();
+            const now = ctx.currentTime;
+            [0, 0.03, 0.07, 0.12].forEach((t, i) => {
+                playNoiseBurst(ctx, now + t, 0.26, 0.26 - i * 0.03, 2200 + i * 900, 'bandpass');
+            });
+            const boom = ctx.createOscillator();
+            const boomGain = ctx.createGain();
+            boom.type = 'sawtooth';
+            boom.frequency.setValueAtTime(90, now);
+            boom.frequency.exponentialRampToValueAtTime(28, now + 0.6);
+            boomGain.gain.setValueAtTime(0.25, now);
+            boomGain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+            boom.connect(boomGain).connect(ctx.destination);
+            boom.start(now); boom.stop(now + 0.75);
+
+            const laughStart = now + 0.55;
+            [180, 160, 140, 120].forEach((f, i) => {
+                const t = laughStart + i * 0.18;
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.type = 'sawtooth';
+                o.frequency.setValueAtTime(f, t);
+                o.frequency.exponentialRampToValueAtTime(f * 0.6, t + 0.12);
+                const filt = ctx.createBiquadFilter();
+                filt.type = 'bandpass';
+                filt.frequency.value = 800;
+                filt.Q.value = 5;
+                g.gain.setValueAtTime(0.0001, t);
+                g.gain.exponentialRampToValueAtTime(0.16, t + 0.02);
+                g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+                o.connect(filt).connect(g).connect(ctx.destination);
+                o.start(t); o.stop(t + 0.2);
+            });
+        }
+
+        // 방지권으로 막았을 때 - 보호막 쉴드 사운드
+        function playShieldSound() {
+            const ctx = getAudioCtx();
+            const now = ctx.currentTime;
+            playTone(ctx, 440, 'sine', now, 0.4, 0.14);
+            playTone(ctx, 660, 'sine', now + 0.05, 0.4, 0.1);
+            playNoiseBurst(ctx, now, 0.3, 0.06, 5000, 'highpass');
+        }
+
+        // 차원 도약 - 워프 사운드
+        function playWarpSound() {
+            const ctx = getAudioCtx();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(1400, now + 0.35);
+            osc.frequency.exponentialRampToValueAtTime(200, now + 0.55);
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.exponentialRampToValueAtTime(0.18, now + 0.15);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(now); osc.stop(now + 0.65);
+        }
+
+        // 거절/부족 알림음 - 짧고 둔탁한 "안돼" 사운드
+        function playDeniedSound() {
+            const ctx = getAudioCtx();
+            const now = ctx.currentTime;
+            playTone(ctx, 180, 'square', now, 0.14, 0.12);
+            playTone(ctx, 130, 'square', now + 0.1, 0.18, 0.1);
+        }
+
+        // =====================================================================
+        // 3-1. 커스텀 토스트 알림 (브라우저 alert() 완전 대체, 조롱 멘트 포함)
+        // =====================================================================
+        const poorGoldTaunts = [
+            "지갑 사정이... 대장간 문턱도 못 넘으시겠는데요? 😏 (필요 골드: {G})",
+            "어허, 그 돈으로는 나무 막대기도 못 깎겠습니다. (부족액 기준 필요 골드: {G})",
+            "꿈은 100강인데 지갑은 0강이시네요 ㅋㅋㅋ (필요 골드: {G})",
+            "돈부터 좀 벌고 오시죠, 대장부님. (필요 골드: {G})",
+            "빈털터리 강화 도전자 등장! 필요한 금액은 {G}입니다만... 😝",
+            "골드도 없이 여길 왜 오셨어요? 일단 {G}부터 채워 오시죠."
+        ];
+        const poorScrollTaunts = [
+            "방지권도 없이 그냥 도전하시게요? 배짱 하나는 인정합니다 ㅋㅋ (필요: {N}개)",
+            "쉴드도 없이 맨몸 강화라니... 오늘 대장간 로그가 재밌어지겠군요. (필요 수량: {N}개)",
+            "방지권 수량 부족! 상점 좀 들르고 오시죠, 서두르지 마시고. (필요: {N}개)",
+            "방지권 없이 깡으로 가시겠다? 말리진 않겠습니다. (필요: {N}개)"
+        ];
+
+        function randomTaunt(pool, replacements) {
+            let msg = pool[Math.floor(Math.random() * pool.length)];
+            Object.keys(replacements || {}).forEach(key => {
+                msg = msg.split(key).join(replacements[key]);
+            });
+            return msg;
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.innerText = message;
+            container.appendChild(t);
+            playDeniedSound();
+            setTimeout(() => { t.remove(); }, 3150);
+        }
+
+        // 100강 달성 - 오케스트라풍 팡파르
+        function playFanfare() {
+            const ctx = getAudioCtx();
+            const now = ctx.currentTime;
+            const melody = [
+                { t: 0.0, f: 523.25, d: 0.22 },
+                { t: 0.22, f: 523.25, d: 0.22 },
+                { t: 0.44, f: 523.25, d: 0.22 },
+                { t: 0.68, f: 659.25, d: 0.45 },
+                { t: 1.2, f: 783.99, d: 0.45 },
+                { t: 1.72, f: 1046.5, d: 0.95 },
+                { t: 2.75, f: 987.77, d: 0.28 },
+                { t: 3.05, f: 1046.5, d: 1.3 }
+            ];
+            melody.forEach(n => {
+                playTone(ctx, n.f, 'sawtooth', now + n.t, n.d, 0.2);
+                playTone(ctx, n.f / 2, 'triangle', now + n.t, n.d, 0.14);
+                playTone(ctx, n.f * 2, 'sine', now + n.t, n.d * 0.6, 0.05);
+            });
+            [261.63, 329.63, 392.0, 523.25].forEach(f => {
+                playTone(ctx, f, 'sine', now, 4.6, 0.05);
+            });
+            playNoiseBurst(ctx, now + 1.65, 0.5, 0.12, 4000, 'highpass');
+            playNoiseBurst(ctx, now + 3.0, 0.6, 0.14, 5000, 'highpass');
+        }
+
+        // =====================================================================
+        // 4. UI 갱신
+        // =====================================================================
+        function updateUI() {
+            const data = swordData[currentLevel];
+
+            const nameEl = document.getElementById('sword-name');
+            nameEl.innerText = `+${currentLevel} ${data.name}`;
+            nameEl.style.color = data.color;
+
+            updateSwordVisual(currentLevel);
+
+            if (currentLevel >= 80) {
+                nameEl.style.textShadow = `0 0 35px ${data.color}, 0 0 70px #fff`;
+            } else if (currentLevel >= 50) {
+                nameEl.style.textShadow = `0 0 25px ${data.color}, 0 0 50px #fff`;
+            } else if (currentLevel >= 25) {
+                nameEl.style.textShadow = `0 0 15px ${data.color}, 0 0 25px ${data.color}`;
+            } else if (currentLevel >= 7) {
+                nameEl.style.textShadow = `0 0 10px ${data.color}`;
+            } else {
+                nameEl.style.textShadow = 'none';
+            }
+
+            document.getElementById('sell-price').innerText = `판매가: ${formatNumber(data.price)} G`;
+            document.getElementById('cost-display').innerText = `강화 비용: ${data.cost === 0 ? "무료" : formatNumber(data.cost) + " G"}`;
+
+            const neededScrolls = getRequiredScrollCount(currentLevel);
+            document.getElementById('scroll-demand-text').innerText = `파괴 방지권 사용 (${neededScrolls}개 소모)`;
+
+            const rateEl = document.getElementById('rate-display');
+            if (currentLevel === maxLevel) {
+                rateEl.innerHTML = "세계의 경계를 넘어 신이 되었습니다!<br>(MAX LEVEL)";
+                document.getElementById('btn-enhance').disabled = true;
+            } else {
+                document.getElementById('btn-enhance').disabled = false;
+                let penaltyText = data.penalty === 'drop' ? '<span style="color:#e67e22;">(실패 시 1단계 하락)</span>' :
+                                  data.penalty === 'destroy' ? '<span style="color:#ff4757; font-weight:bold;">(실패 시 무기 파괴!)</span>' :
+                                  '<span style="color:#2ecc71;">(실패 페널티 없음)</span>';
+                rateEl.innerHTML = `성공 확률: <strong>${data.rate}%</strong><br>${penaltyText}`;
+            }
+
+            document.getElementById('btn-sell').disabled = (currentLevel === 0);
+            document.getElementById('gold-display').innerText = formatNumber(gold);
+            document.getElementById('scroll-display').innerText = formatNumber(protectScrolls);
+        }
+
+        function logMessage(msg, type) {
+            const logBox = document.getElementById('log-container');
+            const newLog = document.createElement('div');
+            newLog.className = `log-entry ${type}`;
+            newLog.innerHTML = msg;
+            logBox.prepend(newLog);
+        }
+
+        // =====================================================================
+        // 5. 게임 핵심 로직 (기존 로직 유지 + 사운드/연출 훅 추가)
+        // =====================================================================
+        function enhanceSword() {
+            document.getElementById('btn-enhance').blur();
+
+            if (currentLevel >= maxLevel) return;
+
+            const data = swordData[currentLevel];
+            const useScrollCheckbox = document.getElementById('use-scroll');
+            const isUsingScroll = useScrollCheckbox.checked;
+            const requiredScrolls = getRequiredScrollCount(currentLevel);
+
+            if (gold < data.cost) {
+                showToast(randomTaunt(poorGoldTaunts, { '{G}': formatNumber(data.cost) + ' G' }));
+                return;
+            }
+
+            if (isUsingScroll && protectScrolls < requiredScrolls) {
+                showToast(randomTaunt(poorScrollTaunts, { '{N}': requiredScrolls }));
+                useScrollCheckbox.checked = false;
+                return;
+            }
+
+            gold -= data.cost;
+            if (isUsingScroll) protectScrolls -= requiredScrolls;
+
+            playHitSound();
+
+            const roll = Math.random() * 100;
+
+            if (roll <= data.rate) {
+                currentLevel++;
+                const newData = swordData[currentLevel];
+                logMessage(`[+${currentLevel - 1} -> +${currentLevel}] 강화 성공!! <strong style="color:${newData.color};">${newData.name}</strong> 완성! (-${formatNumber(data.cost)}G)`, 'success');
+                playSuccessSound();
+
+                if (currentLevel === maxLevel) {
+                    setTimeout(triggerVictoryCelebration, 350);
+                }
+            } else {
+                if (isUsingScroll) {
+                    let preventType = (data.penalty === 'destroy') ? "무기 폭발" : "등급 하락";
+                    logMessage(`[+${currentLevel}] 강화 대실패... 방지권 ${requiredScrolls}개를 제물 바쳐 ${preventType}을(를) 면했습니다. (-${formatNumber(data.cost)}G)`, 'system');
+                    playShieldSound();
+                } else {
+                    if (data.penalty === 'destroy') {
+                        const oldName = data.name;
+                        currentLevel = 0;
+                        const randomMock = mockMessages[Math.floor(Math.random() * mockMessages.length)];
+
+                        const modal = document.getElementById('mock-modal');
+                        document.getElementById('mock-text-message').innerHTML = `대장장이: "<span style="color:#fff;">${randomMock}</span>"`;
+
+                        clearTimeout(mockTimeout);
+                        modal.style.opacity = '1';
+                        modal.style.display = 'flex';
+
+                        mockTimeout = setTimeout(() => {
+                            modal.style.opacity = '0';
+                            setTimeout(() => { modal.style.display = 'none'; }, 400);
+                        }, 2500);
+
+                        logMessage(`[${oldName}] 💥 챙그랑! 형태도 남지 않고 무기가 소멸했습니다.<br><span style="color:#f39c12; font-weight:normal;">대장장이: "${randomMock}"</span> (+0 리셋)`, 'destroy');
+                        useScrollCheckbox.checked = false;
+                        playDestroySound();
+                    } else if (data.penalty === 'drop') {
+                        currentLevel--;
+                        logMessage(`[+${currentLevel + 1}] 강화 실패... 아쉽게 1티어 다운그레이드 되었습니다.`, 'fail');
+                        playFailSound(false);
+                    } else {
+                        logMessage(`[+${currentLevel}] 강화 실패! 다행히 안전 등급 구간입니다.`, 'fail');
+                        playFailSound(true);
+                    }
+                }
+            }
+            updateUI();
+        }
+
+        function sellSword() {
+            document.getElementById('btn-sell').blur();
+            if (currentLevel === 0) return;
+            const price = swordData[currentLevel].price;
+
+            gold += price;
+            logMessage(`💰 [+${currentLevel} ${swordData[currentLevel].name}] 유물을 골동품점에 처분하여 <strong>${formatNumber(price)} G</strong>를 정산했습니다!`, 'system');
+            currentLevel = 0;
+            document.getElementById('use-scroll').checked = false;
+            updateUI();
+        }
+
+        function buyProtectScroll(amount, price) {
+            event.target.blur();
+
+            if (gold >= price) {
+                gold -= price;
+                protectScrolls += amount;
+                logMessage(`📜 상점 거래 성공: 방지권 ${amount}매를 수령했습니다. (-${formatNumber(price)} G)`, 'system');
+                updateUI();
+            } else {
+                showToast(randomTaunt(poorGoldTaunts, { '{G}': formatNumber(price) + ' G' }));
+            }
+        }
+
+        // 🔥 차원 도약 시 무조건 확인창 없이 즉시 작동되도록 변경!
+        function useJumpTeleport() {
+            event.target.blur();
+            const targetLevel = parseInt(selectEl.value);
+            const price = jumpPrices[targetLevel];
+
+            if (gold < price) {
+                showToast(randomTaunt(poorGoldTaunts, { '{G}': formatNumber(price) + ' G' }));
+                return;
+            }
+
+            // confirm 알럿을 아예 제거하여 클릭 시 즉시 도약 수행
+            gold -= price;
+            currentLevel = targetLevel;
+            document.getElementById('use-scroll').checked = false;
+
+            playWarpSound();
+            logMessage(`🌀 시공 전이 완료! 즉시 <strong>+${currentLevel}강</strong> 평행우주 전선에 낙하했습니다!`, 'success');
+            updateUI();
+        }
+
+        // =====================================================================
+        // 6. 100강 신화급 축하 연출
+        // =====================================================================
+        function spawnVictoryBurst() {
+            const wrap = document.getElementById('victory-burst-wrap');
+            wrap.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const b = document.createElement('div');
+                b.className = 'victory-burst';
+                b.style.animationDelay = (i * 0.15) + 's';
+                wrap.appendChild(b);
+            }
+        }
+
+        function spawnConfetti() {
+            const layer = document.getElementById('confetti-layer');
+            layer.innerHTML = '';
+            const colors = ['#ffd700', '#ff6b6b', '#54a0ff', '#1dd1a1', '#feca57', '#ff9ff3', '#ffffff', '#a29bfe'];
+            const frag = document.createDocumentFragment();
+            for (let i = 0; i < 220; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti-piece';
+                c.style.left = Math.random() * 100 + '%';
+                c.style.setProperty('--fall-duration', (3 + Math.random() * 3.5) + 's');
+                c.style.setProperty('--fall-delay', (Math.random() * 2.5) + 's');
+                c.style.setProperty('--drift', (Math.random() * 220 - 110) + 'px');
+                c.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+                c.style.background = colors[Math.floor(Math.random() * colors.length)];
+                if (Math.random() > 0.5) c.style.borderRadius = '50%';
+                frag.appendChild(c);
+            }
+            layer.appendChild(frag);
+        }
+
+        function triggerVictoryCelebration() {
+            const overlay = document.getElementById('victory-overlay');
+            const crown = document.getElementById('victory-crown');
+            const title = document.getElementById('victory-title');
+            const sub = document.getElementById('victory-sub');
+            const btn = document.querySelector('.victory-close-btn');
+
+            [crown, title, sub, btn].forEach(el => el.classList.remove('pop'));
+            overlay.classList.remove('show');
+            overlay.style.display = 'flex';
+
+            // 1) 암전 (블랙아웃)
+            requestAnimationFrame(() => {
+                void overlay.offsetWidth;
+                overlay.classList.add('show');
+            });
+
+            // 2) 빅뱅처럼 터지는 연출 + 팡파르
+            setTimeout(() => {
+                spawnVictoryBurst();
+                spawnConfetti();
+                playFanfare();
+                void crown.offsetWidth;
+                crown.classList.add('pop');
+                setTimeout(() => { void title.offsetWidth; title.classList.add('pop'); }, 250);
+                setTimeout(() => { sub.classList.add('pop'); }, 900);
+                setTimeout(() => { btn.classList.add('pop'); }, 1300);
+            }, 700);
+
+            clearTimeout(window._victoryTimeout);
+            window._victoryTimeout = setTimeout(closeVictoryOverlay, 12000);
+        }
+
+        function closeVictoryOverlay() {
+            clearTimeout(window._victoryTimeout);
+            const overlay = document.getElementById('victory-overlay');
+            overlay.classList.remove('show');
+            setTimeout(() => { overlay.style.display = 'none'; }, 900);
+        }
+
+        // =====================================================================
+        // 초기화
+        // =====================================================================
+        updateJumpPrice();
+        updateUI();
+    </script>
+</body>
+</html>
