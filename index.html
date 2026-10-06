@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>FLASH ZONE · 게임 모음</title>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ff9d2e'/%3E%3Ccircle cx='32' cy='24' r='9' fill='%23fff'/%3E%3Crect x='28' y='30' width='8' height='14' fill='%23fff'/%3E%3Crect x='14' y='42' width='36' height='10' rx='5' fill='%231a2260'/%3E%3C/svg%3E">
 <style>
 :root{--navy:#0a0d2a;--blue:#2b3a8f;--blue2:#1a2260;--orange:#ff9d2e;--yellow:#ffe45c;--green:#32d546;--text:#eaf0ff;--muted:#9fb0e6;--card:#141b4d;
@@ -187,7 +190,7 @@ var GAMES=[
    desc:"곡괭이를 들고 뒷산 광산으로! 보석을 캐서 골드로 바꾸고, 블랙잭 · 러시안 룰렛 · 반응속도 · 볼파이트 대전까지 즐기는 종합 게임이에요.", thumb:"gems"},
   {id:"sword", title:"전설의 검 키우기", sub:"100강의 지배자", src:"sword.html", badge:"new", tags:["방치형","강화"], cat:"idle",
    desc:"나무 막대기를 강화해서 100강 신화의 검을 만들어요. 파괴 방지권과 차원 도약 장치로 위험을 피하며 끝까지 가보세요.", thumb:"sword"},
-  {id:"pixel", title:"슈퍼 마리오", sub:"", src:"pixel.html", badge:"new", tags:["액션","플랫포머"], cat:"action",
+  {id:"pixel", title:"SUPER PIXEL BROS.", sub:"", src:"pixel.html", badge:"new", tags:["액션","플랫포머"], cat:"action",
    desc:"점프하고, 벽돌을 깨고, 적을 밟으며 깃발까지 달려가는 클래식 픽셀 액션 게임이에요.", thumb:"pixel"}
 ];
 var CATS=[["all","전체"],["action","액션"],["idle","방치형"]];
@@ -260,44 +263,84 @@ function enterPortal(){
   $("gate").hidden=true; $("portal").hidden=false;
   $("run").textContent="새 게임이 추가됐어요!  \u2605  SUPER PIXEL BROS.  \u2605  전설의 검 키우기 : 100강의 지배자  \u2605  뒷산에서 보석 캐기 업데이트  \u2605  게임은 계속 추가돼요";
   renderTabs(); renderGrid();
+  setTimeout(function(){ GAMES.forEach(function(g){ try{ var l=document.createElement("link"); l.rel="prefetch"; l.href=g.src; document.head.appendChild(l); }catch(e){} }); },800);
   var id=(location.hash||"").replace("#","");
   if(id&&GAMES.some(function(g){return g.id===id;})) openGame(id,false);
 }
 $("lock").addEventListener("click",function(){ ss("passed_auth",null); closeGame(true); showGate(); });
 
 /* ============ 플레이어 ============ */
-var playing=null,progTimer=null,pct=0,tipTimer=null;
+var playing=null,progTimer=null,pct=0,tipTimer=null,loadId=0,curFinish=null;
 function setPct(p){ pct=p; $("barFill").style.width=p+"%"; $("pct").textContent=Math.floor(p)+"%"; }
+/* iframe은 열 때마다 새로 만들고, 닫을 때 통째로 제거함
+   → 브라우저 기록에 iframe 이동이 안 쌓이고, 로딩 중인 게임이 '목록' 버튼을 붙잡지 못함 */
+function swapFrame(url){
+  var old=$("frame"), f=document.createElement("iframe");
+  f.id="frame"; f.title="game"; f.setAttribute("allow","fullscreen; autoplay");
+  if(url) f.src=url;
+  old.onload=null; old.parentNode.replaceChild(f,old);
+  return f;
+}
+function frameState(f){
+  try{ var d=f.contentDocument; if(!d) return ""; var h=d.location.href; if(!h||h==="about:blank") return ""; return d.readyState||"complete"; }
+  catch(e){ return "?"; }
+}
+var ignorePop=false;
 function openGame(id,push){
   var g=GAMES.filter(function(x){return x.id===id;})[0]; if(!g) return;
+  clearInterval(progTimer); clearInterval(tipTimer);
   playing=g;
   if(push) history.pushState({g:id},"","#"+id);
   document.body.classList.add("noscroll");
   $("pTitle").textContent=g.title+(g.sub?" : "+g.sub:"");
   $("pl").textContent=g.title;
   $("preload").classList.remove("done"); setPct(0);
-  var ti=0; $("tip").textContent=TIPS[0]; clearInterval(tipTimer); tipTimer=setInterval(function(){ ti=(ti+1)%TIPS.length; $("tip").textContent=TIPS[ti]; },2600);
+  var ti=0; $("tip").textContent=TIPS[0]; tipTimer=setInterval(function(){ ti=(ti+1)%TIPS.length; $("tip").textContent=TIPS[ti]; },2600);
   $("player").hidden=false;
-  var f=$("frame"), loaded=false;
-  f.onload=function(){ if(f.getAttribute("src")==="about:blank") return; loaded=true; clearInterval(progTimer); setPct(100); setTimeout(function(){ $("preload").classList.add("done"); clearInterval(tipTimer); },350); };
-  f.src=g.src;
-  clearInterval(progTimer);
-  progTimer=setInterval(function(){ if(loaded){ clearInterval(progTimer); return; } setPct(Math.min(92,pct+(92-pct)*.08+.6)); },90);
+  var my=++loadId, done=false, ticks=0;
+  function finish(){
+    if(done||my!==loadId) return; done=true; clearInterval(progTimer); setPct(100);
+    setTimeout(function(){ if(my!==loadId) return; $("preload").classList.add("done"); clearInterval(tipTimer); },250);
+  }
+  curFinish=finish;
+  var f=swapFrame(g.src);
+  f.onload=function(){ if(my===loadId&&playing) finish(); };
+  progTimer=setInterval(function(){
+    if(done||my!==loadId){ clearInterval(progTimer); return; }
+    ticks++;
+    var st=frameState(f);
+    /* 다 로드됐거나, 화면 구조(DOM)만 잡혀도 바로 통과. 외부 서버가 느려도 최대 약 6초 뒤엔 무조건 통과 */
+    if(st==="complete"||st==="?"||(st==="interactive"&&ticks>3)||ticks>65){ finish(); return; }
+    setPct(Math.min(92,pct+(92-pct)*.08+.6));
+  },90);
 }
 function closeGame(skipHistory){
   if(!playing&&$("player").hidden) return;
-  playing=null; clearInterval(progTimer); clearInterval(tipTimer);
-  $("frame").onload=null; $("frame").src="about:blank";
+  playing=null; loadId++; curFinish=null; clearInterval(progTimer); clearInterval(tipTimer);
+  /* 화면부터 즉시 닫고, 게임은 그 다음에 제거 */
   $("player").hidden=true; document.body.classList.remove("noscroll");
+  try{ var d=document; if(d.fullscreenElement||d.webkitFullscreenElement){ (d.exitFullscreen||d.webkitExitFullscreen).call(d); } }catch(e){}
+  swapFrame("");
   if(!skipHistory&&location.hash) history.replaceState(null,"",location.pathname+location.search);
 }
-$("pBack").addEventListener("click",function(){ if(history.state&&history.state.g) history.back(); else closeGame(); });
+/* 목록 버튼: 누르는 즉시 닫고, 우리가 쌓은 기록 한 칸만 조용히 되돌림 */
+$("pBack").addEventListener("click",function(){
+  var had=history.state&&history.state.g;
+  closeGame(true);
+  if(had){ ignorePop=true; setTimeout(function(){ ignorePop=false; },800); history.back(); }
+  else if(location.hash) history.replaceState(null,"",location.pathname+location.search);
+});
 window.addEventListener("popstate",function(e){
+  if(ignorePop){ ignorePop=false; closeGame(true); return; }
   if(e.state&&e.state.g&&authed()) openGame(e.state.g,false); else closeGame(true);
 });
+/* 게임 쪽(2차 비밀번호 화면 등)이 "준비됨" 신호를 보내면 로딩 화면을 바로 걷음 */
+window.addEventListener("message",function(e){
+  if(e.origin!==location.origin||e.data!=="gm-ready") return;
+  try{ if(playing&&e.source===$("frame").contentWindow&&curFinish) curFinish(); }catch(x){}
+});
 $("pReload").addEventListener("click",function(){
-  if(!playing) return; var g=playing; $("preload").classList.remove("done"); setPct(0);
-  var f=$("frame"); f.onload=null; f.src="about:blank"; setTimeout(function(){ openGame(g.id,false); },60);
+  if(!playing) return; openGame(playing.id,false);
 });
 var fsEl=document.documentElement;
 var canFS=!!(fsEl.requestFullscreen||fsEl.webkitRequestFullscreen);
