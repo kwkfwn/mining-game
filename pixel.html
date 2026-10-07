@@ -30,6 +30,8 @@ html[data-device=desktop] #hint{display:block}
 .tb.sm{width:44px;height:44px;font-size:14px}
 .tb.a{background:rgba(232,64,156,.28);border-color:#ff8fc8}
 .tb.b{background:rgba(48,80,232,.3);border-color:#9fb4ff}
+#touch .fire{position:fixed;bottom:calc(16px + 64px + 6px + env(safe-area-inset-bottom,0px));right:calc(94px + env(safe-area-inset-right,0px));z-index:5;width:48px;height:48px;font-size:12px;background:rgba(252,120,24,.3);border-color:#ffb060;opacity:.3;transition:opacity .15s}
+#touch .fire.ready{opacity:1;background:rgba(252,88,24,.55)}
 #touch .pause{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));z-index:5;width:40px;height:40px;font-size:13px;opacity:.8}
 #touch .enter{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:calc(10px + env(safe-area-inset-left,0px));z-index:5;width:76px;height:40px;border-radius:20px;font-size:13px;letter-spacing:.04em;background:rgba(255,228,92,.25);border-color:#ffe45c;opacity:.9}
 #touch .stage{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:calc(94px + env(safe-area-inset-left,0px));z-index:5;width:86px;height:40px;border-radius:20px;font-size:13px;background:rgba(80,120,255,.28);border-color:#9fb4ff;opacity:.9}
@@ -40,11 +42,12 @@ html[data-device=desktop] #hint{display:block}
 <div id="touch" aria-hidden="true">
 <div class="pad"><button class="tb" data-k="L" type="button">&#9664;</button><button class="tb sm" data-k="D" type="button">&#9660;</button><button class="tb" data-k="R" type="button">&#9654;</button></div>
 <div class="btns"><button class="tb b" data-k="B" type="button">달리기</button><button class="tb a" data-k="A" type="button">점프</button></div>
+<button class="tb sm fire" data-k="F" type="button">불꽃</button>
 <button class="tb sm pause" data-k="P" type="button">&#10073;&#10073;</button>
 <button class="tb sm enter" data-k="E" type="button">ENTER</button>
 <button class="tb sm stage" data-k="T" type="button">스테이지</button>
 </div>
-<div id="hint">&larr; &rarr; 이동 &nbsp;&middot;&nbsp; Space 점프 &nbsp;&middot;&nbsp; Z / Shift 달리기·불꽃 &nbsp;&middot;&nbsp; &darr; 파이프 &nbsp;&middot;&nbsp; P 일시정지 &nbsp;&middot;&nbsp; T 스테이지 선택</div>
+<div id="hint">&larr; &rarr; 이동 &nbsp;&middot;&nbsp; Space 점프 &nbsp;&middot;&nbsp; Z / Shift 달리기 &nbsp;&middot;&nbsp; F 불꽃 &nbsp;&middot;&nbsp; &darr; 파이프 &nbsp;&middot;&nbsp; P 일시정지 &nbsp;&middot;&nbsp; T 스테이지 선택</div>
 <canvas id="game" width="256" height="240" tabindex="0"></canvas>
 
 <script>
@@ -629,7 +632,7 @@ const held = {}, edge = {};
 const ACT = {
   left: ['ArrowLeft', 'KeyA'], right: ['ArrowRight', 'KeyD'], jump: ['Space', 'ArrowUp', 'KeyW'],
   down: ['ArrowDown', 'KeyS'],
-  run: ['KeyZ', 'KeyX', 'ShiftLeft', 'ShiftRight'], start: ['Enter'], ok: ['Enter', 'Space'], up: ['ArrowUp', 'KeyW'], sel: ['KeyT'], pause: ['KeyP', 'Escape'], mute: ['KeyM'],
+  run: ['KeyZ', 'KeyX', 'ShiftLeft', 'ShiftRight'], fire: ['KeyF'], start: ['Enter'], ok: ['Enter', 'Space'], up: ['ArrowUp', 'KeyW'], sel: ['KeyT'], pause: ['KeyP', 'Escape'], mute: ['KeyM'],
 };
 const codeToAct = {};
 for (const a in ACT) ACT[a].forEach(c => (codeToAct[c] || (codeToAct[c] = [])).push(a));
@@ -645,7 +648,7 @@ const isDown = a => ACT[a].some(c => held[c]);
 /* ------------------------------ 터치 컨트롤 (모바일 모드) ------------------------------ */
 (function () {
   const root = document.getElementById('touch'); if (!root) return;
-  const map = {L: 'ArrowLeft', R: 'ArrowRight', D: 'ArrowDown', A: 'Space', B: 'KeyZ', P: 'KeyP', E: 'Enter', T: 'KeyT'};
+  const map = {L: 'ArrowLeft', R: 'ArrowRight', D: 'ArrowDown', A: 'Space', B: 'KeyZ', F: 'KeyF', P: 'KeyP', E: 'Enter', T: 'KeyT'};
   const press = c => { audio(); if (!held[c]) { held[c] = true; (codeToAct[c] || []).forEach(a => edge[a] = true); } };
   root.querySelectorAll('.tb').forEach(btn => {
     const code = map[btn.dataset.k]; let pid = null;
@@ -913,16 +916,16 @@ function buildLevel(stage) {
  *  별2: 깃대에 닿을 때 화면 TIME이 목표 이상 남아 있기 (= 빨리 깨기)
  *  별3: 그 스테이지에서 먹은 코인이 목표 이상 (왼쪽 위 COIN 숫자)
  *  난이도는 아래 값으로 조절: GOAL_SPEED 클수록 시간 조건이 빡빡, GOAL_COIN_RATIO 클수록 코인 조건이 빡빡 */
-const GOAL_SPEED = 1.5, GOAL_COIN_RATIO = 0.6;
+const GOAL_SPEED = 1.5, GOAL_COIN_RATIO = 0.35;
 function calcGoals(stage) {
   const cycle = Math.floor((stage - 1) / LAYOUTS.length);
   let total = 0;
   for (const it of items) if (it.type === 'coin') total++;
   for (const k in contents) if (contents[k] === 'coin') total++;
-  const ratio = Math.min(0.9, GOAL_COIN_RATIO + 0.05 * cycle);
+  const ratio = Math.min(0.6, GOAL_COIN_RATIO + 0.03 * cycle);
   const speed = GOAL_SPEED + 0.1 * Math.min(cycle, 5);              // 평균 px/프레임 기준
   const used = Math.ceil(FLAG_C * TS / speed / 24);                 // 24프레임마다 TIME 1 감소
-  G.goal = {time: Math.max(0, 400 - used), coins: Math.max(1, Math.ceil(total * ratio))};
+  G.goal = {time: Math.max(0, 400 - used), coins: Math.max(3, Math.ceil(total * ratio))};
 }
 
 /* 파이프 아래 지하 보너스 방: 코인, 별, 1UP 버섯이 있는 작은 방. 끝의 파이프를 밟으면 원래 자리로 돌아간다 */
@@ -1040,6 +1043,7 @@ function killHero(fell) {
 }
 
 /* ------------------------------ 업데이트 ------------------------------ */
+const fireBtn = document.querySelector('#touch .fire'); let fireOn = false;
 function update() {
   G.frame++;
   if (edge.mute) G.mute = !G.mute;
@@ -1061,6 +1065,7 @@ function update() {
     case 'gameover': G.t++; if (G.t > 60 && (edge.start || edge.jump)) toTitle(); break;
   }
   for (const k in edge) delete edge[k];
+  if (fireBtn) { const on = !!(hero && hero.power === 2); if (on !== fireOn) { fireOn = on; fireBtn.classList.toggle('ready', on); } }
 }
 
 function updatePlaying() {
@@ -1122,7 +1127,7 @@ function updateHero() {
   h.vy = Math.min(h.vy + ((h.vy < 0 && jh) ? 0.19 : 0.52), 6);
 
   /* 불꽃 발사 */
-  if (edge.run && h.power === 2 && fireballs.length < 2) {
+  if ((edge.run || edge.fire) && h.power === 2 && fireballs.length < 2) {
     fireballs.push({x: h.dir > 0 ? h.x + h.w : h.x - 8, y: h.y + 10, w: 8, h: 8, vx: h.dir * 3.4, vy: 1, dir: h.dir}); sfx('fire');
   }
 
