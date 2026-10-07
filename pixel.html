@@ -2,9 +2,10 @@
 <html lang="ko">
 <head>
 <script>(function(){try{if(sessionStorage.getItem('passed_auth')!=='9f4a707e7991c314131369a8'){(window.top||window).location.replace('index.html');}}catch(e){}})();</script>
+<script>(function(){try{var m=sessionStorage.getItem('device_mode');if(m==='mobile'||m==='desktop')document.documentElement.setAttribute('data-device',m);}catch(e){}})();</script>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>SUPER PIXEL BROS.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,8 +15,32 @@
   body { display: flex; align-items: center; justify-content: center; }
   canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; outline: none; }
 </style>
+<style id="dev-css">
+/* ===== 기기별 화면 (모바일 / 컴퓨터) ===== */
+#touch,#hint{display:none}
+html[data-device=mobile] body{touch-action:none;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;box-sizing:border-box}
+html[data-device=mobile] #touch{display:block}
+html[data-device=desktop] #hint{display:block}
+@media (orientation:portrait){html[data-device=mobile] body{padding-bottom:130px}}
+#touch .pad,#touch .btns{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:5;display:flex;gap:8px;align-items:center}
+#touch .pad{left:calc(12px + env(safe-area-inset-left,0px))}
+#touch .btns{right:calc(12px + env(safe-area-inset-right,0px))}
+.tb{width:64px;height:64px;border-radius:50%;border:3px solid rgba(255,255,255,.55);background:rgba(255,255,255,.14);color:#fff;font:900 15px/1 'Malgun Gothic',sans-serif;touch-action:none;-webkit-user-select:none;user-select:none;display:flex;align-items:center;justify-content:center;padding:0;-webkit-tap-highlight-color:transparent;outline:none}
+.tb.on{background:rgba(255,228,92,.5);border-color:#ffe45c;color:#2a1300}
+.tb.sm{width:44px;height:44px;font-size:14px}
+.tb.a{background:rgba(232,64,156,.28);border-color:#ff8fc8}
+.tb.b{background:rgba(48,80,232,.3);border-color:#9fb4ff}
+#touch .pause{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));z-index:5;width:40px;height:40px;font-size:13px;opacity:.8}
+#hint{position:fixed;left:0;right:0;bottom:6px;text-align:center;color:#7d88c8;font:12px 'Malgun Gothic','Apple SD Gothic Neo',sans-serif;pointer-events:none}
+</style>
 </head>
 <body>
+<div id="touch" aria-hidden="true">
+<div class="pad"><button class="tb" data-k="L" type="button">&#9664;</button><button class="tb sm" data-k="D" type="button">&#9660;</button><button class="tb" data-k="R" type="button">&#9654;</button></div>
+<div class="btns"><button class="tb b" data-k="B" type="button">달리기</button><button class="tb a" data-k="A" type="button">점프</button></div>
+<button class="tb sm pause" data-k="P" type="button">&#10073;&#10073;</button>
+</div>
+<div id="hint">&larr; &rarr; 이동 &nbsp;&middot;&nbsp; Space 점프 &nbsp;&middot;&nbsp; Z / Shift 달리기·불꽃 &nbsp;&middot;&nbsp; &darr; 파이프 &nbsp;&middot;&nbsp; P 일시정지</div>
 <canvas id="game" width="256" height="240" tabindex="0"></canvas>
 
 <script>
@@ -612,6 +637,21 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => { held[e.code] = false; });
 addEventListener('blur', () => { for (const k in held) held[k] = false; });
 const isDown = a => ACT[a].some(c => held[c]);
+
+/* ------------------------------ 터치 컨트롤 (모바일 모드) ------------------------------ */
+(function () {
+  const root = document.getElementById('touch'); if (!root) return;
+  const map = {L: 'ArrowLeft', R: 'ArrowRight', D: 'ArrowDown', A: 'Space', B: 'KeyZ', P: 'KeyP'};
+  const press = c => { audio(); if (!held[c]) { held[c] = true; (codeToAct[c] || []).forEach(a => edge[a] = true); } };
+  root.querySelectorAll('.tb').forEach(btn => {
+    const code = map[btn.dataset.k]; let pid = null;
+    btn.addEventListener('pointerdown', e => { e.preventDefault(); pid = e.pointerId; try { btn.setPointerCapture(pid); } catch (_) {} btn.classList.add('on'); press(code); });
+    const end = () => { if (pid === null) return; pid = null; btn.classList.remove('on'); held[code] = false; };
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => btn.addEventListener(t, end));
+    btn.addEventListener('contextmenu', e => e.preventDefault());
+  });
+  document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+})();
 
 /* ------------------------------ 게임 상태 ------------------------------ */
 const G = {mode: 'title', lives: 3, score: 0, coins: 0, time: 400, timeT: 0, freeze: 0, frame: 0, camX: 0,
@@ -1259,9 +1299,11 @@ function render() {
 
 /* ------------------------------ 메인 루프 ------------------------------ */
 function fit() {
-  const raw = Math.min(innerWidth / VW, innerHeight / VH);
+  const dev = document.documentElement.getAttribute('data-device');
+  const reserve = dev === 'mobile' ? (innerHeight > innerWidth ? 130 : 0) : (dev === 'desktop' ? 26 : 0);
+  const raw = Math.min(innerWidth / VW, (innerHeight - reserve) / VH);
   /* 터치 기기에서는 화면에 더 꽉 차게(0.25 단위), PC는 원래대로 정수 배율 */
-  const s = (window.matchMedia && matchMedia('(pointer:coarse)').matches) ? Math.max(1, Math.floor(raw * 4) / 4) : Math.max(1, Math.floor(raw));
+  const s = (document.documentElement.getAttribute('data-device') === 'mobile' || (window.matchMedia && matchMedia('(pointer:coarse)').matches)) ? Math.max(1, Math.floor(raw * 4) / 4) : Math.max(1, Math.floor(raw));
   canvas.style.width = VW * s + 'px'; canvas.style.height = VH * s + 'px';
 }
 addEventListener('resize', fit); fit(); canvas.focus();
