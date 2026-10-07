@@ -31,6 +31,8 @@ html[data-device=desktop] #hint{display:block}
 .tb.a{background:rgba(232,64,156,.28);border-color:#ff8fc8}
 .tb.b{background:rgba(48,80,232,.3);border-color:#9fb4ff}
 #touch .pause{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));z-index:5;width:40px;height:40px;font-size:13px;opacity:.8}
+#touch .enter{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:calc(10px + env(safe-area-inset-left,0px));z-index:5;width:76px;height:40px;border-radius:20px;font-size:13px;letter-spacing:.04em;background:rgba(255,228,92,.25);border-color:#ffe45c;opacity:.9}
+#touch .stage{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:calc(94px + env(safe-area-inset-left,0px));z-index:5;width:86px;height:40px;border-radius:20px;font-size:13px;background:rgba(80,120,255,.28);border-color:#9fb4ff;opacity:.9}
 #hint{position:fixed;left:0;right:0;bottom:6px;text-align:center;color:#7d88c8;font:12px 'Malgun Gothic','Apple SD Gothic Neo',sans-serif;pointer-events:none}
 </style>
 </head>
@@ -39,8 +41,10 @@ html[data-device=desktop] #hint{display:block}
 <div class="pad"><button class="tb" data-k="L" type="button">&#9664;</button><button class="tb sm" data-k="D" type="button">&#9660;</button><button class="tb" data-k="R" type="button">&#9654;</button></div>
 <div class="btns"><button class="tb b" data-k="B" type="button">달리기</button><button class="tb a" data-k="A" type="button">점프</button></div>
 <button class="tb sm pause" data-k="P" type="button">&#10073;&#10073;</button>
+<button class="tb sm enter" data-k="E" type="button">ENTER</button>
+<button class="tb sm stage" data-k="T" type="button">스테이지</button>
 </div>
-<div id="hint">&larr; &rarr; 이동 &nbsp;&middot;&nbsp; Space 점프 &nbsp;&middot;&nbsp; Z / Shift 달리기·불꽃 &nbsp;&middot;&nbsp; &darr; 파이프 &nbsp;&middot;&nbsp; P 일시정지</div>
+<div id="hint">&larr; &rarr; 이동 &nbsp;&middot;&nbsp; Space 점프 &nbsp;&middot;&nbsp; Z / Shift 달리기·불꽃 &nbsp;&middot;&nbsp; &darr; 파이프 &nbsp;&middot;&nbsp; P 일시정지 &nbsp;&middot;&nbsp; T 스테이지 선택</div>
 <canvas id="game" width="256" height="240" tabindex="0"></canvas>
 
 <script>
@@ -625,7 +629,7 @@ const held = {}, edge = {};
 const ACT = {
   left: ['ArrowLeft', 'KeyA'], right: ['ArrowRight', 'KeyD'], jump: ['Space', 'ArrowUp', 'KeyW'],
   down: ['ArrowDown', 'KeyS'],
-  run: ['KeyZ', 'KeyX', 'ShiftLeft', 'ShiftRight'], start: ['Enter'], pause: ['KeyP', 'Escape'], mute: ['KeyM'],
+  run: ['KeyZ', 'KeyX', 'ShiftLeft', 'ShiftRight'], start: ['Enter'], ok: ['Enter', 'Space'], up: ['ArrowUp', 'KeyW'], sel: ['KeyT'], pause: ['KeyP', 'Escape'], mute: ['KeyM'],
 };
 const codeToAct = {};
 for (const a in ACT) ACT[a].forEach(c => (codeToAct[c] || (codeToAct[c] = [])).push(a));
@@ -641,7 +645,7 @@ const isDown = a => ACT[a].some(c => held[c]);
 /* ------------------------------ 터치 컨트롤 (모바일 모드) ------------------------------ */
 (function () {
   const root = document.getElementById('touch'); if (!root) return;
-  const map = {L: 'ArrowLeft', R: 'ArrowRight', D: 'ArrowDown', A: 'Space', B: 'KeyZ', P: 'KeyP'};
+  const map = {L: 'ArrowLeft', R: 'ArrowRight', D: 'ArrowDown', A: 'Space', B: 'KeyZ', P: 'KeyP', E: 'Enter', T: 'KeyT'};
   const press = c => { audio(); if (!held[c]) { held[c] = true; (codeToAct[c] || []).forEach(a => edge[a] = true); } };
   root.querySelectorAll('.tb').forEach(btn => {
     const code = map[btn.dataset.k]; let pid = null;
@@ -655,13 +659,114 @@ const isDown = a => ACT[a].some(c => held[c]);
 
 /* ------------------------------ 게임 상태 ------------------------------ */
 const G = {mode: 'title', lives: 3, score: 0, coins: 0, time: 400, timeT: 0, freeze: 0, frame: 0, camX: 0,
-  paused: false, mute: false, t: 0, phase: 0, flagY: 40, deadT: 0, bumpOff: {}, castleT: 0, bonusT: 0, stage: 1, high: 0, warpCooldown: 0};
+  paused: false, mute: false, t: 0, phase: 0, flagY: 40, deadT: 0, bumpOff: {}, castleT: 0, bonusT: 0, stage: 1, high: 0, warpCooldown: 0, stageCoins: 0, result: null, goal: {time: 0, coins: 0}};
 let map, contents, hero, enemies = [], items = [], coinPops = [], fireballs = [], particles = [], popups = [], fxs = [], bumps = [];
 let warpPipe = null, surfaceSave = null, underExit = null;
 const HIGH_KEY = 'superPixelBrosHighScore';
 function loadHigh() { try { return parseInt(localStorage.getItem(HIGH_KEY) || '0', 10) || 0; } catch (e) { return 0; } }
 function saveHigh(v) { try { localStorage.setItem(HIGH_KEY, String(v)); } catch (e) { /* 저장 불가 환경이면 무시 */ } }
 G.high = loadHigh();
+
+/* ------------------------------ 스테이지 선택 / 진행 저장 ------------------------------ */
+const UNLOCK_ALL = false;                 // true로 바꾸면 모든 스테이지가 처음부터 열려요
+const PROG_KEY = 'superPixelBrosProgress';
+function loadProg() {
+  const out = {};
+  try {
+    const o = JSON.parse(localStorage.getItem(PROG_KEY) || '{}');
+    if (Array.isArray(o.cleared)) o.cleared.filter(n => n > 0).forEach(n => { out[n] = 1; });   // 예전 저장분 = 별 1개
+    if (o.stars && typeof o.stars === 'object') for (const k in o.stars) {
+      const n = +k, v = Math.min(3, Math.max(0, (+o.stars[k]) | 0));
+      if (n > 0 && v > 0) out[n] = Math.max(out[n] || 0, v);
+    }
+  } catch (e) { /* 저장 불가 환경이면 무시 */ }
+  return out;
+}
+const bestStars = loadProg();                                   // {스테이지번호: 별 개수(1~3)}
+const cleared = new Set(Object.keys(bestStars).map(Number));
+function saveProg() { try { localStorage.setItem(PROG_KEY, JSON.stringify({cleared: [...cleared], stars: bestStars})); } catch (e) { /* 저장 불가 환경이면 무시 */ } }
+const maxCleared = () => cleared.size ? Math.max(...cleared) : 0;
+const unlockedMax = () => UNLOCK_ALL ? 9999 : maxCleared() + 1;
+function markCleared(s, n) { cleared.add(s); if (n > (bestStars[s] || 0)) { bestStars[s] = n; saveProg(); } }
+const stageLabelOf = s => (Math.floor((s - 1) / LAYOUTS.length) + 1) + '-' + (((s - 1) % LAYOUTS.length) + 1);
+let selStage = 1, selPrev = 'title';
+const SEL_X = [40, 98, 156, 214], SEL_Y = [54, 100, 146, 192], PER_PAGE = 16;
+const selPages = () => Math.max(1, Math.ceil((UNLOCK_ALL ? 16 : unlockedMax()) / PER_PAGE));
+function openSelect() {
+  selPrev = G.mode; selStage = Math.min(Math.max(1, maxCleared() + 1), unlockedMax()); G.mode = 'select'; sfx('coin');
+}
+function closeSelect() { G.mode = selPrev; }
+function pickStage(s) {
+  if (s > unlockedMax()) return;
+  G.stage = s; G.lives = 3; G.score = 0; G.coins = 0; startIntermission();
+}
+function updateSelect() {
+  const un = unlockedMax();
+  if (edge.left) selStage = Math.max(1, selStage - 1);
+  if (edge.right) selStage = Math.min(un, selStage + 1);
+  if (edge.down) selStage = Math.min(un, selStage + 4);
+  if (edge.up) selStage = Math.max(1, selStage - 4);
+  if (edge.ok) pickStage(selStage);
+  else if (edge.pause || edge.sel) closeSelect();
+}
+function selHit(x, y) {
+  const page = Math.floor((selStage - 1) / PER_PAGE);
+  for (let i = 0; i < PER_PAGE; i++) {
+    const cx = SEL_X[i % 4], cy = SEL_Y[Math.floor(i / 4)];
+    if ((x - cx) * (x - cx) + (y - cy) * (y - cy) <= 20 * 20) return page * PER_PAGE + i + 1;
+  }
+  return 0;
+}
+function tapAt(x, y) {
+  if (G.mode === 'title') { if (y >= 178 && y <= 198) openSelect(); return; }
+  if (G.mode !== 'select') return;
+  if (x < 64 && y < 26) { closeSelect(); return; }
+  const pages = selPages(), page = Math.floor((selStage - 1) / PER_PAGE);
+  if (pages > 1 && y > 216) {
+    if (x < 70 && page > 0) selStage = (page - 1) * PER_PAGE + 1;
+    else if (x > 186 && page < pages - 1) selStage = Math.min(unlockedMax(), (page + 1) * PER_PAGE + 1);
+    return;
+  }
+  const s = selHit(x, y);
+  if (s) { if (s <= unlockedMax()) { selStage = s; pickStage(s); } }
+}
+canvas.addEventListener('pointerdown', e => {
+  const r = canvas.getBoundingClientRect(); if (!r.width) return;
+  audio(); tapAt((e.clientX - r.left) * VW / r.width, (e.clientY - r.top) * VH / r.height);
+});
+function starPath(cx, cy, R, r) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, d = i % 2 ? r : R, x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+  ctx.closePath();
+}
+function drawSelect() {
+  ctx.fillStyle = '#0a0d2a'; ctx.fillRect(0, 0, VW, VH);
+  ctx.fillStyle = '#1a2260'; ctx.fillRect(0, 0, VW, 2); ctx.fillRect(0, VH - 2, VW, 2);
+  txtShadow('STAGE SELECT', 128, 8, '#fcd800', 8, 'center');
+  txt('< BACK', 6, 10, '#9fb0e6', 6);
+  txt('TAP A STAGE', 128, 22, '#9fb0e6', 6, 'center');
+  const un = unlockedMax(), pages = selPages(), page = Math.floor((selStage - 1) / PER_PAGE);
+  for (let i = 0; i < PER_PAGE; i++) {
+    const s = page * PER_PAGE + i + 1, cx = SEL_X[i % 4], cy = SEL_Y[Math.floor(i / 4)];
+    const done = cleared.has(s), open = s <= un, cur = s === selStage;
+    ctx.beginPath(); ctx.arc(cx, cy, 16, 0, Math.PI * 2);
+    ctx.fillStyle = done ? '#f8a020' : open ? '#3050e8' : '#242842'; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = done ? '#fcd800' : open ? '#98b0ff' : '#3a4066'; ctx.stroke();
+    if (cur) { ctx.beginPath(); ctx.arc(cx, cy, 19.5, 0, Math.PI * 2); ctx.lineWidth = 2; ctx.strokeStyle = G.frame % 40 < 28 ? '#fcfcfc' : '#fc9838'; ctx.stroke(); }
+    if (open) { const lb = stageLabelOf(s); txt(lb, cx, cy - (lb.length > 3 ? 3 : 4), '#fcfcfc', lb.length > 3 ? 6 : 8, 'center'); }
+    else { rect(ctx, '#5a6296', cx - 6, cy - 2, 12, 9); ctx.beginPath(); ctx.arc(cx, cy - 2, 4, Math.PI, 0); ctx.lineWidth = 2; ctx.strokeStyle = '#5a6296'; ctx.stroke(); }
+    const got = bestStars[s] || 0;
+    for (let k = 0; k < 3; k++) {
+      starPath(cx - 14 + k * 14, cy + 23, 5, 2.2);
+      if (k < got) { ctx.fillStyle = '#fcd800'; ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = '#7c3c00'; ctx.stroke(); }
+      else { ctx.lineWidth = 1; ctx.strokeStyle = open ? '#4a5aa8' : '#2c3150'; ctx.stroke(); }
+    }
+  }
+  if (pages > 1) {
+    txt('<', 24, 224, page > 0 ? '#fcfcfc' : '#3a4066', 8, 'center'); txt('>', 232, 224, page < pages - 1 ? '#fcfcfc' : '#3a4066', 8, 'center');
+    txt((page + 1) + '/' + pages, 128, 226, '#9fb0e6', 6, 'center');
+  }
+}
 
 /* ------------------------------ 레벨 ------------------------------ */
 /* 레벨을 지을 때 쓰는 공용 도구 모음 (지상 스테이지 4종 + 지하 보너스 방이 함께 사용) */
@@ -803,6 +908,23 @@ function buildLevel(stage) {
   warpPipe = built.warp || null;
   buildScenery(built.W);
 }
+/* ---- 별 3개 달성조건 (스테이지마다 다름) ----
+ *  별1: 스테이지 클리어
+ *  별2: 깃대에 닿을 때 화면 TIME이 목표 이상 남아 있기 (= 빨리 깨기)
+ *  별3: 그 스테이지에서 먹은 코인이 목표 이상 (왼쪽 위 COIN 숫자)
+ *  난이도는 아래 값으로 조절: GOAL_SPEED 클수록 시간 조건이 빡빡, GOAL_COIN_RATIO 클수록 코인 조건이 빡빡 */
+const GOAL_SPEED = 1.5, GOAL_COIN_RATIO = 0.6;
+function calcGoals(stage) {
+  const cycle = Math.floor((stage - 1) / LAYOUTS.length);
+  let total = 0;
+  for (const it of items) if (it.type === 'coin') total++;
+  for (const k in contents) if (contents[k] === 'coin') total++;
+  const ratio = Math.min(0.9, GOAL_COIN_RATIO + 0.05 * cycle);
+  const speed = GOAL_SPEED + 0.1 * Math.min(cycle, 5);              // 평균 px/프레임 기준
+  const used = Math.ceil(FLAG_C * TS / speed / 24);                 // 24프레임마다 TIME 1 감소
+  G.goal = {time: Math.max(0, 400 - used), coins: Math.max(1, Math.ceil(total * ratio))};
+}
+
 /* 파이프 아래 지하 보너스 방: 코인, 별, 1UP 버섯이 있는 작은 방. 끝의 파이프를 밟으면 원래 자리로 돌아간다 */
 function buildUnderground(stage) {
   const Wl = 42, mapArr = new Uint8Array(Wl * ROWS), contentsObj = {}, itemsList = [];
@@ -860,17 +982,17 @@ function newHero() {
     walkT: 0, climbT: 0, combo: 0, morph: 0, morphKind: '', dead: false, fell: false, hidden: false, prevBottom: 0};
 }
 function resetLevel() {
-  buildLevel(G.stage); hero = newHero();
+  buildLevel(G.stage); hero = newHero(); calcGoals(G.stage); G.stageCoins = 0; G.result = null;
   coinPops = []; fireballs = []; particles = []; popups = []; fxs = []; bumps = [];
   G.camX = 0; G.time = 400; G.timeT = 0; G.freeze = 0; G.flagY = 40; G.deadT = 0; G.castleT = 0; G.bumpOff = {};
   G.warpCooldown = 0; surfaceSave = null; underExit = null;
 }
-function newGame() { G.stage = 1; G.lives = 3; G.score = 0; G.coins = 0; startIntermission(); }
+function newGame() { G.stage = Math.min(maxCleared() + 1, unlockedMax()); G.lives = 3; G.score = 0; G.coins = 0; startIntermission(); }
 function nextStage() { G.stage++; resetLevel(); G.mode = 'intermission'; G.t = 0; }
 function startIntermission() { resetLevel(); G.mode = 'intermission'; G.t = 0; }
 function toTitle() { resetLevel(); G.mode = 'title'; }
 const addScore = (n, x, y) => { G.score += n; if (x !== undefined) popups.push({x, y, t: 0, text: String(n)}); };
-function getCoin() { G.coins++; if (G.coins >= 100) { G.coins -= 100; G.lives++; sfx('oneup'); } G.score += 200; sfx('coin'); }
+function getCoin() { G.coins++; G.stageCoins++; if (G.coins >= 100) { G.coins -= 100; G.lives++; sfx('oneup'); } G.score += 200; sfx('coin'); }
 
 /* ------------------------------ 블록 / 아이템 ------------------------------ */
 function hitBlock(c, r) {
@@ -921,7 +1043,9 @@ function killHero(fell) {
 function update() {
   G.frame++;
   if (edge.mute) G.mute = !G.mute;
+  if (edge.sel && (G.mode === 'title' || G.mode === 'win' || G.mode === 'gameover' || (G.mode === 'playing' && G.paused))) { openSelect(); delete edge.sel; delete edge.ok; delete edge.start; delete edge.jump; }
   switch (G.mode) {
+    case 'select': updateSelect(); break;
     case 'title': if (edge.start || edge.jump) newGame(); break;
     case 'intermission': if (++G.t >= 110) { G.mode = 'playing'; } break;
     case 'playing':
@@ -933,7 +1057,7 @@ function update() {
     case 'flag': updateFlag(); cameraFollow(); updateMisc(); break;
     case 'castle': updateCastle(); cameraFollow(); updateMisc(); break;
     case 'clear': updateClear(); updateMisc(); break;
-    case 'win': if (edge.start) nextStage(); updateMisc(); break;
+    case 'win': if (edge.start || edge.jump) nextStage(); updateMisc(); break;
     case 'gameover': G.t++; if (G.t > 60 && (edge.start || edge.jump)) toTitle(); break;
   }
   for (const k in edge) delete edge[k];
@@ -1137,6 +1261,8 @@ function updateDying() {
 /* ---- 깃대 / 클리어 연출 ---- */
 function startFlag() {
   const h = hero; G.mode = 'flag'; G.phase = 0; h.vx = 0; h.vy = 0; h.climbT = 0;
+  const timeOk = G.time >= G.goal.time, coinOk = G.stageCoins >= G.goal.coins;
+  G.result = {time: G.time, coins: G.stageCoins, timeOk, coinOk, stars: 1 + (timeOk ? 1 : 0) + (coinOk ? 1 : 0)};
   const feet = Math.min(h.y + h.h, BASE_Y);
   const pts = feet <= 64 ? 5000 : feet <= 96 ? 2000 : feet <= 128 ? 800 : feet <= 160 ? 400 : 100;
   addScore(pts, POLE_X + 8, feet - 16);
@@ -1158,7 +1284,7 @@ function updateCastle() {
   const h = hero; h.vx = 1.3; h.dir = 1; h.vy = Math.min(h.vy + 0.52, 6);
   const r = moveEntity(h); h.onGround = r.landed; if (r.landed) h.vy = 0;
   if (h.onGround) h.walkT += 0.18;
-  if (h.x >= DOOR_X - 6) { h.hidden = true; G.mode = 'clear'; G.t = 0; G.castleT = 0; }
+  if (h.x >= DOOR_X - 6) { h.hidden = true; G.mode = 'clear'; markCleared(G.stage, G.result ? G.result.stars : 1); G.t = 0; G.castleT = 0; }
 }
 function updateClear() {
   G.t++; G.castleT++;
@@ -1262,7 +1388,28 @@ function drawWorld() {
 }
 
 function stageLabel() { return (Math.floor((G.stage - 1) / LAYOUTS.length) + 1) + '-' + (((G.stage - 1) % LAYOUTS.length) + 1); }
+function goalState() {
+  const r = G.result, g = G.goal;
+  return {
+    clear: r ? 'ok' : 'pending',
+    speed: r ? (r.timeOk ? 'ok' : 'fail') : (G.time >= g.time ? 'pending' : 'fail'),
+    coin: G.stageCoins >= g.coins ? 'ok' : (r ? 'fail' : 'pending'),
+  };
+}
+function drawGoals() {
+  const st = goalState(), g = G.goal;
+  ctx.fillStyle = 'rgba(0,0,0,0.38)'; ctx.fillRect(4, 26, 90, 28);
+  const rows = [['CLEAR', st.clear], ['TIME ' + g.time + '+', st.speed], ['COIN ' + Math.min(G.stageCoins, 99) + '/' + g.coins, st.coin]];
+  rows.forEach(([label, state], i) => {
+    const y = 28 + i * 8;
+    starPath(11, y + 3, 3.6, 1.6);
+    if (state === 'ok') { ctx.fillStyle = '#fcd800'; ctx.fill(); }
+    ctx.lineWidth = 1; ctx.strokeStyle = state === 'ok' ? '#7c3c00' : state === 'fail' ? '#f85858' : '#fcfcfc'; ctx.stroke();
+    txtShadow(label, 19, y, state === 'ok' ? '#fcd800' : state === 'fail' ? '#f85858' : '#fcfcfc', 6, 'left');
+  });
+}
 function drawHUD() {
+  if (G.mode !== 'title' && G.mode !== 'gameover') drawGoals();
   txt('HERO', 24, 8); txt(String(G.score).padStart(6, '0'), 24, 16);
   if (Math.floor(G.frame / 12) % 3 !== 2) rect(ctx, '#f8d820', 88, 16, 4, 8);
   txt('x' + String(G.coins).padStart(2, '0'), 96, 16);
@@ -1271,6 +1418,7 @@ function drawHUD() {
 }
 
 function render() {
+  if (G.mode === 'select') { drawSelect(); return; }
   if (G.mode === 'intermission' || G.mode === 'gameover') {
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, VW, VH);
     if (G.mode === 'intermission') {
@@ -1288,12 +1436,22 @@ function render() {
     txt('LEFT/RIGHT MOVE   DOWN ENTER PIPE', 128, 140, '#fcfcfc', 6, 'center');
     txt('SPACE  JUMP (HOLD=HIGH)', 128, 150, '#fcfcfc', 8, 'center');
     txt('Z / SHIFT  RUN + FIRE', 128, 162, '#fcfcfc', 8, 'center'); txt('P  PAUSE     M  SOUND', 128, 174, '#fcfcfc', 8, 'center');
+    txtShadow('T  STAGE SELECT', 128, 188, '#9fd0ff', 8, 'center'); if (maxCleared() > 0) txtShadow('CONTINUE ' + stageLabelOf(Math.min(maxCleared() + 1, unlockedMax())), 128, 200, '#fcd800', 8, 'center');
   }
   if (G.paused && G.mode === 'playing') txtShadow('PAUSE', 128, 112, '#fcfcfc', 8, 'center');
   if (G.mode === 'win') {
-    ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(16, 60, 224, 104);
-    txtShadow('COURSE CLEAR!', 128, 84, '#fcfcfc', 16, 'center'); txtShadow('SCORE ' + String(G.score).padStart(6, '0'), 128, 116, '#fc9838', 8, 'center');
+    const r = G.result || {stars: 1, time: 0, coins: 0};
+    ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(16, 58, 224, 122);
+    txtShadow('COURSE CLEAR!', 128, 66, '#fcfcfc', 16, 'center');
+    for (let k = 0; k < 3; k++) {
+      starPath(98 + k * 30, 98, 11, 4.8);
+      if (k < r.stars) { ctx.fillStyle = '#fcd800'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#7c3c00'; ctx.stroke(); }
+      else { ctx.lineWidth = 1.5; ctx.strokeStyle = '#6a7098'; ctx.stroke(); }
+    }
+    txt('TIME ' + r.time + '/' + G.goal.time + '  COIN ' + r.coins + '/' + G.goal.coins, 128, 116, '#9fd0ff', 6, 'center');
+    txtShadow('SCORE ' + String(G.score).padStart(6, '0'), 128, 128, '#fc9838', 8, 'center');
     if (G.frame % 60 < 40) txtShadow('PRESS ENTER', 128, 148, '#fcfcfc', 8, 'center');
+    txt('T  STAGE SELECT', 128, 162, '#9fd0ff', 6, 'center');
   }
 }
 
