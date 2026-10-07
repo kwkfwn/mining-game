@@ -121,6 +121,40 @@ button{font-family:inherit;cursor:pointer;}
 #tip{font-size:13px;color:var(--muted);max-width:360px;min-height:20px;}
 @media (max-width:560px){.logo b{font-size:24px;}.logo svg{width:38px;height:38px;}.grid{grid-template-columns:1fr;}.top .gbtn.sm{padding:6px 10px;}}
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+
+/* ---------- 기기 선택 ---------- */
+#device{min-height:100%;display:flex;align-items:center;justify-content:center;padding:calc(24px + var(--top)) 18px calc(24px + var(--bot));position:relative;overflow:hidden;}
+.dcard{max-width:520px;}
+.dcard h2{margin:14px 0 4px;font-size:21px;font-weight:900;text-shadow:0 2px 0 #000a;}
+.dcard p{margin:0 0 4px;}
+.dopts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+.dopt{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 10px 16px;border-radius:18px;color:var(--text);border:3px solid #6b7bff;
+  background:linear-gradient(180deg,#1c2566,#0f1547);box-shadow:inset 0 2px 0 rgba(255,255,255,.25),0 8px 20px rgba(0,0,0,.5);transition:transform .12s,border-color .15s,box-shadow .15s;}
+.dopt:hover{transform:translateY(-4px);border-color:var(--yellow);box-shadow:inset 0 2px 0 rgba(255,255,255,.3),0 14px 28px rgba(0,0,0,.55),0 0 24px rgba(255,228,92,.4);}
+.dopt:active{transform:translateY(1px) scale(.98);}
+.dopt svg{width:64px;height:64px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.45));}
+.dopt b{font-size:20px;font-weight:900;text-shadow:0 2px 0 #000a;}
+.dopt span{word-break:keep-all;font-size:12px;font-weight:700;color:var(--muted);line-height:1.4;}
+.dopt .rec{position:absolute;top:-11px;right:10px;padding:2px 10px;border-radius:99px;font-style:normal;font-weight:900;font-size:11px;letter-spacing:.08em;color:#3a1a02;background:linear-gradient(#fff6b0,#ffb52e);box-shadow:0 2px 6px rgba(0,0,0,.45);}
+.dnote{margin-top:14px;font-size:12px;color:#6f7fc8;}
+.topbtns{display:flex;gap:8px;align-items:center;}
+/* ---------- 기기별 화면 ---------- */
+html[data-device=mobile] .wrap{max-width:480px;padding:16px 12px calc(32px + var(--bot));}
+html[data-device=mobile] .grid{grid-template-columns:1fr;gap:16px;}
+html[data-device=mobile] .card:hover{transform:none;border-color:#6b7bff;box-shadow:inset 0 2px 0 rgba(255,255,255,.25),0 10px 26px rgba(0,0,0,.55);}
+html[data-device=mobile] .card:hover .thumb svg{transform:none;}
+html[data-device=mobile] .thumb .over{display:none;}
+html[data-device=mobile] .sectionHead h2{font-size:19px;}
+html[data-device=mobile] .gbtn{min-height:44px;}
+html[data-device=mobile] .gbtn.sm{min-height:36px;}
+html[data-device=mobile] .tab{padding:8px 16px;}
+html[data-device=mobile] .pstage{background:#05061a;}
+html[data-device=mobile] #frame{left:50%;right:auto;width:min(100%,480px);transform:translateX(-50%);}
+html[data-device=mobile] #tip{display:block;}
+html[data-device=desktop] .wrap{max-width:1280px;padding:28px 28px 48px;}
+html[data-device=desktop] .grid{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:26px;}
+html[data-device=desktop] .card,html[data-device=desktop] .tab,html[data-device=desktop] .gbtn{cursor:pointer;}
+@media (max-width:360px){.dopts{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -138,11 +172,26 @@ button{font-family:inherit;cursor:pointer;}
   </div>
 </section>
 
+<!-- 기기 선택 -->
+<section id="device" hidden>
+  <div class="rays"></div>
+  <div class="gcard dcard">
+    <div class="logo" id="dlogo"></div>
+    <h2>어떤 기기로 플레이하나요?</h2>
+    <p>선택한 기기에 맞춰 게임 화면이 바뀌어요</p>
+    <div class="dopts">
+      <button class="dopt" data-m="mobile" type="button"><i class="rec" hidden>추천</i><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="18" y="4" width="28" height="56" rx="7" fill="#1a2260" stroke="#ffe45c" stroke-width="3"/><rect x="22" y="11" width="20" height="38" rx="2" fill="#5c94fc"/><circle cx="32" cy="54.5" r="2.6" fill="#ffe45c"/><rect x="28" y="7" width="8" height="2" rx="1" fill="#ffe45c"/></svg><b>모바일</b><span>터치 · 세로 화면<br>화면 속 버튼 조작</span></button>
+      <button class="dopt" data-m="desktop" type="button"><i class="rec" hidden>추천</i><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="9" width="56" height="35" rx="5" fill="#1a2260" stroke="#ffe45c" stroke-width="3"/><rect x="9" y="14" width="46" height="25" rx="2" fill="#5c94fc"/><rect x="28" y="44" width="8" height="8" fill="#ffe45c"/><rect x="18" y="52" width="28" height="5" rx="2.5" fill="#ffe45c"/></svg><b>컴퓨터</b><span>키보드 · 넓은 화면<br>방향키 · 스페이스</span></button>
+    </div>
+    <div class="dnote">나중에 위쪽 '기기 변경' 버튼으로 바꿀 수 있어요</div>
+  </div>
+</section>
+
 <!-- 게임 모음 -->
 <section id="portal" hidden>
   <header class="top">
     <div class="logo"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#ff8a1e"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="15" fill="url(#lg1)" stroke="#3a1a02" stroke-width="3"/><circle cx="32" cy="22" r="9" fill="#e02828" stroke="#3a1a02" stroke-width="3"/><circle cx="29" cy="19" r="2.6" fill="#fff" opacity=".8"/><rect x="29" y="29" width="6" height="14" fill="#3a1a02"/><rect x="11" y="41" width="42" height="13" rx="6.5" fill="#1a2260" stroke="#3a1a02" stroke-width="3"/><circle cx="21" cy="47.5" r="3.4" fill="#7dff7a"/><circle cx="32" cy="47.5" r="3.4" fill="#ffe45c"/><circle cx="43" cy="47.5" r="3.4" fill="#ff7a7a"/></svg><div><b>FLASH ZONE</b><small>GAME ARCADE</small></div></div>
-    <button class="gbtn blue sm" id="lock" type="button">LOCK</button>
+    <div class="topbtns"><button class="gbtn blue sm" id="devSwitch" type="button">기기 변경</button><button class="gbtn blue sm" id="lock" type="button">LOCK</button></div>
   </header>
   <div class="ticker"><span class="tag">NEW</span><span class="run" id="run"></span></div>
   <main class="wrap">
@@ -213,16 +262,41 @@ function $(id){return document.getElementById(id);}
 function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);v===null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v);}catch(e){return null;}}
 function authed(){return ss("passed_auth")===_TK;}
 
+
+/* ============ 기기 선택 (모바일 / 컴퓨터) ============ */
+var DEVNAME={mobile:"\uD83D\uDCF1 \uBAA8\uBC14\uC77C",desktop:"\uD83D\uDCBB \uCEF4\uD4E8\uD130"};
+function getDev(){ var m=ss("device_mode"); return (m==="mobile"||m==="desktop")?m:""; }
+function applyDev(m){
+  document.documentElement.setAttribute("data-device",m||"");
+  $("devSwitch").textContent=m?(DEVNAME[m]+" \u00B7 \uBCC0\uACBD"):"\uAE30\uAE30 \uBCC0\uACBD";
+}
+function guessDev(){
+  try{ if(matchMedia("(pointer:coarse)").matches||Math.min(screen.width,screen.height)<700) return "mobile"; }catch(e){}
+  return "desktop";
+}
+function showDevice(){
+  closeGame(true);
+  $("gate").hidden=true; $("portal").hidden=true; $("device").hidden=false;
+  if(!$("dlogo").innerHTML) $("dlogo").innerHTML=LOGO+'<div><b>FLASH ZONE</b><small>GAME ARCADE</small></div>';
+  var g=guessDev();
+  [].forEach.call($("device").querySelectorAll(".dopt"),function(b){
+    b.querySelector(".rec").hidden=(b.getAttribute("data-m")!==g);
+    b.onclick=function(){ chooseDev(b.getAttribute("data-m")); };
+  });
+}
+function chooseDev(m){ ss("device_mode",m); applyDev(m); $("device").hidden=true; enterPortal(); }
+$("devSwitch").addEventListener("click",function(){ showDevice(); });
+
 /* ============ 입장 화면 ============ */
 var fails=0,locked=false;
-function showGate(){ $("portal").hidden=true; $("gate").hidden=false; setTimeout(function(){ $("pw").focus(); },60); }
+function showGate(){ $("device").hidden=true; $("portal").hidden=true; $("gate").hidden=false; setTimeout(function(){ $("pw").focus(); },60); }
 function tryEnter(){
   if(locked) return;
   var v=$("pw").value;
   if(!v) return;
   if(_ph(v)===_AH){
     ss("passed_auth",_TK); fails=0; $("pw").value=""; $("gateMsg").textContent="";
-    enterPortal(); return;
+    showDevice(); return;
   }
   fails++; var c=$("gcard"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake");
   $("pw").value="";
@@ -260,14 +334,14 @@ function renderGrid(){
   });
 }
 function enterPortal(){
-  $("gate").hidden=true; $("portal").hidden=false;
+  $("gate").hidden=true; $("device").hidden=true; $("portal").hidden=false;
   $("run").textContent="새 게임이 추가됐어요!  \u2605  SUPER PIXEL BROS.  \u2605  전설의 검 키우기 : 100강의 지배자  \u2605  뒷산에서 보석 캐기 업데이트  \u2605  게임은 계속 추가돼요";
   renderTabs(); renderGrid();
   setTimeout(function(){ GAMES.forEach(function(g){ try{ var l=document.createElement("link"); l.rel="prefetch"; l.href=g.src; document.head.appendChild(l); }catch(e){} }); },800);
   var id=(location.hash||"").replace("#","");
   if(id&&GAMES.some(function(g){return g.id===id;})) openGame(id,false);
 }
-$("lock").addEventListener("click",function(){ ss("passed_auth",null); closeGame(true); showGate(); });
+$("lock").addEventListener("click",function(){ ss("passed_auth",null); ss("device_mode",null); applyDev(""); closeGame(true); $("device").hidden=true; showGate(); });
 
 /* ============ 플레이어 ============ */
 var playing=null,progTimer=null,pct=0,tipTimer=null,loadId=0,curFinish=null;
@@ -352,7 +426,7 @@ $("pFull").addEventListener("click",function(){
 });
 
 /* ============ 시작 ============ */
-if(authed()) enterPortal(); else showGate();
+if(authed()){ var _m=getDev(); if(_m){ applyDev(_m); enterPortal(); } else showDevice(); } else showGate();
 })();
 </script>
 </body>
