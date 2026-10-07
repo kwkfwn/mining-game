@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <script>(function(){try{if(sessionStorage.getItem('passed_auth')!=='9f4a707e7991c314131369a8'){(window.top||window).location.replace('index.html');}}catch(e){}})();</script>
+<script>(function(){try{var m=sessionStorage.getItem('device_mode');if(m==='mobile'||m==='desktop')document.documentElement.setAttribute('data-device',m);}catch(e){}})();</script>
 <script>(function(){var n=document,r=0;function o(){if(!r){r=1;try{n.documentElement.innerHTML='<body style="margin:0;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;font:20px sans-serif">개발자 도구가 감지되어 접근이 제한되었어요.</body>'}catch{}try{window.stop()}catch{}setTimeout(function(){location.replace("about:blank")},900)}}window.__gmTrip=o,n.addEventListener("contextmenu",function(e){e.preventDefault()},!0),n.addEventListener("keydown",function(e){var t=(e.key||"").toLowerCase();if(e.keyCode===123||t==="f12"||e.ctrlKey&&e.shiftKey&&"ijck".indexOf(t)>=0&&t||e.ctrlKey&&(t==="u"||t==="s")||e.metaKey&&e.altKey&&"ijcu".indexOf(t)>=0&&t)return e.preventDefault(),e.stopPropagation(),!1},!0),setInterval(function(){var e=performance.now();(function(){}).constructor("debugger")(),performance.now()-e>200&&o()},1e3);var i=new Image;Object.defineProperty(i,"id",{get:function(){o()}}),setInterval(function(){console.log(i),console.clear&&console.clear()},1500)})();</script>
 <script>(function(){
 var G="sword",H="21328f90b1ffbf498e7f95183b2d950e91467263ae671c30f43e2f900164e00c",K=H.slice(0,24),SK="passed_auth2_"+G;
@@ -461,6 +462,22 @@ try{window.stop()}catch(e){}
         @keyframes toastIn { 0% { transform: translateY(-30px) scale(0.9); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
         @keyframes toastOut { to { transform: translateY(-20px) scale(0.95); opacity: 0; } }
     </style>
+<style id="dev-css">
+/* ===== 기기별 화면 (모바일 / 컴퓨터) ===== */
+html[data-device] button{touch-action:manipulation}
+html[data-device=mobile] body{display:block;padding:10px 10px calc(28px + env(safe-area-inset-bottom,0px));-webkit-tap-highlight-color:transparent}
+html[data-device=mobile] #game-wrapper{flex-direction:column;gap:12px;max-width:100%}
+html[data-device=mobile] .panel{flex:none;padding:14px;border-radius:12px}
+html[data-device=mobile] h2{font-size:21px;letter-spacing:0;margin-bottom:10px}
+html[data-device=mobile] .status-bar{padding:10px 12px;font-size:14px;margin-bottom:8px}
+html[data-device=mobile] .gold{font-size:19px}
+html[data-device=mobile] #sword-display-area{height:170px;margin:8px 0}
+html[data-device=mobile] #sword-svg{height:155px}
+html[data-device=mobile] button{min-height:46px}
+html[data-device=desktop] body{padding:28px 24px}
+html[data-device=desktop] #game-wrapper{max-width:1180px;gap:24px}
+html[data-device=desktop] button{cursor:pointer}
+</style>
 </head>
 <body>
 
