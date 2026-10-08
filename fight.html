@@ -7,7 +7,7 @@ html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--fg);font:13px/1.5 system-ui,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;overflow:hidden}
 canvas{border-radius:8px;box-shadow:0 8px 40px #0007;touch-action:none}
 p{margin:0;font-size:12px;opacity:.75;text-align:center;padding:0 10px}
-#manBtn,#musBtn{border:2px solid #35f0ff;background:#1a0b3a;color:#eaf0ff;font:800 13px system-ui,"Malgun Gothic",sans-serif;padding:5px 16px;border-radius:99px;cursor:pointer}
+#manBtn,#musBtn,#keyBtn{border:2px solid #35f0ff;background:#1a0b3a;color:#eaf0ff;font:800 13px system-ui,"Malgun Gothic",sans-serif;padding:5px 16px;border-radius:99px;cursor:pointer}
 #man{position:fixed;inset:0;z-index:9;background:#000b;display:flex;align-items:center;justify-content:center;padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px))}
 #man[hidden]{display:none}
 #man .card{width:min(680px,100%);max-height:100%;overflow:auto;background:linear-gradient(#1a0b3a,#0b0620);border:2px solid #35f0ff;border-radius:14px;padding:16px 18px;color:#eaf0ff;font-size:13px;line-height:1.65;box-shadow:0 0 40px #35f0ff55;font-family:system-ui,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
@@ -17,15 +17,12 @@ p{margin:0;font-size:12px;opacity:.75;text-align:center;padding:0 10px}
 #manX{display:block;margin:14px auto 0;border:2px solid #ffe27a;background:#2a1a5a;color:#ffe27a;font:800 14px system-ui,"Malgun Gothic",sans-serif;padding:6px 28px;border-radius:99px;cursor:pointer}
 </style><link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Bungee&display=swap" rel="stylesheet"></head><body>
 <canvas id="c" width="960" height="540"></canvas>
-<p>P1 <b>WASD</b> · 펀치 <b>F G</b> · 킥 <b>R T</b> &nbsp;|&nbsp; P2 <b>방향키</b> · 펀치 <b>K L</b> · 킥 <b>I O</b> &nbsp;|&nbsp; 뒤로 = 방어 · ↓+G 어퍼컷(런처) · ↓+R 하단킥 · ↓+T 스위프 · 공중에서 공격 = 점프킥 · 고유 필살기 ↓→ + 펀치2(G/L) · 게이지 가득 시 펀치 2개 동시 입력 = 초필살기 · 온라인(3): H 방 만들기 / J 코드로 참가 · 양쪽 모두 P1 키로 조작</p>
+<p><span id="hk"></span> &nbsp;|&nbsp; 뒤로 = 방어 · ↓+RP 어퍼컷(런처) · ↓+LK 하단킥 · ↓+RK 스위프 · 공중에서 공격 = 점프킥 · 고유 필살기 ↓→ + RP · 게이지 가득 시 펀치 2개 동시 입력 = 초필살기 · 온라인(3): H 방 만들기 / J 코드로 참가 · 양쪽 모두 P1 키로 조작</p>
 <button id="manBtn" tabindex="-1">📖 설명서</button>
 <div id="man" hidden><div class="card">
 <h2>📖 NEON KNUCKLE 설명서</h2>
-<h3>조작키</h3>
-<table><tr><th></th><th>P1</th><th>P2</th></tr>
-<tr><td>이동 · 점프 · 앉기</td><td><kbd>A</kbd><kbd>D</kbd> · <kbd>W</kbd> · <kbd>S</kbd></td><td><kbd>←</kbd><kbd>→</kbd> · <kbd>↑</kbd> · <kbd>↓</kbd></td></tr>
-<tr><td>펀치 LP · RP</td><td><kbd>F</kbd> <kbd>G</kbd></td><td><kbd>K</kbd> <kbd>L</kbd></td></tr>
-<tr><td>킥 LK · RK</td><td><kbd>R</kbd> <kbd>T</kbd></td><td><kbd>I</kbd> <kbd>O</kbd></td></tr></table>
+<h3>조작키 · 키 설정</h3>
+<table id="kt"></table><div style="margin-top:6px;font-size:12px;opacity:.85">칸을 누르고 원하는 키를 누르세요 (Esc 취소 · 이미 쓰는 키면 서로 바뀌어요) <button id="ktR" type="button" style="border:1px solid #5a3fb0;background:#2a1a5a;color:#eaf0ff;border-radius:6px;padding:2px 8px;cursor:pointer">기본값</button></div>
 <h3>기본 규칙</h3><ul>
 <li>상대 반대쪽(뒤)을 누르고 있으면 <b>방어</b>예요. 서서 방어는 상단·중단을, 앉아서 방어(뒤+↓)는 하단을 막아요.</li>
 <li>공격은 상단·중단·하단이 있어요. 상단은 앉으면 피하고, 하단은 서서 막을 수 없고, 앉아 막으면 중단이 들어와요.</li>
@@ -35,14 +32,14 @@ p{margin:0;font-size:12px;opacity:.75;text-align:center;padding:0 10px}
 <li>↓ + RP 어퍼컷(띄우기 → 공중 콤보) · ↓ + LK 로우킥(하단) · ↓ + RK 스위프(하단, 쓰러뜨림)</li>
 <li>점프 중 공격은 점프킥(중단)이에요. 콤보가 길어질수록 데미지가 줄어요.</li></ul>
 <h3>필살기</h3><ul>
-<li><b>고유기</b>: ↓ → 를 차례로 누르고 곧바로 RP (→ 는 상대 쪽). TAIGA 승룡권(무적 어퍼) · RIN 질풍각(돌진 킥) · KAGE 회전각(하단 돌진) · TITAN 철산고(강타)</li>
-<li><b>초필살기</b>: 때리거나 맞으면 체력바 아래 게이지가 차요. 가득 차면 LP + RP 를 동시에 누르세요. 막을 수 없는 대기술이에요.</li></ul>
+<li><b>고유기</b>: ↓ → 를 차례로(또는 ↘ 로 한 번에) 누르고 RP (→ 는 상대 쪽). TAIGA 승룡권(무적 어퍼) · RIN 질풍각(돌진 킥) · KAGE 회전각(하단 돌진) · TITAN 철산고(강타) · VOLT 뇌격보(무적 돌진)</li><li><b>VOLT 특성</b>: 공격이 맞으면 초필살기 게이지가 1.6배로 빨리 차요.</li>
+<li><b>초필살기</b>: 때리거나 맞으면 체력바 아래 게이지가 차요. 가득 차면 LP + RP 를 동시에 누르세요. 막을 수 없는 대기술이에요.</li><li><b>단축키</b>: ⌨️ 키 설정에서 어퍼컷·로우킥·스위프·고유기·초필살기를 키 하나에 지정할 수 있어요. 공중에서는 아무 공격키 = 점프킥이에요. (모바일은 오른쪽 버튼의 고유 · 초필)</li></ul>
 <h3>모드</h3><ul>
 <li><kbd>1</kbd> CPU와 대전 · <kbd>2</kbd> 한 키보드로 2P 대전 · <kbd>3</kbd> 온라인</li>
 <li>온라인: <kbd>H</kbd> 방 만들기(방 코드가 떠요) / <kbd>J</kbd> 방 참가(코드 입력). 양쪽 모두 P1 키로 조작하고, 입력이 약 0.1초 늦게 반영돼요.</li>
 <li>경기가 끝나면 <kbd>Enter</kbd>(화면 왼쪽 터치)는 다시하기, <kbd>Esc</kbd>(오른쪽 터치)는 메뉴예요. 온라인은 두 사람이 모두 다시하기를 눌러야 캐릭터 선택부터 새로 시작해요.</li>
 <li>모바일·터치 기기는 화면 아래 버튼으로 조작해요. (오프라인 모드는 설명서를 열면 일시정지돼요)</li></ul>
-<h3>크레딧</h3><ul><li>캐릭터 스프라이트: Asset Bakery · 2D Fighter (itch.io), KAGE·TITAN은 팬 제작 커스텀 스프라이트(Capcom · DC 캐릭터 기반)</li></ul>
+<h3>크레딧</h3><ul><li>캐릭터 스프라이트: Asset Bakery · 2D Fighter (itch.io), KAGE·TITAN은 팬 제작 커스텀 스프라이트(Capcom · DC 캐릭터 기반), VOLT는 코드로 그린 오리지널 캐릭터</li></ul>
 <button id="manX" type="button">닫기</button>
 </div></div>
 <script>
@@ -60,16 +57,16 @@ function snd(n,v){v=v||1;try{AC=AC||new(window.AudioContext||window.webkitAudioC
  else if(n=='blk'){tone(900*r,500,.07,'square',.12);tone(260*r,120,.1,'triangle',.25);noise(.05,.15,2500)}
  else if(n=='wh')noise(.12,.12,1500);
  else tone(500,900,.12,'square',.12)}catch(e){}}
-addEventListener('keydown',e=>{if(!e.repeat){K[e.code]=1;PR[e.code]=1;mkAC()}if(/^(Arrow|Space)/.test(e.code))e.preventDefault()});
+addEventListener('keydown',e=>{if(!e.repeat){K[e.code]=1;PR[e.code]=1;mkAC()}if(/^(Arrow|Space)/.test(e.code)||(kbBound(e.code)&&!e.ctrlKey&&!e.metaKey))e.preventDefault()});
 addEventListener('keyup',e=>K[e.code]=0);
 c.addEventListener('pointerdown',e=>{mkAC();if(sc=='menu'){const q=e.offsetX/c.clientWidth*3|0;q>1?online():start(q)}else if(sc=='lobby'&&!lb){e.offsetX<c.clientWidth/2?host():join()}else if(sc=='end'){if(e.offsetX<c.clientWidth/2)again();else{leaveNet();sc='menu'}}else if(sc=='lobby'){leaveNet();sc='menu'}});
-const KM=[{l:'KeyA',r:'KeyD',u:'KeyW',d:'KeyS',b:['KeyF','KeyG','KeyR','KeyT']},{l:'ArrowLeft',r:'ArrowRight',u:'ArrowUp',d:'ArrowDown',b:['KeyK','KeyL','KeyI','KeyO']}];
+const KM=[{l:'KeyA',r:'KeyD',u:'KeyW',d:'KeyS',b:['KeyF','KeyG','KeyR','KeyT']},{l:'ArrowLeft',r:'ArrowRight',u:'ArrowUp',d:'ArrowDown',b:['KeyK','KeyL','KeyI','KeyO']}];KM[0].s=['','','','PadSP','PadSU'];KM[1].s=['','','','',''];
 const ID=[6,35,150,25,160,26,2,-12,-26],CR=[20,40,150,30,160,62,10,58,-12],BS=[-6,70,170,60,175,26,2,-12,-26],BC=[20,70,170,60,175,62,10,58,-12],HP=[-24,-20,20,-30,10,22,2,-12,-24],HC=[-10,-20,20,-30,10,62,10,58,-12],JP=[0,60,120,55,130,55,-30,30,-50],FP=[-20,-60,-20,-70,-30,30,40,10,50],
 PS={w0:[-2,20,160,25,160,26,2,-12,-26],a0:[12,88,92,25,160,26,2,-12,-26],w1:[-6,35,150,10,170,26,2,-12,-26],a1:[20,30,150,88,95,28,10,-18,-36],w2:[-12,30,150,25,160,70,-20,-10,-5],a2:[-8,20,150,25,160,85,80,-10,-5],w3:[-10,30,150,25,160,-20,-20,60,-60],a3:[-30,30,150,40,150,-15,-10,100,95],w4:[10,40,150,40,100,62,10,58,-12],a4:[25,30,150,135,172,55,8,40,-20],w5:[22,40,150,30,160,62,10,58,-12],a5:[18,40,150,30,160,62,88,55,-15],w6:[26,50,150,40,160,62,10,58,-12],a6:[35,70,150,60,160,80,15,65,75]},
 MV={0:{st:5,ac:3,rc:9,d:4,h:'h',r:68,hs:13,bs:5,kb:3,W:'w0',A:'a0'},1:{st:8,ac:3,rc:13,d:7,h:'m',r:76,hs:16,bs:8,kb:6,W:'w1',A:'a1'},2:{st:10,ac:4,rc:14,d:8,h:'m',r:90,hs:18,bs:9,kb:7,W:'w2',A:'a2'},3:{st:14,ac:4,rc:20,d:13,h:'h',r:98,hs:24,bs:12,kb:12,W:'w3',A:'a3',L:1},
 d1:{st:12,ac:4,rc:22,d:9,h:'m',r:62,hs:30,bs:14,kb:3,W:'w4',A:'a4',L:2,cr:1},d2:{st:9,ac:3,rc:14,d:5,h:'l',r:84,hs:14,bs:8,kb:4,W:'w5',A:'a5',cr:1},d3:{st:15,ac:4,rc:24,d:8,h:'l',r:96,hs:30,bs:12,kb:8,W:'w6',A:'a6',L:1,cr:1},air:{st:3,ac:18,rc:6,d:9,h:'m',r:84,hs:20,bs:11,kb:6,W:'w2',A:'a2',air:1},
-s0:{st:6,ac:6,rc:30,d:14,h:'m',r:72,hs:30,bs:14,kb:3,W:'w4',A:'a4',L:2,iv:1},s1:{st:10,ac:6,rc:24,d:12,h:'m',r:104,hs:24,bs:12,kb:10,W:'w3',A:'a3',L:1,lg:7},s2:{st:18,ac:4,rc:30,d:18,h:'m',r:88,hs:30,bs:16,kb:16,W:'w1',A:'a1',L:1,lg:3},s3:{st:11,ac:5,rc:22,d:11,h:'l',r:112,hs:30,bs:12,kb:8,W:'w6',A:'a6',L:1,lg:5,cr:1},sup:{st:22,ac:6,rc:34,d:30,h:'m',r:150,hs:50,bs:22,kb:16,W:'w4',A:'a4',L:2,iv:1,lg:4,ub:1,sup:1}};
-const F=[{w:0},{w:0}],CH=[{name:'TAIGA',si:0,sk:'#e9b58f',hair:'#15151d',ps:0,top:'#2d6df6',pants:'#1b2a6b',glove:'#ff9d1c',spd:1,pw:1,spk:'s0',tag:'밸런스 · 승룡권'},{name:'RIN',si:1,sk:'#d79b72',hair:'#f4f4fb',ps:1,top:'#e8344f',pants:'#4a1020',glove:'#2fe0a5',spd:1.18,pw:.9,sz:.96,spk:'s1',tag:'스피드 · 질풍각'},{name:'KAGE',si:4,sk:'#e0c7a8',hair:'#aebdca',ps:0,top:'#3a4a3e',pants:'#1c2a22',glove:'#ff4560',spd:1.1,pw:1,sz:1,spk:'s3',tag:'하단 · 회전각'},{name:'TITAN',si:5,sk:'#d9a47a',hair:'#111',ps:2,top:'#222',pants:'#2a5db0',glove:'#9bd06a',spd:.82,pw:1.3,sz:1.12,spk:'s2',tag:'파워 · 철산고'}];
+s0:{st:6,ac:6,rc:30,d:14,h:'m',r:72,hs:30,bs:14,kb:3,W:'w4',A:'a4',L:2,iv:1},s1:{st:10,ac:6,rc:24,d:12,h:'m',r:104,hs:24,bs:12,kb:10,W:'w3',A:'a3',L:1,lg:7},s2:{st:18,ac:4,rc:30,d:18,h:'m',r:88,hs:30,bs:16,kb:16,W:'w1',A:'a1',L:1,lg:3},s3:{st:11,ac:5,rc:22,d:11,h:'l',r:112,hs:30,bs:12,kb:8,W:'w6',A:'a6',L:1,lg:5,cr:1},s4:{st:9,ac:7,rc:30,d:13,h:'m',r:104,hs:30,bs:12,kb:9,W:'w1',A:'a1',L:1,lg:8,iv:1,zap:1},sup:{st:22,ac:6,rc:34,d:30,h:'m',r:150,hs:50,bs:22,kb:16,W:'w4',A:'a4',L:2,iv:1,lg:4,ub:1,sup:1}};
+const F=[{w:0},{w:0}],CH=[{name:'TAIGA',si:0,sk:'#e9b58f',hair:'#15151d',ps:0,top:'#2d6df6',pants:'#1b2a6b',glove:'#ff9d1c',spd:1,pw:1,spk:'s0',tag:'밸런스 · 승룡권'},{name:'RIN',si:1,sk:'#d79b72',hair:'#f4f4fb',ps:1,top:'#e8344f',pants:'#4a1020',glove:'#2fe0a5',spd:1.18,pw:.9,sz:.96,spk:'s1',tag:'스피드 · 질풍각'},{name:'KAGE',si:4,sk:'#e0c7a8',hair:'#aebdca',ps:0,top:'#3a4a3e',pants:'#1c2a22',glove:'#ff4560',spd:1.1,pw:1,sz:1,spk:'s3',tag:'하단 · 회전각'},{name:'TITAN',si:5,sk:'#d9a47a',hair:'#111',ps:2,top:'#222',pants:'#2a5db0',glove:'#9bd06a',spd:.82,pw:1.3,sz:1.12,spk:'s2',tag:'파워 · 철산고'},{name:'VOLT',si:9,sk:'#f0c4a0',hair:'#ff3df2',ps:0,top:'#14173a',pants:'#2a0f4f',glove:'#ffe03a',vz:'#35f0ff',spd:1.12,pw:.92,sz:.98,gm:1.6,spk:'s4',tag:'게이지 · 뇌격보'}];
 function reset(f,x,dir){Object.assign(f,{x,dir,hp:100,lag:100,st:'idle',f:0,mv:null,hit:0,stun:0,vx:0,vy:0,jy:0,cr:0,bl:0,blk:0,buf:null,bt:0,cb:0,sh:0,ct:0,fl:0,dn:0,jg:0,ko:0,th:0,pt:[0,0,0,0],gx:0,q:0,c:0,ox:null,oy:0,op:null,cp:0,pose:ID.slice()})}
 reset(F[0],250,1);reset(F[1],710,-1);Object.assign(F[0],CH[0]);Object.assign(F[1],CH[1]);
 function newRound(){reset(F[0],300,1);reset(F[1],660,-1);timer=60;tf=0;sc='intro';ph=0;PT.length=0;GH.length=0;FX.length=0;slow=0}
@@ -91,7 +88,7 @@ function tryHit(a,o){const m=a.mv,d=Math.abs(o.x-a.x),rr=(RX[a.si]||[])[SK.index
  a.hit=1;
  if(bl){o.st='hurt';o.bl=1;o.stun=m.bs;o.vx=a.dir*m.kb*.9;a.x-=a.dir*2;hs=3;a.gx=Math.min(100,a.gx+3);snd('blk');fx(px,py,0);zm=.008;sp(px,py,8,'#7df',4);return}
  const fl=o.st=='fly',jg=fl?o.jg+1:0,dm=Math.max(1,Math.round(m.d*(m.sup?.8:.6)*(a.pw||1)*Math.max(.3,1-.15*a.cb)));
- o.hp=Math.max(0,o.hp-dm);a.cb++;a.gx=Math.min(100,a.gx+dm*1);o.gx=Math.min(100,o.gx+dm*.6);a.sh=a.cb;a.ct=100;o.fl=4;o.bl=0;o.blk=0;o.mv=null;
+ o.hp=Math.max(0,o.hp-dm);a.cb++;a.gx=Math.min(100,a.gx+dm*(a.gm||1));o.gx=Math.min(100,o.gx+dm*.6);a.sh=a.cb;a.ct=100;o.fl=4;o.bl=0;o.blk=0;o.mv=null;
  hs=m.sup?24:Math.min(13,5+(dm>>1)+(m.L?2:0));shake=m.sup?22:m.L?12:5;flash=m.sup?.8:m.L?.3:.12;zm=m.sup?.07:m.L?.04:.02;a.cp=12;snd('hit',m.sup?2:dm/7);fx(px,py,m.sup||m.L?2:1);fx(px,py-26,3,'-'+dm);sp(px,py,m.sup?30:m.L?20:12,'#ffd34d',m.L?9:6);sp(px,py,6,'#fff',4);
  if(o.hp<=0){o.ko=1;o.st='fly';o.jg=9;o.vy=12;o.vx=a.dir*6;o.jy=Math.max(o.jy,1);slow=50;snd('ko')}
  else if(m.L==2){o.st='fly';o.jg=0;o.vy=13;o.vx=a.dir*2.2;o.jy=Math.max(o.jy,1)}
@@ -106,15 +103,15 @@ function upd(a,o,I){
  a.pt=a.pt.map(v=>v>0?v-1:0);I.p.forEach((q,n)=>{if(q){a.buf=n;a.bt=9;a.pt[n]=6}});
  if(s=='idle'){
   a.dir=o.x>a.x?1:-1;a.cr=I.d?1:0;a.blk=bk&&!fw?1:0;
-  if(I.d)a.q=18;else if(a.q>0)a.q--;
-  if(fw&&a.q>0&&!I.d){a.c=14;a.q=0}
+  if(I.d)a.q=30;else if(a.q>0)a.q--;
+  if(fw&&a.q>0){a.c=26;a.q=0}
   if(a.c>0)a.c--;
-  if(a.pt[0]>0&&a.pt[1]>0&&a.gx>=100){a.gx=0;a.buf=null;atk(a,MV.sup);hs=28;flash=.9;shake=14;bn.s='필살기!';bn.t=70;snd('ko')}
-  else if(a.buf!=null){const m=a.c>0&&a.buf==1?MV[a.spk]:(I.d&&MV['d'+a.buf])||MV[a.buf];if(m==MV[a.spk])a.c=0;a.buf=null;atk(a,m)}
+  if((a.pt[0]>0&&a.pt[1]>0||a.buf==8)&&a.gx>=100){a.gx=0;a.buf=null;atk(a,MV.sup);hs=28;flash=.9;shake=14;bn.s='필살기!';bn.t=70;snd('ko')}
+  else if(a.buf!=null){const b=a.buf,m=b==4?MV.d1:b==5?MV.d2:b==6?MV.d3:b==7?MV[a.spk]:b==8?null:a.c>0&&b==1?MV[a.spk]:(I.d&&MV['d'+b])||MV[b];if(m==MV[a.spk])a.c=0;a.buf=null;if(m)atk(a,m)}
   else if(I.u&&!I.d){a.st='jump';a.vy=15;a.jy=1;a.vx=(fw?4.2:bk?-4.2:0)*a.dir;a.cr=0}
   else if(!I.d)a.x+=(fw?3.3*a.spd:bk?-2.5:0)*a.dir;
  }else if(s=='jump'){a.dir=o.x>a.x?1:-1;if(a.buf!=null){a.buf=null;atk(a,MV.air)}else if(air(a)){a.st='idle';sp(a.x,FL,7,'#c9c2e0',2.6,.12)}}
- else if(s=='atk'){const m=a.mv;air(a);a.f++;if(a.f==m.st)snd('wh');if(a.f>m.st&&a.f<=m.st+m.ac&&!a.hit)tryHit(a,o);if(a.f<=m.st&&!m.air&&m.r>70&&!m.lg)a.x+=a.dir*.8;if(m.lg&&a.f<=m.st+m.ac)a.x+=a.dir*m.lg;if(m.sup&&a.f<m.st)sp(a.x,FL-70,2,'#ff7dff',5,-.1);if(a.f>=m.st+m.ac+m.rc){a.st=a.jy>0?'jump':'idle';a.mv=null}}
+ else if(s=='atk'){const m=a.mv;air(a);a.f++;if(a.f==m.st)snd('wh');if(a.f>m.st&&a.f<=m.st+m.ac&&!a.hit)tryHit(a,o);if(a.f<=m.st&&!m.air&&m.r>70&&!m.lg)a.x+=a.dir*.8;if(m.lg&&a.f<=m.st+m.ac)a.x+=a.dir*m.lg;if(m.sup&&a.f<m.st)sp(a.x,FL-70,2,'#ff7dff',5,-.1);if(m.zap&&a.f>2&&a.f<=m.st+m.ac)sp(a.x,FL-60,3,'#35f0ff',6,.05);if(a.f>=m.st+m.ac+m.rc){a.st=a.jy>0?'jump':'idle';a.mv=null}}
  else if(s=='hurt'){if(a.bl){a.cr=I.d?1:0;a.blk=bk&&!fw?1:0}a.x+=a.vx;a.vx*=.82;if(--a.stun<=0){a.st='idle';a.bl=0}}
  else if(s=='fly'){a.x+=a.vx;a.vx*=.985;a.jy+=a.vy;a.vy-=.65;if(a.jy<=0&&a.vy<0){a.jy=0;a.vy=0;a.vx=0;a.st=a.ko?'ko':'down';a.dn=50;shake=Math.max(shake,8);sp(a.x,FL,10,'#ccc',3,.1)}}
  else if(s=='down'){if(--a.dn<=0){a.st='idle';a.cr=0}}
@@ -125,7 +122,7 @@ function tgt(a){const s=a.st;
  if(s=='jump')return JP;
  if(s=='fly'||s=='down'||s=='ko')return FP;
  return a.cr?(a.blk?BC:CR):(a.blk?BS:ID)}
-function inp(i){if(net){const m=net.inb[i][net.f]|0;return{l:m&1,r:m&2,u:m&4,d:m&8,p:[m&16,m&32,m&64,m&128]}}if(i&&!mode)return ai();const m=KM[i];return{l:K[m.l],r:K[m.r],u:K[m.u],d:K[m.d],p:m.b.map(b=>PR[b])}}
+function inp(i){if(net){const m=net.inb[i][net.f]|0;return{l:m&1,r:m&2,u:m&4,d:m&8,p:[m&16,m&32,m&64,m&128,m&256,m&512,m&1024,m&2048,m&4096]}}if(i&&!mode)return ai();const m=KM[i];return{l:K[m.l],r:K[m.r],u:K[m.u],d:K[m.d],p:m.b.concat(m.s).map(b=>PR[b])}}
 function ai(){const a=F[1],o=F[0],d=Math.abs(o.x-a.x),I={p:[]},s=a.ai||(a.ai={t:0,m:0,b:0,bt:0}),tw=o.x>a.x?'r':'l',aw=o.x>a.x?'l':'r';
  if(--s.t<=0){s.t=8+Math.random()*16|0;const r=Math.random();s.m=d>130?1:d>85?(r<.45?1:r<.85?3:0):(r<.55?3:r<.7?2:0)}
  if(o.st=='atk'&&o.f==3&&d<o.mv.r+25){s.b=Math.random()<.55;s.bt=o.mv.st+o.mv.ac+4;s.lo=o.mv.h=='l'}
@@ -209,7 +206,7 @@ function drawF(f){if(SH[f.si]){spr(f);return}
  g.fillStyle=w?'#fff':f.hair;g.beginPath();
  if(f.ps==2)g.arc(0,0,14.5,Math.PI*1.1,Math.PI*1.9);else if(f.ps){g.arc(0,-1,15,Math.PI,0);g.moveTo(-12,-8);g.quadraticCurveTo(-36,-4,-30,22);g.quadraticCurveTo(-22,2,-10,0)}
  else{[[-15,0],[-19,-15],[-8,-11],[-9,-26],[0,-15],[6,-28],[10,-13],[19,-17],[15,0]].forEach((p,i)=>i?g.lineTo(...p):g.moveTo(...p))}
- g.fill();g.fillStyle=f.glove;g.fillRect(-14,-8,28,4);const hu=f.st=='hurt'||f.st=='fly'||f.st=='down'||f.st=='ko'||f.fl>0,sy=f.st=='atk';g.fillStyle='#fff';g.fillRect(4,-4,8,6);g.fillStyle='#111';g.fillRect(hu?5:8,hu?-3:-2.5,4,4.5);g.fillStyle='#3a0610';if(hu||sy){g.beginPath();g.ellipse(8,8,3.4,hu?4.4:3,0,0,7);g.fill()}else g.fillRect(4,7,8,2);g.restore();
+ g.fill();g.fillStyle=f.glove;g.fillRect(-14,-8,28,4);const hu=f.st=='hurt'||f.st=='fly'||f.st=='down'||f.st=='ko'||f.fl>0,sy=f.st=='atk';g.fillStyle='#fff';g.fillRect(4,-4,8,6);g.fillStyle='#111';g.fillRect(hu?5:8,hu?-3:-2.5,4,4.5);g.fillStyle='#3a0610';if(hu||sy){g.beginPath();g.ellipse(8,8,3.4,hu?4.4:3,0,0,7);g.fill()}else g.fillRect(4,7,8,2);if(f.vz&&!w){g.fillStyle=f.vz;g.fillRect(0,-7,16,9);g.strokeStyle=ol;g.lineWidth=2;g.strokeRect(0,-7,16,9);g.fillStyle='#fff';g.fillRect(9,-6,5,2)}g.restore();
  arm(o[1],o[2]);g.restore()}
 const BG=document.createElement('canvas');BG.width=W;BG.height=H;
 (()=>{const b=BG.getContext('2d');let z=7,q;const rn=()=>(z=z*16807%2147483647)/2147483647;
@@ -229,7 +226,7 @@ function leaveNet(){if(net){net.rm.leave().catch(()=>{});net=null}if(pr){try{pr.
 function rmChk(){const n=net;if(n&&sc=='end'&&n.rq&&n.rr){n.g++;n.rq=n.rr=0;n.inb=[{},{}];n.f=0;n.hi=-1;n.sw=0;F[0].w=F[1].w=0;rd=1;winner=-1;cur=[0,0];ok=[0,0];reset(F[0],250,1);reset(F[1],710,-1);sc='sel';snd('ui')}}
 function again(){const n=net;if(!n)start(mode);else if(!n.gone&&!n.rq){n.rq=1;n.rm.emit('rem',{});rmChk()}}
 function netIn(){const n=net,fr=n.f+n.D,now=performance.now();
- if(n.hi<fr){const k=KM[0];n.inb[n.me][fr]=(K[k.l]?1:0)|(K[k.r]?2:0)|(K[k.u]?4:0)|(K[k.d]?8:0)|k.b.reduce((a,b,i)=>a|(PR[b]?16<<i:0),0);n.hi=fr}
+ if(n.hi<fr){const k=KM[0];n.inb[n.me][fr]=(K[k.l]?1:0)|(K[k.r]?2:0)|(K[k.u]?4:0)|(K[k.d]?8:0)|k.b.concat(k.s).reduce((a,b,i)=>a|(PR[b]?16<<i:0),0);n.hi=fr}
  if(now-n.ts>30){n.ts=now;const a=[];for(let q=Math.max(0,n.f-n.D-8);q<=n.hi;q++)a.push(n.inb[n.me][q]|0);n.rm.emit('inp',{e:n.hi,a,c:cur[n.me],o:1,g:n.g}).catch(()=>{})}
  if(n.inb[0][n.f]!=null&&n.inb[1][n.f]!=null){n.sw=0;return 1}
  n.sw=n.sw||now;if(now-n.sw>6000){leaveNet();nmsg='상대 연결이 끊겼어요 (Esc: 메뉴)';sc='lobby'}return 0}
@@ -251,7 +248,7 @@ function selUI(){txt('캐릭터 선택',W/2,64,50,'#ffe27a');
  CH.forEach((h,n)=>{const bw=Math.min(200,880/CH.length-10),x=W/2-(CH.length*(bw+10)-10)/2+n*(bw+10),y=474;g.fillStyle='#000c';g.fillRect(x,y,bw,58);g.fillStyle=h.top;g.fillRect(x,y,bw,6);g.fillStyle=h.glove;g.fillRect(x,y+6,bw,3);
   txt(h.name,x+bw/2,y+34,22,'#fff');txt(h.tag,x+bw/2,y+53,11,'#cde');
   [0,1].forEach(i=>{if(cur[i]==n){g.strokeStyle=i?'#ff4560':'#35f0ff';g.lineWidth=4;g.strokeRect(x-2,y-2,bw+4,62);txt((i?(mode?'2P':'CPU'):'1P')+(ok[i]?' ✓':''),x+(i?bw*.75:bw*.25),y-10,18,i?'#ff4560':'#35f0ff')}})});
- txt(F[0].name+'  vs  '+F[1].name,W/2,110,26,'#fff');txt(net?'A/D 로 고르고 아무 공격키(F G R T)로 확정':'P1 A/D · P2 ←/→ 로 고르고 아무 공격키로 확정',W/2,150,18,'#cfe')}
+ txt(F[0].name+'  vs  '+F[1].name,W/2,110,26,'#fff');txt(net?kbName(KM[0].l)+'/'+kbName(KM[0].r)+' 로 고르고 아무 공격키로 확정':'P1 '+kbName(KM[0].l)+'/'+kbName(KM[0].r)+' · P2 '+kbName(KM[1].l)+'/'+kbName(KM[1].r)+' 로 고르고 아무 공격키로 확정',W/2,150,18,'#cfe')}
 const cam={x:W/2,y:H/2,z:1,cx:W/2,cy:H/2};
 function camUpdate(){const sim=sc=='intro'||sc=='fight'||sc=='ko',A=F[0],B=F[1];let tz=1,tx=W/2,ty=H/2;
  if(sim){tz=Math.max(1,Math.min(1.2,1.42-Math.abs(A.x-B.x)/950));tx=(A.x+B.x)/2;ty=300}
@@ -290,8 +287,8 @@ addEventListener('pointerdown',()=>window.focus());window.focus();
   const pad=document.createElement('div');pad.style.cssText='display:flex;justify-content:space-between;width:min(96vw,560px);user-select:none;-webkit-user-select:none;touch-action:none';
   const mk=a=>{const d=document.createElement('div');d.style.cssText='display:grid;grid-template-columns:repeat(3,58px);gap:6px';
    a.forEach(([l,k])=>{const b=document.createElement('button');b.textContent=l;b.style.cssText='height:58px;border-radius:14px;border:2px solid #6b7bff;background:#1c2566;color:#fff;font:800 17px system-ui;touch-action:none;visibility:'+(k?'visible':'hidden');
-    if(k){b.onpointerdown=e=>{e.preventDefault();K[k]=1;PR[k]=1};b.onpointerup=b.onpointerleave=b.onpointercancel=()=>{K[k]=0}}d.appendChild(b)});return d};
-  pad.append(mk([['',0],['▲','KeyW'],['',0],['◀','KeyA'],['▼','KeyS'],['▶','KeyD']]),mk([['LP','KeyF'],['RP','KeyG'],['',0],['LK','KeyR'],['RK','KeyT'],['',0]]));
+    if(k){b.onpointerdown=e=>{e.preventDefault();const q=kbPad(k);K[q]=1;PR[q]=1};b.onpointerup=b.onpointerleave=b.onpointercancel=()=>{K[kbPad(k)]=0}}d.appendChild(b)});return d};
+  pad.append(mk([['',0],['▲','KeyW'],['',0],['◀','KeyA'],['▼','KeyS'],['▶','KeyD']]),mk([['LP','KeyF'],['RP','KeyG'],['고유','PadSP'],['LK','KeyR'],['RK','KeyT'],['초필','PadSU']]));
   document.body.appendChild(pad);fit()}})();
 try{if(parent!==window)parent.postMessage('gm-ready',location.origin)}catch(e){}
 const man=document.getElementById('man'),mb=document.getElementById('manBtn');
@@ -301,4 +298,20 @@ man.addEventListener('pointerdown',e=>{if(e.target==man)tman(0)});
 addEventListener('keydown',e=>{if(mo&&e.code=='Escape')tman(0)});
 addEventListener('blur',()=>{for(const k in K)K[k]=0});
 mb.insertAdjacentHTML('afterend','<button id="musBtn" tabindex="-1">🔊</button>');const ub=document.getElementById('musBtn');ub.onclick=()=>{MUS^=1;ub.textContent=MUS?'🔊':'🔇';ub.blur();if(!MUS)try{speechSynthesis.cancel()}catch(e){}};
+
+const kbDef=JSON.parse(JSON.stringify(KM)),kbAct=[['l','← 왼쪽'],['r','→ 오른쪽'],['u','↑ 점프'],['d','↓ 앉기'],['b0','펀치 LP'],['b1','펀치 RP'],['b2','킥 LK'],['b3','킥 RK'],['s0','어퍼컷 (↓+RP)'],['s1','로우킥 (↓+LK)'],['s2','스위프 (↓+RK)'],['s3','고유기'],['s4','초필살기']],kbNm={ArrowLeft:'←',ArrowRight:'→',ArrowUp:'↑',ArrowDown:'↓',Semicolon:';',Comma:',',Period:'.',Slash:'/',Quote:"'",BracketLeft:'[',BracketRight:']',Backslash:'\\',Minus:'-',Equal:'=',Backquote:'`',PadSP:'터치',PadSU:'터치'},kt=document.getElementById('kt');let kbW=null;
+function kbName(c){return !c?'—':kbNm[c]||c.replace(/^(Key|Digit)/,'').replace(/^Numpad/,'N')}
+function kbGet(i,a){return /^[bs]\d/.test(a)?KM[i][a[0]][+a[1]]:KM[i][a]}
+function kbSet(i,a,v){if(/^[bs]\d/.test(a))KM[i][a[0]][+a[1]]=v;else KM[i][a]=v}
+function kbBound(c){return KM.some(m=>m.l==c||m.r==c||m.u==c||m.d==c||m.b.includes(c)||m.s.includes(c))}
+function kbPad(c){const d=kbDef[0],f=[d.l,d.r,d.u,d.d,...d.b,...d.s],j=f.indexOf(c),m=KM[0];return j<0?c:([m.l,m.r,m.u,m.d,...m.b,...m.s][j]||c)}
+function kbSave(){try{localStorage.setItem('nk_keys',JSON.stringify(KM))}catch(e){}}
+function kbRender(){kt.innerHTML='<tr><th></th><th>P1</th><th>P2</th></tr>'+kbAct.map(([a,n])=>(a=='s0'?'<tr><th colspan="3" style="color:#ffe27a">단축키 · 칸을 누르고 키 입력 / Backspace 로 해제</th></tr>':'')+'<tr><td>'+n+'</td>'+[0,1].map(i=>{const w=kbW&&kbW.i==i&&kbW.a==a;return '<td><kbd data-i="'+i+'" data-a="'+a+'" style="cursor:pointer;display:inline-block;min-width:22px;text-align:center'+(w?';background:#ffe27a;color:#000':'')+'">'+(w?'…':kbName(kbGet(i,a)))+'</kbd></td>'}).join('')+'</tr>').join('');
+ const f=i=>{const m=KM[i];return 'P'+(i+1)+' <b>'+[m.u,m.l,m.d,m.r].map(kbName).join('')+'</b> · 펀치 <b>'+kbName(m.b[0])+' '+kbName(m.b[1])+'</b> · 킥 <b>'+kbName(m.b[2])+' '+kbName(m.b[3])+'</b>'};document.getElementById('hk').innerHTML=f(0)+' &nbsp;|&nbsp; '+f(1)}
+try{JSON.parse(localStorage.getItem('nk_keys')).forEach((m,i)=>kbAct.forEach(([a])=>{const v=/^[bs]\d/.test(a)?(m[a[0]]||[])[+a[1]]:m[a];if(typeof v=='string'&&(v||a[0]=='s'))kbSet(i,a,v)}))}catch(e){}
+kt.onclick=e=>{const k=e.target.closest('kbd');if(k){kbW={i:+k.dataset.i,a:k.dataset.a};kbRender()}};
+document.getElementById('ktR').onclick=()=>{KM.forEach((m,i)=>kbAct.forEach(([a])=>kbSet(i,a,/^[bs]\d/.test(a)?kbDef[i][a[0]][+a[1]]:kbDef[i][a])));kbW=null;kbSave();kbRender()};
+addEventListener('keydown',e=>{if(!kbW)return;if(!mo){kbW=null;return}e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;const{i,a}=kbW;if(e.code=='Escape'||e.code=='Backspace'||e.code=='Delete'){if(e.code!='Escape'&&a[0]=='s'){kbSet(i,a,'');kbSave()}}else{const old=kbGet(i,a),rl=old&&!old.startsWith('Pad');let h=null;for(let p=0;p<2;p++)kbAct.forEach(([x])=>{if((p!=i||x!=a)&&kbGet(p,x)==e.code)h=[p,x]});if(h&&!rl&&h[1][0]!='s'){kbW=null;kbRender();return}if(h)kbSet(h[0],h[1],rl?old:'');kbSet(i,a,e.code);kbSave()}kbW=null;kbRender()},true);
+mb.insertAdjacentHTML('afterend','<button id="keyBtn" tabindex="-1">⌨️ 키 설정</button>');const kbBtn=document.getElementById('keyBtn');kbBtn.onclick=()=>{tman(1);kbBtn.blur();kt.scrollIntoView({block:'center'})};
+kbRender();
 </script></body></html>
