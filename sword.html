@@ -377,6 +377,16 @@ try{window.stop()}catch(e){}
             line-height: 1.5;
         }
 
+                #mock-modal.decide { pointer-events: auto; background-color: rgba(0,0,0,0.72); }
+        #mock-modal-content { padding: 28px 30px; width: min(92vw, 440px); }
+        .bk-btns { display: none; flex-direction: column; gap: 9px; margin-top: 16px; }
+        #mock-modal.decide .bk-btns { display: flex; }
+        .bk-btns button { padding: 12px; border: 0; border-radius: 10px; color: #fff; font-weight: 700; font-size: 15px; font-family: inherit; cursor: pointer; }
+        .bk-btns button:disabled { opacity: .45; cursor: not-allowed; }
+        #bk-protect { background: linear-gradient(135deg,#00b3b1,#0097a7); }
+        #bk-pick { background: linear-gradient(135deg,#f39c12,#d35400); }
+        #bk-let { background: #34495e; }
+
         /* ============== 100강 신화급 축하 연출 ============== */
         #victory-overlay {
             display: none;
@@ -478,6 +488,41 @@ html[data-device=desktop] body{padding:28px 24px}
 html[data-device=desktop] #game-wrapper{max-width:1180px;gap:24px}
 html[data-device=desktop] button{cursor:pointer}
 </style>
+<style id="v2-css">
+html,body{height:100%}
+html body{display:block!important;height:100dvh;padding:8px!important;box-sizing:border-box;overflow:hidden}
+html body #game-wrapper{display:block;height:100%;max-width:560px!important;margin:0 auto}
+.view{display:none;flex-direction:column;gap:6px;height:100%;box-sizing:border-box;min-height:0;padding:10px!important;overflow-y:auto}
+#view-main{display:flex;overflow:hidden}
+html body h2{font-size:18px!important;margin:0 0 4px!important;letter-spacing:0!important}
+h2 small{font-size:11px;color:#2ecc71}
+html body .status-bar{flex-direction:row;justify-content:space-between;padding:6px 10px!important;margin:0!important;font-size:13px!important}
+html body .gold{font-size:16px!important}
+.nav{display:flex;gap:6px}.nav button{flex:1;padding:8px 2px!important;font-size:12px!important;background:#2c3e50;color:#fff}
+html body #sword-display-area{flex:1 1 0;height:auto!important;min-height:70px;margin:2px 0!important}
+html body #sword-visual{position:absolute;inset:0;width:auto;height:auto}
+html body #gs{height:100%!important;max-height:100%;width:auto}
+html body #sword-name{font-size:21px;margin:0}
+html body #sell-price,html body #cost-display{font-size:13px;margin:0}
+html body #rate-display{height:auto;min-height:32px;margin:0;font-size:12px}
+html body .ui-area{padding:5px 10px;margin:0}
+html body .btn-group{flex-wrap:wrap;margin:0}
+html body button{min-height:0!important}
+html body .btn-group button{padding:11px}
+.btn-store{flex-basis:100%;background:linear-gradient(135deg,#3498db,#2c3e50);color:#fff}
+.vhead{display:flex;align-items:center;justify-content:space-between;gap:8px}.vhead h2{margin:0!important}
+.back,.mini{background:#2c3e50;color:#fff;padding:8px 10px!important;font-size:12px!important}
+.sec{color:#f1c40f;font-weight:bold;text-align:left;margin-top:6px}
+.row{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.3);padding:6px 10px;border-radius:6px;font-size:13px;text-align:left;margin-top:4px}
+.row span{flex:1}.empty{font-size:12px;color:#95a5a6;text-align:left}
+#craft-body,.shop-btn-grid{display:grid!important;grid-template-columns:1fr 1fr;gap:6px}
+.rec{display:flex;flex-direction:column;gap:2px;background:linear-gradient(135deg,#8e44ad,#2c3e50);color:#fff;font-size:12px!important;padding:8px!important;text-transform:none}
+#junk-box{display:none;background:rgba(0,0,0,.4);padding:8px;border-radius:8px;color:#ffdd59}
+#mode-overlay{position:fixed;inset:0;z-index:9999;background:#05070cf5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px}
+.mode-btn{width:min(340px,92%);padding:16px!important;color:#fff;text-transform:none;font-size:15px!important}
+.mode-btn small{display:block;font-weight:normal;font-size:12px;margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:3px}.grid2 .row{margin-top:0;padding:3px 8px;font-size:12px}
+</style>
 </head>
 <body>
 
@@ -487,8 +532,13 @@ html[data-device=desktop] button{cursor:pointer}
     <div id="mock-modal">
         <div id="mock-modal-content">
             <div style="font-size: 50px; margin-bottom: 10px;">💥</div>
-            <div id="mock-text-title">무기가 소멸했습니다!</div>
+            <div id="mock-text-title">검이 깨졌습니다!</div>
             <div id="mock-text-message">메시지</div>
+            <div class="bk-btns">
+                <button id="bk-pick" onclick="pickJunk()">🤏 줍기</button>
+                <button id="bk-protect" onclick="chooseBreak(true)"></button>
+                <button id="bk-let" onclick="chooseBreak(false)">💔 검 떠나보내기</button>
+            </div>
         </div>
     </div>
 
@@ -496,14 +546,15 @@ html[data-device=desktop] button{cursor:pointer}
         <div id="victory-burst-wrap"></div>
         <div id="confetti-layer"></div>
         <div id="victory-crown">👑</div>
-        <div id="victory-title">100강의 지배자, 신의 경지에 도달하다!</div>
-        <div id="victory-sub">창조신의 권능: 싱귤래리티 — 당신은 이제 세계의 법칙 그 자체입니다.</div>
+        <div id="victory-title">30강 달성! 전설의 검을 완성했습니다!</div>
+        <div id="victory-sub">당신은 대장간의 전설이 되었습니다.</div>
         <button class="victory-close-btn" onclick="closeVictoryOverlay()">여운을 뒤로하고 대장간으로 돌아가기</button>
     </div>
 
     <div id="game-wrapper">
-        <div class="panel">
-            <h2>🔥 100층의 신화 대장간 🔥</h2>
+        <div class="panel view" id="view-main">
+            <h2>🔥 30층의 신화 대장간 🔥 <small id="mode-badge"></small></h2>
+            <div class="nav"><button onclick="showView('shop')">🏪 상점가기</button><button onclick="showView('items')">🎒 아이템창가기</button><button onclick="showView('craft')">⚒️ 조합소가기</button></div>
 
             <div class="status-bar">
                 <div class="gold">💰 <span id="gold-display">2,000,000</span> G</div>
@@ -584,55 +635,50 @@ html[data-device=desktop] button{cursor:pointer}
             <div id="sell-price">판매가: 0 G</div>
             <div id="cost-display">강화 비용: 무료</div>
             <div id="rate-display">성공 100%<br>(실패 페널티 없음)</div>
+            <div id="junk-drop" class="row" style="display:none"><span id="junk-drop-text"></span><button class="mini" onclick="pickJunk()">🤏 줍기</button></div>
 
-            <div class="ui-area">
-                <label class="checkbox-area">
-                    <input type="checkbox" id="use-scroll" style="transform: scale(1.3);">
-                    <span>🛡️ <strong id="scroll-demand-text">파괴 방지권 사용 (1개 소모)</strong></span>
-                </label>
-            </div>
+            <div class="ui-area"><div class="checkbox-area" style="cursor:default">🛡️ <strong id="scroll-demand-text"></strong></div></div>
 
             <div class="btn-group">
                 <button class="btn-enhance" id="btn-enhance" onclick="enhanceSword()">강화 도전!</button>
                 <button class="btn-sell" id="btn-sell" onclick="sellSword()">판매 (즉시 정산)</button>
-            </div>
-
-            <div id="log-container">
-                <div class="log-entry system">시스템: 무기 파괴 페널티가 20강부터 시작되도록 대폭 완화되었습니다! (19강까지는 실패 시 하락만 적용)</div>
+                <button class="btn-store" id="btn-store" onclick="storeSword()" style="display:none">📦 검 보관하기</button>
             </div>
         </div>
 
-        <div class="panel shop-panel">
-            <h2>차원 상점</h2>
+        <div class="panel view" id="view-shop">
+            <div class="vhead"><button class="back" onclick="showView('main')">← 대장간</button><h2>🏪 상점</h2></div>
 
             <div class="shop-item" style="border-color: #00d8d6; background: rgba(0, 216, 214, 0.03);">
                 <div style="font-size: 28px;">📜</div>
                 <div style="font-weight: bold; font-size: 16px; color:#00d8d6;">파괴 방지권 상점</div>
-                <p>실패 패널티(파괴/하락) 완벽 차단!<br><span style="color:#ff7675; font-weight:bold;">※ 구간별 요구량이 완만하게 상승합니다!</span></p>
-                <div class="shop-btn-grid">
-                    <button class="btn-buy" onclick="buyProtectScroll(1, 100000)">📜 낱개 1장 ㆍ 100,000 G</button>
-                    <button class="btn-buy" style="background: linear-gradient(135deg, #05c46b, #0fb9b1);" onclick="buyProtectScroll(10, 950000)">📦 견고한 가죽 주머니 [10개] ㆍ 950K G</button>
-                    <button class="btn-buy" style="background: linear-gradient(135deg, #718093, #2f3640);" onclick="buyProtectScroll(50, 4500000)">💼 강철 보급 상자 [50개] ㆍ 4.5M G</button>
-                    <button class="btn-buy" style="background: linear-gradient(135deg, #00d2d3, #5f27cd);" onclick="buyProtectScroll(100, 8500000)">💎 비밀 금고 묶음 [100개] ㆍ 8.5M</button>
-                    <button class="btn-buy" style="background: linear-gradient(135deg, #a55eea, #4b7bec);" onclick="buyProtectScroll(1000, 80000000)">🧰 고대 보물상자 [1,000개] ㆍ 80M G</button>
-                    <button class="btn-buy" style="background: linear-gradient(135deg, #222f3e, #10ac84);" onclick="buyProtectScroll(10000, 750000000)">🌌 차원의 특이점 [10,000개] ㆍ 750M G</button>
-                </div>
+                <p>검이 깨진 직후 쓰면 파괴 완벽 차단! (쓸지 말지는 깨진 뒤에 선택)<br><span style="color:#ff7675; font-weight:bold;">※ 구간별 요구량이 완만하게 상승합니다!</span></p>
+                <div class="shop-btn-grid" id="shop-scrolls"></div>
             </div>
 
             <div class="shop-item" style="border-color: #9b59b6; background: rgba(155, 89, 182, 0.05);">
                 <div style="font-size: 28px;">🌀</div>
-                <div style="font-weight: bold; font-size: 16px; color:#e056fd;">차원 도약 장치 (7강~30강)</div>
-                <p>판매가보다 높은 기회비용으로 안전하게 원하는 구간을 도약합니다.</p>
-
-                <select id="jump-level-select" onchange="updateJumpPrice()">
-                </select>
-
-                <div id="jump-price-display" style="color: #ffdd59; font-weight: bold; font-size: 14px; margin: 4px 0;">
-                    필요 골드: 계산 중...
-                </div>
-                <button class="btn-jump" onclick="useJumpTeleport()">해당 차원으로 도약!</button>
+                <div style="font-weight: bold; font-size: 16px; color:#e056fd;">워프권</div>
+                <p>+0 상태에서 사용하면 일정한 확률로 해당 강화 상태로 시작합니다.<br>실패하면 워프권만 사라져요.</p>
+                <div class="shop-btn-grid" id="shop-warps" style="grid-template-columns: 1fr;"></div>
             </div>
         </div>
+        <div class="panel view" id="view-items">
+            <div class="vhead"><button class="back" onclick="showView('main')">← 대장간</button><h2>🎒 아이템창</h2></div>
+            <div id="items-body"></div>
+        </div>
+        <div class="panel view" id="view-craft">
+            <div class="vhead"><button class="back" onclick="toggleJunk()">🧩 잡템창가기</button><button class="back" onclick="showView('main')">← 대장간</button></div>
+            <h2>⚒️ 조합소</h2>
+            <div id="junk-box">🧩 잡템 보유: <b id="junk-count">0</b>개 <small>(검이 부서질 때 획득)</small></div>
+            <div id="craft-body"></div>
+        </div>
+    </div>
+
+    <div id="mode-overlay">
+        <h2 style="font-size:22px!important">난이도를 선택하세요</h2>
+        <button class="mode-btn" style="background:linear-gradient(135deg,#27ae60,#16a085)" onclick="startGame('easy')">🌱 이지 모드<small>강화 비용↓ · 성공 확률↑ · 방지권·조합 재료↓ · 판매가↓ · 워프권↑ · 시작 3,000,000G</small></button>
+        <button class="mode-btn" style="background:linear-gradient(135deg,#c0392b,#6c1d1d)" onclick="startGame('hard')">🔥 하드 모드<small>기본 비용·확률·판매가 · 시작 1,500,000G</small></button>
     </div>
 
     <script>
@@ -745,39 +791,21 @@ if(window.__g2fail)throw new Error("Access Denied");
         ];
 
         const swordData = [];
-        const maxLevel = 100;
-
+        const maxLevel = 30;
+        // [강화 비용(골드), 성공 확률%, 판매가(0=판매 불가), 방지권 수(0=사용 불가)] — 0~30강
+        const TBL = [
+            [500,100,0,0],[500,98,200,0],[1000,95,500,0],[2000,93,1000,0],[4000,90,2000,1],[7000,86,6000,1],
+            [10000,81,15000,1],[15000,75,25000,1],[22000,70,50000,1],[30000,66,90000,1],[30000,62,180000,1],[51000,61,500000,1],
+            [70000,54,1000000,1],[80000,50,2000000,2],[100000,49,5000000,3],[130000,46,10000000,4],[170000,44,20000000,7],
+            [220000,40,44500000,9],[300000,38,72000000,10],[400000,35,120000000,12],[650000,33,240000000,15],
+            [0,30,300000000,17],[0,27,400000000,20],[0,27,550000000,22],[0,25,750000000,23],[0,35,400000000,23],
+            [5000000,50,1800000000,0],[0,40,2500000000,0],[0,15,5000000000,0],[0,5,0,0],[0,0,0,0]
+        ];
+        // 재료 비용: ['d', 드랍템, 개수] 또는 ['s', 보관한 검 강수, 자루 수]
+        const ITEMCOST = { 21: ['s', 19, 1], 22: ['s', 21, 2], 23: ['d', 'd6', 12], 24: ['s', 22, 1], 25: ['d', 'd7', 15], 27: ['d', 'd8', 2], 28: ['d', 'd9', 3] };
         for (let i = 0; i <= maxLevel; i++) {
-            let preset = rawPreset[i];
-            let rate = 100;
-            let penalty = "none";
-            let price = 0;
-            let cost = 0;
-
-            if (i <= 4) { rate = 100; penalty = "none"; }
-            else if (i <= 14) { rate = 95 - (i - 5) * 1; penalty = "drop"; }
-            else if (i <= 19) { rate = 85; penalty = "drop"; }
-            else if (i <= 29) { rate = 80 - (i - 20) * 2; penalty = "destroy"; }
-            else if (i <= 49) { rate = 60 - (i - 30) * 1.5; penalty = "destroy"; }
-            else if (i <= 79) { rate = 30 - (i - 50) * 0.6; penalty = "destroy"; }
-            else if (i < 100) { rate = Math.max(8.0 - (i - 80) * 0.25, 3.0); penalty = "destroy"; }
-            else { rate = 0; penalty = "none"; }
-
-            if (i > 0) {
-                price = Math.floor(2000 * Math.pow(1.32, i));
-                // 강화 비용: 초중반은 판매가의 6%, 30강부터 서서히 낮춰 고강 구간을 '운'으로 도전 가능하게
-                const costFactor = i < 30 ? 0.06 : Math.max(0.06 - (i - 30) * 0.0008, 0.004);
-                cost = Math.floor(price * costFactor);
-            }
-
-            swordData.push({
-                name: preset.n,
-                color: preset.c,
-                rate: parseFloat(rate.toFixed(2)),
-                penalty,
-                price,
-                cost
-            });
+            const t = TBL[i];
+            swordData.push({ name: rawPreset[i].n, color: rawPreset[i].c, rate: t[1], penalty: (t[1] >= 100 || t[1] === 0) ? 'none' : 'destroy', price: t[2], cost: t[0], scroll: t[3], item: ITEMCOST[i] || null });
         }
 
         let currentLevel = 0;
@@ -799,45 +827,18 @@ if(window.__g2fail)throw new Error("Access Denied");
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
-        const jumpPrices = {};
-        const selectEl = document.getElementById('jump-level-select');
-        for (let lvl = 7; lvl <= 30; lvl++) {
-            jumpPrices[lvl] = Math.floor(swordData[lvl].price * 1.35);
-
-            const opt = document.createElement('option');
-            opt.value = lvl;
-            opt.innerText = `목표: +${lvl} ${swordData[lvl].name}`;
-            selectEl.appendChild(opt);
-        }
-
-        function updateJumpPrice() {
-            const level = selectEl.value;
-            const price = jumpPrices[level];
-            document.getElementById('jump-price-display').innerText = `필요 골드: ${formatNumber(price)} G`;
-        }
-
         function getRequiredScrollCount(level) {
-            if (level < 20) return 1;
-            if (level < 25) return 3;
-            if (level < 30) return 5;
-            if (level < 40) return 10;
-            if (level < 50) return 20;
-            if (level < 60) return 35;
-            if (level < 70) return 50;
-            if (level < 80) return 80;
-            if (level < 90) return 120;
-            if (level < 100) return 200;
-            return 1;
+            return (swordData[level] && swordData[level].scroll) || 0;
         }
 
         // =====================================================================
         // 2. 검 비주얼 렌더링 (SVG + CSS 등급별 진화 + 파티클 오오라)
         // =====================================================================
         function getTier(level) {
-            if (level >= 100) return 4;
-            if (level >= 80) return 3;
-            if (level >= 50) return 2;
-            if (level >= 20) return 1;
+            if (level >= 30) return 4;
+            if (level >= 25) return 3;
+            if (level >= 20) return 2;
+            if (level >= 10) return 1;
             return 0;
         }
 
@@ -1344,15 +1345,15 @@ if(window.__g2fail)throw new Error("Access Denied");
                 nameEl.style.textShadow = 'none';
             }
 
-            document.getElementById('sell-price').innerText = `판매가: ${formatNumber(data.price)} G`;
+            document.getElementById('sell-price').innerText = data.price ? `판매가: ${formatNumber(data.price)} G` : '판매 불가';
             document.getElementById('cost-display').innerText = `강화 비용: ${data.cost === 0 ? "무료" : formatNumber(data.cost) + " G"}`;
 
             const neededScrolls = getRequiredScrollCount(currentLevel);
-            document.getElementById('scroll-demand-text').innerText = `파괴 방지권 사용 (${neededScrolls}개 소모)`;
+            document.getElementById('scroll-demand-text').innerText = neededScrolls ? `깨지면 방지권 ${neededScrolls}개로 막을 수 있어요 (깨진 뒤 선택)` : '이 구간은 방지권 사용 불가';
 
             const rateEl = document.getElementById('rate-display');
             if (currentLevel === maxLevel) {
-                rateEl.innerHTML = "세계의 경계를 넘어 신이 되었습니다!<br>(MAX LEVEL)";
+                rateEl.innerHTML = "전설의 검을 완성했습니다!<br>(MAX LEVEL)";
                 document.getElementById('btn-enhance').disabled = true;
             } else {
                 document.getElementById('btn-enhance').disabled = false;
@@ -1362,17 +1363,20 @@ if(window.__g2fail)throw new Error("Access Denied");
                 rateEl.innerHTML = `성공 확률: <strong>${data.rate}%</strong><br>${penaltyText}`;
             }
 
-            document.getElementById('btn-sell').disabled = (currentLevel === 0);
+            document.getElementById('btn-sell').disabled = !data.price;
             document.getElementById('gold-display').innerText = formatNumber(gold);
             document.getElementById('scroll-display').innerText = formatNumber(protectScrolls);
+            if (data.item) document.getElementById('cost-display').innerText = `강화 비용: ${itemText(data.item)} (보유 ${itemHave(data.item)})` + (data.cost ? ` + ${formatNumber(data.cost)} G` : '');
+            document.getElementById('btn-store').style.display = canStore ? '' : 'none';
+            document.getElementById('junk-drop').style.display = pendingJunk ? 'flex' : 'none';
+            const bp = document.getElementById('bk-pick'); bp.style.display = pendingJunk ? '' : 'none';
+            if (pendingJunk) { const jj = DROPS[pendingJunk.id]; bp.innerText = `🤏 줍기 (${jj.e} ${jj.n} ×${pendingJunk.qty})`; }
+            if (pendingJunk) { const j = DROPS[pendingJunk.id]; document.getElementById('junk-drop-text').innerText = `${j.e} ${j.n} ×${pendingJunk.qty} 발견!`; }
         }
 
         function logMessage(msg, type) {
-            const logBox = document.getElementById('log-container');
-            const newLog = document.createElement('div');
-            newLog.className = `log-entry ${type}`;
-            newLog.innerHTML = msg;
-            logBox.prepend(newLog);
+            if (type === 'destroy') return;
+            notify(msg.replace(/<[^>]*>/g, ''));
         }
 
         // =====================================================================
@@ -1391,8 +1395,7 @@ if(window.__g2fail)throw new Error("Access Denied");
             if (currentLevel >= maxLevel) return;
 
             const data = swordData[currentLevel];
-            const useScrollCheckbox = document.getElementById('use-scroll');
-            const isUsingScroll = useScrollCheckbox.checked;
+            if (broken) return;
             const requiredScrolls = getRequiredScrollCount(currentLevel);
 
             if (gold < data.cost) {
@@ -1400,22 +1403,22 @@ if(window.__g2fail)throw new Error("Access Denied");
                 return;
             }
 
-            if (isUsingScroll && protectScrolls < requiredScrolls) {
-                showToast(randomTaunt(poorScrollTaunts, { '{N}': requiredScrolls }));
-                useScrollCheckbox.checked = false;
-                return;
-            }
-
+            const ic = data.item;
+            if (ic && itemHave(ic) < ic[2]) { showToast(`재료가 부족해요! 필요: ${itemText(ic)} (보유 ${itemHave(ic)})`); return; }
+            if (ic) itemPay(ic);
             gold -= data.cost;
-            if (isUsingScroll) protectScrolls -= requiredScrolls;
+            pendingJunk = null;
 
             playHitSound();
             fx('fx-hit');
 
             const roll = Math.random() * 100;
+            canStore = false;
+            
 
             if (roll <= data.rate) {
                 currentLevel++;
+                canStore = currentLevel >= 10;
                 const newData = swordData[currentLevel];
                 logMessage(`[+${currentLevel - 1} -> +${currentLevel}] 강화 성공!! <strong style="color:${newData.color};">${newData.name}</strong> 완성! (-${formatNumber(data.cost)}G)`, 'success');
                 playSuccessSound();
@@ -1425,31 +1428,10 @@ if(window.__g2fail)throw new Error("Access Denied");
                     setTimeout(triggerVictoryCelebration, 350);
                 }
             } else {
-                if (isUsingScroll) {
-                    let preventType = (data.penalty === 'destroy') ? "무기 폭발" : "등급 하락";
-                    logMessage(`[+${currentLevel}] 강화 대실패... 방지권 ${requiredScrolls}개를 제물 바쳐 ${preventType}을(를) 면했습니다. (-${formatNumber(data.cost)}G)`, 'system');
-                    playShieldSound();
-                } else {
+                dropJunk(currentLevel);
+                {
                     if (data.penalty === 'destroy') {
-                        const oldName = data.name;
-                        currentLevel = 0;
-                        const randomMock = mockMessages[Math.floor(Math.random() * mockMessages.length)];
-
-                        const modal = document.getElementById('mock-modal');
-                        document.getElementById('mock-text-message').innerHTML = `대장장이: "<span style="color:#fff;">${randomMock}</span>"`;
-
-                        clearTimeout(mockTimeout);
-                        modal.style.opacity = '1';
-                        modal.style.display = 'flex';
-
-                        mockTimeout = setTimeout(() => {
-                            modal.style.opacity = '0';
-                            setTimeout(() => { modal.style.display = 'none'; }, 400);
-                        }, 2500);
-
-                        logMessage(`[${oldName}] 💥 챙그랑! 형태도 남지 않고 무기가 소멸했습니다.<br><span style="color:#f39c12; font-weight:normal;">대장장이: "${randomMock}"</span> (+0 리셋)`, 'destroy');
-                        useScrollCheckbox.checked = false;
-                        playDestroySound();
+                        openBreak(data, requiredScrolls);
                     } else if (data.penalty === 'drop') {
                         currentLevel--;
                         logMessage(`[+${currentLevel + 1}] 강화 실패... 아쉽게 1티어 다운그레이드 되었습니다.`, 'fail');
@@ -1463,49 +1445,99 @@ if(window.__g2fail)throw new Error("Access Denied");
             updateUI();
         }
 
+        // ===== 방지권: 깨진 뒤에 쓸지 말지 선택 =====
+        let broken = null;
+        const keepMessages = [
+            "방지권 아끼시게요? 그럼 이 검은 여기서 작별입니다~ ㅋㅋ",
+            "자, 방지권 쓰실 거죠? 안 쓰면 검은 영영 안녕~ 😏",
+            "주머니 속 방지권은 장식입니까? 지금 안 쓰면 언제 쓰시게요~"
+        ];
+        function openBreak(data, need) {
+            const canPay = need > 0 && protectScrolls >= need;
+            const msg = randomTaunt(canPay ? keepMessages : mockMessages);
+            broken = { lv: currentLevel, name: data.name, need, cost: data.cost, msg };
+            const m = document.getElementById('mock-modal'), decide = need > 0 || !!pendingJunk;
+            document.getElementById('mock-text-message').innerHTML = `대장장이: "<span style="color:#fff;">${msg}</span>"`;
+            const pb = document.getElementById('bk-protect');
+            pb.style.display = need ? '' : 'none';
+            pb.disabled = !canPay;
+            pb.innerText = canPay ? `🛡️ 방지권 ${need}개 써서 검 지키기 (보유 ${protectScrolls}개)` : `🛡️ 방지권 부족 (필요 ${need}개 · 보유 ${protectScrolls}개)`;
+            document.getElementById('bk-let').innerText = need ? '💔 방지권 안 쓰고 보내주기' : '💔 검 떠나보내기';
+            m.classList.toggle('decide', decide);
+            clearTimeout(mockTimeout);
+            m.style.opacity = '1'; m.style.display = 'flex';
+            playDestroySound();
+            if (!decide) {
+                resolveBreak(false);
+                mockTimeout = setTimeout(() => { m.style.opacity = '0'; setTimeout(() => { if (!broken) m.style.display = 'none'; }, 400); }, 2500);
+            }
+        }
+        function resolveBreak(useProtect) {
+            if (!broken) return;
+            const b = broken; broken = null;
+            if (useProtect && b.need && protectScrolls >= b.need) {
+                protectScrolls -= b.need;
+                logMessage(`[+${b.lv}] 강화 대실패... 방지권 ${b.need}개를 제물 바쳐 무기 폭발을 면했습니다. (-${formatNumber(b.cost)}G)`, 'system');
+                playShieldSound();
+            } else {
+                currentLevel = 0;
+                logMessage(`[${b.name}] 💥 챙그랑! 형태도 남지 않고 무기가 소멸했습니다.<br><span style="color:#f39c12; font-weight:normal;">대장장이: "${b.msg}"</span> (+0 리셋)`, 'destroy');
+            }
+            updateUI();
+        }
+        function chooseBreak(useProtect) {
+            resolveBreak(useProtect);
+            document.getElementById('mock-modal').style.display = 'none';
+        }
+
         function sellSword() {
             document.getElementById('btn-sell').blur();
-            if (currentLevel === 0) return;
+            if (!swordData[currentLevel].price) return;
             const price = swordData[currentLevel].price;
 
             gold += price;
+            canStore = false;
             logMessage(`💰 [+${currentLevel} ${swordData[currentLevel].name}] 유물을 골동품점에 처분하여 <strong>${formatNumber(price)} G</strong>를 정산했습니다!`, 'system');
             currentLevel = 0;
-            document.getElementById('use-scroll').checked = false;
             updateUI();
         }
 
-        function buyProtectScroll(amount, price) {
-            event.target.blur();
+        function buyProtectScroll(i) {
+            document.activeElement && document.activeElement.blur();
+            const s = SHOP_SCROLLS[i], price = pick(s.price);
 
             if (gold >= price) {
                 gold -= price;
-                protectScrolls += amount;
-                logMessage(`📜 상점 거래 성공: 방지권 ${amount}매를 수령했습니다. (-${formatNumber(price)} G)`, 'system');
+                protectScrolls += s.n;
+                logMessage(`📜 상점 거래 성공: 방지권 ${s.n}매를 수령했습니다. (-${formatNumber(price)} G)`, 'system');
                 updateUI();
             } else {
                 showToast(randomTaunt(poorGoldTaunts, { '{G}': formatNumber(price) + ' G' }));
             }
         }
 
-        // 🔥 차원 도약 시 무조건 확인창 없이 즉시 작동되도록 변경!
-        function useJumpTeleport() {
-            event.target.blur();
-            const targetLevel = parseInt(selectEl.value);
-            const price = jumpPrices[targetLevel];
+        // 워프권: +0 상태에서 구매 즉시 사용. 일정한 확률(WARP_CHANCE)로 해당 강화 상태로 시작, 실패하면 워프권만 소모
+        function useJumpTeleport(i) {
+            document.activeElement && document.activeElement.blur();
+            const w = SHOP_WARPS[i], price = pick(w.price);
 
+            if (currentLevel !== 0) { notify('+0 상태일 때만 워프권을 쓸 수 있어요'); return; }
             if (gold < price) {
                 showToast(randomTaunt(poorGoldTaunts, { '{G}': formatNumber(price) + ' G' }));
                 return;
             }
 
-            // confirm 알럿을 아예 제거하여 클릭 시 즉시 도약 수행
             gold -= price;
-            currentLevel = targetLevel;
-            document.getElementById('use-scroll').checked = false;
+            canStore = false;
 
-            playWarpSound();
-            logMessage(`🌀 시공 전이 완료! 즉시 <strong>+${currentLevel}강</strong> 평행우주 전선에 낙하했습니다!`, 'success');
+            if (Math.random() < WARP_CHANCE) {
+                currentLevel = w.lv;
+                playWarpSound();
+                logMessage(`🌀 시공 전이 성공! <strong>+${w.lv}강 ${swordData[w.lv].name}</strong> 상태로 시작합니다! (-${formatNumber(price)} G)`, 'success');
+            } else {
+                playFailSound(false);
+                logMessage(`🌀 시공의 틈이 닫혀버렸어요... 워프권만 사라졌습니다. (-${formatNumber(price)} G)`, 'fail');
+            }
             updateUI();
         }
 
@@ -1586,7 +1618,129 @@ if(window.__g2fail)throw new Error("Access Denied");
         // =====================================================================
         // 초기화
         // =====================================================================
-        updateJumpPrice();
+        // ===== 모드 / 재료 / 잡템 / 보관 / 조합소 =====
+        const MODES = {
+            easy: { gold: 3000000, cost: 0.6, rate: 10, price: 0.7 },
+            hard: { gold: 1500000, cost: 1, rate: 0, price: 1 }
+        };
+        let gameMode = 'hard', canStore = false, pendingJunk = null;
+        const DROPS = {
+            d1: { n: '녹슨 쇠조각', e: '🔩' }, d2: { n: '괴수의 뼛조각', e: '🦴' }, d3: { n: '빛바랜 마석 가루', e: '💠' },
+            d4: { n: '대장간 철 부스러기', e: '⚙️' }, d5: { n: '불탄 칼자루', e: '🪵' }, d6: { n: '떠도는 원혼', e: '👻' },
+            d7: { n: '룬 가루', e: '✨' }, d8: { n: '투명한 결정', e: '🔮' }, d9: { n: '타이탄의 심장석', e: '🗿' }
+        };
+        // 강화 실패 시 나오는 잡템 (강수별)
+        const DROP_AT = { 6: 'd1', 7: 'd1', 8: 'd1', 9: 'd2', 10: 'd3', 11: 'd4', 12: 'd4', 13: 'd5', 14: 'd6', 15: 'd7', 16: 'd8', 17: 'd9' };
+        const junk = {}, stash = {};
+        Object.keys(DROPS).forEach(k => junk[k] = 0);
+        const itemHave = ic => ic[0] === 'd' ? junk[ic[1]] : (stash[ic[1]] || 0);
+        const itemPay = ic => { if (ic[0] === 'd') junk[ic[1]] -= ic[2]; else stash[ic[1]] -= ic[2]; };
+        const itemText = ic => ic[0] === 'd' ? `${DROPS[ic[1]].e}${DROPS[ic[1]].n} ${ic[2]}개` : `⚔️ +${ic[1]} ${swordData[ic[1]].name} ${ic[2]}자루`;
+        // 값이 [하드, 이지] 배열이면 현재 모드에 맞는 값, 숫자 하나면 두 모드 공통
+        const pick = v => Array.isArray(v) ? v[gameMode === 'easy' ? 1 : 0] : v;
+        // 조합소: c = 필요 잡템, scroll = 받는 방지권 수, sword = 받는 검 강수(보관함으로 들어감)
+        const RECIPES = [
+            { c: { d1: [8, 5] }, scroll: 1 },
+            { c: { d2: [5, 3] }, scroll: 1 },
+            { c: { d3: [3, 2] }, sword: 13 },
+            { c: { d4: [5, 3] }, scroll: 2 },
+            { c: { d5: 2 }, sword: 16 },
+            { c: { d6: 4 }, scroll: 4 },
+            { c: { d6: [4, 6] }, sword: 19 },
+            { c: { d7: 6 }, scroll: 10 },
+            { c: { d8: [4, 3] }, scroll: [11, 9] }
+        ];
+        const need = (r, id) => pick(r.c[id]);
+        const recipeName = r => r.sword ? `⚔️ +${r.sword} ${swordData[r.sword].name}` : `🛡️ 파괴 방지권 ×${pick(r.scroll)}`;
+        const recipeGive = r => { if (r.sword) stash[r.sword] = (stash[r.sword] || 0) + 1; else protectScrolls += pick(r.scroll); };
+
+        // 상점: 가격은 [하드, 이지] 순서
+        const SHOP_SCROLLS = [
+            { n: 1, price: [2100000, 1000000], icon: '📜', bg: '' },
+            { n: 3, price: [6000000, 2500000], icon: '📦', bg: 'linear-gradient(135deg, #05c46b, #0fb9b1)' }
+        ];
+        const SHOP_WARPS = [
+            { lv: 9, price: [800000, 1000000] },
+            { lv: 13, price: [5000000, 7000000] },
+            { lv: 14, price: [7500000, 10000000] },
+            { lv: 15, price: [10000000, 15000000] }
+        ];
+        const WARP_CHANCE = 0.5; // 워프권 성공 확률 (임시값) — 바꾸려면 이 숫자만 고치면 돼요
+        function renderShop() {
+            document.getElementById('shop-scrolls').innerHTML = SHOP_SCROLLS.map((s, i) =>
+                `<button class="btn-buy"${s.bg ? ` style="background:${s.bg}"` : ''} onclick="buyProtectScroll(${i})">${s.icon} 파괴 방지권 ${s.n}개 ㆍ ${formatNumber(pick(s.price))} G</button>`).join('');
+            document.getElementById('shop-warps').innerHTML = SHOP_WARPS.map((w, i) =>
+                `<button class="btn-jump" onclick="useJumpTeleport(${i})">🌀 +${w.lv}강 워프권 ㆍ ${formatNumber(pick(w.price))} G<small style="display:block;font-weight:normal;margin-top:2px">일정한 확률로 +${w.lv} ${swordData[w.lv].name} 상태로 시작</small></button>`).join('');
+        }
+        function notify(m) {
+            const c = document.getElementById('toast-container'); c.innerHTML = '';
+            const t = document.createElement('div'); t.className = 'toast'; t.innerText = m; c.appendChild(t);
+            setTimeout(() => t.remove(), 2400);
+        }
+        function showView(n) {
+            ['main', 'shop', 'items', 'craft'].forEach(v => document.getElementById('view-' + v).style.display = v === n ? 'flex' : 'none');
+            if (n === 'items') renderItems();
+            if (n === 'craft') renderCraft();
+            if (n === 'shop') renderShop();
+        }
+        function startGame(m) {
+            gameMode = m; const M = MODES[m];
+            gold = M.gold;
+            swordData.forEach((d, i) => {
+                d.cost = Math.floor(d.cost * M.cost);
+                d.price = Math.floor(d.price * M.price);
+                if (i < maxLevel && d.rate < 100) d.rate = Math.min(100, +(d.rate + M.rate).toFixed(2));
+            });
+            document.getElementById('mode-badge').innerText = m === 'easy' ? '[이지]' : '[하드]';
+            document.getElementById('mode-overlay').style.display = 'none';
+            renderShop();
+            updateUI();
+        }
+        function storeSword() {
+            if (!canStore || currentLevel < 1) return;
+            stash[currentLevel] = (stash[currentLevel] || 0) + 1;
+            notify(`📦 +${currentLevel} ${swordData[currentLevel].name} 보관 완료!`);
+            currentLevel = 0; canStore = false;
+            updateUI();
+        }
+        function takeSword(l) {
+            if (currentLevel !== 0) { notify('+0 상태일 때만 꺼낼 수 있어요'); return; }
+            stash[l]--; currentLevel = l; canStore = false; updateUI(); showView('main');
+        }
+        function sellStash(l) { stash[l]--; gold += swordData[l].price; updateUI(); renderItems(); notify(`💰 +${formatNumber(swordData[l].price)} G`); }
+        function renderItems() {
+            const lv = Object.keys(stash).map(Number).filter(l => stash[l] > 0).sort((a, b) => b - a);
+            document.getElementById('items-body').innerHTML =
+                '<div class="sec">⚔️ 보관한 검</div>' + (lv.length ? lv.map(l => `<div class="row"><span style="color:${swordData[l].color}">+${l} ${swordData[l].name}</span><b>×${stash[l]}</b><button class="mini" onclick="takeSword(${l})">꺼내기</button>${swordData[l].price ? `<button class="mini" onclick="sellStash(${l})">판매</button>` : ''}</div>`).join('') : '<div class="empty">보관한 검이 없어요. 10강 이상 성공하면 보관할 수 있어요.</div>') +
+                '<div class="sec">💠 재료 (잡템)</div><div class="grid2">' + Object.keys(DROPS).map(id => `<div class="row"><span>${DROPS[id].e} ${DROPS[id].n}</span><b>×${junk[id]}</b></div>`).join('') + '</div>' +
+                `<div class="sec">🛡️ 파괴 방지권</div><div class="row"><span>보유</span><b>×${formatNumber(protectScrolls)}</b></div>`;
+        }
+        function toggleJunk() { const b = document.getElementById('junk-box'); b.style.display = b.style.display === 'block' ? 'none' : 'block'; }
+        function dropJunk(l) { const id = DROP_AT[l]; pendingJunk = id ? { id, qty: 1 + Math.floor(Math.random() * 4) } : null; }
+        function pickJunk() {
+            if (!pendingJunk) return;
+            const j = DROPS[pendingJunk.id];
+            junk[pendingJunk.id] += pendingJunk.qty;
+            notify(`${j.e} ${j.n} ×${pendingJunk.qty} 획득!`);
+            pendingJunk = null; updateUI();
+        }
+        function dropLv(id) { const a = Object.keys(DROP_AT).filter(l => DROP_AT[l] === id); return a.length > 1 ? `${a[0]}~${a[a.length - 1]}` : a[0]; }
+        function renderCraft() {
+            document.getElementById('junk-box').innerHTML = '🧩 보유 잡템 <small>(강화 실패 시 줍기로 획득)</small><div class="grid2">' + Object.keys(DROPS).map(id => `<div class="row"><span>${DROPS[id].e} ${DROPS[id].n} <small>(${dropLv(id)}강)</small></span><b>×${junk[id]}</b></div>`).join('') + '</div>';
+            document.getElementById('craft-body').innerHTML = RECIPES.map((r, i) => {
+                const ids = Object.keys(r.c), ok = ids.every(id => junk[id] >= need(r, id));
+                const cost = ids.map(id => DROPS[id].e + need(r, id)).join(' ');
+                return `<button class="rec" ${ok ? '' : 'disabled'} onclick="craft(${i})"><span>${recipeName(r)}</span><small>${cost}</small></button>`;
+            }).join('');
+        }
+        function craft(i) {
+            const r = RECIPES[i], ids = Object.keys(r.c);
+            if (!ids.every(id => junk[id] >= need(r, id))) return;
+            ids.forEach(id => junk[id] -= need(r, id));
+            recipeGive(r); notify(`${recipeName(r)} 제작 완료!`); renderCraft(); updateUI();
+        }
+        renderShop();
+        showView('main');
         updateUI();
     </script>
     <style>
