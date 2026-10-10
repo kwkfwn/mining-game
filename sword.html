@@ -509,7 +509,11 @@ html body .ui-area{padding:5px 10px;margin:0}
 html body .btn-group{flex-wrap:wrap;margin:0}
 html body button{min-height:0!important}
 html body .btn-group button{padding:11px}
-.btn-store{flex-basis:100%;background:linear-gradient(135deg,#3498db,#2c3e50);color:#fff}
+/* 보관 버튼: 하단 버튼줄이 아니라 검 영역 오른쪽 위에 떠 있는 작은 알약 (떠도 아래 버튼 위치가 안 밀려요) */
+#sword-stage{position:relative;flex:1 1 0;min-height:74px;display:flex;flex-direction:column}
+.store-chip{position:absolute;top:8px;right:6px;z-index:6;padding:7px 12px;font-size:12px;letter-spacing:0;text-transform:none;border-radius:999px;border:1px solid rgba(255,255,255,.4);background:linear-gradient(135deg,#3498db,#2c3e50);color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.55);animation:chipIn .35s ease-out}
+.store-chip:hover{filter:brightness(1.2)}
+@keyframes chipIn{from{opacity:0;transform:translateY(-6px) scale(.9)}to{opacity:1;transform:none}}
 .vhead{display:flex;align-items:center;justify-content:space-between;gap:8px}.vhead h2{margin:0!important}
 .back,.mini{background:#2c3e50;color:#fff;padding:8px 10px!important;font-size:12px!important}
 .sec{color:#f1c40f;font-weight:bold;text-align:left;margin-top:6px}
@@ -561,6 +565,7 @@ html body .btn-group button{padding:11px}
                 <div class="item-protect">🛡️ 파괴 방지권: <span id="scroll-display">0</span>개 보유</div>
             </div>
 
+            <div id="sword-stage">
             <div id="sword-display-area">
                 <div id="sword-visual" class="tier-0">
                     <div id="particle-layer"></div>
@@ -630,6 +635,8 @@ html body .btn-group button{padding:11px}
                     </div>
                 </div>
             </div>
+            <button class="store-chip" id="btn-store" onclick="storeSword()" style="display:none" title="이 검을 강화 재료로 보관해요 (다시 꺼낼 수 없어요)">📦 재료로 보관</button>
+            </div>
 
             <div id="sword-name">+0 나무 막대기</div>
             <div id="sell-price">판매가: 0 G</div>
@@ -642,7 +649,6 @@ html body .btn-group button{padding:11px}
             <div class="btn-group">
                 <button class="btn-enhance" id="btn-enhance" onclick="enhanceSword()">강화 도전!</button>
                 <button class="btn-sell" id="btn-sell" onclick="sellSword()">판매 (즉시 정산)</button>
-                <button class="btn-store" id="btn-store" onclick="storeSword()" style="display:none">📦 검 보관하기</button>
             </div>
         </div>
 
@@ -1418,7 +1424,7 @@ if(window.__g2fail)throw new Error("Access Denied");
 
             if (roll <= data.rate) {
                 currentLevel++;
-                canStore = currentLevel >= 10;
+                canStore = canStash(currentLevel);
                 const newData = swordData[currentLevel];
                 logMessage(`[+${currentLevel - 1} -> +${currentLevel}] 강화 성공!! <strong style="color:${newData.color};">${newData.name}</strong> 완성! (-${formatNumber(data.cost)}G)`, 'success');
                 playSuccessSound();
@@ -1635,23 +1641,30 @@ if(window.__g2fail)throw new Error("Access Denied");
         Object.keys(DROPS).forEach(k => junk[k] = 0);
         const itemHave = ic => ic[0] === 'd' ? junk[ic[1]] : (stash[ic[1]] || 0);
         const itemPay = ic => { if (ic[0] === 'd') junk[ic[1]] -= ic[2]; else stash[ic[1]] -= ic[2]; };
+        // 보관한 검은 '강화 재료' 전용이에요 (다시 꺼내거나 팔 수 없음).
+        // ITEMCOST에서 ['s', 강수, 자루 수]를 요구하는 강수만 보관할 수 있고, 어느 강화에 쓰이는지도 여기서 읽어와요.
+        const STASH_USE = {}; // { 보관 강수: [{ at: 이 재료를 쓰는 강화 시작 강수, n: 필요 자루 수 }] }
+        Object.keys(ITEMCOST).forEach(k => { const c = ITEMCOST[k]; if (c[0] === 's') (STASH_USE[c[1]] = STASH_USE[c[1]] || []).push({ at: +k, n: c[2] }); });
+        const canStash = l => !!STASH_USE[l];
+        const stashUseText = l => canStash(l) ? STASH_USE[l].map(u => `+${u.at}→+${u.at + 1} 강화 ${u.n}자루`).join(', ') : '쓰이는 곳 없음';
         const itemText = ic => ic[0] === 'd' ? `${DROPS[ic[1]].e}${DROPS[ic[1]].n} ${ic[2]}개` : `⚔️ +${ic[1]} ${swordData[ic[1]].name} ${ic[2]}자루`;
         // 값이 [하드, 이지] 배열이면 현재 모드에 맞는 값, 숫자 하나면 두 모드 공통
         const pick = v => Array.isArray(v) ? v[gameMode === 'easy' ? 1 : 0] : v;
-        // 조합소: c = 필요 잡템, scroll = 받는 방지권 수, sword = 받는 검 강수(보관함으로 들어감)
+        // 조합소: c = 필요 잡템, scroll = 받는 방지권 수, sword = 받는 검 강수(보관함으로 들어감),
+        //         warp = 만들면 워프권처럼 바로 그 강화 상태로 워프 (+0일 때만 / 보관함엔 바로 안 쌓이고, 재료로 쓰는 강수(+19)는 워프 직후 '재료로 보관' 가능)
         const RECIPES = [
             { c: { d1: [8, 5] }, scroll: 1 },
             { c: { d2: [5, 3] }, scroll: 1 },
-            { c: { d3: [3, 2] }, sword: 13 },
+            { c: { d3: [3, 2] }, warp: 13 },
             { c: { d4: [5, 3] }, scroll: 2 },
-            { c: { d5: 2 }, sword: 16 },
+            { c: { d5: 2 }, warp: 16 },
             { c: { d6: 4 }, scroll: 4 },
-            { c: { d6: [4, 6] }, sword: 19 },
+            { c: { d6: [4, 6] }, warp: 19 },
             { c: { d7: 6 }, scroll: 10 },
             { c: { d8: [4, 3] }, scroll: [11, 9] }
         ];
         const need = (r, id) => pick(r.c[id]);
-        const recipeName = r => r.sword ? `⚔️ +${r.sword} ${swordData[r.sword].name}` : `🛡️ 파괴 방지권 ×${pick(r.scroll)}`;
+        const recipeName = r => r.warp ? `🌀 +${r.warp} ${swordData[r.warp].name} (워프)` : r.sword ? `⚔️ +${r.sword} ${swordData[r.sword].name}` : `🛡️ 파괴 방지권 ×${pick(r.scroll)}`;
         const recipeGive = r => { if (r.sword) stash[r.sword] = (stash[r.sword] || 0) + 1; else protectScrolls += pick(r.scroll); };
 
         // 상점: 가격은 [하드, 이지] 순서
@@ -1697,21 +1710,17 @@ if(window.__g2fail)throw new Error("Access Denied");
             updateUI();
         }
         function storeSword() {
-            if (!canStore || currentLevel < 1) return;
+            if (!canStore || !canStash(currentLevel)) return;
             stash[currentLevel] = (stash[currentLevel] || 0) + 1;
-            notify(`📦 +${currentLevel} ${swordData[currentLevel].name} 보관 완료!`);
+            notify(`📦 +${currentLevel} ${swordData[currentLevel].name} 보관 완료! (재료: ${stashUseText(currentLevel)})`);
             currentLevel = 0; canStore = false;
             updateUI();
         }
-        function takeSword(l) {
-            if (currentLevel !== 0) { notify('+0 상태일 때만 꺼낼 수 있어요'); return; }
-            stash[l]--; currentLevel = l; canStore = false; updateUI(); showView('main');
-        }
-        function sellStash(l) { stash[l]--; gold += swordData[l].price; updateUI(); renderItems(); notify(`💰 +${formatNumber(swordData[l].price)} G`); }
+        // 보관한 검은 강화 재료 전용: 다시 꺼내거나 팔 수 없고, ITEMCOST의 ['s', ...] 요구로만 소모돼요
         function renderItems() {
             const lv = Object.keys(stash).map(Number).filter(l => stash[l] > 0).sort((a, b) => b - a);
             document.getElementById('items-body').innerHTML =
-                '<div class="sec">⚔️ 보관한 검</div>' + (lv.length ? lv.map(l => `<div class="row"><span style="color:${swordData[l].color}">+${l} ${swordData[l].name}</span><b>×${stash[l]}</b><button class="mini" onclick="takeSword(${l})">꺼내기</button>${swordData[l].price ? `<button class="mini" onclick="sellStash(${l})">판매</button>` : ''}</div>`).join('') : '<div class="empty">보관한 검이 없어요. 10강 이상 성공하면 보관할 수 있어요.</div>') +
+                '<div class="sec">⚔️ 보관한 검 <small style="color:#95a5a6;font-weight:normal">(강화 재료 전용)</small></div>' + (lv.length ? lv.map(l => `<div class="row"><span style="color:${swordData[l].color}">+${l} ${swordData[l].name}<br><small style="color:#95a5a6">재료: ${stashUseText(l)}</small></span><b>×${stash[l]}</b></div>`).join('') : `<div class="empty">보관한 검이 없어요. ${Object.keys(STASH_USE).map(l => '+' + l).join(' · ')} 강화에 성공한 직후 '📦 재료로 보관'을 누르면 쌓여요.</div>`) +
                 '<div class="sec">💠 재료 (잡템)</div><div class="grid2">' + Object.keys(DROPS).map(id => `<div class="row"><span>${DROPS[id].e} ${DROPS[id].n}</span><b>×${junk[id]}</b></div>`).join('') + '</div>' +
                 `<div class="sec">🛡️ 파괴 방지권</div><div class="row"><span>보유</span><b>×${formatNumber(protectScrolls)}</b></div>`;
         }
@@ -1730,14 +1739,23 @@ if(window.__g2fail)throw new Error("Access Denied");
             document.getElementById('craft-body').innerHTML = RECIPES.map((r, i) => {
                 const ids = Object.keys(r.c), ok = ids.every(id => junk[id] >= need(r, id));
                 const cost = ids.map(id => DROPS[id].e + need(r, id)).join(' ');
-                return `<button class="rec" ${ok ? '' : 'disabled'} onclick="craft(${i})"><span>${recipeName(r)}</span><small>${cost}</small></button>`;
+                return `<button class="rec" ${ok ? '' : 'disabled'} onclick="craft(${i})"><span>${recipeName(r)}</span><small>${cost}${r.warp ? ' ㆍ +0일 때만' : ''}</small></button>`;
             }).join('');
         }
         function craft(i) {
             const r = RECIPES[i], ids = Object.keys(r.c);
             if (!ids.every(id => junk[id] >= need(r, id))) return;
+            // 워프 레시피: 워프권처럼 +0 상태에서만, 재료를 내면 바로 그 강화 상태로 시작해요 (재료로 쓰는 강수(+19)는 워프 직후 '재료로 보관'도 가능)
+            if (r.warp && currentLevel !== 0) { notify('+0 상태일 때만 워프할 수 있어요. 재료는 그대로예요!'); return; }
             ids.forEach(id => junk[id] -= need(r, id));
-            recipeGive(r); notify(`${recipeName(r)} 제작 완료!`); renderCraft(); updateUI();
+            if (r.warp) {
+                currentLevel = r.warp; canStore = canStash(r.warp);
+                playWarpSound();
+                logMessage(`🌀 조합 워프! <strong>+${r.warp}강 ${swordData[r.warp].name}</strong> 상태로 시작합니다!`, 'success');
+            } else {
+                recipeGive(r); notify(`${recipeName(r)} 제작 완료!`);
+            }
+            renderCraft(); updateUI();
         }
         renderShop();
         showView('main');
