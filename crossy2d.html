@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>길건너 친구들 · 아이소메트릭 2D</title>
+<style>
+:root{--bg:#bfe8a8;--ink:#1c3a22;--txt:#eaf0ff;--card:#141b4d;--line:#6b7bff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:700 15px/1.4 system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
+#c{position:fixed;inset:0;width:100%;height:100%}
+#hud{position:fixed;left:0;right:0;top:calc(10px + env(safe-area-inset-top,0px));display:flex;justify-content:space-between;padding:0 14px;pointer-events:none}
+#hud div{background:var(--card);color:var(--txt);border:2px solid var(--line);padding:6px 14px;border-radius:12px;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+#hud b{font-size:22px}
+#tip{position:fixed;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));text-align:center;font-size:12px;opacity:.75;pointer-events:none}
+#ov{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.35)}
+#ov.on{display:flex}
+.card{background:var(--card);color:var(--txt);border:3px solid var(--line);padding:22px 34px;border-radius:18px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.card h2{margin:0 0 6px;font-size:28px}.card p{margin:4px 0}
+button{margin-top:12px;font:inherit;font-weight:900;background:linear-gradient(#ffe08a,#ff9d2e);color:#3a1a02;border:2px solid #7a3a05;border-radius:12px;padding:10px 22px;cursor:pointer;box-shadow:inset 0 2px 0 rgba(255,255,255,.7),0 4px 0 #7a3a05}
+#pad{position:fixed;right:calc(34px + env(safe-area-inset-right,0px));bottom:calc(46px + env(safe-area-inset-bottom,0px));width:132px;height:132px;transform:rotate(45deg);display:none}
+html[data-device=mobile] #pad{display:block}
+#pad button{position:absolute;width:44px;height:44px;margin:0;padding:0;border-radius:12px;font-size:20px;line-height:1;opacity:.85;touch-action:none}
+#pad button:active{transform:scale(.92);opacity:1}
+#pad .u{left:44px;top:0}#pad .l{left:0;top:44px}#pad .r{left:88px;top:44px}#pad .d{left:44px;top:88px}
+html[data-device=mobile] .kb,html[data-device=desktop] .tc{display:none}
+html[data-device=mobile] #tip,html[data-device=mobile] #msg{text-align:left;padding:0 190px 0 14px;box-sizing:border-box}
+</style></head><body>
+<canvas id="c"></canvas>
+<div id="hud"><div>점수 <b id="sc">0</b></div><div>최고 <b id="hi">0</b></div></div>
+<div id="tip"><span class="kb">↑↓←→ / WASD 이동 · R 재시작</span><span class="tc">오른쪽 아래 버튼 · 탭(전진) · 스와이프로 이동</span></div>
+<div id="ov"><div class="card"><h2>게임 오버</h2><p id="why"></p><p>점수 <b id="fs">0</b> · 최고 <b id="fh">0</b></p><button id="rb">다시 시작 (R)</button></div></div>
+<div id="pad"><button class="u" data-d="0,1" aria-label="앞">▲</button><button class="l" data-d="-1,0" aria-label="왼쪽">◀</button><button class="r" data-d="1,0" aria-label="오른쪽">▶</button><button class="d" data-d="0,-1" aria-label="뒤">▼</button></div>
+<script>
+let DV='';
+try{
+ if(sessionStorage.getItem('passed_auth')!=='9f4a707e7991c314131369a8'){
+  document.body.innerHTML='<div style="position:fixed;inset:0;display:grid;place-items:center;text-align:center;background:#0a0d2a;color:#eaf0ff;font:700 16px/1.6 system-ui,sans-serif"><div>FLASH ZONE에서 입장한 뒤 플레이할 수 있어요<br><a style="color:#ffe45c" href="index.html" target="_top">허브로 이동</a></div></div>';
+  throw 0}
+ DV=sessionStorage.getItem('device_mode')||'';
+}catch(e){if(e===0)throw e}
+if(DV!=='mobile'&&DV!=='desktop')DV=matchMedia('(pointer:coarse)').matches?'mobile':'desktop';
+document.documentElement.setAttribute('data-device',DV);
+const cv=document.getElementById('c'),g=cv.getContext('2d'),$=i=>document.getElementById(i);
+const XL=12,WR=14.5,SP=29,KEY='crossy2d-best',R=Math.random,ri=n=>Math.floor(R()*n),pick=a=>a[ri(a.length)];
+const T=(h,s,l)=>[`hsl(${h} ${s}% ${l+10}%)`,`hsl(${h} ${s}% ${l}%)`,`hsl(${h} ${s}% ${l-13}%)`];
+const HU=[2,210,48,285,165,24,330],GREY=[T(0,0,88),T(210,15,70)],WOOD=T(28,50,40),TRUNK=T(25,45,30),LEAF=T(120,45,38),LEAF2=T(130,52,47),GLASS=T(200,65,80),DARK=T(220,10,16),RED=T(0,85,50),OFF=T(0,25,24),LOCO=T(8,70,46),CHK=T(0,0,96),ORG=T(32,100,55);
+const MSG={car:'자동차에 치였어요!',train:'기차에 치였어요!',water:'물에 빠졌어요!',away:'강물에 떠내려갔어요!',idle:'너무 오래 머물렀어요!'};
+let W,H,A,B,Z,ox,oy,lanes,top,gt,gn,p,cam,S,maxR,best=0,tt=0,last=0;
+try{best=+localStorage.getItem(KEY)||0}catch(e){}
+function rs(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0);A=Math.max(15,Math.min(W/21,H/17));B=A/2;Z=A*1.1}
+// 아이소메트릭 투영: x(가로 칸)→우하향, r(전진 행)→우상향, z(높이)
+const P=(x,r,z)=>[ox+(x+r)*A,oy+(x-r)*B-z*Z];
+function Q(a,c){g.fillStyle=c;g.beginPath();g.moveTo(a[0][0],a[0][1]);for(let i=1;i<a.length;i++)g.lineTo(a[i][0],a[i][1]);g.fill()}
+function box(x,r,z,w,d,h,c){const x0=x-w/2,x1=x+w/2,r0=r-d/2,r1=r+d/2,t=z+h;
+ Q([P(x0,r0,t),P(x1,r0,t),P(x1,r1,t),P(x0,r1,t)],c[0]);
+ Q([P(x0,r0,z),P(x1,r0,z),P(x1,r0,t),P(x0,r0,t)],c[1]);
+ Q([P(x1,r0,z),P(x1,r1,z),P(x1,r1,t),P(x1,r0,t)],c[2])}
+function ln(x,r,z,x2,r2){const a=P(x,r,z),b=P(x2,r2,z);g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke()}
+// ---- 맵 생성 ----
+function nt(){if(gn<=0){const q=R();let t=q<.3?'grass':q<.62?'road':q<.84?'water':'rail';if(t===gt&&(t==='grass'||t==='rail'))t=pick(['road','water']);gt=t;gn=t==='road'||t==='water'?1+ri(3):1+ri(2)}gn--;return gt}
+function mk(r){
+ const t=r<=2?'grass':nt(),dif=1+Math.min(maxR,150)/170,L={r,t,o:[],dir:R()<.5?-1:1};
+ if(t==='grass'){L.h=L.pz=.28;L.c=T(100,52,r&1?52:48);L.tr=new Set();
+  for(let x=-11;x<=11;x++){const a=Math.abs(x);if(a<=8?((a>=7&&R()<.75)||(r>2&&R()<.15)):R()<.5){if(a<=8)L.tr.add(x);L.o.push({k:'tree',x,s:[.5,.8,1.1][ri(3)]})}}}
+ else if(t==='road'){L.h=L.pz=.28;L.c=T(222,10,36);L.sp=(1.5+R()*2.6)*dif;
+  for(let x=-WR+.5;;){const tk=R()<.3,w=tk?3:1.7,c=x+w/2;if(c>WR-2.5)break;L.o.push({k:'car',x:c,w,tk,dir:L.dir,c:T(pick(HU),72,52),c2:pick(GREY)});x=c+w/2+2.4+R()*4.2}}
+ else if(t==='water'){L.h=0;L.pz=.34;L.c=T(200,78,55);L.sp=(.9+R()*1.3)*dif;
+  for(let x=-WR+.5;;){const w=2+R()*1.7,c=x+w/2;if(c>WR-2.5)break;L.o.push({k:'log',x:c,w,dir:L.dir,sp:L.sp,ph:R()*6});x=c+w/2+1.5+R()*1.7}}
+ else{L.h=L.pz=.28;L.c=T(30,14,54);L.st='idle';L.tm=1+R()*3.5;L.fx=0;L.o.push({k:'sig',x:-7.5},{k:'sig',x:7.5})}
+ return L}
+function lane(r){while(top<r)lanes[++top]=mk(top);return lanes[r]}
+function reset(){lanes={};top=-7;gt='';gn=0;maxR=0;S='play';
+ p={x:0,r:0,vx:0,vr:0,x0:0,r0:0,tx:0,tr:0,t:1,fx:0,fr:1,log:null,dead:0,dt:0,idle:0,z0:.28,z1:.28,q:null};
+ cam={x:0,r:0};lane(30);
+ $('ov').classList.remove('on');$('sc').textContent=0;$('hi').textContent=best}
+// ---- 플레이어 ----
+function mv(dx,dr){
+ if(S!=='play')return;
+ if(p.t<1){p.q=[dx,dr];return}
+ const nr=p.r+dr;if(nr<-2)return;
+ const N=lane(nr);let nx=N.t==='water'?p.x+dx:Math.round(p.x+dx);
+ if(N.t!=='water')nx=Math.max(-8,Math.min(8,nx));
+ if(N.t==='grass'&&N.tr.has(nx))return;
+ if(dx&&nx===p.x)return;
+ p.fx=dx;p.fr=dr;p.x0=p.x;p.r0=p.r;p.tx=nx;p.tr=nr;p.t=0;p.log=null;p.z0=lanes[p.r].pz;p.z1=N.pz}
+function die(w){if(S!=='play')return;S='dead';p.dead=w;p.dt=0;if(maxR>best){best=maxR;try{localStorage.setItem(KEY,best)}catch(e){}}}
+function land(){const L=lanes[p.r];p.z0=p.z1;
+ if(p.r>maxR){maxR=p.r;p.idle=0;$('sc').textContent=maxR;if(maxR>best)$('hi').textContent=maxR}
+ if(L.t==='water'){const o=L.o.find(o=>Math.abs(p.x-o.x)<o.w/2+.1);if(o)p.log=o;else return die('water')}
+ if(p.q){const q=p.q;p.q=null;mv(q[0],q[1])}}
+function updP(dt){
+ if(S==='dead'){p.dt+=dt;
+  if(p.dt>.6&&!$('ov').classList.contains('on')){$('why').textContent=MSG[p.dead];$('fs').textContent=maxR;$('fh').textContent=best;$('ov').classList.add('on')}
+  return}
+ if((p.idle+=dt)>14)return die('idle');
+ if(p.t<1){p.t+=dt/.13;const t=Math.min(p.t,1);p.vx=p.x0+(p.tx-p.x0)*t;p.vr=p.r0+(p.tr-p.r0)*t;
+  if(p.t>=1){p.x=p.tx;p.r=p.tr;p.vx=p.x;p.vr=p.r;land();if(S!=='play')return}}
+ else if(p.log){p.x+=p.log.dir*p.log.sp*dt;p.vx=p.x;if(Math.abs(p.x)>XL-1.5)return die('away')}
+ const L=lanes[Math.round(p.vr)];
+ if(L&&Math.abs(p.vr-L.r)<.6){
+  if(L.t==='road'){for(const o of L.o)if(Math.abs(p.vx-o.x)<o.w/2+.22)return die('car')}
+  else if(L.t==='rail'&&L.st==='go'){const a=L.fx,b=L.fx-L.dir*14.5;if(p.vx>Math.min(a,b)-.2&&p.vx<Math.max(a,b)+.2)return die('train')}}}
+// ---- 업데이트 ----
+function rng(){const a=W/A;return[Math.max(Math.floor(cam.r-XL-.45*a-2),-6),Math.ceil(cam.r+XL+.6*a+2)]}
+function upd(dt){
+ tt+=dt;const[r0,r1]=rng();lane(r1+3);
+ for(let r=r0;r<=r1;r++){const L=lanes[r];
+  if(L.t==='road'||L.t==='water'){for(const o of L.o){o.x+=o.dir*L.sp*dt;if(o.x>WR&&o.dir>0)o.x-=SP;else if(o.x<-WR&&o.dir<0)o.x+=SP}if(L.t==='road')L.o.sort((a,b)=>a.x-b.x)}
+  else if(L.t==='rail'){
+   if(L.st==='idle'){if((L.tm-=dt)<=0){L.st='warn';L.tm=1.6}}
+   else if(L.st==='warn'){if((L.tm-=dt)<=0){L.st='go';L.fx=-L.dir*(XL+1)}}
+   else{L.fx+=L.dir*26*dt;if(L.dir>0?L.fx-15>XL+2:L.fx+15<-XL-2){L.st='idle';L.tm=2+R()*4.5}}}}
+ for(const k in lanes)if(k<r0-6)delete lanes[k];
+ updP(dt);
+ cam.x+=(p.vx*.55-cam.x)*Math.min(1,dt*5);cam.r+=(p.vr-cam.r)*Math.min(1,dt*7)}
+// ---- 그리기 ----
+function drawLane(L){const r=L.r,h=L.h,r0=r-.5,r1=r+.5,c=L.c;
+ Q([P(-XL,r0,h),P(XL,r0,h),P(XL,r1,h),P(-XL,r1,h)],c[0]);
+ Q([P(-XL,r0,-.4),P(XL,r0,-.4),P(XL,r0,h),P(-XL,r0,h)],c[1]);
+ Q([P(XL,r0,-.4),P(XL,r1,-.4),P(XL,r1,h),P(XL,r0,h)],c[2]);
+ g.lineWidth=Math.max(1,A*.08);
+ if(L.t==='road'){g.strokeStyle='rgba(255,255,255,.5)';g.setLineDash([A*.7,A*.6]);ln(-XL,r,h,XL,r)}
+ else if(L.t==='water'){g.strokeStyle='rgba(255,255,255,.4)';g.setLineDash([A*.6,A*1.4]);g.lineDashOffset=-tt*A*L.dir*.7;ln(-XL,r-.25,h,XL,r-.25);g.lineDashOffset=tt*A*.5;ln(-XL,r+.25,h,XL,r+.25);g.lineDashOffset=0;
+  for(const o of L.o)box(o.x,r,.03+Math.sin(tt*2+o.ph)*.03,o.w,.82,.3,WOOD)}
+ else if(L.t==='rail'){g.setLineDash([]);g.strokeStyle='rgba(70,50,30,.55)';g.lineWidth=A*.12;for(let x=-XL;x<XL;x+=.7)ln(x,r-.32,h,x,r+.32);g.strokeStyle='#e4e7ec';g.lineWidth=A*.07;ln(-XL,r-.2,h,XL,r-.2);ln(-XL,r+.2,h,XL,r+.2)}
+ g.setLineDash([])}
+function drawObj(o,L){const z=L.h,r=L.r;
+ if(o.k==='tree'){box(o.x,r,z,.3,.3,.4,TRUNK);box(o.x,r,z+.4,.9,.9,o.s,LEAF);box(o.x,r,z+.4+o.s,.55,.55,.35,LEAF2)}
+ else if(o.k==='car'){const d=.72,s=o.dir;box(o.x,r,z,o.w*.86,d*.9,.12,DARK);
+  if(o.tk){box(o.x-s*.55,r,z+.12,o.w-1.1,d,.8,o.c2);box(o.x+s*(o.w/2-.55),r,z+.12,1.1,d,.52,o.c);box(o.x+s*(o.w/2-.04),r,z+.3,.12,d*.8,.2,GLASS)}
+  else{box(o.x,r,z+.12,o.w,d,.36,o.c);box(o.x-s*.1,r,z+.48,o.w*.5,d*.9,.3,GLASS)}}
+ else if(o.k==='sig'){const on=L.st==='warn'&&((tt*6)|0)%2===0;box(o.x,r-.4,z,.12,.12,1.1,DARK);box(o.x,r-.4,z+1.1,.5,.22,.3,on?RED:OFF)}}
+function drawTrain(L){const z=L.h+.08;for(let i=0;i<5;i++){const c=L.fx-L.dir*(1.4+i*2.9);box(c,L.r,z,2.7,.8,1,i?GREY[i&1]:LOCO);box(c,L.r,z+.5,2.5,.84,.3,GLASS)}}
+function drawP(){const t=Math.min(p.t,1),zb=p.z0+(p.z1-p.z0)*t;let z=zb+Math.sin(Math.PI*t)*.45,q=1,al=1;
+ if(p.dead==='water'||p.dead==='away'){const k=Math.min(p.dt/.8,1);z-=k;al=1-k}else if(p.dead==='car'||p.dead==='train')q=.16;
+ const x=p.vx,r=p.vr,fx=p.fx,fr=p.fr,back=fr>0||fx<0;
+ Q([P(x-.34,r-.34,zb),P(x+.34,r-.34,zb),P(x+.34,r+.34,zb),P(x-.34,r+.34,zb)],'rgba(0,0,0,.25)');
+ g.globalAlpha=al;
+ const beak=()=>box(x+fx*.38,r+fr*.38,z+.3*q,fx?.26:.16,fr?.26:.16,.14*q,ORG);
+ if(back)beak();
+ box(x,r,z,.62,.62,.62*q,CHK);box(x,r,z+.62*q,.16,.36,.16*q,RED);
+ if(!back)beak();
+ g.globalAlpha=1}
+function draw(){
+ g.clearRect(0,0,W,H);
+ ox=W*.42-(cam.x+cam.r)*A;oy=H*.62-(cam.x-cam.r)*B;
+ const[r0,r1]=rng(),pr=Math.round(p.vr);
+ for(let r=Math.min(r1,top);r>=r0;r--){const L=lanes[r];drawLane(L);
+  let done=r!==pr;
+  if(L.t==='rail'&&L.st==='go')drawTrain(L);
+  for(const o of L.o){if(o.k==='log')continue;if(!done&&o.x>p.vx){drawP();done=true}drawObj(o,L)}
+  if(!done)drawP()}}
+function loop(ts){const dt=Math.min(.05,(ts-last)/1e3||0);last=ts;upd(dt);draw();requestAnimationFrame(loop)}
+// ---- 입력 ----
+const KM={ArrowUp:[0,1],KeyW:[0,1],ArrowDown:[0,-1],KeyS:[0,-1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]};
+addEventListener('keydown',e=>{const m=KM[e.code];
+ if(m){e.preventDefault();mv(m[0],m[1])}else if(e.code==='KeyR'||(S==='dead'&&(e.code==='Space'||e.code==='Enter')))reset()});
+let s0=null;
+addEventListener('pointerdown',e=>{s0=DV!=='mobile'||e.target.closest('button')?null:[e.clientX,e.clientY]});
+addEventListener('pointerup',e=>{if(!s0)return;const dx=e.clientX-s0[0],dy=e.clientY-s0[1];s0=null;
+ if(Math.hypot(dx,dy)<18)return mv(0,1);
+ const f=dx-dy/2,q=dx+dy/2;if(Math.abs(f)>Math.abs(q))mv(0,f>0?1:-1);else mv(q>0?1:-1,0)});
+$('rb').onclick=reset;addEventListener('resize',rs);
+document.querySelectorAll('#pad button').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();const d=b.dataset.d.split(',');mv(+d[0],+d[1])}));
+rs();reset();requestAnimationFrame(loop);
+try{parent.postMessage('gm-ready',location.origin)}catch(e){}
+</script></body></html>
