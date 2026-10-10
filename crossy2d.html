@@ -42,10 +42,10 @@ if(DV!=='mobile'&&DV!=='desktop')DV=matchMedia('(pointer:coarse)').matches?'mobi
 document.documentElement.setAttribute('data-device',DV);
 const cv=document.getElementById('c'),g=cv.getContext('2d'),$=i=>document.getElementById(i);
 const XL=12,WR=14.5,SP=29,KEY='crossy2d-best',R=Math.random,ri=n=>Math.floor(R()*n),pick=a=>a[ri(a.length)];
-const T=(h,s,l)=>[`hsl(${h} ${s}% ${l+10}%)`,`hsl(${h} ${s}% ${l}%)`,`hsl(${h} ${s}% ${l-13}%)`];
+const T=(h,s,l)=>[`hsl(${h} ${s}% ${Math.min(l+10,98)}%)`,`hsl(${h} ${s}% ${l}%)`,`hsl(${h} ${s}% ${l-13}%)`];
 const HU=[2,210,48,285,165,24,330],GREY=[T(0,0,88),T(210,15,70)],WOOD=T(28,50,40),TRUNK=T(25,45,30),LEAF=T(120,45,38),LEAF2=T(130,52,47),GLASS=T(200,65,80),DARK=T(220,10,16),RED=T(0,85,50),OFF=T(0,25,24),LOCO=T(8,70,46),CHK=T(0,0,96),ORG=T(32,100,55);
 const MSG={car:'자동차에 치였어요!',train:'기차에 치였어요!',water:'물에 빠졌어요!',away:'강물에 떠내려갔어요!',idle:'너무 오래 머물렀어요!'};
-let W,H,A,B,Z,ox,oy,lanes,top,gt,gn,p,cam,S,maxR,best=0,tt=0,last=0;
+let W,H,A,B,Z,ox,oy,lanes,topL,gt,gn,p,cam,S,maxR,best=0,tt=0,last=0;
 try{best=+localStorage.getItem(KEY)||0}catch(e){}
 function rs(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0);A=Math.max(15,Math.min(W/21,H/17));B=A/2;Z=A*1.1}
 // 아이소메트릭 투영: x(가로 칸)→우하향, r(전진 행)→우상향, z(높이)
@@ -68,8 +68,8 @@ function mk(r){
   for(let x=-WR+.5;;){const w=2+R()*1.7,c=x+w/2;if(c>WR-2.5)break;L.o.push({k:'log',x:c,w,dir:L.dir,sp:L.sp,ph:R()*6});x=c+w/2+1.5+R()*1.7}}
  else{L.h=L.pz=.28;L.c=T(30,14,54);L.st='idle';L.tm=1+R()*3.5;L.fx=0;L.o.push({k:'sig',x:-7.5},{k:'sig',x:7.5})}
  return L}
-function lane(r){while(top<r)lanes[++top]=mk(top);return lanes[r]}
-function reset(){lanes={};top=-7;gt='';gn=0;maxR=0;S='play';
+function lane(r){while(topL<r)lanes[++topL]=mk(topL);return lanes[r]}
+function reset(){lanes={};topL=-7;gt='';gn=0;maxR=0;S='play';
  p={x:0,r:0,vx:0,vr:0,x0:0,r0:0,tx:0,tr:0,t:1,fx:0,fr:1,log:null,dead:0,dt:0,idle:0,z0:.28,z1:.28,q:null};
  cam={x:0,r:0};lane(30);
  $('ov').classList.remove('on');$('sc').textContent=0;$('hi').textContent=best}
@@ -145,7 +145,7 @@ function draw(){
  g.clearRect(0,0,W,H);
  ox=W*.42-(cam.x+cam.r)*A;oy=H*.62-(cam.x-cam.r)*B;
  const[r0,r1]=rng(),pr=Math.round(p.vr);
- for(let r=Math.min(r1,top);r>=r0;r--){const L=lanes[r];drawLane(L);
+ for(let r=Math.min(r1,topL);r>=r0;r--){const L=lanes[r];drawLane(L);
   let done=r!==pr;
   if(L.t==='rail'&&L.st==='go')drawTrain(L);
   for(const o of L.o){if(o.k==='log')continue;if(!done&&o.x>p.vx){drawP();done=true}drawObj(o,L)}
