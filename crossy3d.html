@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>길건너 친구들 · 3D 복셀</title>
+<style>
+:root{--bg:#86cf68;--ink:#1c3a22;--txt:#eaf0ff;--card:#141b4d;--line:#6b7bff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:700 15px/1.4 system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
+#c{position:fixed;inset:0}
+#sc{position:fixed;left:0;right:0;top:calc(6px + env(safe-area-inset-top,0px));text-align:center;font-size:56px;font-weight:900;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.28);pointer-events:none}
+#hi{position:fixed;right:14px;top:calc(12px + env(safe-area-inset-top,0px));background:var(--card);color:var(--txt);border:2px solid var(--line);padding:6px 12px;border-radius:12px;pointer-events:none}
+#msg{position:fixed;left:0;right:0;bottom:calc(22px + env(safe-area-inset-bottom,0px));text-align:center;font-size:15px;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.4);pointer-events:none}
+#fl{position:fixed;inset:0;background:#f33;opacity:0;pointer-events:none}
+#fl.on{animation:fl .6s ease-out}
+@keyframes fl{from{opacity:.5}to{opacity:0}}
+#ov{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.3)}
+#ov.on{display:flex}
+.card{background:var(--card);color:var(--txt);border:3px solid var(--line);padding:22px 34px;border-radius:18px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:none;opacity:1}}
+.card h2{margin:0 0 6px;font-size:28px}.card p{margin:4px 0}
+button{margin-top:12px;font:inherit;font-weight:900;background:linear-gradient(#ffe08a,#ff9d2e);color:#3a1a02;border:2px solid #7a3a05;border-radius:12px;padding:10px 22px;cursor:pointer;box-shadow:inset 0 2px 0 rgba(255,255,255,.7),0 4px 0 #7a3a05}
+#pad{position:fixed;right:calc(34px + env(safe-area-inset-right,0px));bottom:calc(46px + env(safe-area-inset-bottom,0px));width:132px;height:132px;transform:rotate(45deg);display:none}
+html[data-device=mobile] #pad{display:block}
+#pad button{position:absolute;width:44px;height:44px;margin:0;padding:0;border-radius:12px;font-size:20px;line-height:1;opacity:.85;touch-action:none}
+#pad button:active{transform:scale(.92);opacity:1}
+#pad .u{left:44px;top:0}#pad .l{left:0;top:44px}#pad .r{left:88px;top:44px}#pad .d{left:44px;top:88px}
+html[data-device=mobile] .kb,html[data-device=desktop] .tc{display:none}
+html[data-device=mobile] #tip,html[data-device=mobile] #msg{text-align:left;padding:0 190px 0 14px;box-sizing:border-box}
+</style></head><body>
+<div id="sc">0</div><div id="hi">최고 0</div>
+<div id="msg"><span class="kb">↑ 또는 W 로 시작 · 방향키/WASD 이동 · R 재시작</span><span class="tc">오른쪽 아래 ▲ 버튼이나 화면 탭으로 시작 · 스와이프로도 이동</span></div>
+<div id="fl"></div>
+<div id="ov"><div class="card"><h2>게임 오버</h2><p id="why"></p><p>점수 <b id="fs">0</b> · 최고 <b id="fh">0</b></p><button id="rb">다시 시작 (R)</button></div></div>
+<div id="pad"><button class="u" data-d="0,1" aria-label="앞">▲</button><button class="l" data-d="-1,0" aria-label="왼쪽">◀</button><button class="r" data-d="1,0" aria-label="오른쪽">▶</button><button class="d" data-d="0,-1" aria-label="뒤">▼</button></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+let DV='';
+try{
+ if(sessionStorage.getItem('passed_auth')!=='9f4a707e7991c314131369a8'){
+  document.body.innerHTML='<div style="position:fixed;inset:0;display:grid;place-items:center;text-align:center;background:#0a0d2a;color:#eaf0ff;font:700 16px/1.6 system-ui,sans-serif"><div>FLASH ZONE에서 입장한 뒤 플레이할 수 있어요<br><a style="color:#ffe45c" href="index.html" target="_top">허브로 이동</a></div></div>';
+  throw 0}
+ DV=sessionStorage.getItem('device_mode')||'';
+}catch(e){if(e===0)throw e}
+if(DV!=='mobile'&&DV!=='desktop')DV=matchMedia('(pointer:coarse)').matches?'mobile':'desktop';
+document.documentElement.setAttribute('data-device',DV);
+if(!window.THREE){document.body.textContent='three.js를 불러오지 못했어요. 네트워크 상태를 확인해 주세요.';throw 0}
+const $=i=>document.getElementById(i),R=Math.random,ri=n=>Math.floor(R()*n),pick=a=>a[ri(a.length)];
+const XL=22,WR=24,SP=48,KEY='crossy3d-best';
+const MSG={car:'자동차에 치였어요!',water:'물에 빠졌어요!',away:'강물에 떠내려갔어요!',eagle:'화면에서 너무 뒤처져 독수리에게 잡혔어요!'};
+let best=0;try{best=+localStorage.getItem(KEY)||0}catch(e){}
+// ---- 렌더러 / 직교 카메라 / 조명 ----
+const rd=new THREE.WebGLRenderer({antialias:true});
+rd.domElement.id='c';rd.setPixelRatio(Math.min(devicePixelRatio||1,2));rd.shadowMap.enabled=true;rd.shadowMap.type=THREE.PCFSoftShadowMap;
+document.body.prepend(rd.domElement);
+const scene=new THREE.Scene(),cam=new THREE.OrthographicCamera(-1,1,1,-1,-60,120);
+scene.background=new THREE.Color(0x86cf68);
+scene.add(new THREE.AmbientLight(0xffffff,.72));
+const sun=new THREE.DirectionalLight(0xffffff,.78),shc=sun.shadow.camera;
+sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.bias=-.001;
+shc.left=shc.bottom=-18;shc.right=shc.top=18;shc.near=1;shc.far=60;shc.updateProjectionMatrix();
+scene.add(sun,sun.target);
+// ---- 복셀 헬퍼 (지오메트리/재질 캐시) ----
+const MM={},GG={},mat=c=>MM[c]||(MM[c]=new THREE.MeshLambertMaterial({color:c})),geo=(w,h,d)=>GG[[w,h,d]]||(GG[[w,h,d]]=new THREE.BoxGeometry(w,h,d));
+function bx(w,h,d,c,x,y,z,par,cs=1){const m=new THREE.Mesh(geo(w,h,d),mat(c));m.position.set(x,y,z);m.castShadow=!!cs;m.receiveShadow=true;par.add(m);return m}
+// 복셀 닭 (정면 = -z)
+const ch=new THREE.Group();
+bx(.62,.62,.62,0xffffff,0,.31,0,ch);bx(.16,.2,.34,0xe63946,0,.72,-.04,ch);bx(.22,.14,.22,0xffa62b,0,.42,-.42,ch);
+for(const s of[-1,1]){bx(.09,.11,.09,0x222222,s*.2,.5,-.31,ch);bx(.1,.3,.38,0xe6ecef,s*.36,.3,.04,ch)}
+scene.add(ch);
+function tree(x,g,cs){const h=pick([.8,1.1,1.4]);bx(.3,.5,.3,0x7a5230,x,.25,0,g,cs);bx(.9,h,.9,0x2f9e44,x,.5+h/2,0,g,cs);bx(.56,.4,.56,0x40c057,x,.5+h+.2,0,g,cs)}
+function car(L,x,tk,par,w){
+ const g=new THREE.Group(),d=L.dir,c=pick([0xe63946,0x4d96ff,0xf4a261,0x9b5de5,0x2a9d8f,0xffd23f,0xff6b9a]);
+ bx(w*.82,.24,.86,0x22252b,0,.12,0,g);
+ if(tk){bx(w-1.1,.95,.9,0xeceff1,-d*.55,.72,0,g);bx(1.05,.62,.9,c,d*(w/2-.55),.55,0,g);bx(.12,.28,.7,0x9fd8f0,d*(w/2-.02),.7,0,g)}
+ else{bx(w,.42,.9,c,0,.45,0,g);bx(w*.48,.32,.8,0xcfeaf7,-d*.1,.82,0,g)}
+ g.position.x=x;par.add(g);return{x,w,m:g,dir:d,sp:L.sp}}
+// ---- 맵 생성 (z = -행) ----
+let lanes={},top,gt,gn,maxR,S,p,cr,cx,shake,el,last=0;
+function nt(){if(gn<=0){const q=R();let t=q<.3?'grass':q<.7?'road':'water';if(t==='grass'&&gt==='grass')t=pick(['road','water']);gt=t;gn=t==='grass'?1+ri(2):1+ri(3)}gn--;return gt}
+function mk(r){
+ const t=r<=2?'grass':nt(),dif=1+Math.min(maxR,150)/170,g=new THREE.Group(),L={r,t,g,o:[],dir:R()<.5?-1:1,tr:new Set()};
+ g.position.z=-r;scene.add(g);
+ if(t==='grass'){bx(2*XL,1,1,r&1?0x86d85f:0x7acd54,0,-.5,0,g,0);
+  for(let x=-16;x<=16;x++){const a=Math.abs(x);if(a<=8?((a>=7&&R()<.75)||(r>2&&R()<.15)):R()<.4){if(a<=8)L.tr.add(x);tree(x,g,a<=8)}}}
+ else if(t==='road'){L.sp=(2+R()*3.2)*dif;bx(2*XL,1,1,0x4b505a,0,-.5,0,g,0);
+  for(let x=-20;x<=20;x+=4)bx(1.5,.02,.1,0xe9e9e9,x,.01,0,g,0);
+  for(let x=-WR+.5;;){const tk=R()<.3,w=tk?3.2:1.7,c=x+w/2;if(c>WR-2.5)break;L.o.push(car(L,c,tk,g,w));x=c+w/2+2.8+R()*5}}
+ else{L.sp=(1+R()*1.5)*dif;bx(2*XL,1.3,1,0x3d9be0,0,-1,0,g,0);
+  for(let x=-WR+.5;;){const w=pick([2,2.5,3,3.5]),c=x+w/2;if(c>WR-2.5)break;L.o.push({x:c,w,dir:L.dir,sp:L.sp,m:bx(w,.36,.8,0x9a6a3a,c,-.17,0,g)});x=c+w/2+1.5+R()*1.7}}
+ return L}
+function lane(r){while(top<r)lanes[++top]=mk(top);return lanes[r]}
+function reset(){
+ for(const k in lanes)scene.remove(lanes[k].g);
+ lanes={};top=-9;gt='';gn=0;maxR=0;S='ready';cr=1.3;cx=0;shake=0;el=0;
+ p={x:0,r:0,xf:0,rf:0,x0:0,r0:0,tx:0,tr:0,t:1,log:null,dead:0,dt:0,q:null};
+ ch.position.set(0,0,0);ch.rotation.set(0,0,0);ch.scale.set(1,1,1);
+ lane(24);
+ $('ov').classList.remove('on');$('sc').textContent=0;$('hi').textContent='최고 '+best;$('msg').style.display=''}
+// ---- 플레이어 ----
+function mv(dx,dr){
+ if(S==='dead')return;
+ if(p.t<1){p.q=[dx,dr];return}
+ const nr=p.r+dr;if(nr<-3)return;
+ const N=lane(nr);let nx=N.t==='water'?p.x+dx:Math.round(p.x+dx);
+ if(N.t!=='water')nx=Math.max(-8,Math.min(8,nx));
+ if(N.t==='grass'&&N.tr.has(nx))return;
+ if(dx&&nx===p.x)return;
+ if(S==='ready'){S='play';$('msg').style.display='none'}
+ ch.rotation.y=Math.atan2(-dx,dr);
+ p.x0=p.x;p.r0=p.r;p.tx=nx;p.tr=nr;p.t=0;p.log=null}
+function die(w){if(S==='dead')return;S='dead';p.dead=w;p.dt=0;shake=w==='car'?.6:.3;
+ if(w==='car')ch.scale.set(1.5,.12,1.2);
+ if(maxR>best){best=maxR;try{localStorage.setItem(KEY,best)}catch(e){}}
+ const f=$('fl');f.classList.remove('on');void f.offsetWidth;f.classList.add('on')}
+function land(){const L=lanes[p.r];
+ if(p.r>maxR){maxR=p.r;$('sc').textContent=maxR;if(maxR>best)$('hi').textContent='최고 '+maxR}
+ if(L.t==='water'){const o=L.o.find(o=>Math.abs(p.x-o.x)<o.w/2+.1);if(o)p.log=o;else return die('water')}
+ if(p.q){const q=p.q;p.q=null;mv(q[0],q[1])}}
+function updP(dt){
+ if(S==='dead'){p.dt+=dt;
+  if(p.dead==='water'||p.dead==='away')ch.position.y-=dt*2.2;
+  else if(p.dead==='eagle'){ch.position.y+=dt*(6+p.dt*14);ch.rotation.y+=dt*10}
+  if(p.dt>.9&&!$('ov').classList.contains('on')){$('why').textContent=MSG[p.dead];$('fs').textContent=maxR;$('fh').textContent=best;$('ov').classList.add('on')}
+  return}
+ let y=0;
+ if(p.t<1){p.t=Math.min(1,p.t+dt/.15);const t=p.t,s=Math.sin(Math.PI*t);
+  p.xf=p.x0+(p.tx-p.x0)*t;p.rf=p.r0+(p.tr-p.r0)*t;y=s*.6;ch.scale.set(1-.12*s,1+.22*s,1-.12*s);
+  if(t>=1){p.x=p.tx;p.r=p.tr;p.xf=p.x;p.rf=p.r;y=0;ch.scale.set(1,1,1);ch.position.set(p.xf,0,-p.rf);land();if(S==='dead')return}}
+ else if(p.log){p.x+=p.log.dir*p.log.sp*dt;p.xf=p.x;if(Math.abs(p.x)>11){ch.position.set(p.xf,0,-p.rf);die('away');return}}
+ const L=lanes[Math.round(p.rf)];
+ if(L&&L.t==='road'&&Math.abs(p.rf-L.r)<.6)for(const o of L.o)if(Math.abs(p.xf-o.x)<o.w/2+.25){ch.position.set(p.xf,0,-p.rf);die('car');return}
+ ch.position.set(p.xf,y,-p.rf)}
+// ---- 업데이트 ----
+function upd(dt){
+ if(S==='play'){el+=dt;cr+=(.4+Math.min(el*.012,.9))*dt;if(p.rf<cr-5.2)die('eagle')} // 화면이 서서히 전진, 너무 뒤처지면 사망
+ const want=p.rf+1.3;if(S!=='dead'&&want>cr)cr+=(want-cr)*Math.min(1,dt*3.5);
+ lane(Math.ceil(cr)+22);
+ for(const k in lanes){const L=lanes[k];
+  if(k<cr-16){scene.remove(L.g);delete lanes[k];continue}
+  if(L.t!=='grass')for(const o of L.o){o.x+=o.dir*o.sp*dt;if(o.x>WR&&o.dir>0)o.x-=SP;else if(o.x<-WR&&o.dir<0)o.x+=SP;o.m.position.x=o.x}}
+ updP(dt);
+ cx+=(p.xf*.5-cx)*Math.min(1,dt*4);shake*=.9;const j=shake*(R()-.5);
+ cam.position.set(cx+11+j,11+j,-cr+11);cam.lookAt(cx,0,-cr);
+ sun.position.set(ch.position.x-6,14,ch.position.z+8);sun.target.position.copy(ch.position);sun.target.updateMatrixWorld()}
+function rs(){const w=innerWidth,h=innerHeight,a=w/h,s=Math.max(7.5,7/a);rd.setSize(w,h);cam.left=-s*a;cam.right=s*a;cam.top=s;cam.bottom=-s;cam.updateProjectionMatrix()}
+function loop(t){const dt=Math.min(.05,(t-last)/1e3||0);last=t;upd(dt);rd.render(scene,cam);requestAnimationFrame(loop)}
+// ---- 입력 ----
+const KM={ArrowUp:[0,1],KeyW:[0,1],ArrowDown:[0,-1],KeyS:[0,-1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]};
+addEventListener('keydown',e=>{const m=KM[e.code];
+ if(m){e.preventDefault();mv(m[0],m[1])}else if(e.code==='KeyR'||(S==='dead'&&(e.code==='Space'||e.code==='Enter')))reset()});
+let s0=null;
+addEventListener('pointerdown',e=>{s0=DV!=='mobile'||e.target.closest('button')?null:[e.clientX,e.clientY]});
+addEventListener('pointerup',e=>{if(!s0)return;const dx=e.clientX-s0[0],dy=e.clientY-s0[1];s0=null;
+ if(Math.hypot(dx,dy)<18)return mv(0,1);
+ const f=dx-dy/2,q=dx+dy/2;if(Math.abs(f)>Math.abs(q))mv(0,f>0?1:-1);else mv(q>0?1:-1,0)});
+$('rb').onclick=reset;addEventListener('resize',rs);
+document.querySelectorAll('#pad button').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();const d=b.dataset.d.split(',');mv(+d[0],+d[1])}));
+rs();reset();requestAnimationFrame(loop);
+try{parent.postMessage('gm-ready',location.origin)}catch(e){}
+</script></body></html>
