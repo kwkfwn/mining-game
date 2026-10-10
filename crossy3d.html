@@ -76,7 +76,7 @@ function car(L,x,tk,par,w){
  else{bx(w,.42,.9,c,0,.45,0,g);bx(w*.48,.32,.8,0xcfeaf7,-d*.1,.82,0,g)}
  g.position.x=x;par.add(g);return{x,w,m:g,dir:d,sp:L.sp}}
 // ---- 맵 생성 (z = -행) ----
-let lanes={},top,gt,gn,maxR,S,p,cr,cx,shake,el,last=0;
+let lanes={},topL,gt,gn,maxR,S,p,cr,cx,shake,el,last=0;
 function nt(){if(gn<=0){const q=R();let t=q<.3?'grass':q<.7?'road':'water';if(t==='grass'&&gt==='grass')t=pick(['road','water']);gt=t;gn=t==='grass'?1+ri(2):1+ri(3)}gn--;return gt}
 function mk(r){
  const t=r<=2?'grass':nt(),dif=1+Math.min(maxR,150)/170,g=new THREE.Group(),L={r,t,g,o:[],dir:R()<.5?-1:1,tr:new Set()};
@@ -89,10 +89,10 @@ function mk(r){
  else{L.sp=(1+R()*1.5)*dif;bx(2*XL,1.3,1,0x3d9be0,0,-1,0,g,0);
   for(let x=-WR+.5;;){const w=pick([2,2.5,3,3.5]),c=x+w/2;if(c>WR-2.5)break;L.o.push({x:c,w,dir:L.dir,sp:L.sp,m:bx(w,.36,.8,0x9a6a3a,c,-.17,0,g)});x=c+w/2+1.5+R()*1.7}}
  return L}
-function lane(r){while(top<r)lanes[++top]=mk(top);return lanes[r]}
+function lane(r){while(topL<r)lanes[++topL]=mk(topL);return lanes[r]}
 function reset(){
  for(const k in lanes)scene.remove(lanes[k].g);
- lanes={};top=-9;gt='';gn=0;maxR=0;S='ready';cr=1.3;cx=0;shake=0;el=0;
+ lanes={};topL=-9;gt='';gn=0;maxR=0;S='ready';cr=1.3;cx=0;shake=0;el=0;
  p={x:0,r:0,xf:0,rf:0,x0:0,r0:0,tx:0,tr:0,t:1,log:null,dead:0,dt:0,q:null};
  ch.position.set(0,0,0);ch.rotation.set(0,0,0);ch.scale.set(1,1,1);
  lane(24);
