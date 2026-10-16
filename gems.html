@@ -43,12 +43,12 @@ try{window.stop()}catch(e){}
 @keyframes campTwinkle{0%,100%{transform:scale(.7) rotate(-10deg);opacity:.7}50%{transform:scale(1.25) rotate(12deg);opacity:1}}
 
 /* 👺 도깨비 */
-.campGob{position:absolute;z-index:6;width:78px;padding:0;margin:0;border:none;background:none;overflow:visible;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transform:translate(-50%,-50%);transition:left .95s ease-in-out,top .95s ease-in-out;animation:campGobIn .35s cubic-bezier(.2,1.6,.4,1);-webkit-tap-highlight-color:transparent}
-.campGobIc{font-size:48px;line-height:1;filter:drop-shadow(0 0 10px var(--gobc,#ffd23f));animation:campGobBob .5s ease-in-out infinite alternate}
-.campGobTag{font-size:10.5px;font-weight:800;color:var(--gobc,#ffd23f);text-shadow:0 1px 3px #000,0 0 6px rgba(0,0,0,.8);white-space:nowrap;letter-spacing:.02em}
-.campGobBar{display:block;width:56px;height:5px;border-radius:99px;background:rgba(0,0,0,.6);overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
+.campGob{position:absolute;z-index:6;width:108px;padding:0;margin:0;border:none;background:none;overflow:visible;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transform:translate(-50%,-50%);transition:left .95s ease-in-out,top .95s ease-in-out;animation:campGobIn .35s cubic-bezier(.2,1.6,.4,1);-webkit-tap-highlight-color:transparent}
+.campGobIc{display:block;font-size:0;line-height:0;filter:drop-shadow(0 0 10px var(--gobc,#ffd23f));animation:campGobBob .5s ease-in-out infinite alternate}
+.campGobTag{font-size:12px;font-weight:800;color:var(--gobc,#ffd23f);text-shadow:0 1px 3px #000,0 0 6px rgba(0,0,0,.8);white-space:nowrap;letter-spacing:.02em}
+.campGobBar{display:block;width:70px;height:5px;border-radius:99px;background:rgba(0,0,0,.6);overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
 .campGobBar>b{display:block;height:100%;width:100%;border-radius:99px;background:var(--gobc,#ffd23f);animation:campGobLife linear forwards}
-.campGob.k_l .campGobIc{font-size:54px;animation:campGobBob .32s ease-in-out infinite alternate}
+.campGob.k_l .campGobIc{animation:campGobBob .32s ease-in-out infinite alternate}
 .campGob.caught{pointer-events:none;animation:campGobOut .38s ease-in forwards}
 @keyframes campGobLife{to{width:0}}
 @keyframes campGobBob{from{transform:translateY(-4px) rotate(-7deg)}to{transform:translateY(4px) rotate(7deg)}}
@@ -155,7 +155,7 @@ try{window.stop()}catch(e){}
           </svg>
         </div>
         <div class="popupLayer" id="popupLayer"></div>
-        <div id="mineHint">광석을 클릭해서 채굴하세요 · 희귀할수록 여러 번 쳐야 캐집니다 · ✨반짝 광석 · 👺도깨비를 놓치지 마세요!</div>
+        <div id="mineHint">광석을 클릭해서 채굴하세요 · 희귀할수록 여러 번 쳐야 캐집니다 · ✨반짝 광석 · 도깨비를 놓치지 마세요!</div>
       </div>
       <div id="mineLockedCard" style="display:none;"></div>
     </div>
@@ -1153,9 +1153,9 @@ const CFG={
   gobMin:70, gobMax:130,   /* 그 다음부터 도깨비 등장 간격(초) */
   gobLife:7,               /* 도깨비가 머무는 시간(초) */
   gob:[                    /* w=등장 가중치, x=보상(광석 N개 분량) */
-    {k:"n",w:80,x:25, icon:"👺",name:"도깨비",       color:"#ffd23f"},
-    {k:"g",w:17,x:80, icon:"🌟",name:"황금 도깨비",  color:"#ffb347"},
-    {k:"l",w:3, x:300,icon:"💎",name:"전설의 도깨비",color:"#7ee8fa"}
+    {k:"n",w:80,x:25, name:"도깨비",       color:"#ffd23f"},
+    {k:"g",w:17,x:80, name:"황금 도깨비",  color:"#ffb347"},
+    {k:"l",w:3, x:300,name:"전설의 도깨비",color:"#7ee8fa"}
   ],
   minerMax:10,             /* 고용 가능한 광부 수 */
   minerBase:120,           /* 첫 광부 고용비 (광석 N개 분량) */
@@ -1173,12 +1173,12 @@ const QT={
   ore:  {ic:"⛏️",nm:"광석 캐기",     t:[[150,80],[400,220],[800,420]],  d:function(n){return"광석을 "+fmt(n)+"개 캐세요"}},
   combo:{ic:"🔥",nm:"콤보 달인",     t:[[3,80],[8,200],[16,380]],       d:function(n){return"채굴 콤보(연속 25회)를 "+fmt(n)+"번 달성하세요"}},
   crit: {ic:"💥",nm:"크리티컬 헌터", t:[[100,70],[300,200],[600,380]],  d:function(n){return"크리티컬을 "+fmt(n)+"번 터뜨리세요"}},
-  gob:  {ic:"👺",nm:"도깨비 사냥",   t:[[1,70],[3,200],[5,360]],        d:function(n){return"광산에서 도깨비를 "+fmt(n)+"마리 잡으세요"}},
+  gob:  {ic:"@gob",nm:"도깨비 사냥",   t:[[1,70],[3,200],[5,360]],        d:function(n){return"광산에서 도깨비를 "+fmt(n)+"마리 잡으세요"}},
   shiny:{ic:"✨",nm:"반짝이 수집",   t:[[1,70],[3,190],[6,380]],        d:function(n){return"반짝 광석을 "+fmt(n)+"개 캐세요"}},
   earn: {ic:"💰",nm:"채굴 수입",     t:[[200,70],[600,210],[1200,400]], d:function(n){return"채굴로 "+fmt(n)+" Gold를 버세요"}}
 };
 /* 이번에 추가된 칭호 5종 (정의는 본체의 On 배열에 들어 있어요) */
-const NEWT=[["tt_camp_quest","qd",10,"📜"],["tt_camp_gob","gc",10,"👺"],["tt_camp_shiny","sc",50,"✨"],["tt_camp_boss","@m",10,"👷"],["tt_camp_legend","gl",1,"💎"]];
+const NEWT=[["tt_camp_quest","qd",10,"📜"],["tt_camp_gob","gc",10,"@gn"],["tt_camp_shiny","sc",50,"✨"],["tt_camp_boss","@m",10,"👷"],["tt_camp_legend","gl",1,"@gl"]];
 const TIERL={common:"COMMON",rare:"RARE",epic:"EPIC",legend:"LEGEND"};
 const AVATARS=["👷","🤠","😎","🧙","🧝","🦸","🥷","🐻","🦊","🐶"];
 
@@ -1360,6 +1360,61 @@ function onBreak(o,c,crit){
 function onCombo(){try{bump(quests(),"combo",1)}catch(_){}}
 
 /* ═══════════ 👺 도깨비 ═══════════ */
+/* ─── 도깨비 그림 (직접 그린 SVG · 외부 이미지/이모티콘 없음) ─── */
+let gobUid=0;
+const GOBP={
+  n:{skin:"#e2563f",hi:"#ff8a6b",lo:"#a52a22",horn:"#f6ecd0",hornLo:"#cdb98a",cloth:"#f2b233",stripe:"#4a2a12",club:"#9a6a35",clubLo:"#5e3d18",spike:"#e9dcc0",iris:"#ffd23f",glow:"#ffb02e",extra:""},
+  g:{skin:"#f6c431",hi:"#fff0a0",lo:"#c98a10",horn:"#fffbe0",hornLo:"#f0d27a",cloth:"#b3261e",stripe:"#ffe58a",club:"#ffd75a",clubLo:"#b9801a",spike:"#fff6c8",iris:"#ff5a2a",glow:"#ffd23f",extra:"spark"},
+  l:{skin:"#49c7ea",hi:"#c4f6ff",lo:"#1b7fb3",horn:"#ffffff",hornLo:"#9fdcf2",cloth:"#3a2f9a",stripe:"#a99bff",club:"#8fe6ff",clubLo:"#2b8fc0",spike:"#ffffff",iris:"#ff4fd8",glow:"#7ee8fa",extra:"crystal"}
+};
+function gobSvg(k,w,inl){
+  const p=GOBP[k]||GOBP.n,u="gb"+(++gobUid),h=Math.round(w*1.12);
+  let s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 112" width="'+w+'" height="'+h+'" aria-hidden="true" focusable="false" style="overflow:visible;'+(inl?'display:inline-block;vertical-align:-6px':'display:block;margin:0 auto')+'">';
+  s+='<defs>'
+   +'<radialGradient id="'+u+'s" cx=".38" cy=".3" r=".85"><stop offset="0" stop-color="'+p.hi+'"/><stop offset=".55" stop-color="'+p.skin+'"/><stop offset="1" stop-color="'+p.lo+'"/></radialGradient>'
+   +'<linearGradient id="'+u+'h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+p.horn+'"/><stop offset="1" stop-color="'+p.hornLo+'"/></linearGradient>'
+   +'<linearGradient id="'+u+'c" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="'+p.club+'"/><stop offset="1" stop-color="'+p.clubLo+'"/></linearGradient>'
+   +'</defs>';
+  /* 방망이(뒤) */
+  s+='<g transform="rotate(24 84 62)"><path d="M80 44 L88 44 L90 92 Q84 97 78 92 Z" fill="url(#'+u+'c)" stroke="#2a1a08" stroke-opacity=".55" stroke-width="1.4"/>'
+   +'<path d="M74 44 Q72 20 84 16 Q96 20 94 44 Q84 50 74 44 Z" fill="url(#'+u+'c)" stroke="#2a1a08" stroke-opacity=".55" stroke-width="1.4"/>'
+   +'<g fill="'+p.spike+'" stroke="#2a1a08" stroke-opacity=".5" stroke-width="1"><path d="M76 28 L69 25 L76 33Z"/><path d="M92 28 L99 25 L92 33Z"/><path d="M78 20 L74 13 L82 18Z"/><path d="M90 20 L94 13 L86 18Z"/><path d="M84 15 L84 7 L88 15Z"/><path d="M78 38 L70 38 L77 43Z"/><path d="M91 38 L99 38 L92 43Z"/></g></g>';
+  /* 다리/발 */
+  s+='<g stroke="#2a1208" stroke-opacity=".45" stroke-width="1.4"><ellipse cx="38" cy="108" rx="11" ry="5.5" fill="'+p.lo+'"/><ellipse cx="62" cy="108" rx="11" ry="5.5" fill="'+p.lo+'"/></g>';
+  /* 몸 */
+  s+='<path d="M27 84 Q27 66 50 66 Q73 66 73 84 L71 106 Q50 112 29 106 Z" fill="url(#'+u+'s)" stroke="#2a1208" stroke-opacity=".5" stroke-width="1.6"/>';
+  /* 허리 두른 천 */
+  s+='<path d="M28 90 Q50 100 72 90 L71 107 Q50 113 29 107 Z" fill="'+p.cloth+'" stroke="#2a1208" stroke-opacity=".55" stroke-width="1.4"/>'
+   +'<g stroke="'+p.stripe+'" stroke-width="3.2" stroke-linecap="round" fill="none"><path d="M36 97 L40 106"/><path d="M46 100 L48 109"/><path d="M56 100 L54 109"/><path d="M65 97 L61 106"/></g>';
+  /* 팔 */
+  s+='<g fill="url(#'+u+'s)" stroke="#2a1208" stroke-opacity=".5" stroke-width="1.5"><ellipse cx="25" cy="82" rx="7.5" ry="11" transform="rotate(14 25 82)"/><ellipse cx="76" cy="76" rx="7.5" ry="11" transform="rotate(-30 76 76)"/></g>'
+   +'<circle cx="79" cy="68" r="7" fill="'+p.skin+'" stroke="#2a1208" stroke-opacity=".5" stroke-width="1.5"/>';
+  /* 뿔 */
+  s+='<g fill="url(#'+u+'h)" stroke="#2a1208" stroke-opacity=".55" stroke-width="1.5" stroke-linejoin="round"><path d="M27 30 Q16 10 25 2 Q36 8 40 22 Z"/><path d="M73 30 Q84 10 75 2 Q64 8 60 22 Z"/></g>';
+  if(p.extra==="crystal")s+='<path d="M50 4 L57 22 L50 30 L43 22 Z" fill="url(#'+u+'h)" stroke="#2a1208" stroke-opacity=".55" stroke-width="1.5" stroke-linejoin="round"/>';
+  /* 귀 + 머리 */
+  s+='<g fill="'+p.skin+'" stroke="#2a1208" stroke-opacity=".5" stroke-width="1.5"><path d="M20 44 Q9 40 8 50 Q10 60 22 58 Z"/><path d="M80 44 Q91 40 92 50 Q90 60 78 58 Z"/></g>'
+   +'<ellipse cx="50" cy="46" rx="31" ry="29" fill="url(#'+u+'s)" stroke="#2a1208" stroke-opacity=".55" stroke-width="1.8"/>';
+  /* 볼터치 */
+  s+='<ellipse cx="29" cy="56" rx="6.5" ry="4" fill="#ff5f7e" opacity=".45"/><ellipse cx="71" cy="56" rx="6.5" ry="4" fill="#ff5f7e" opacity=".45"/>';
+  /* 눈썹 */
+  s+='<g fill="#2a1208"><path d="M24 33 Q36 27 46 38 Q36 36 25 40 Z"/><path d="M76 33 Q64 27 54 38 Q64 36 75 40 Z"/></g>';
+  /* 눈 */
+  s+='<g stroke="#2a1208" stroke-width="1.6"><ellipse cx="36" cy="44" rx="8" ry="7" fill="#fffdf2"/><ellipse cx="64" cy="44" rx="8" ry="7" fill="#fffdf2"/></g>'
+   +'<circle cx="37" cy="45" r="4.4" fill="'+p.iris+'"/><circle cx="63" cy="45" r="4.4" fill="'+p.iris+'"/>'
+   +'<circle cx="37.5" cy="45.5" r="2.2" fill="#1a0c06"/><circle cx="62.5" cy="45.5" r="2.2" fill="#1a0c06"/>'
+   +'<circle cx="35.6" cy="43.2" r="1.3" fill="#fff"/><circle cx="61.2" cy="43.2" r="1.3" fill="#fff"/>';
+  /* 코 */
+  s+='<path d="M46 52 Q50 49 54 52 Q54 57 50 57 Q46 57 46 52 Z" fill="'+p.lo+'" opacity=".75"/>';
+  /* 입 + 송곳니 */
+  s+='<path d="M30 60 Q50 80 70 60 Q50 66 30 60 Z" fill="#3a0d12" stroke="#2a1208" stroke-width="1.6" stroke-linejoin="round"/>'
+   +'<path d="M36 64 Q50 69 64 64 Q50 74 36 64 Z" fill="#ff7b8a"/>'
+   +'<g fill="#fffdf2" stroke="#2a1208" stroke-width=".9" stroke-linejoin="round"><path d="M33 61.5 L37.5 61.5 L35.5 68Z"/><path d="M62.5 61.5 L67 61.5 L64.5 68Z"/><path d="M43 64 L47 64.5 L45 69Z"/><path d="M53 64.5 L57 64 L55 69Z"/></g>';
+  /* 머리 위 반짝(황금/전설) */
+  if(p.extra==="spark")s+='<g fill="#fffbd0"><path d="M10 14 L12 20 L18 22 L12 24 L10 30 L8 24 L2 22 L8 20Z"/><path d="M92 58 L93.6 62 L98 63.4 L93.6 65 L92 69 L90.4 65 L86 63.4 L90.4 62Z"/></g>';
+  if(p.extra==="crystal")s+='<g fill="#ffffff"><path d="M8 14 L10 20 L16 22 L10 24 L8 30 L6 24 L0 22 L6 20Z"/><path d="M92 8 L93.6 12 L98 13.4 L93.6 15 L92 19 L90.4 15 L86 13.4 L90.4 12Z"/></g>';
+  return s+'</svg>';
+}
 const gob={el:null,kind:null,timer:0,wait:CFG.gobFirst};
 function nextWait(){return CFG.gobMin+Math.random()*(CFG.gobMax-CFG.gobMin)}
 function mineActive(){
@@ -1384,7 +1439,7 @@ function spawnGob(){
   const el=document.createElement("button");
   el.type="button";el.className="campGob k_"+g.k;el.style.setProperty("--gobc",g.color);
   el.setAttribute("aria-label",g.name+" 잡기");
-  el.innerHTML='<span class="campGobIc">'+g.icon+'</span><span class="campGobTag">'+esc(g.name)+'</span><i class="campGobBar"><b></b></i>';
+  el.innerHTML='<span class="campGobIc">'+gobSvg(g.k,g.k==="l"?104:92)+'</span><span class="campGobTag">'+esc(g.name)+'</span><i class="campGobBar"><b></b></i>';
   el.querySelector("b").style.animationDuration=CFG.gobLife+"s";
   placeGob(el);
   el.addEventListener("pointerdown",catchGob);el.addEventListener("click",catchGob);
@@ -1393,7 +1448,7 @@ function spawnGob(){
   gob.timer=setTimeout(function(){fleeGob(el)},CFG.gobLife*1000);
   try{z.tick()}catch(_){}
   const xs=ex();
-  if(!xs.st.gs){xs.st.gs=1;toast("👺 도깨비가 나타났어요! 빨리 눌러서 잡으세요!")}
+  if(!xs.st.gs){xs.st.gs=1;toast("도깨비가 나타났어요! 빨리 눌러서 잡으세요!")}
 }
 function fleeGob(el){
   if(gob.el!==el)return;
@@ -1409,7 +1464,7 @@ function catchGob(ev){
   xs.st.gc=(xs.st.gc||0)+1;if(g.k==="l")xs.st.gl=(xs.st.gl||0)+1;
   bump(quests(),"gob",1);
   el.classList.add("caught");setTimeout(function(){try{el.remove()}catch(_){}},380);
-  popup(g.icon+" "+g.name+" 포획! +"+fmt(gold)+"G",g.color,4,true);
+  popup(g.name+" 포획! +"+fmt(gold)+"G",g.color,4,true);
   ringFx(g.color);sparkFx(g.k==="l"?20:12,g.color,4);
   if(g.k==="l"){mega();sfx("jackpot")}else if(g.k==="g"){conf(40);rain(12);sfx(4)}else{conf(18);sfx(3)}
   rerender();
@@ -1444,7 +1499,7 @@ function chip(l,v){return'<span class="invChip">'+l+' <b>'+v+'</b></span>'}
 function questCard(x,i){
   const def=QT[x.t],done=x.p>=x.n,got=!!x.c,pct=Math.min(100,Math.floor(x.p/x.n*100));
   const stars="★".repeat(x.r+1)+"☆".repeat(2-x.r);
-  return'<div class="pick-card campQ'+(got?" owned":"")+(done&&!got?" ready":"")+'"><div class="picon">'+def.ic+'</div><div class="info"><div class="name">'+def.nm+' <span class="campStars">'+stars+'</span></div><div class="stats">'+def.d(x.n)+'</div><div class="campBar'+(done?" done":"")+'"><i style="width:'+pct+'%"></i></div><div class="stats">'+fmt(x.p)+' / '+fmt(x.n)+' · 보상 ≈ <b class="campG">'+fmt(rewardGold(x.w))+' G</b></div></div><button data-camp="q:'+i+'"'+(done&&!got?"":" disabled")+'>'+(got?"완료 ✓":done?"받기":"진행 중")+'</button></div>';
+  return'<div class="pick-card campQ'+(got?" owned":"")+(done&&!got?" ready":"")+'"><div class="picon">'+(def.ic==="@gob"?gobSvg("n",32):def.ic)+'</div><div class="info"><div class="name">'+def.nm+' <span class="campStars">'+stars+'</span></div><div class="stats">'+def.d(x.n)+'</div><div class="campBar'+(done?" done":"")+'"><i style="width:'+pct+'%"></i></div><div class="stats">'+fmt(x.p)+' / '+fmt(x.n)+' · 보상 ≈ <b class="campG">'+fmt(rewardGold(x.w))+' G</b></div></div><button data-camp="q:'+i+'"'+(done&&!got?"":" disabled")+'>'+(got?"완료 ✓":done?"받기":"진행 중")+'</button></div>';
 }
 function render(force){
   const body=byId("campBody");
@@ -1476,13 +1531,13 @@ function render(force){
   const gcN=num(xs.st.gc),glN=num(xs.st.gl),scN=num(xs.st.sc);
   h+='<div class="tierHead">✨ 채굴 중에 만나는 행운 (광산 화면)</div><div class="shopList">';
   h+='<div class="pick-card"><div class="picon">✨</div><div class="info"><div class="name">반짝 광석</div><div class="stats">광석이 가끔(약 '+(CFG.shinyP*100).toFixed(1).replace(/\.0$/,"")+'%) 반짝이며 나와요. 캐면 Gold <b>×'+CFG.shinyX+'</b>! · 지금까지 <b>'+fmt(scN)+'</b>개</div></div></div>';
-  h+='<div class="pick-card"><div class="picon">👺</div><div class="info"><div class="name">도깨비</div><div class="stats">광산 화면에 머물면 가끔 나타나요. '+CFG.gobLife+'초 안에 눌러서 잡으면 Gold! (🌟 황금 · 💎 전설은 훨씬 큰 보상) · 지금까지 <b>'+fmt(gcN)+'</b>마리 (전설 '+fmt(glN)+')</div></div></div></div>';
+  h+='<div class="pick-card"><div class="picon">'+gobSvg("n",32)+'</div><div class="info"><div class="name">도깨비</div><div class="stats">광산 화면에 머물면 가끔 나타나요. '+CFG.gobLife+'초 안에 눌러서 잡으면 Gold! (황금·전설 도깨비는 훨씬 큰 보상) · 지금까지 <b>'+fmt(gcN)+'</b>마리 (전설 '+fmt(glN)+')</div></div></div></div>';
 
   h+='<div class="tierHead">🏅 칭호 보상</div><div class="campTitles"><div class="stats" style="margin-bottom:6px">칭호를 <b>처음 얻을 때마다</b> Gold 보상! · COMMON '+fmt(CFG.titleGold.common)+' · RARE '+fmt(CFG.titleGold.rare)+' · EPIC '+fmt(CFG.titleGold.epic)+' · LEGEND '+fmt(CFG.titleGold.legend)+'</div>';
   NEWT.forEach(function(r){
     const t=On.find(function(o){return o.id===r[0]});if(!t)return;
     const own=!!(s.ownedTitles&&s.ownedTitles[t.id]),cur=r[1]==="@m"?m.n:num(xs.st[r[1]]);
-    h+='<div class="campTT'+(own?" own":"")+'"><span>'+r[3]+' <b>'+esc(t.name)+'</b> <em data-t="'+t.tier+'">'+TIERL[t.tier]+'</em><small>'+esc(t.req)+'</small></span><span class="campTTp">'+(own?"획득 ✓":fmt(Math.min(cur,r[2]))+" / "+fmt(r[2]))+'</span></div>';
+    h+='<div class="campTT'+(own?" own":"")+'"><span>'+(r[3]==="@gn"?gobSvg("n",20,1):r[3]==="@gl"?gobSvg("l",20,1):r[3])+' <b>'+esc(t.name)+'</b> <em data-t="'+t.tier+'">'+TIERL[t.tier]+'</em><small>'+esc(t.req)+'</small></span><span class="campTTp">'+(own?"획득 ✓":fmt(Math.min(cur,r[2]))+" / "+fmt(r[2]))+'</span></div>';
   });
   h+='</div>';
 
@@ -2151,7 +2206,7 @@ function haInner(){if(y.f.forEach(a=>{const l=y.ex||0,o=y.phase===1&&l>0;a.rx=o?
           <h4>✨ 채굴 중에 만나는 행운</h4>
           <ul>
             <li><b>✨ 반짝 광석</b>: 가끔 반짝이는 광석이 나와요. 캐면 Gold <b>5배</b>!</li>
-            <li><b>👺 도깨비</b>: 광산 화면에 머물다 보면 나타나요. 7초 안에 눌러서 잡으면 Gold! 🌟 황금 도깨비와 💎 전설의 도깨비는 훨씬 큰 보상을 줘요.</li>
+            <li><b>도깨비</b>: 광산 화면에 머물다 보면 나타나요. 7초 안에 눌러서 잡으면 Gold! 황금 도깨비와 전설의 도깨비는 훨씬 큰 보상을 줘요.</li>
           </ul>
           <h4>🏅 칭호 보상 &amp; 신규 칭호 5종</h4>
           <ul>
