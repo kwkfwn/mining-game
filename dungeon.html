@@ -2207,7 +2207,215 @@ function sprDraw(ctx,who,o,key,now,cxp,footY,scale,isP,tint){
   ctx.restore();
   return true;
 }
+/* ================= 도트 아이콘 (이모지 대체, 코드로 그린 16x16 픽셀아트) ================= */
+/* ===== 도트 아이콘 엔진: 16x16, 문자열 DSL -> RGBA ===== */
+var ICO_PAL={K:'#1b1424',W:'#fafafa',w:'#cfd3e0',g:'#8d92a8',d:'#585d73',D:'#34384a',R:'#e5473f',r:'#a22b33',O:'#f58a2c',o:'#b95a1d',Y:'#ffd94a',y:'#c79b25',G:'#58c765',N:'#2e8a47',n:'#1f5c35',B:'#4b8ef2',b:'#2b58b8',C:'#72e3f2',c:'#38a8c8',P:'#c872ea',p:'#7c40ab',M:'#f58cb8',m:'#c0507f',S:'#f3caa0',s:'#cf9870',T:'#8d5b35',t:'#5c3a20',L:'#ebdcae',l:'#bfae7a'};
+function icoRaster(def){
+  var N=16,px=[],i,j;for(i=0;i<N*N;i++)px.push(null);
+  var noOut=false;
+  function set(x,y,c){if(x<0||y<0||x>=N||y>=N)return;px[y*N+x]=(c==='-')?null:ICO_PAL[c];}
+  var ops=def.split('|');
+  for(var oi=0;oi<ops.length;oi++){
+    var op=ops[oi].trim();if(!op)continue;
+    if(op==='!'){noOut=true;continue;}
+    if(op==='m'){
+      for(j=0;j<N;j++)for(i=0;i<8;i++){var a=px[j*N+i];if(a)px[j*N+15-i]=a;}
+      continue;
+    }
+    var cmd=op.charAt(0),col=op.charAt(1),rest=op.slice(2).trim(),n;
+    if(cmd==='p'){
+      rest.split(/\s+/).forEach(function(t){var q=t.split(',');set(+q[0],+q[1],col);});
+      continue;
+    }
+    n=rest.split(/\s+/).map(Number);
+    if(cmd==='r'){for(j=n[1];j<n[1]+n[3];j++)for(i=n[0];i<n[0]+n[2];i++)set(i,j,col);}
+    else if(cmd==='e'){for(j=0;j<N;j++)for(i=0;i<N;i++){var dx=(i+.5-n[0])/n[2],dy=(j+.5-n[1])/n[3];if(dx*dx+dy*dy<=1)set(i,j,col);}}
+    else if(cmd==='d'){for(j=0;j<N;j++)for(i=0;i<N;i++){if(Math.abs(i+.5-n[0])+Math.abs(j+.5-n[1])<=n[2])set(i,j,col);}}
+    else if(cmd==='o'){for(j=0;j<N;j++)for(i=0;i<N;i++){var ex=i+.5-n[0],ey=j+.5-n[1];if(Math.abs(Math.sqrt(ex*ex+ey*ey)-n[2])<=.75)set(i,j,col);}}
+    else if(cmd==='v'){for(j=n[1];j<=n[2];j++){var t=n[2]===n[1]?0:(j-n[1])/(n[2]-n[1]),hw=n[3]+(n[4]-n[3])*t;for(i=0;i<N;i++)if(Math.abs(i+.5-n[0])<=hw)set(i,j,col);}}
+    else if(cmd==='l'){
+      var x0=n[0],y0=n[1],x1=n[2],y1=n[3],ddx=Math.abs(x1-x0),ddy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,er=ddx+ddy,e2;
+      for(;;){set(x0,y0,col);if(x0===x1&&y0===y1)break;e2=2*er;if(e2>=ddy){er+=ddy;x0+=sx;}if(e2<=ddx){er+=ddx;y0+=sy;}}
+    }
+  }
+  var out=px.slice();
+  if(!noOut){
+    for(j=0;j<N;j++)for(i=0;i<N;i++){
+      if(px[j*N+i])continue;
+      if((i>0&&px[j*N+i-1])||(i<N-1&&px[j*N+i+1])||(j>0&&px[(j-1)*N+i])||(j<N-1&&px[(j+1)*N+i]))out[j*N+i]=ICO_PAL.K;
+    }
+  }
+  var rgba=new Uint8ClampedArray(N*N*4);
+  for(i=0;i<N*N;i++){var c=out[i];if(!c)continue;rgba[i*4]=parseInt(c.substr(1,2),16);rgba[i*4+1]=parseInt(c.substr(3,2),16);rgba[i*4+2]=parseInt(c.substr(5,2),16);rgba[i*4+3]=255;}
+  return rgba;
+}
+
+var ICO={
+/* ---- 몬스터 ---- */
+'🐀':"eg 7 10 4 3|eg 11 9 2.5 2|pM 10,6 11,6 10,7 11,7|pK 12,8|pM 13,9|lM 3 11 1 9|lM 1 9 1 7|pd 5,13 6,13 9,13 10,13",
+'🦇':"pp 4,5 5,5 2,6 3,6 4,6 5,6 6,6 1,7 2,7 3,7 4,7 5,7 6,7 1,8 2,8 4,8 5,8 6,8 7,8 2,9 5,9 6,9|eD 8 9 2 3|pD 6,5 6,6|m|pR 7,8 8,8|pW 7,11 8,11",
+'🟢':"eG 8 9 5.5 5|rG 3 9 10 4|r- 0 13 16 3|rN 3 12 10 1|m|pW 6,8 9,8|pK 6,9 9,9|pW 4,5 5,5 4,6",
+'🟠':"eO 8 9 5.5 5|rO 3 9 10 4|r- 0 13 16 3|ro 3 12 10 1|m|pY 6,8 9,8|pK 6,9 9,9|pY 4,5 5,5 4,6|pY 7,11 8,11",
+'👺':"eG 8 9 4 5|pG 3,8 2,7 1,6 3,7 2,8 4,5|m|rN 7 10 2 1|pY 6,8 9,8|pK 6,9 9,9 5,7 6,7 9,7 10,7|rK 6 12 4 1|pW 6,12 9,12",
+'🏹':"pT 6,1 5,2 4,3 3,4 3,5 3,6 3,7 3,8 3,9 3,10 3,11 4,12 5,13 6,14|lw 6 2 6 13|lL 6 8 13 8|pw 13,7 14,8 13,9 12,7 12,9|pR 7,7 7,9 8,7 8,9",
+'💀':"eL 8 7 5 5|rL 5 9 6 5|rK 5 6 2 3|pK 7,9|pD 7,12 7,13|m",
+'🕷':"lD 6 8 2 5|lD 5 9 1 8|lD 5 10 1 12|lD 6 11 3 14|eD 8 10 3 3|eD 8 6 2 2|m|pR 7,5 7,10",
+'🦂':"eo 7 11 4 2.5|pO 11,11 12,10 13,9 13,8 13,7 12,6 11,5 10,5|pR 9,6 9,5|pO 2,7 3,7 2,8 3,8 1,9 2,9 3,9|pd 4,13 6,14 8,14 10,13|pK 4,10",
+'🐺':"eg 8 9 5 4|pg 3,4 3,5 4,4 4,5 4,6 5,5|m|rw 5 10 6 3|rK 7 10 2 1|pY 5,8 10,8|pK 5,9 10,9",
+'🍄':"eR 8 6 6 4|r- 0 9 16 1|rL 6 9 4 5|pK 7,11 8,11|pW 5,4 6,4 5,5 9,3 10,3 9,4 11,6 12,6|rl 6 13 4 1",
+'🐻':"eT 8 9 5 5|eT 4 5 2 2|eT 12 5 2 2|eS 8 11 3 2.5|rK 7 10 2 1|pK 5,8 10,8",
+'🧟':"eG 8 9 4 5|rt 4 3 8 2|rW 5 8 2 2|rW 9 8 2 2|pK 6,9 9,9|rK 6 12 4 1|pN 7,12 8,12|pR 11,6 11,7",
+'🧛':"rK 2 12 3 3|rK 11 12 3 3|eW 8 9 4 4|rK 4 3 8 3|pK 7,6 8,6|pR 6,8 9,8|rR 6 11 4 1|pW 6,12 9,12|rr 5 13 6 2",
+'🦴':"lL 5 10 10 5|lL 6 10 10 6|eL 4 11 2 2|eL 3 12 1.5 1.5|eL 11 4 2 2|eL 12 3 1.5 1.5",
+'🦎':"eO 8 10 4 2|eO 12 9 2 2|lO 4 10 1 12|pO 6,12 6,13 10,12 10,13|pK 13,8|pY 7,9 9,9",
+'😈':"eP 8 9 4 4|pY 4,5 3,4 3,3 3,2|m|pY 6,8 9,8|pK 6,9 9,9|rK 6 11 4 1|pW 6,11 9,11",
+'🐕':"et 4 6 2 3|et 12 6 2 3|eT 8 9 4 4|rS 6 10 4 3|rK 7 10 2 1|pK 5,8 10,8",
+'🦍':"eD 8 8 5 5|rD 3 8 10 5|eg 8 10 3 3|pK 7,10 8,10|pW 5,7 10,7|pK 5,8 10,8",
+'🦊':"eO 8 9 5 4|pO 3,3 3,4 4,4 4,5 4,6 5,6 5,5|m|eW 8 11 3 2|rK 7 11 2 1|pK 5,8 10,8",
+'🦉':"eT 8 9 5 5|pT 3,4 4,4 3,5 4,5 4,3|m|eL 8 11 3 3|eY 5.5 8 2 2|eY 10.5 8 2 2|pK 5,8 10,8|pO 7,10 8,10 7,11",
+'👁':"eW 8 8 6 4|eP 8 8 3 3|eK 8 8 1.5 2|pW 7,7|pR 3,7 4,8 12,8 11,7 2,8 13,8",
+'🐙':"eP 8 6 5 4|rP 3 6 10 3|rP 3 9 2 4|rP 6 9 2 5|pP 2,13 3,14 1,12|m|pW 5,6 6,6|pK 6,7|pM 5,3 6,3",
+'🦑':"eM 8 6 3 4.5|pM 5,4 4,5 4,6 5,6 3,6|m|rM 6 9 4 2|lM 6 11 5 14|lM 7 11 7 14|m|pW 6,7|pK 6,8",
+'👿':"eR 8 9 5 5|pD 4,5 3,4 3,3 3,2|m|pY 5,8 6,8 9,8 10,8|pK 6,8 9,8|rK 5 11 6 1|pW 6,11 9,11",
+'🐲':"eN 8 8 5 5|pO 3,3 3,4 4,3 4,4 4,5|m|rG 5 10 6 4|pK 6,11 9,11|pY 5,7 10,7|pK 5,8 10,8",
+'🐉':"eR 8 8 5 5|pY 3,2 3,3 4,3 4,4 4,5 2,1|m|rO 5 10 6 4|pK 6,11 9,11|pY 5,7 10,7|pK 5,8 10,8|rr 3 13 10 1",
+'📦':"rT 2 4 12 10|rt 2 4 12 2|rL 7 4 2 10|pt 3,9 4,9 5,9 10,9 11,9 12,9",
+'🤴':"eS 8 10 4 4|rY 4 4 8 3|pY 4,3 7,3 8,3 11,3|pR 7,5 8,5|pK 6,9 9,9|rK 7 12 2 1",
+'👹':"eR 8 9 5 5|pW 3,4 3,3 3,2|m|pY 5,8 10,8|pK 5,9 10,9|rK 5 11 6 2|pW 6,11 9,11 6,12 9,12",
+'👸':"rY 3 5 2 9|rY 11 5 2 9|rY 4 3 8 3|eS 8 10 4 4|pC 6,2 7,2 8,2 9,2|pK 6,9 9,9|pR 7,12 8,12",
+'🐍':"rG 4 3 7 2|rG 3 5 2 2|rG 4 7 8 2|rG 11 9 2 2|rG 4 11 9 2|pK 10,3|pR 11,3 12,2|pY 6,8 8,8 10,8 5,12 7,12 9,12 11,12",
+'🧊':"rC 3 3 10 10|rW 4 4 3 1|rW 4 5 1 2|rc 3 11 10 2|rc 11 3 2 10",
+'🗿':"rg 5 2 7 12|rg 4 7 9 7|rd 5 5 7 1|rK 6 6 1 1|rK 10 6 1 1|rd 8 7 2 5|rd 6 12 5 1",
+'🌑':"eD 8 8 6 6|rP 5 7 2 2|m|pg 4,4 5,4",
+'🥚':"eL 8 9 4 5|pW 6,6 6,7|pt 9,10 7,12 10,12"
+};
+
+var ICO_B={
+/* ---- 직업 ---- */
+'🤺':"eg 8 8 4 5|rD 5 7 6 3|rK 5 8 6 1|rR 7 1 2 3|pR 6,3 9,3|rg 4 12 8 2",
+'🧝':"eN 8 8 5 5|eS 8 9 3 3.5|pS 4,8 3,7 2,6 4,7|m|pK 6,9 9,9|pN 6,5 7,4 8,4 9,5|rM 7 11 2 1",
+'🧙':"vb 8 2 3 .5 1.5|vb 8 4 5 2 3.5|rb 2 6 12 2|eS 8 10 3 2.5|eW 8 12 3 2|pY 8,4|pK 6,10 9,10",
+'🦹':"ep 8 8 5 5|rK 4 7 8 3|pW 6,8 9,8|rp 3 12 10 2|pD 5,5 6,4",
+'👼':"eY 8 3 4 1.5|e- 8 3 2.5 .5|eS 8 9 4 4|rY 4 5 8 2|pK 6,9 9,9|pM 7,12 8,12|rW 1 8 2 4|rW 13 8 2 4",
+'🧔':"eS 8 8 4 4|rO 3 3 10 3|eO 8 12 4 3|pK 6,8 9,8|rt 6 11 4 1|pO 3,6 12,6",
+/* ---- 스킬/효과 ---- */
+'🌀':"eC 8 8 6 6|eB 8 8 4.5 4.5|eC 8 8 3 3|eB 8 8 1.5 1.5|r- 8 4 5 1|r- 3 11 5 1",
+'🛡':"rB 3 2 10 8|eB 8 9 5 4|rW 7 3 2 9|rW 4 6 8 2|rb 3 2 10 1",
+'🎯':"eR 8 8 6 6|eW 8 8 4.5 4.5|eR 8 8 3 3|eW 8 8 1.5 1.5",
+'🌧':"eg 6 6 3 3|eg 10 7 3 3|rg 4 7 9 3|pB 5,11 5,12 8,12 8,13 11,11 11,12 3,13 3,14",
+'🔥':"eR 8 10 5 4|rR 4 7 8 4|pR 8,2 8,3 7,4 8,4 9,4 6,5 7,5 8,5 9,5 10,5 9,3|eO 8 11 3.5 3.5|eY 8 12 2 2.5",
+'❄':"lC 8 2 8 13|lC 2 8 13 8|lC 3 3 12 12|lC 3 12 12 3|pW 8,8 7,8 9,8 8,7 8,9|pW 8,2 8,13 2,8 13,8",
+'✨':"lY 7 2 7 12|lY 2 7 12 7|pW 7,7 6,7 8,7 7,6 7,8|pY 12,2 12,3 12,4 11,3 13,3|pY 3,12 3,13 3,14 2,13 4,13",
+'☀':"eY 8 8 3.5 3.5|lY 8 1 8 3|lY 8 13 8 15|lY 1 8 3 8|lY 13 8 15 8|lY 3 3 4 4|lY 12 3 11 4|lY 3 13 4 12|lY 12 13 11 12|eO 8 8 2 2",
+'💢':"lR 3 3 6 3|lR 3 3 3 6|lR 12 3 9 3|lR 12 3 12 6|lR 3 12 6 12|lR 3 12 3 9|lR 12 12 9 12|lR 12 12 12 9|lR 4 4 6 4|lR 11 4 9 4|lR 4 11 6 11|lR 11 11 9 11",
+'💥':"lO 1 8 14 8|lO 8 1 8 14|lO 3 3 12 12|lO 3 12 12 3|eO 8 8 5 5|eY 8 8 3.5 3.5|eW 8 8 1.5 1.5",
+'💪':"eS 5 10 3 3|rS 3 5 3 6|eS 10 7 3.5 3|rs 6 8 5 1|pS 7,5 8,5 12,8|rs 12 6 2 2",
+'🗡':"lw 12 3 5 10|lw 13 3 6 10|lY 3 8 7 12|lT 4 11 2 13|pd 13,2",
+'🪨':"eg 8 9 5 4|eg 6 7 3 3|rw 5 6 2 1|rd 9 11 4 2",
+'☠':"lL 2 10 13 14|lL 13 10 2 14|eL 8 6 4 4|rL 5 8 6 3|rK 5 5 2 2|m|pK 7,8",
+'🩸':"eR 8 10 4 4|pR 8,2 8,3 7,4 8,4 9,4 7,5 8,5 9,5 6,6 7,6 8,6 9,6 10,6|pW 6,9 6,10|pr 10,12",
+'🦔':"eT 8 9 6 4|pt 4,4 6,3 8,3 10,3 12,4 3,6 13,6|eS 12 11 2 2|pK 13,10 11,10|rt 5 12 1 2",
+'💨':"lw 2 6 11 6|lw 4 9 13 9|lw 2 12 9 12|pw 12,5 13,6 12,7|pw 14,9 14,10|pw 10,12 10,13",
+'🔷':"dB 8 8 6|dC 8 8 3|pW 6,5 7,5 6,6",
+'🌿':"lN 8 14 8 6|eG 5.5 6 2.5 2|eG 10.5 6 2.5 2|eG 5.5 10 2.5 2|eG 10.5 10 2.5 2|eG 8 4 2 2",
+'🏮':"rK 7 1 2 1|eR 8 8 5 5|rY 5 2 6 2|rY 5 12 6 2|pr 7,4 7,5 7,6 7,7 7,8 7,9 7,10 7,11|pO 8,14 8,15",
+'🍀':"eG 6 6 3 3|eG 10 6 3 3|eG 6 10 3 3|eG 10 10 3 3|eN 8 8 1.5 1.5|lN 8 10 11 14",
+'💚':"eG 5.5 6 3 3|eG 10.5 6 3 3|dG 8 9 5|pW 4,5 5,5",
+'❤':"eR 5.5 6 3 3|eR 10.5 6 3 3|dR 8 9 5|pW 4,5 5,5",
+'📘':"rB 3 2 10 12|rb 3 2 2 12|rW 6 4 6 1|rW 6 6 5 1|rY 7 10 3 2",
+'📖':"rW 2 4 6 9|rW 8 4 6 9|rl 7 4 2 9|pK 3,6 4,6 5,6 3,8 4,8 5,8 10,6 11,6 12,6 10,8 11,8 12,8|pT 7,3 8,3",
+'🧘':"eS 8 4 2 2|eO 8 9 3.5 3|rO 3 11 10 3|rS 5 8 1 2|rS 10 8 1 2|rt 5 6 6 1",
+'⚡':"rY 8 1 3 2|rY 7 3 3 2|rY 6 5 3 2|rY 5 7 6 2|rY 7 9 3 2|rY 6 11 3 2|rY 5 13 2 1|rO 5 7 6 1",
+'🦷':"eW 8 6 5 4|rW 4 6 8 3|rW 4 9 3 5|rW 9 9 3 5|rw 4 13 3 1|rw 9 13 3 1",
+'🎭':"eW 6 7 4 5|eY 10 9 4 5|pK 5,7 7,7 9,9 11,9|rK 5 10 3 1|rK 9 12 3 1",
+'💎':"rC 4 3 8 3|rC 3 6 10 2|rC 4 8 8 1|rC 5 9 6 1|rC 6 10 4 1|rC 7 11 2 1|pW 5,4 6,4|rc 3 7 10 1|pc 8,3 8,4 8,5",
+'🐦':"eB 8 9 4 3|eB 11 6 2 2|pO 14,7 13,7|pK 12,6|rB 3 8 2 2|rb 6 9 4 1|pb 7,8 8,8",
+'⏳':"rT 3 2 10 1|rT 3 13 10 1|vW 8 3 7 5.5 .5|vW 8 8 12 .5 5.5|vY 8 5 7 3 .5|vY 8 10 12 .5 4|pY 7,12 8,12",
+'💀':"eL 8 7 5 5|rL 5 9 6 5|rK 5 6 2 3|pK 7,9|pD 7,12 7,13|m",
+'🧭':"eY 8 8 6 6|eW 8 8 4.5 4.5|lR 8 3 8 8|lR 7 5 7 8|lD 8 8 8 13|lD 9 9 9 12",
+'😇':"eY 8 3 4 1.5|e- 8 3 2.5 .5|eS 8 9 4 4|pK 6,9 9,9|pM 7,12 8,12|pW 7,3",
+'⚗':"rW 7 2 2 4|eP 8 11 5 3|vw 8 5 9 1 5|rP 4 11 8 3|rp 5 13 6 1|pW 6,10",
+'🏋':"rD 2 5 2 6|rD 12 5 2 6|rg 4 7 8 2|rD 1 6 1 4|rD 14 6 1 4",
+'⚔':"lw 2 2 11 11|lw 3 2 11 10|lY 9 13 13 9|lT 12 12 14 14|lw 13 2 4 11|lw 12 2 4 10|lY 6 13 2 9|lT 3 12 1 14",
+'🐚':"eM 8 9 5 4|rM 3 9 10 3|pm 8,5 8,6 8,7 8,8 8,9 6,6 6,7 6,8 10,6 10,7 10,8|pL 5,13 6,13|m",
+'⭐':"rY 7 1 1 2|rY 6 3 2 1|rY 1 4 7 1|rY 2 5 6 1|rY 3 6 5 1|rY 4 7 4 2|rY 3 9 5 1|rY 3 10 4 1|rY 2 11 4 1|rY 2 12 3 1|m|pO 7,6 8,6 7,7 8,7|pW 6,4 7,3",
+'🕊':"eW 8 9 4 3|eW 11 6 2 2|pO 14,7 13,7|pK 12,6|rW 3 8 2 2|rw 5 5 5 2|pw 6,4 7,4 8,4|pw 5,10 6,10",
+'👻':"eW 8 7 5 5|rW 3 7 10 6|r- 5 13 1 3|r- 9 13 1 3|pK 6,7 6,8 9,7 9,8|rK 7 10 2 1|pw 4,12",
+'🪙':"eY 8 8 6 6|eO 8 8 4.5 4.5|eY 8 8 3.5 3.5|rO 7 5 2 6|pW 4,5 5,5 4,6",
+'🔮':"eP 8 7 5 5|eW 8 7 5 5|eP 8 7 4 4|pW 5,5 6,4 6,5|rD 5 12 6 2|rT 6 11 4 1",
+'🍯':"eO 8 10 5 4|rT 5 4 6 2|rY 5 6 6 1|pY 5,7 5,8 5,9|pW 6,9 6,10|pO 10,12",
+'🏆':"rY 5 2 6 6|eY 8 6 3.5 4|pY 3,3 3,4 3,5 4,6 12,3 12,4 12,5 11,6|rY 7 9 2 3|rO 5 12 6 2|pW 6,3 6,4",
+'🏅':"rR 5 1 2 5|rB 9 1 2 5|eY 8 10 4 4|eO 8 10 2 2|pW 6,8",
+'🧞':"eB 8 6 3 3|eB 8 10 4 3|vb 8 11 14 2 .5|rY 5 2 6 2|pK 7,6 9,6|pM 6,9",
+/* ---- 아이템 ---- */
+'🪓':"lT 4 13 11 4|lT 5 13 12 4|eg 10 5 3.5 3|rg 9 3 5 6|rw 11 3 3 1|rd 12 6 2 3",
+'🔨':"lT 5 13 10 7|lT 6 13 11 7|rg 8 2 6 5|rw 8 2 6 1|rd 12 3 2 4",
+'🔱':"lT 8 6 8 14|lw 4 2 4 6|lw 8 2 8 6|lw 12 2 12 6|lw 4 6 12 6|pw 3,2 5,2 7,2 9,2 11,2 13,2",
+'🥋':"rw 3 3 10 11|rW 3 3 2 8|rW 11 3 2 8|vw 8 3 6 .5 3|rT 3 9 10 2|pK 7,4 8,5",
+'🦺':"rg 3 3 10 11|r- 6 3 4 3|pd 5,7 7,7 9,7 11,7 4,9 6,9 8,9 10,9 5,11 7,11 9,11 11,11|rd 3 12 10 1",
+'👘':"vP 8 2 14 3.5 6|rp 7 3 2 11|rY 3 8 10 1|pW 8,3",
+'🧥':"vb 8 2 14 3 6|rB 5 4 6 1|pY 8,4 8,5|rb 7 5 2 9",
+'💍':"eY 8 10 4 4|e- 8 10 2 2|dC 8 4 2.5|pW 7,3",
+'📿':"oM 8 8 5|pY 8,13 8,14|eC 8 14 1.5 1.5",
+'🧿':"eB 8 8 6 6|eW 8 8 4 4|eC 8 8 2.5 2.5|eK 8 8 1 1",
+'🧪':"rw 6 2 4 3|rw 6 5 4 8|rG 6 8 4 5|eG 8 12 2 1|pW 7,3 7,6",
+'💧':"eB 8 10 4 4|pB 8,2 8,3 7,4 8,4 9,4 7,5 8,5 9,5 6,6 7,6 8,6 9,6 10,6|pW 6,9 6,10",
+'💊':"eR 5.5 9 3 2.5|rR 5 6 3 6|rW 8 6 4 6|eW 11 9 3 3|pw 9,7 9,8",
+'📜':"rL 4 3 8 10|eL 8 3 4 1.5|eL 8 13 4 1.5|pT 6,6 7,6 8,6 9,6 6,8 7,8 8,8 6,10 7,10",
+'☄':"lO 2 14 9 7|lO 3 14 10 7|lY 1 12 8 6|eO 11 5 3 3|eY 11 5 1.5 1.5",
+'💣':"eD 7 10 5 5|pW 5,8 5,9|lT 10 5 12 3|pR 12,2 13,2 13,1 12,1|pY 14,2",
+'⛲':"rg 5 10 6 3|rg 3 12 10 2|pB 8,3 8,4 8,5 7,6 9,6 6,7 10,7 6,8 10,8|rB 4 10 8 1",
+'🎲':"rW 3 3 10 10|rw 3 11 10 2|rw 11 3 2 10|pK 5,5 10,5 5,10 10,10 7,7 8,8"
+};
+for(var k in ICO_B)ICO[k]=ICO_B[k];
+
+var ICO_C={
+'🔒':"pw 6,2 7,2 8,2 9,2 5,3 10,3 5,4 10,4 5,5 10,5 5,6 10,6|rY 3 7 10 7|ry 3 13 10 1|rK 7 9 2 2|pK 8,11",
+'💰':"eY 8 10 5 4|rY 6 4 4 4|rR 5 4 6 1|pT 8,8 8,9 8,10 8,11 7,9 9,10|pW 5,9 5,10",
+'🗺':"rL 2 3 12 10|rl 6 3 1 10|rl 10 3 1 10|pR 4,6 5,7 6,8 4,8 6,6|pB 11,9 12,10",
+'🎒':"eT 8 4 4 1.5|rT 3 4 10 10|rt 3 9 10 1|rY 7 8 2 3|rt 3 5 2 8|rt 11 5 2 8",
+'😱':"eY 8 8 6 6|rW 4 6 2 3|rW 10 6 2 3|pK 5,7 5,8 10,7 10,8|eK 8 11 2 2.5|pK 4,4 5,4 6,4 9,4 10,4 11,4",
+'📅':"rW 3 3 10 11|rR 3 3 10 3|pK 5,7 7,7 9,7 11,7 5,9 7,9 9,9 11,9 5,11 7,11 9,11|rK 5 1 1 3|rK 10 1 1 3",
+'⚙':"eg 8 8 4 4|rg 7 2 2 12|rg 2 7 12 2|lg 3 3 12 12|lg 3 12 12 3|e- 8 8 1.5 1.5",
+'🏺':"eO 8 9 4 5|rO 6 2 4 3|pO 3,5 3,6 12,5 12,6 3,7 12,7|rT 4 9 8 1|rt 6 2 4 1",
+'💾':"rB 2 2 12 12|rg 4 2 8 4|rW 4 8 8 5|rd 9 3 2 2|pK 5,10 6,10 7,10 8,10 9,10",
+'🚪':"rT 4 2 8 12|rt 4 2 8 1|pY 10,8 10,9|rt 6 4 4 3|rt 6 8 4 4",
+'🔊':"rg 2 6 3 4|rg 5 4 2 8|rg 7 3 1 10|pw 10,6 10,7 10,8 10,9 12,4 12,5 12,10 12,11 13,6 13,7 13,8 13,9",
+'📳':"rD 5 2 6 12|rC 6 3 4 8|pw 2,5 2,6 2,7 2,8 3,4 3,9 13,5 13,6 13,7 13,8 12,4 12,9",
+'🎮':"rD 2 6 12 6|eD 3.5 10 2 3|eD 12.5 10 2 3|pW 4,7 4,8 4,9 3,8 5,8|pR 11,7|pB 12,8|pY 10,8|pG 11,9",
+'❓':"rR 6 2 4 1|pR 5,3 6,3 9,3 10,3 9,4 10,4 8,5 9,5 7,6 8,6 7,7 8,7 7,9 8,9 7,10 8,10",
+'📱':"rD 4 2 8 12|rC 5 3 6 8|pw 8,12 7,12",
+'⌨':"rg 1 5 14 7|pW 3,7 5,7 7,7 9,7 11,7 13,7 3,9 5,9 7,9 9,9 11,9|rW 5 10 6 1",
+'💡':"eY 8 6 4 4|rw 6 10 4 2|rg 6 12 4 1|pW 6,4 7,4|rD 7 13 2 1",
+'✅':"rG 2 2 12 12|pW 4,8 5,9 6,10 7,9 8,8 9,7 10,6 11,5 4,9 5,10 6,11 7,10 8,9 9,8 10,7 11,6",
+'🔸':"dO 8 8 4|pY 7,6",
+'📋':"rT 3 3 10 11|rW 4 5 8 8|rg 6 2 4 2|pK 5,7 6,7 7,7 8,7 9,7 5,9 6,9 7,9 8,9 5,11 6,11 7,11",
+'🛠':"lT 3 13 11 5|lT 4 13 12 5|rg 9 2 5 4|r- 11 2 1 2|lw 12 12 4 4|lw 13 12 5 4|rg 2 3 3 3",
+'🏔':"vg 8 3 13 .5 6.5|vW 8 3 6 .5 2.5|pw 6,6 10,6|rd 5 13 6 1",
+'🔔':"eY 8 8 4 5|rY 4 8 8 4|rY 3 12 10 1|pO 8,13 7,14 8,14|pY 8,2 8,1|pW 6,6 6,7",
+'⚠':"vY 8 2 13 .5 6.5|rK 7 6 2 4|pK 7,11 8,11",
+'☣':"eY 8 8 6 6|eK 8 5 2 2|eK 5 10 2 2|eK 11 10 2 2|eY 8 8 1.5 1.5|pK 8,8",
+'🍀':"eG 5 5 2.6 2.6|eG 11 5 2.6 2.6|eG 5 11 2.6 2.6|eG 11 11 2.6 2.6|eN 8 8 1.2 1.2|lN 8 9 8 14",
+'☄':"lO 1 14 8 8|lO 2 14 9 8|lO 1 12 7 7|lY 3 13 9 9|eO 11 5 3.5 3.5|eY 11 5 2 2"
+};
+for(var k in ICO_C)ICO[k]=ICO_C[k];
+
+var ICO_CV={},ICO_URL={};
+function icoKey(e){return String(e).replace(/\uFE0F/g,'');}
+function icoCanvas(e){
+  var k=icoKey(e);if(ICO_CV[k]!==undefined)return ICO_CV[k];
+  var def=ICO[k];if(!def)return ICO_CV[k]=null;
+  var c=document.createElement('canvas');c.width=16;c.height=16;
+  var g=c.getContext('2d'),id=g.createImageData(16,16);id.data.set(icoRaster(def));g.putImageData(id,0,0);
+  return ICO_CV[k]=c;
+}
+function icoURL(e){
+  var k=icoKey(e);if(ICO_URL[k])return ICO_URL[k];
+  var c=icoCanvas(k);return c?(ICO_URL[k]=c.toDataURL()):'';
+}
 function drawEmoji(ctx,e,cxp,cyp,size){
+  var ic=icoCanvas(e);
+  if(ic){var s=size*1.2;ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(ic,Math.round(cxp-s/2),Math.round(cyp-s/2),Math.round(s),Math.round(s));ctx.restore();return;}
   ctx.font=Math.round(size)+'px '+EMOJI;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(e,cxp,cyp);
 }
 function drawMon(ctx,m,ox,oy,now,ghostly){
@@ -2529,8 +2737,8 @@ function renderActs(){
   }
   h+=ab('hp','🧪','HP 물약',p.cons.hp||0,'H',!(p.cons.hp>0));
   h+=ab('mp','💧','MP 물약',p.cons.mp||0,'M',!(p.cons.mp>0));
-  h+=ab('explore',TR?'⏹️':'🧭',TR?'중지':'탐험',null,'X',false);
-  h+=ab('stairs','⏬',onSt?'내려가기':'계단',null,'Enter',false,0,onSt);
+  h+=ab('explore',TR?'■':'🧭',TR?'중지':'탐험',null,'X',false);
+  h+=ab('stairs','▼',onSt?'내려가기':'계단',null,'Enter',false,0,onSt);
   $('acts').innerHTML=h;
 }
 UI.travelState=function(){if(G&&!G.over&&!$('s-game').hidden)renderActs();};
@@ -2606,7 +2814,7 @@ function renderBag(){
       return '<div class="islot'+(sel?' sel':'')+'" data-a="selEq" data-v="'+sl+'" style="--rc:'+rc+'">'+(it?it.e:'＋')+'<small>'+(it?esc(it.n.split(' ').pop()):SLOT_N[sl])+'</small></div>';
     }).join('')+'</div>';
     var wc=worseCount();
-    body+='<div class="sect" style="margin:2px 0 6px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>가방 ('+p.bag.length+'/'+BAG_CAP+')</span>'+(wc?'<button class="btn sm" data-a="dropworse">♻ 열등한 장비 '+wc+'개 분해</button>':'')+'</div>';
+    body+='<div class="sect" style="margin:2px 0 6px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>가방 ('+p.bag.length+'/'+BAG_CAP+')</span>'+(wc?'<button class="btn sm" data-a="dropworse">↻ 열등한 장비 '+wc+'개 분해</button>':'')+'</div>';
     if(p.bag.length){
       body+='<div class="igrid">'+p.bag.map(function(it){
         var sel=selI&&selI.src==='bag'&&selI.id===it.id,up=itemScore(it)>itemScore(p.eq[it.k]);
@@ -2711,7 +2919,7 @@ function openSettings(fromGame){
 var settingsFromGame=false;
 function openTips(){
   var h='<div style="line-height:1.75;font-size:14px">'+
-    '<b>📱 터치</b><br>• 맵을 <b>탭</b>: 그 칸으로 이동 (멀면 자동으로 걸어가요)<br>• 몬스터를 탭: 공격 대상 지정 · 사거리 안이면 바로 공격<br>• 맵을 <b>스와이프</b>: 한 칸 이동 · 내 캐릭터를 탭: 한 턴 쉬기<br>• <b>🧭 탐험</b>: 자동으로 던전을 돌아다녀요 (적이 보이면 멈춰요)<br>• <b>⏬ 계단</b>: 계단 위치를 알면 자동으로 이동, 위에서는 내려가기<br><br>'+
+    '<b>📱 터치</b><br>• 맵을 <b>탭</b>: 그 칸으로 이동 (멀면 자동으로 걸어가요)<br>• 몬스터를 탭: 공격 대상 지정 · 사거리 안이면 바로 공격<br>• 맵을 <b>스와이프</b>: 한 칸 이동 · 내 캐릭터를 탭: 한 턴 쉬기<br>• <b>🧭 탐험</b>: 자동으로 던전을 돌아다녀요 (적이 보이면 멈춰요)<br>• <b>▼ 계단</b>: 계단 위치를 알면 자동으로 이동, 위에서는 내려가기<br><br>'+
     '<b>⌨️ 키보드 (크롬북)</b><br>• 이동: 방향키 / WASD (대각선: Q E Z C)<br>• F 공격 · 1 2 스킬 · H HP 물약 · M MP 물약<br>• X 자동 탐험 · Enter 계단 · Space 쉬기<br>• I 가방 · Esc 메뉴 · Tab 대상 바꾸기<br><br>'+
     '<b>💡 팁</b><br>• 붉게 빛나는 칸은 보스의 공격 예고예요. 벗어나세요!<br>• 쓰러져도 영혼을 받아요. 제단에서 영구 강화를 해보세요.</div>';
   openSheet('tips',sheetHTML('❓ 조작법',h,{foot:'<button class="btn lamp" data-a="close">알겠어요</button>'}));
@@ -2996,6 +3204,49 @@ function boot(){
   try{if(window.parent&&window.parent!==window)window.parent.postMessage('gm-ready',location.origin);}catch(e){}
 }
 boot();
+
+
+/* ===== 화면 속 이모지 -> 도트 아이콘 자동 치환 (텍스트 노드 감시) ===== */
+(function(){
+  try{
+    var st=document.createElement('style');
+    st.textContent='.ei{display:inline-block;width:1.2em;height:1.2em;vertical-align:-.25em;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain}';
+    document.head.appendChild(st);
+    var keys=Object.keys(ICO).sort(function(a,b){return b.length-a.length;});
+    var RE=new RegExp('('+keys.join('|')+')\\uFE0F?','gu');
+    var SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,TITLE:1,OPTION:0};
+    function fix(n){
+      var p=n.parentNode;if(!p||SKIP[p.nodeName]===1)return;
+      var t=n.nodeValue;RE.lastIndex=0;if(!RE.test(t))return;
+      RE.lastIndex=0;
+      var fr=document.createDocumentFragment(),last=0,m;
+      while((m=RE.exec(t))){
+        if(m.index>last)fr.appendChild(document.createTextNode(t.slice(last,m.index)));
+        var u=icoURL(m[1]);
+        if(u){var im=new Image();im.className='ei';im.alt=m[1];im.draggable=false;im.src=u;fr.appendChild(im);}
+        else fr.appendChild(document.createTextNode(m[0]));
+        last=m.index+m[0].length;
+      }
+      if(last<t.length)fr.appendChild(document.createTextNode(t.slice(last)));
+      p.replaceChild(fr,n);
+    }
+    function walk(root){
+      if(root.nodeType===3){fix(root);return;}
+      if(root.nodeType!==1&&root.nodeType!==9&&root.nodeType!==11)return;
+      var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),list=[],n;
+      while((n=w.nextNode()))list.push(n);
+      for(var i=0;i<list.length;i++)fix(list[i]);
+    }
+    walk(document.body);
+    new MutationObserver(function(ms){
+      for(var i=0;i<ms.length;i++){
+        var mu=ms[i];
+        if(mu.type==='characterData'){if(mu.target.parentNode)fix(mu.target);}
+        else for(var j=0;j<mu.addedNodes.length;j++)walk(mu.addedNodes[j]);
+      }
+    }).observe(document.body,{childList:true,subtree:true,characterData:true});
+  }catch(err){if(window.console)console.warn('icon replace failed',err);}
+})();
 
 })();
 </script></body></html>
