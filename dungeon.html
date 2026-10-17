@@ -800,7 +800,7 @@ function pickMonKey(rng,depth){
 function bossKeyFor(depth){return BOSS_ORDER[(Math.floor(depth/5)-1)%BOSS_ORDER.length];}
 function mkMon(rng,key,x,y,o){
   o=o||{};var d=MON[key],dep=G.depth,sc=mScale(dep);
-  var m={id:++G.uid,k:key,x:x,y:y,vx:x,vy:y,sl:!!o.sleep,en:0,st:{},cd:[],tele:null,el:-1,nm:d.n,small:!!o.small};
+  var m={id:++G.uid,k:key,x:x,y:y,vx:x,vy:y,sl:!!o.sleep,agg:!!o.agg,en:0,st:{},cd:[],tele:null,el:-1,nm:d.n,small:!!o.small};
   var hh=1+.2*G.heat,ha=1+.12*G.heat,mh=mutMul('mh'),ma=mutMul('ma'),mx=mutMul('mx');
   if(d.dyn){m.mhp=Math.round((30+dep*7)*hh*mh);m.atk=(7+dep*1.15)*ha*ma;m.def=Math.floor(dep/3);m.xp=Math.round((30+dep*3)*mx);}
   else if(d.boss){
@@ -1060,6 +1060,7 @@ function noise(r){var p=G.p;G.mons.forEach(function(m){if(m.sl&&m.hp>0&&cheb(m.x
 function hurtMon(m,dmg,crit,o){
   o=o||{};if(m.hp<=0)return 0;
   dmg=Math.max(1,Math.round(dmg));m.hp-=dmg;
+  m.agg=1;m.lost=0;
   if(m.sl){m.sl=false;wakeNear(m);}
   FX.text(m.x,m.y,(crit?'!':'')+dmg,o.color||(crit?'#ffb347':'#ffffff'),crit);FX.hit(m);
   if(!o.nols&&!o.status){var ls=curLs();if(ls>0)healPlayer(dmg*ls/100,true);}
@@ -1090,7 +1091,7 @@ function killMon(m){
   FX.burst(m.x,m.y,m.el>=0||d.boss?'#ffd24d':'#cfd3e2');SFX('kill');
   if(G.tgt===m.id)G.tgt=0;
   if(ST.reap)healPlayer(ST.maxHp*ST.reap/100,false);
-  if(d.split&&!m.small){for(var i=0;i<2;i++){var pos=freeNear(m.x,m.y,1);if(pos){var s=mkMon(R,m.k,pos.x,pos.y,{small:true,sleep:false});G.mons.push(s);}}log('슬라임이 둘로 갈라졌다!','mut');}
+  if(d.split&&!m.small){for(var i=0;i<2;i++){var pos=freeNear(m.x,m.y,1);if(pos){var s=mkMon(R,m.k,pos.x,pos.y,{small:true,sleep:false,agg:true});G.mons.push(s);}}log('슬라임이 둘로 갈라졌다!','mut');}
   if(d.explode&&cheb(m.x,m.y,p.x,p.y)<=1){log(m.nm+jo(m.nm,'이','가')+' 폭발했다!','bad');FX.ring(m.x,m.y,'#ff8a3a');hurtPlayer(m.atk*1.3*plrDefRed(),m.nm);if(!G.over)mStatusOnPlayer('burn',m);}
   if(d.boss)onBossKilled(m);else dropLoot(m);
   gainXp(xp);
@@ -1199,11 +1200,11 @@ function monTurn(m){
 }
 function tryWake(m,d){
   var p=G.p,dist=cheb(m.x,m.y,p.x,p.y),vis=isVisMon(m);
-  if(d.boss){if(vis&&dist<=7){m.sl=false;log('⚠ '+m.nm+jo(m.nm,'이','가')+' 눈을 떴다!','bad');SFX('boss');FX.shake(6);}return;}
+  if(d.boss){if(vis&&dist<=7){m.sl=false;m.agg=1;log('⚠ '+m.nm+jo(m.nm,'이','가')+' 눈을 떴다!','bad');SFX('boss');FX.shake(6);}return;}
   if(dist>ST.light+2)return;
   if(!vis&&dist>2)return;
   var ch=dist<=1?.9:(dist<=3?.35:.12);if(G.cls==='rogue')ch*=.5;
-  if(R.next()<ch){m.sl=false;if(vis)log(m.nm+jo(m.nm,'이','가')+' 깨어났다!','bad');wakeNear(m);}
+  if(R.next()<ch){m.sl=false;m.agg=1;if(vis)log(m.nm+jo(m.nm,'이','가')+' 깨어났다!','bad');wakeNear(m);}
 }
 function mOccupied(nx,ny){var p=G.p;if(nx===p.x&&ny===p.y)return true;if(monAt(nx,ny))return true;var pr=propAt(nx,ny);return !!(pr&&blocksMove(pr));}
 function randomStep(m,d){
@@ -1249,13 +1250,41 @@ function mStatusFlee(m,d){
   if(stepAway(m,d))return;
   if(dist<=1&&(d.phase||adjOK(m.x,m.y,p.x-m.x,p.y-m.y)))monAttack(m,1);
 }
+/* 몬스터는 기본적으로 자거나 혼자 돌아다녀요. 시야 안(탐지 범위)에 들어오면 알아채고 다가오고,
+   시야에서 벗어나면 쫓아오지 않고 다시 배회해요. */
+function monAware(m,d,dist){
+  var vis=isVisMon(m);
+  if(m.agg){
+    if(vis&&dist<=14){m.lost=0;return true;}
+    m.lost=(m.lost||0)+1;
+    if(m.lost>2){m.agg=0;m.lost=0;}
+    return false;
+  }
+  var r=Math.min(ST.light,Math.max(5,(d.rng||0)+1));if(G.cls==='rogue')r=Math.max(3,r-2);
+  if(vis&&dist<=r){m.agg=1;m.lost=0;FX.text(m.x,m.y,'!','#ff6b6b',true);return true;}
+  return false;
+}
+function monWander(m,d){
+  if(R.next()>.4)return;
+  if(m.hx===undefined){m.hx=m.x;m.hy=m.y;}
+  var c=[],cur=cheb(m.x,m.y,m.hx,m.hy);
+  for(var i=0;i<8;i++){
+    var dx=DIRS8[i][0],dy=DIRS8[i][1];
+    if(!canStep(m.x,m.y,dx,dy,!!d.phase))continue;
+    var nx=m.x+dx,ny=m.y+dy;if(mOccupied(nx,ny))continue;
+    var nd=cheb(nx,ny,m.hx,m.hy);if(nd>4&&nd>=cur)continue;
+    c.push([dx,dy]);
+  }
+  if(c.length){var e=c[Math.floor(R.next()*c.length)];m.x+=e[0];m.y+=e[1];}
+}
 function monAct(m,d){
   var p=G.p;
   if(m.st.stun>0){m.st.stun--;return;}
   if(m.sl){tryWake(m,d);return;}
-  if(m.tele){resolveTele(m);return;}
+  if(m.tele){if(++m.tele.w<3)return;resolveTele(m);return;}
   var dist=cheb(m.x,m.y,p.x,p.y);
   if(m.st.fear>0){m.st.fear--;mStatusFlee(m,d);return;}
+  if(!monAware(m,d,dist)){monWander(m,d);return;}
   if(d.abil&&monAbilities(m,d,dist))return;
   if(d.erratic&&R.next()<.4){randomStep(m,d);return;}
   var adj=dist===1&&(d.phase||adjOK(m.x,m.y,p.x-m.x,p.y-m.y));
@@ -1288,7 +1317,7 @@ function monAbilities(m,d,dist){
     if(a.t==='summon'){
       if(countMinions(m)>=a.cap)continue;
       var sp=0;
-      for(var s=0;s<a.n;s++){var pos=freeNear(m.x,m.y,2);if(!pos)break;var mm=mkMon(R,a.ids[Math.floor(R.next()*a.ids.length)],pos.x,pos.y,{sleep:false});mm.owner=m.id;G.mons.push(mm);sp++;}
+      for(var s=0;s<a.n;s++){var pos=freeNear(m.x,m.y,2);if(!pos)break;var mm=mkMon(R,a.ids[Math.floor(R.next()*a.ids.length)],pos.x,pos.y,{sleep:false,agg:true});mm.owner=m.id;G.mons.push(mm);sp++;}
       if(sp){log(m.nm+jo(m.nm,'이','가')+' 부하를 불러냈다!','bad');FX.ring(m.x,m.y,'#c883ff');m.cd[i]=a.ev;return true;}
       continue;
     }
@@ -1299,7 +1328,7 @@ function monAbilities(m,d,dist){
     if(a.t==='slam'){
       if(dist<=a.r+1){
         var tl=[];for(var dy=-a.r;dy<=a.r;dy++)for(var dx=-a.r;dx<=a.r;dx++){if(isFloor(m.x+dx,m.y+dy))tl.push([m.x+dx,m.y+dy]);}
-        m.tele={tiles:tl,mult:a.m,st:a.st};m.cd[i]=a.ev;
+        m.tele={tiles:tl,mult:a.m,st:a.st,w:0};m.cd[i]=a.ev;
         log('⚠ '+m.nm+jo(m.nm,'이','가')+' 강력한 일격을 준비한다! 붉은 칸에서 벗어나세요','bad');SFX('warn');return true;
       }
       continue;
@@ -1307,7 +1336,7 @@ function monAbilities(m,d,dist){
     if(a.t==='breath'){
       if(dist<=a.len&&los(m.x,m.y,p.x,p.y)){
         var lt=lineTiles(m.x,m.y,p.x,p.y,a.len);
-        m.tele={tiles:lt,mult:a.m,st:'burn'};m.cd[i]=a.ev;
+        m.tele={tiles:lt,mult:a.m,st:'burn',w:0};m.cd[i]=a.ev;
         log('⚠ '+m.nm+jo(m.nm,'이','가')+' 숨을 크게 들이쉰다! 일직선을 피하세요','bad');SFX('warn');return true;
       }
       continue;
@@ -1331,6 +1360,31 @@ function spawnWanderer(){
     var mm=mkMon(R,pickMonKey(R,G.depth),x,y,{sleep:false});G.mons.push(mm);return;
   }
 }
+/* ===== 실시간 몬스터 시계 / 플레이어 행동 간격 ===== */
+var MON_MS=450,MOVE_MS=300,ATK_MS=450,PL_LOCK=0,monAcc=0,monLast=0;
+function plLocked(){return performance.now()<PL_LOCK;}
+function lockPl(ms){var t=performance.now()+ms;if(t>PL_LOCK)PL_LOCK=t;}
+function monsterPhase(){
+  if(!G||G.over)return;
+  var hp0=G.p.hp;
+  computeDist();
+  var list=G.mons.slice();
+  for(var i=0;i<list.length&&!G.over;i++)monTurn(list[i]);
+  G.mons=G.mons.filter(function(m){return m.hp>0;});
+  if(G.over){afterTurn();return;}
+  updateDex();
+  if(UI.refresh)UI.refresh();
+  if(G.pend.lv>0||G.pend.relic>0||G.pend.victory){if(UI.processPending)UI.processPending();}
+  if(G.p.hp!==hp0)saveRun();
+}
+function monLoop(){
+  var now=performance.now(),dt=now-monLast;monLast=now;
+  if(!G||G.over||document.hidden||$('s-game').hidden||sheetId||(UI.busy&&UI.busy())){monAcc=0;return;}
+  monAcc+=Math.min(dt,300);
+  if(monAcc<MON_MS)return;
+  monAcc-=MON_MS;if(monAcc>MON_MS)monAcc=0;
+  monsterPhase();
+}
 function tick(){
   var p=G.p,k;
   G.turn++;G.fturn++;S.st.turns++;
@@ -1342,12 +1396,10 @@ function tick(){
   var W=G.map.w;
   for(var tk in G.traps){var tr=G.traps[tk];if(!tr.rev){var tx=tk%W,ty=(tk/W)|0;if(cheb(tx,ty,p.x,p.y)<=2&&R.next()<.4)tr.rev=true;}}
   computeDist();
-  var list=G.mons.slice();
-  for(var i=0;i<list.length&&!G.over;i++)monTurn(list[i]);
   if(!G.over&&G.fturn>0&&G.fturn%140===0&&!G.flags.boss)spawnWanderer();
 }
 function endTurn(cost){
-  cost=cost||1;
+  cost=cost||1;lockPl(MOVE_MS*cost);
   if(G.p.st.slow>0){G.p.slowTog=!G.p.slowTog;if(G.p.slowTog)cost++;}
   for(var i=0;i<cost&&!G.over;i++)tick();
   G.mons=G.mons.filter(function(m){return m.hp>0;});
@@ -1413,7 +1465,7 @@ function applyTrap(tr){
   if(tr.t==='spike'){log('⚠ 가시 함정!','bad');hurtPlayer(ST.maxHp*.07+dep*2,'가시 함정');}
   else if(tr.t==='gas'){log('☣ 독가스가 뿜어져 나왔다!','bad');addPStatus('poison',6,Math.max(1,Math.round(ST.maxHp*.012+dep*.5)));}
   else if(tr.t==='fire'){log('🔥 화염 함정!','bad');hurtPlayer(ST.maxHp*.04+dep,'화염 함정');if(!G.over)addPStatus('burn',3,Math.max(1,Math.round(ST.maxHp*.012+dep*.4)));}
-  else if(tr.t==='alarm'){log('🔔 경보가 울렸다! 모든 적이 깨어났다','bad');G.mons.forEach(function(m){m.sl=false;});SFX('warn');}
+  else if(tr.t==='alarm'){log('🔔 경보가 울렸다! 모든 적이 깨어났다','bad');G.mons.forEach(function(m){m.sl=false;m.agg=1;});SFX('warn');}
   else if(tr.t==='tele'){log('🌀 전송 함정! 어딘가로 날아갔다','info');teleportRandom();}
 }
 function trapCheck(){
@@ -1460,6 +1512,7 @@ function stepTo(dx,dy){
   return true;
 }
 function playerAttack(m){
+  if(plLocked())return false;
   var p=G.p,C=CLASSES[G.cls],d=cheb(m.x,m.y,p.x,p.y);sprAtk('p',p,m);
   noise(6);
   var res=calcPlayerDmg(m,C.bm,{sneak:true});
@@ -1477,7 +1530,7 @@ function openChest(pr){
   pr.open=true;
   if(pr.mimic){
     var i=G.props.indexOf(pr);if(i>=0)G.props.splice(i,1);
-    var mm=mkMon(R,'mimic',pr.x,pr.y,{sleep:false});G.mons.push(mm);
+    var mm=mkMon(R,'mimic',pr.x,pr.y,{sleep:false,agg:true});G.mons.push(mm);
     log('📦 상자가 입을 벌렸다! 미믹이다!','bad');FX.ring(pr.x,pr.y,'#ff6a6a');FX.shake(6);SFX('boss');
     endTurn(1);return true;
   }
@@ -1502,6 +1555,7 @@ function interact(pr){
 }
 function doMove(dx,dy){
   if(!G||G.over)return false;
+  if(plLocked())return false;
   stopTravel();
   var p=G.p;
   if(!dx&&!dy)return doWait();
@@ -1517,10 +1571,12 @@ function doMove(dx,dy){
 }
 function doWait(){
   if(!G||G.over)return false;
+  if(plLocked())return false;
   stopTravel();pickupHere();endTurn(1);return true;
 }
 function doAttackAuto(){
   if(!G||G.over)return false;
+  if(plLocked())return false;
   stopTravel();
   var m=pickTarget(CLASSES[G.cls].rg);
   if(!m){UI.toast('공격할 대상이 없어요');return false;}
@@ -1640,6 +1696,7 @@ var SKILL_FN={
  }
 };
 function doSkill(i){
+  if(plLocked())return false;
   if(!G||G.over)return false;
   stopTravel();
   var p=G.p,C=CLASSES[G.cls],id=C.sk[i],sk=SK[id];
@@ -1897,7 +1954,7 @@ function travelStep(){
   G.mons.forEach(function(m){
     if(m.hp<=0||!isVisMon(m))return;
     if(!TR.known[m.id]){TR.known[m.id]=1;fresh=true;}
-    if(!m.sl)threat=true;
+    if(!m.sl&&(m.agg||cheb(m.x,m.y,p.x,p.y)<=3))threat=true;
   });
   if(threat||fresh){stopTravel();UI.toast(threat?'적이 나타났어요!':'앞에 무언가 있어요');return;}
   var nxt=TR.path.shift();
@@ -1925,7 +1982,7 @@ function travelStep(){
 function doExplore(){
   if(!G||G.over)return false;
   if(TR){stopTravel();return true;}
-  var aw=visibleHostiles().filter(function(m){return !m.sl;});
+  var aw=visibleHostiles().filter(function(m){return !m.sl&&(m.agg||cheb(m.x,m.y,G.p.x,G.p.y)<=3);});
   if(aw.length){UI.toast('적이 시야에 있어요!');return false;}
   var path=explorePath();
   if(!path||!path.length){if(!noteBlocker(isExploreGoal))UI.toast('더 탐험할 곳이 없어요. 계단으로 가세요!');return false;}
@@ -2238,6 +2295,7 @@ function sprSheet(key,tint){
 }
 /* 공격 애니메이션 시작 + 방향 설정 (key: 'p' 또는 'm'+id) */
 function sprAtk(key,o,t){
+  if(key==='p')lockPl(ATK_MS);
   var A=AN[key]||(AN[key]={f:1,a:0});A.a=performance.now();
   if(!t&&key==='p'&&G&&G.tgt!=null){for(var i=0;i<G.mons.length;i++)if(G.mons[i].id===G.tgt){t=G.mons[i];break;}}
   if(t&&t.x!==o.x)A.f=t.x>o.x?1:-1;
@@ -2907,7 +2965,7 @@ function renderActs(){
   h+=ab('explore',TR?'■':'🧭',TR?'중지':'탐험',null,'X',false);
   h+=ab('rest','⏳','대기',null,'Space',false);
   h+=ab('stairs','🚪',onSt?'내려가기':'계단',null,'Enter',false,0,onSt);
-  $('acts').innerHTML=h;
+  if(renderActs.last!==h){renderActs.last=h;$('acts').innerHTML=h;}
 }
 UI.travelState=function(){if(G&&!G.over&&!$('s-game').hidden)renderActs();};
 UI.refresh=function(){
@@ -3396,6 +3454,7 @@ function boot(){
   if(S.set.padMode===undefined)S.set.padMode='slots';
   if(S.set.dmg===undefined)S.set.dmg=true;
   applyUiIcons(document);
+  monLast=performance.now();setInterval(monLoop,120);
   if(ssGet('passed_auth')!==TOKEN){
     $('gate').hidden=false;
     $('gateBtn').addEventListener('click',function(){try{(window.top||window).location.href='./';}catch(e){location.href='./';}});
