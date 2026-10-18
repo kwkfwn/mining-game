@@ -134,7 +134,7 @@ function ai(){const a=F[1],o=F[0],d=Math.abs(o.x-a.x),I={p:[]},s=a.ai||(a.ai={t:
  if(a.st=='idle'&&d>200&&Math.random()<.005)I.u=1;
  return I}
 function step(){
- const gn=net&&(sc=='intro'||sc=='fight'||sc=='ko');if(gn&&!netIn())return;t++;shake*=.86;flash*=.8;zm*=.88;if(slow>0)slow--;
+ const gn=net&&(sc=='intro'||sc=='fight'||sc=='ko');if(gn&&!netIn())return;if(gn)netCk();t++;shake*=.86;flash*=.8;zm*=.88;if(slow>0)slow--;
  if(sc=='open')openStep();
  else if(sc=='menu')menuStep();else if(sc=='snd'||sc=='keys'||sc=='man')optStep();
  else if(sc=='end'){if(res){res.u++;if(res.u==24)snd('ui');if(res.seg.length>1&&res.u==24+46*(res.seg.length-1)){snd('ui');setTimeout(()=>snd('ui'),120);setTimeout(()=>snd('ui'),240);flash=.5}}if(PR.Enter||PR.Space)again();else if(PR.Escape){leaveNet();sc='menu'}}
@@ -143,6 +143,11 @@ function step(){
  else if(sc=='sel'){[0,1].forEach(i=>{const m=KM[net?0:i];if(!(i&&!mode)&&!(net&&i!=net.me)&&!ok[i]){if(PR[m.l])cur[i]=(cur[i]+CH.length-1)%CH.length;if(PR[m.r])cur[i]=(cur[i]+1)%CH.length;if(PR[m.u])cur[i]=selMv(cur[i],-1);if(PR[m.d])cur[i]=selMv(cur[i],1);if(m.b.some(b=>PR[b])){ok[i]=1;snd('ui')}}Object.assign(F[i],{sz:1,gm:1,vm:0,vz:0},CH[cur[i]])});stgStep();if(net&&t%10==0)net.rm.emit('pick',stgMsg()).catch(()=>{});if(ok[0]&&ok[1]){if(net)netInit();newRound()}}
  else{
   if(hs>0){hs--;if(gn)net.f++;return}
+  simBody()
+ }
+ netPrClr(gn);if(gn)net.f++
+}
+function simBody(){
   if(sc=='intro'&&++ph>110)sc='fight';
   else if(sc=='fight'){if(++tf%60==0&&--timer<=0)endR(F[0].hp>F[1].hp?0:F[1].hp>F[0].hp?1:-1,'TIME UP');else if(F[0].hp<=0||F[1].hp<=0){const dk=F[0].hp<=0&&F[1].hp<=0;endR(dk?-1:F[0].hp<=0?1:0,dk?'DOUBLE K.O.':'K.O.')}}
   else if(sc=='ko'&&++ph>130){if(F[0].w>1||F[1].w>1){winner=F[0].w>F[1].w?0:F[1].w>F[0].w?1:-1;sc='end';matchDone()}else{rd++;newRound()}}
@@ -153,8 +158,6 @@ function step(){
    a.lag=a.lag>a.hp?Math.max(a.hp,a.lag-.35):a.hp;a.x=Math.max(45,Math.min(W-45,a.x))});
   const A=F[0],B=F[1];if(A.jy<=0&&B.jy<=0&&A.st!='fly'&&B.st!='fly'&&Math.abs(A.x-B.x)<44){const m=(44-Math.abs(A.x-B.x))/2,s=A.x<B.x?1:-1;A.x-=s*m;B.x+=s*m;A.x=Math.max(45,Math.min(W-45,A.x));B.x=Math.max(45,Math.min(W-45,B.x));if(Math.abs(A.x-B.x)<44){if(A.x<=45)B.x=A.x+44;else if(B.x<=45)A.x=B.x+44;else if(A.x>=W-45)B.x=A.x-44;else if(B.x>=W-45)A.x=B.x-44}}
   for(let i=PT.length;i--;){const p=PT[i];p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;if(--p.l<=0)PT.splice(i,1)}for(let i=GH.length;i--;)if(--GH[i].ttl<=0)GH.splice(i,1);
- }
- for(const k in PR)delete PR[k];if(gn)net.f++
 }
 function txt(s,x,y,z,col,al,st){g.font=`${z}px "Russo One","Black Han Sans",Impact,"Arial Black","Apple SD Gothic Neo","Malgun Gothic",sans-serif`;g.textAlign=al||'center';g.lineJoin='round';g.lineWidth=z/7;g.strokeStyle=st||'#12081f';g.strokeText(s,x,y);g.fillStyle=col;g.fillText(s,x,y)}
 function poly(x,y,w,h,s){g.beginPath();g.moveTo(x,y);g.lineTo(x+s*w,y);g.lineTo(x+s*(w-12),y+h);g.lineTo(x,y+h);g.closePath()}
@@ -167,7 +170,7 @@ function hud(){
   txt(f.name+(i&&!mode?' (CPU)':''),x,82,22,'#fff',i?'right':'left');ptag(i,x);
   for(let k=0;k<2;k++){g.fillStyle=k<f.w?'#ffd34d':'#0008';g.beginPath();g.arc(x+s*(14+k*24),98,8,0,7);g.fill();g.strokeStyle='#fff';g.lineWidth=2;g.stroke()}
   if(f.sh>1&&f.ct>0)txt(f.sh+' HIT!',i?W-50:50,170,42+(f.cp||0)*1.5,'#ffd34d',i?'right':'left')});
- if(net&&net.sw)txt('동기화 중…',W/2,130,24,'#ffd34d');if(bn.t>0){bn.t--;txt(bn.s,W/2,200,90+bn.t*.5,'#ff7dff')}txt(Math.max(0,timer),W/2,66,46,timer<11?'#ff4560':'#fff');
+ if(net&&net.sw&&performance.now()-net.sw>300)txt(performance.now()-net.sw>2500?'상대를 기다리는 중…':'동기화 중…',W/2,130,24,'#ffd34d');if(bn.t>0){bn.t--;txt(bn.s,W/2,200,90+bn.t*.5,'#ff7dff')}txt(Math.max(0,timer),W/2,66,46,timer<11?'#ff4560':'#fff');
  if(sc=='intro'){const z=1+Math.max(0,1-ph%60/12)*.6;if(ph<110)txt(ph<60?'ROUND '+rd:'FIGHT!',W/2,250,(ph<60?72:104)*z,ph<60?'#fff':'#ff4560')}
  if(sc=='ko'){txt(msg,W/2,250,96,'#ff4560');if(ph>50)txt(winner<0?'DRAW':F[winner].name+' WIN',W/2,330,46,'#ffe27a')}
  if(sc=='end'){txt(winner<0?'DRAW':F[winner].name+' 승리!',W/2,250,92,'#ffe27a');const n=net,st=n?(n.gone?'상대가 나갔어요':n.rq&&!n.rr?'상대 응답 대기 중…':n.rr&&!n.rq?'상대가 다시하기를 원해요!':''):'';txt('다시하기',W/4,350,36,'#7dffb0');txt('Enter · 왼쪽 터치',W/4,382,16,'#cfe');txt('메뉴로',W*.75,350,36,'#ff9db0');txt('Esc · 오른쪽 터치',W*.75,382,16,'#cfe');if(st)txt(st,W/2,440,26,'#ffd34d');xpUI()}
@@ -476,28 +479,76 @@ function stgUI(){const N=STG.length,o=stgGeo(),can=stgCan(),host=!net||net.me==0
  g.restore()}
 bNeon(BG.getContext('2d'));STG[0].cv=BG;
 STG.forEach((s,i)=>{if(i)setTimeout(()=>{try{stgBG(i);stgTh(i)}catch(e){}},1200+i*350)});   // 인트로가 도는 동안 나머지 맵을 하나씩 미리 그려 둬요
-function netInit(){const n=net;for(let k=0;k<n.D;k++)n.inb[0][k]=n.inb[1][k]=0;n.f=0;n.hi=n.D-1;n.sw=0}
-function leaveNet(){mmStop();if(net){net.rm.leave().catch(()=>{});net=null}if(pr){try{pr.destroy()}catch(e){}pr=null}}
-function rmChk(){const n=net;if(n&&sc=='end'&&n.rq&&n.rr){n.g++;n.rq=n.rr=0;n.inb=[{},{}];n.f=0;n.hi=-1;n.sw=0;F[0].w=F[1].w=0;rd=1;winner=-1;cur=[0,0];ok=[0,0];reset(F[0],250,1);reset(F[1],710,-1);sc='sel';snd('ui')}}
+function leaveNet(){mmStop();if(net){clearInterval(net.hb);net.rm.leave().catch(()=>{});net=null}if(pr){try{pr.destroy()}catch(e){}pr=null}}
+function rmChk(){const n=net;if(n&&sc=='end'&&n.rq&&n.rr){n.g++;n.rq=n.rr=0;n.inb=[{},{}];n.f=0;n.hi=-1;n.sw=0;netRs(n);F[0].w=F[1].w=0;rd=1;winner=-1;cur=[0,0];ok=[0,0];reset(F[0],250,1);reset(F[1],710,-1);sc='sel';snd('ui')}}
 function again(){const n=net;if(!n)start(mode);else if(!n.gone&&!n.rq){n.rq=1;n.rm.emit('rem',{});rmChk()}}
-function netIn(){const n=net,fr=n.f+n.D,now=performance.now();
- if(n.hi<fr){const k=KM[0];n.inb[n.me][fr]=(K[k.l]?1:0)|(K[k.r]?2:0)|(K[k.u]?4:0)|(K[k.d]?8:0)|k.b.concat(k.s).reduce((a,b,i)=>a|(PR[b]?16<<i:0),0);n.hi=fr}
- if(now-n.ts>30){n.ts=now;const a=[];for(let q=Math.max(0,n.f-n.D-8);q<=n.hi;q++)a.push(n.inb[n.me][q]|0);n.rm.emit('inp',{e:n.hi,a,c:cur[n.me],o:1,g:n.g}).catch(()=>{})}
- if(n.inb[0][n.f]!=null&&n.inb[1][n.f]!=null){n.sw=0;return 1}
+/* ===== 온라인 동기화 보강 =====
+   1) 입력 비트 정합: 보내는 쪽과 받는 쪽이 같은 폭(13비트)으로 입력을 다룸 (예전에는 받는 쪽이 8비트로 잘라서 "고유/초필" 입력이 사라졌음)
+   2) 경량 패킷: 객체 대신 숫자 배열, 상대가 이미 받은 프레임은 빼고(ack) 한 프레임마다 전송 + 100ms 하트비트
+   3) 눌림 유실 방지: 멈춤(stall) 중에 눌린 버튼도 다음 프레임 입력에 반드시 실림
+   4) 자동 보정: 20프레임마다 상태 체크섬을 교환, 어긋나면 방장의 스냅샷을 받아 따라잡기(빨리감기)로 복구
+   5) 지연이 크면 입력 지연(D)을 자동으로 늘리고, 짧은 멈춤은 '동기화 중…' 문구를 띄우지 않음 */
+const CKI=20,SNX={pose:1,op:1,ox:1,oy:1,th:1,lag:1};
+let FFW=0,FFE=0;
+{const _s=snd,_y=say,_m=matchDone;snd=function(){if(!FFW)return _s.apply(this,arguments)};say=function(){if(!FFW)return _y.apply(this,arguments)};matchDone=function(){if(FFW){FFE=1;return}return _m.apply(this,arguments)}}
+function netRs(n){n.D=5;n.ra=-1;n.pa=n.D-1;n.tx=0;n.lx=performance.now();n.hh={};n.rh={};n.sn={};n.ep=0;n.gep=0;n.gs=0;n.pend=null;n.ck=[0,0];n.lastSn=0;n.sd=[];n.dt=0;n.sent=n.D-1;n.la=performance.now();n.rt=0;n.cs=0;n.eAt=0}
+function netInit(){const n=net;netRs(n);for(let k=0;k<n.D;k++)n.inb[0][k]=n.inb[1][k]=0;n.f=0;n.hi=n.D-1;n.sw=0}
+function netPrClr(gn){if(gn){const k=KM[0],ib=k.b.concat(k.s);for(const c in PR)if(ib.indexOf(c)<0)delete PR[c]}else for(const c in PR)delete PR[c]}
+/* 입력 전송: [게임번호, 마지막 프레임, 내가 받은 상대 프레임(ack), 보정 세대, 체크포인트 프레임, 체크섬, 선택 캐릭터, ...프레임별 입력] */
+function netTx(){const n=net;if(!n)return;const live=sc=='intro'||sc=='fight'||sc=='ko';
+ if(!live){if(sc!='end'||n.pa>=n.hi)return;if(!n.eAt)n.eAt=performance.now();if(performance.now()-n.eAt>4000)return}else n.eAt=0;   // 경기가 끝난 뒤에도, 상대가 마지막 프레임을 확인할 때까지(최대 4초) 보냄
+ const o=1-n.me;
+ while(n.inb[o][n.ra+1]!=null)n.ra++;
+ const now=performance.now();let lo=Math.max(0,n.pa+1);
+ if(now-n.la<120||now-n.rt<100)lo=Math.max(lo,Math.min(n.sent,n.hi)-1);else n.rt=now;   // 평소엔 새 프레임 + 앞 2프레임만, 상대 응답이 120ms 넘게 없으면 확인 안 된 프레임을 전부 다시 보냄
+ const hi=Math.min(n.hi,lo+39),ck=n.cs>0;if(ck)n.cs--;
+ const a=[n.g,hi,n.ra,n.me?n.gep:n.ep,ck?n.ck[0]:0,ck?n.ck[1]:0,cur[n.me]&63];
+ for(let q=lo;q<=hi;q++)a.push(n.inb[n.me][q]|0);
+ n.sent=hi;n.tx=now;n.rm.emit('inp',a).catch(()=>{});
+ if(n.me==0&&n.ep>n.gs&&n.tx-n.lastSn>600)netSnap(n)}
+function netIn(){const n=net,fr=n.f+n.D,now=performance.now();let cp=0;
+ if(n.hi<fr){const k=KM[0],held=(K[k.l]?1:0)|(K[k.r]?2:0)|(K[k.u]?4:0)|(K[k.d]?8:0);let pr=0;
+  k.b.concat(k.s).forEach((b,i)=>{if(PR[b]){pr|=16<<i;delete PR[b]}});
+  for(let q=n.hi+1;q<fr;q++)n.inb[n.me][q]=held;
+  n.inb[n.me][fr]=held|pr;n.hi=fr;cp=1}
+ if(cp||now-n.tx>50)netTx();
+ if(n.inb[0][n.f]!=null&&n.inb[1][n.f]!=null){
+  if(n.sw){const d=now-n.sw;if(d>10)n.sd.push(now);if(d>60&&n.D<10&&now-n.dt>500){n.D=Math.min(10,n.D+Math.ceil(d/30));n.dt=now;n.sd=[]}n.sw=0}
+  if(n.sd.length){n.sd=n.sd.filter(x=>now-x<4000);if(n.sd.length>=5&&n.D<10&&now-n.dt>1200){n.D++;n.dt=now;n.sd=[]}}
+  else if(n.D>5&&now-n.dt>10000){n.D--;n.dt=now}
+  return 1}
  n.sw=n.sw||now;if(now-n.sw>6000){leaveNet();nmsg='상대 연결이 끊겼어요 (Esc: 메뉴)';sc='lobby'}return 0}
+/* 상태 체크섬 · 스냅샷 (방장이 기준) */
+function snapF(f){const o={};for(const k in f){if(SNX[k])continue;const v=f[k];if(k=='mv')o.mv=v?SK.indexOf(v):-1;else if(v===null||typeof v=='number'||typeof v=='string'||typeof v=='boolean')o[k]=v;else if(Array.isArray(v))o[k]=Array.from(v,x=>typeof x=='number'&&x===x?x:0)}return o}
+function snapAll(){return[snapF(F[0]),snapF(F[1]),hs,ph,tf,timer,rd,sc,winner,msg]}
+function hashOf(s){let h=2166136261;const f=x=>{h^=x;h=Math.imul(h,16777619)},str=t=>{for(let i=0;i<t.length;i++)f(t.charCodeAt(i))};
+ [s[0],s[1]].forEach(o=>Object.keys(o).sort().forEach(k=>{str(k);const v=o[k];str(typeof v=='number'?String(Math.round(v*1000)):Array.isArray(v)?v.map(x=>Math.round(x*1000)).join(','):String(v))}));
+ for(let i=2;i<s.length;i++)str(String(s[i]));return h>>>0}
+function applySnap(s){[0,1].forEach(i=>{const f=F[i],o=s[i];for(const k in o){if(k=='mv')f.mv=o.mv<0?null:SK[o.mv];else f[k]=Array.isArray(o[k])?o[k].slice():o[k]}f.ox=f.x;f.oy=f.jy});hs=s[2];ph=s[3];tf=s[4];timer=s[5];rd=s[6];sc=s[7];winner=s[8];msg=s[9]}
+function ffwd(g){const n=net,sv=[shake,flash,zm,slow];FFW=1;FFE=0;
+ try{while(n.f<g&&(sc=='intro'||sc=='fight'||sc=='ko')){if(hs>0){hs--;n.f++;continue}simBody();n.f++}}catch(e){}
+ FFW=0;shake=sv[0];flash=sv[1];zm=sv[2];slow=sv[3];if(FFE&&sc=='end'&&!res)matchDone();FFE=0}
+function netSnap(n){const ks=Object.keys(n.sn).map(Number);if(!ks.length)return;const sf=Math.max.apply(null,ks);n.lastSn=performance.now();n.rm.emit('snap',[n.g,n.ep,sf,n.sn[sf]]).catch(()=>{})}
+function netBad(n){if(performance.now()-n.lastSn<300||n.ep>n.gs)return;n.ep++;n.nrs=(n.nrs|0)+1;n.rh={};netSnap(n)}
+function netCkRx(n,ep,cf,ch){if(ep>n.gs)n.gs=ep;if(ep!==n.ep||!cf)return;n.rh[cf]=ch;const m=n.hh[cf];if(m!=null&&m!==ch)netBad(n)}
+function netCk(){const n=net,gn=sc=='intro'||sc=='fight'||sc=='ko';if(!gn)return;
+ if(n.me==1&&n.pend&&n.pend.f<=n.f){const p=n.pend,g=n.f;n.pend=null;applySnap(p.s);n.f=p.f;n.gep=p.ep;n.hh={};n.ck=[0,0];n.cs=0;ffwd(g);n.nfx=(n.nfx|0)+1}
+ if(n.f%CKI==0&&(sc=='intro'||sc=='fight'||sc=='ko')){const s=snapAll(),h=hashOf(s);n.hh[n.f]=h;n.ck=[n.f,h];n.cs=3;delete n.hh[n.f-CKI*8];delete n.rh[n.f-CKI*8];
+  if(n.me==0){n.sn[n.f]=s;delete n.sn[n.f-CKI*6];const r=n.rh[n.f];if(r!=null&&r!==h)netBad(n)}}}
 function online(){sc='lobby';lb=0;mmStop();nmsg=window.Peer?'':'PeerJS를 불러오지 못했어요 — 인터넷 확인 (Esc)';if(!window.Peer)lb=1}
-function mkNet(k,me){const H={},n=net={D:5,me,inb:[{},{}],f:0,hi:-1,ts:0,sw:0,g:0,rq:0,rr:0,gone:0,pf:[null,null],rm:{emit:(t,d)=>{try{k.send({t,d})}catch(e){}return Promise.resolve()},on:(t,h)=>{H[t]=h},leave:()=>{try{k.close()}catch(e){}return Promise.resolve()}}};
+function mkNet(k,me){const H={},n=net={D:5,me,inb:[{},{}],f:0,hi:-1,ts:0,sw:0,g:0,rq:0,rr:0,gone:0,pf:[null,null],ra:-1,pa:4,tx:0,lx:0,hh:{},rh:{},sn:{},ep:0,gep:0,gs:0,pend:null,ck:[0,0],lastSn:0,sd:[],dt:0,nrs:0,nfx:0,hb:0,sent:4,la:0,rt:0,cs:0,rm:{emit:(t,d)=>{try{k.send({t,d})}catch(e){}return Promise.resolve()},on:(t,h)=>{H[t]=h},leave:()=>{try{k.close()}catch(e){}return Promise.resolve()}}};
  k.on('data',m=>{if(m&&H[m.t])H[m.t]({sameTab:false,data:m.d})});
  k.on('close',()=>{if(net!=n)return;if(sc=='end')n.gone=1;else if(sc!='menu'){leaveNet();nmsg='상대 연결이 끊겼어요 (Esc: 메뉴)';sc='lobby';lb=1}});
- H.inp=m=>{const d=m.data,o=1-n.me;if(!d||!Array.isArray(d.a)||(d.g|0)!==n.g)return;if(d.o){cur[o]=d.c&63;ok[o]=1}d.a.forEach((v,j)=>{const fr=(d.e|0)-d.a.length+1+j;if(fr>=0&&fr<n.f+400&&n.inb[o][fr]==null)n.inb[o][fr]=v&255})};
+ H.inp=m=>{const d=m.data,o=1-n.me;if(!Array.isArray(d)||d.length<7||(d[0]|0)!==n.g)return;n.lx=performance.now();const e=d[1]|0,len=d.length-7,M=(1<<(4+KM[0].b.length+KM[0].s.length))-1;if((d[2]|0)>n.pa){n.pa=d[2]|0;n.la=performance.now()}cur[o]=d[6]&63;ok[o]=1;for(let j=0;j<len;j++){const fr=e-len+1+j;if(fr>=0&&fr<n.f+400&&n.inb[o][fr]==null)n.inb[o][fr]=d[7+j]&M}if(n.me==0)netCkRx(n,d[3]|0,d[4]|0,d[5]>>>0)};
+ H.snap=m=>{const d=m.data;if(n.me==1&&Array.isArray(d)&&(d[0]|0)===n.g&&(d[1]|0)>n.gep&&d[3])n.pend={ep:d[1]|0,f:d[2]|0,s:d[3]}};
  H.pick=m=>{const d=m.data;if(d){cur[1-n.me]=d.c&63;ok[1-n.me]=d.o?1:0;if(n.me==1&&d.p!=null){const N=STG.length;stgPick=Math.max(0,Math.min(N,d.p|0));stg=Math.max(0,Math.min(N-1,d.s|0))}}};H.rem=()=>{n.rr=1;rmChk()};H.prof=m=>{const q=cleanPf(m.data);if(!q.n)q.n='PLAYER';n.pf[1-n.me]=q};
- mode=2;cur=[0,0];ok=[0,0];F[0].w=F[1].w=0;rd=1;winner=-1;res=null;reset(F[0],250,1);reset(F[1],710,-1);n.pf[me]=pubPf();n.rm.emit('prof',n.pf[me]);fd={t:0,k:null};sc='found'}
+ mode=2;cur=[0,0];ok=[0,0];F[0].w=F[1].w=0;rd=1;winner=-1;res=null;reset(F[0],250,1);reset(F[1],710,-1);n.pf[me]=pubPf();n.rm.emit('prof',n.pf[me]);fd={t:0,k:null};n.hb=setInterval(()=>{if(net!==n){clearInterval(n.hb);return}if(performance.now()-n.tx>80)netTx()},100);sc='found'}
 function host(){lb=1;nmsg='방 만드는 중…';const id=Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.random()*24|0]).join('');
- pr=new Peer('nk2-'+id);pr.on('open',()=>{nmsg='방 코드: '+id+' — 친구에게 알려주세요 (Esc: 취소)'});
+ pr=new Peer('nk3-'+id);pr.on('open',()=>{nmsg='방 코드: '+id+' — 친구에게 알려주세요 (Esc: 취소)'});
  pr.on('connection',k=>{if(!net)k.on('open',()=>mkNet(k,0))});
  pr.on('error',e=>{if(e.type=='unavailable-id'){pr.destroy();host()}else nmsg='연결 오류: '+e.type+' (Esc: 뒤로)'})}
 function join(){const id=(prompt('방 코드를 입력하세요')||'').trim().toUpperCase();if(!id)return;lb=1;nmsg='연결 중…';
- pr=new Peer();pr.on('open',()=>{const k=pr.connect('nk2-'+id);k.on('open',()=>mkNet(k,1))});
+ pr=new Peer();pr.on('open',()=>{const k=pr.connect('nk3-'+id);k.on('open',()=>mkNet(k,1))});
  pr.on('error',e=>{nmsg=(e.type=='peer-unavailable'?'없는 방 코드예요':'연결 오류: '+e.type)+' (Esc: 뒤로)'})}
 /* ===== 프로필 · 레벨 · 온라인 매칭 (추가) ===== */
 const LVMAX=99,need=L=>100+40*(L-1),ni=v=>(v=+v)>0?Math.min(99999999,Math.floor(v)):0,
@@ -603,7 +654,7 @@ function foundStep(){const n=net;if(!n||!fd){leaveNet();sc='menu';return}fd.t++;
  if(fd.k!=null&&fd.t-fd.k>=170||fd.t>420){if(!n.pf[1-n.me])n.pf[1-n.me]=cleanPf({n:'PLAYER',av:CH[0].name});fd=null;sc='sel';snd('ui')}}
 /*MM-BEGIN*/
 /* 온라인 매칭: PeerJS 슬롯(nkmm1-0 ~ nkmm1-3)을 먼저 잡은 사람이 기다리고, 늦게 온 사람이 낮은 번호 슬롯으로 접속해요 */
-const MMN=4,MMP='nkmm2-',MMFATAL=['network','server-error','socket-error','socket-closed','browser-incompatible','invalid-id','invalid-key','ssl-unavailable'];
+const MMN=4,MMP='nkmm3-',MMFATAL=['network','server-error','socket-error','socket-closed','browser-incompatible','invalid-id','invalid-key','ssl-unavailable'];
 let mm=null;
 function mmKill(m){clearInterval(m.rt);clearTimeout(m.bt);clearTimeout(m.gt);clearTimeout(m.ct);(m.cn||[]).forEach(c=>{try{c.close()}catch(e){}});m.cn=[];if(m.p){try{m.p.destroy()}catch(e){}m.p=null}}
 function mmStop(){const m=mm;mm=null;if(m){m.stop=1;mmKill(m)}}
@@ -619,7 +670,7 @@ function mmClaim(m,i){if(mm!==m||m.done)return;if(i>=MMN){m.tk=[];clearTimeout(m
   else if(MMFATAL.indexOf(ty)>=0)mmEnd('연결 오류: '+ty+' · 잠시 후 다시 시도해 주세요')})}
 function mmOwn(m,p){p.on('connection',k=>{if(mm!==m||m.done||m.p!==p){mmRej(k);return}m.cn.push(k);
  k.on('data',d=>{if(mm!==m||m.done||!d)return;
-  if(d.t=='hi'){if(d.v!==2||m.busy||m.cg){try{k.send({t:'busy'})}catch(e){}return}
+  if(d.t=='hi'){if(d.v!==3||m.busy||m.cg){try{k.send({t:'busy'})}catch(e){}return}
    m.busy=k;try{k.send({t:'ok'})}catch(e){m.busy=0;return}clearTimeout(m.bt);m.bt=setTimeout(()=>{if(m.busy===k){m.busy=0;try{k.close()}catch(e){}}},5000)}
   else if(d.t=='go'&&m.busy===k){clearTimeout(m.bt);try{k.send({t:'rdy'})}catch(e){m.busy=0;return}mmFound(m,k,0)}
   else if(d.t=='no'&&m.busy===k)m.busy=0});
@@ -631,7 +682,7 @@ function mmProbe(m){if(mm!==m||m.done)return;
  for(let j=0;j<m.slot;j++){if(m.fl[j]||!m.tk[j])continue;
   const c=m.fl[j]=m.p.connect(MMP+j,{reliable:true});m.cn.push(c);
   const gt=setTimeout(()=>{if(m.fl[j]===c){delete m.fl[j];if(m.cg!==c){try{c.close()}catch(e){}}}},9000);
-  c.on('open',()=>{try{c.send({t:'hi',v:2})}catch(e){}});
+  c.on('open',()=>{try{c.send({t:'hi',v:3})}catch(e){}});
   c.on('data',d=>mmGuest(m,c,j,d,gt));
   c.on('close',()=>{clearTimeout(gt);if(m.fl[j]===c)delete m.fl[j];if(m.cg===c)m.cg=0})}}
 function mmGuest(m,c,j,d,gt){if(mm!==m||m.done||!d)return;
