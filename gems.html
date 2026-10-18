@@ -89,6 +89,59 @@ try{window.stop()}catch(e){}
 .campTTp{font-family:var(--mono);font-size:11px;font-weight:800;color:var(--sub);white-space:nowrap}
 .campTT.own .campTTp{color:var(--win)}
 @media(prefers-reduced-motion:reduce){.campBadge,.campGobIc,.campSlot.on,#rockWrap.campShiny #rockSvg,#rockWrap.campShiny::after{animation:none!important}}
+/* ═════ 🎮 새 미니게임 4종 (v1.3) ═════ */
+.mgRow{justify-content:center;flex-wrap:wrap;margin:2px 0 6px}
+.mgRow .diceChoice{padding:8px 16px;font-size:12.5px}
+.mgGrid{display:grid;gap:6px;max-width:340px;margin:10px auto}
+.mgCols5{grid-template-columns:repeat(5,1fr)}
+.mgCols4{grid-template-columns:repeat(4,1fr);max-width:320px}
+.mgCols3{grid-template-columns:repeat(3,1fr);max-width:330px;gap:10px}
+.mgTile{aspect-ratio:1;border-radius:10px;background:#0d1119;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:border-color .15s ease,background .15s ease,transform .1s ease}
+.mgTile:hover:not(:disabled){border-color:var(--neon2);transform:translateY(-1px)}
+.mgTile:disabled{opacity:1}
+.mgTile .mgDot{width:9px;height:9px;border-radius:50%;background:#2a3142;display:block}
+.mgTile.safe{background:#10241a;border-color:var(--win);box-shadow:0 0 12px -4px rgba(63,224,122,.6);animation:mgPop .25s ease}
+.mgTile.boom{background:#2a1015;border-color:var(--lose);box-shadow:0 0 12px -4px rgba(255,77,106,.6)}
+.mgTile.boom.hit{box-shadow:0 0 0 2px var(--lose),0 0 22px rgba(255,77,106,.8);animation:mgShake .35s ease}
+.mgTile.dim{opacity:.5}
+.mgTile svg{width:72%;height:72%}
+.mgCard{background:linear-gradient(135deg,#1b1530,#121a2c);border-color:#3a2a5a}
+.mgCard .mgBack{font-weight:900;font-size:20px;color:#6b5a98;font-family:var(--mono)}
+.mgCard.up{background:#10192a;border-color:var(--neon2);animation:mgPop .22s ease}
+.mgCard.ok{background:#10241a;border-color:var(--win);box-shadow:0 0 12px -4px rgba(63,224,122,.6)}
+.mgInfo{justify-content:center;text-align:center;line-height:1.6}
+.mgInfo b{color:var(--gold-txt)}
+.mgActions{display:flex;justify-content:center;margin-top:6px}
+.mgCash{margin-left:0;background:linear-gradient(180deg,#ffd45a,#e0a020);color:#241800;box-shadow:0 6px 18px -6px rgba(255,200,60,.7)}
+.mgUd{display:flex;flex-direction:column;align-items:center;gap:10px;padding:6px 0}
+.mgRange{font-family:var(--mono);font-weight:900;font-size:30px;color:var(--neon2);text-shadow:0 0 14px rgba(63,224,255,.5);letter-spacing:.04em}
+.mgUdRow{display:flex;gap:8px;align-items:center}
+.mgUdRow input{width:120px;background:#0c0f16;border:1px solid var(--line);color:var(--text);font-family:var(--mono);font-weight:800;font-size:18px;text-align:center;border-radius:8px;padding:8px 10px}
+.mgUdRow input:disabled{opacity:.45}
+.mgUdRow .playBtn{margin-left:0}
+.mgChips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;min-height:26px}
+.mgChip{font-family:var(--mono);font-weight:800;font-size:12px;padding:4px 9px;border-radius:99px;border:1px solid var(--line);background:#0d1119;color:var(--sub)}
+.mgChip.up{color:#7fd0ff;border-color:#2c6a8f}
+.mgChip.down{color:#ffb27a;border-color:#8f5a2c}
+.mgChip.hit{color:var(--win);border-color:var(--win)}
+.payTable .cur{color:var(--gold-txt);font-weight:900}
+.mgFree{font-family:var(--mono);font-size:12.5px;font-weight:800;color:var(--sub)}
+.mgFree b{color:var(--win)}
+.mgHud{max-width:330px;margin:0 auto 4px;text-align:center}
+.mgHudBar{height:7px;border-radius:99px;background:#1a2030;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+.mgHudBar>i{display:block;height:100%;width:100%;border-radius:99px;background:linear-gradient(90deg,var(--brass),var(--brass-glow))}
+.mgHudTxt{margin-top:6px;font-family:var(--mono);font-size:12.5px;font-weight:800;color:var(--text)}
+.wkCell{position:relative;aspect-ratio:1;border:none;padding:0;background:none;overflow:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent;border-radius:14px;cursor:pointer;user-select:none}
+.wkHole{position:absolute;left:8%;right:8%;bottom:6%;height:34%;border-radius:50%;background:radial-gradient(ellipse at 50% 35%,#05070b 55%,#1c1409 100%);box-shadow:0 2px 0 #3b2a14,inset 0 0 10px #000}
+.wkMole{position:absolute;left:14%;right:14%;bottom:20%;transform:translateY(115%);transition:transform .11s ease-out;pointer-events:none}
+.wkMole svg{width:100%;display:block}
+.wkCell.up .wkMole{transform:translateY(0)}
+.wkCell.hitf .wkMole{transform:translateY(40%) scale(.9);filter:brightness(1.6) saturate(.4)}
+.wkCell.bad.hitf{background:rgba(255,77,106,.28)}
+.wkFront{position:absolute;left:3%;right:3%;bottom:0;height:25%;background:linear-gradient(180deg,#3a2a14,#22170a);border-radius:50% 50% 16px 16px/60% 60% 16px 16px;box-shadow:0 -2px 0 #4a371c;pointer-events:none}
+@keyframes mgPop{0%{transform:scale(.8)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes mgShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@media(prefers-reduced-motion:reduce){.mgTile,.mgTile.safe,.mgCard.up,.mgTile.boom.hit{animation:none!important}}
 </style></head>
 <body><script>(function(){var n=document,r=0;function o(){if(!r){r=1;try{n.documentElement.innerHTML='<body style="margin:0;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;font:20px sans-serif">개발자 도구가 감지되어 접근이 제한되었어요.</body>'}catch{}try{window.stop()}catch{}setTimeout(function(){location.replace("about:blank")},900)}}window.__gmTrip=o,n.addEventListener("contextmenu",function(e){e.preventDefault()},!0),n.addEventListener("keydown",function(e){var t=(e.key||"").toLowerCase();if(e.keyCode===123||t==="f12"||e.ctrlKey&&e.shiftKey&&"ijck".indexOf(t)>=0&&t||e.ctrlKey&&(t==="u"||t==="s")||e.metaKey&&e.altKey&&"ijcu".indexOf(t)>=0&&t)return e.preventDefault(),e.stopPropagation(),!1},!0),setInterval(function(){var e=performance.now();(function(){}).constructor("debugger")(),performance.now()-e>200&&o()},1e3);var i=new Image;Object.defineProperty(i,"id",{get:function(){o()}}),setInterval(function(){console.log(i),console.clear&&console.clear()},1500)})();</script><canvas id="bgCanvas"></canvas>
 <div id="app">
@@ -460,7 +513,64 @@ try{window.stop()}catch(e){}
     <div class="resultBanner" id="bjResult">베팅하고 딜을 눌러 시작하세요 · 블랙잭 3:2 배당</div>
   </div>
 </div>
-<div class="tabpane" data-pane="reaction">
+<div class="tabpane" data-pane="mgmines">
+        <div class="betRow">
+          <input type="number" id="mnBet" value="1" min="1">
+          <button class="chipbtn" data-bet="+1">+1</button>
+          <button class="chipbtn" data-bet="+10">+10</button>
+          <button class="chipbtn" data-bet="max">MAX</button>
+          <button class="playBtn" id="mnStart">시작</button>
+        </div>
+        <div class="diceChoiceRow mgRow" id="mnBombs"></div>
+        <div class="mgGrid mgCols5" id="mnGrid"></div>
+        <div class="rrMultiRow mgInfo" id="mnInfo"></div>
+        <div class="mgActions"><button class="playBtn mgCash" id="mnCash" disabled>💰 지금 수령하기</button></div>
+        <div class="resultBanner" id="mnResult">안전한 칸을 열 때마다 배당이 올라가요. 폭탄을 밟으면 베팅을 잃으니 적당할 때 수령하세요!</div>
+      </div>
+      <div class="tabpane" data-pane="mgmemory">
+        <div class="betRow">
+          <input type="number" id="mmBet" value="1" min="1">
+          <button class="chipbtn" data-bet="+1">+1</button>
+          <button class="chipbtn" data-bet="+10">+10</button>
+          <button class="chipbtn" data-bet="max">MAX</button>
+          <button class="playBtn" id="mmStart">시작</button>
+        </div>
+        <div class="mgGrid mgCols4" id="mmGrid"></div>
+        <div class="rrMultiRow mgInfo" id="mmInfo"></div>
+        <div class="payTable" id="mmPayTable"></div>
+        <div class="resultBanner" id="mmResult">같은 보석 두 장을 찾아 16장을 모두 맞히세요. 시도 횟수가 적을수록 배당이 커요!</div>
+      </div>
+      <div class="tabpane" data-pane="mgupdown">
+        <div class="betRow">
+          <input type="number" id="udBet" value="1" min="1">
+          <button class="chipbtn" data-bet="+1">+1</button>
+          <button class="chipbtn" data-bet="+10">+10</button>
+          <button class="chipbtn" data-bet="max">MAX</button>
+          <button class="playBtn" id="udStart">시작</button>
+        </div>
+        <div class="mgUd">
+          <div class="mgRange" id="udRange">1 ~ 100</div>
+          <div class="mgUdRow">
+            <input type="number" id="udGuess" min="1" max="100" placeholder="1~100" inputmode="numeric" disabled>
+            <button class="playBtn" id="udGo" disabled>추측!</button>
+          </div>
+          <div class="mgChips" id="udHist"></div>
+        </div>
+        <div class="rrMultiRow mgInfo" id="udInfo"></div>
+        <div class="payTable" id="udPayTable"></div>
+        <div class="resultBanner" id="udResult">1~100 사이의 비밀 숫자를 7번 안에 맞혀 보세요. 적게 시도할수록 배당이 커요!</div>
+      </div>
+      <div class="tabpane" data-pane="mgwhack">
+        <div class="betRow">
+          <span class="mgFree" id="wkPlays"></span>
+          <button class="playBtn" id="wkStart">시작</button>
+        </div>
+        <div class="mgHud"><div class="mgHudBar"><i id="wkBar"></i></div><div class="mgHudTxt" id="wkHud">두더지를 눌러 잡으세요! TNT(폭탄)는 누르면 감점!</div></div>
+        <div class="mgGrid mgCols3" id="wkBoard"></div>
+        <div class="payTable" id="wkPayTable"></div>
+        <div class="resultBanner" id="wkResult">Coin 없이 즐기는 무료 게임! 점수에 따라 Gold를 받아요. (하루 5판 · 한국시간 0시에 초기화)</div>
+      </div>
+      <div class="tabpane" data-pane="reaction">
   <div id="reactLobby" class="mpLobby">
     <h3 class="mpLobbyTitle">⚡ 반응속도 대결 · 방 만들기</h3>
     <div class="mpLobbyRow">
@@ -1113,7 +1223,7 @@ function j(){const t=s.mineAreaIdx||0,n=Fe[t];if(!Ze||!n)return;const i=n.unlock
         <button id="mineLevelBuy"${s.coins<n?" disabled":""}>${A(n)} Coin 사용</button>
       </div>
     </div>
-  `,document.getElementById("mineLevelBuy").addEventListener("click",()=>{s.coins>=n&&(s.coins-=n,s.mineLevel+=1,z.rareFanfare(5),R(),rt())})}function zt(t){if(window.__mpActiveRoom&&t!=="casino"){typeof window.__mpBlockedWarning=="function"&&window.__mpBlockedWarning();return}document.querySelectorAll(".navBtn").forEach(n=>n.classList.toggle("active",n.dataset.view===t)),document.querySelectorAll(".view").forEach(n=>n.classList.toggle("active",n.dataset.view===t)),t==="shop"&&typeof rt=="function"&&rt(),t==="temple"&&tpR(),t==="exchangeView"&&(ca(),_()),t==="camp"&&CAMP&&CAMP.render()}document.querySelectorAll(".navBtn").forEach(t=>{t.addEventListener("click",()=>zt(t.dataset.view))});const cn=[{id:"dice",label:"홀짝"},{id:"ladder",label:"사다리"},{id:"slot",label:"슬롯머신"},{id:"rps",label:"✌️가위바위보"},{id:"fishing",label:"낚시"},{id:"hilo",label:"하이로우"},{id:"roulette-rr",label:"러시안 룰렛"},{id:"blackjack",label:"21(블랙잭)"},{id:"reaction",label:"⚡반응속도"},{id:"bomb",label:"💣폭탄돌리기"},{id:"wordchain",label:"📝끝말잇기"},{id:"ballfight",label:"⚽볼파이트"}];function wn(){const t=document.getElementById("tabbar");cn.forEach((n,i)=>{const c=document.createElement("button");c.className="tabbtn"+(i===0?" active":""),c.textContent=n.label,c.dataset.tab=n.id,c.addEventListener("click",()=>Rn(n.id)),t.appendChild(c)}),document.querySelector('.tabpane[data-pane="dice"]').classList.add("active")}function Rn(t){if(window.__mpActiveRoom&&t!==window.__mpActiveRoom.pane){typeof window.__mpBlockedWarning=="function"&&window.__mpBlockedWarning();return}document.querySelectorAll(".tabbtn").forEach(n=>n.classList.toggle("active",n.dataset.tab===t)),document.querySelectorAll(".tabpane").forEach(n=>n.classList.toggle("active",n.dataset.pane===t))}function Un(){document.querySelectorAll(".betRow").forEach(t=>{t.querySelectorAll(".chipbtn").forEach(n=>{n.addEventListener("click",()=>{const i=t.querySelector("input[type=number]");if(!i)return;let c=parseInt(i.value)||0;const d=n.dataset.bet;d==="+1"?c+=1:d==="+10"?c+=10:d==="max"&&(c=s.coins),i.value=Math.max(1,c||1)})})})}document.getElementById("g2cMax").addEventListener("click",()=>{document.getElementById("g2cInput").value=Math.floor(s.gold/Ge)*Ge}),document.getElementById("c2gMax").addEventListener("click",()=>{document.getElementById("c2gInput").value=s.coins}),document.getElementById("g2cGo").addEventListener("click",()=>{const t=Math.max(0,Math.floor(+document.getElementById("g2cInput").value||0)),n=document.getElementById("exResult");if(t<=0||t>s.gold){n.textContent="환전할 Gold 수량을 확인하세요.",n.className="resultBanner lose";return}const i=Math.floor(t/Ge);if(i<=0){n.textContent=Ge+" Gold 미만은 환전할 수 없습니다.",n.className="resultBanner lose";return}s.gold-=i*Ge,s.coins+=i,n.textContent=A(i*Ge)+" Gold → "+A(i)+" Coin 환전 완료!",n.className="resultBanner win",z.tick(),R()});function Kn(t){const n=Math.max(0,Math.floor(t||0));if(n<=0||n>s.coins)return null;const i=n*Ge,c=Math.round(i*(1-ce));return s.coins-=n,s.gold+=c,{coinsSpent:n,rawGold:i,goldAfterFee:c}}document.getElementById("c2gGo").addEventListener("click",()=>{const t=Math.max(0,Math.floor(+document.getElementById("c2gInput").value||0)),n=document.getElementById("exResult");if(t<=0||t>s.coins){n.textContent="환전할 Coin 수량을 확인하세요.",n.className="resultBanner lose";return}const i=Kn(t);if(!i){n.textContent="환전할 Coin 수량을 확인하세요.",n.className="resultBanner lose";return}n.textContent=`${A(i.coinsSpent)} Coin → ${A(i.goldAfterFee)} Gold 환전 완료! (수수료 5% 적용, 원래 가치 ${A(i.rawGold)}G)`,n.className="resultBanner win",z.tick(),R()}),document.querySelectorAll(".diceChoice[data-choice]").forEach(t=>{t.addEventListener("click",()=>{document.querySelectorAll(".diceChoice[data-choice]").forEach(n=>n.classList.remove("sel")),t.classList.add("sel"),s.diceChoice=t.dataset.choice})});const Pn={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};function Qt(t){const n=document.querySelectorAll("#die .pip");n.forEach(i=>i.classList.remove("on")),(Pn[t]||[4]).forEach(i=>n[i].classList.add("on"))}Qt(1);let Zt=!1;document.getElementById("dicePlay").addEventListener("click",()=>{if(Zt)return;const t=Math.max(1,Math.floor(+document.getElementById("diceBet").value||0)),n=document.getElementById("diceResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}Zt=!0,s.coins-=t,R();const i=document.getElementById("die");i.classList.add("rolling");let c=0;const d=setInterval(()=>{if(Qt(1+Math.floor(Math.random()*6)),z.tick(),c++,c>12){clearInterval(d),i.classList.remove("rolling");const f=1+Math.floor(Math.random()*6);Qt(f);const k=f%2===1;if(k&&s.diceChoice==="odd"||!k&&s.diceChoice==="even"){const S=t*2;s.coins+=S,n.textContent=`🎲 ${f} 나왔습니다! 승리! +${A(S)} Coin`,n.className="resultBanner win",z.win(),Mt(26)}else n.textContent=`🎲 ${f} 나왔습니다. 아쉽게 패배 (-${A(t)} Coin)`,n.className="resultBanner lose",z.lose();R(),Zt=!1}},70)});const Nt={rock:"✊",scissors:"✌️",paper:"🖐️"},Vt={rock:"바위",scissors:"가위",paper:"보"};s.rpsChoice="rock",document.querySelectorAll("#rpsChoiceRow .diceChoice[data-rps]").forEach(t=>{t.addEventListener("click",()=>{document.querySelectorAll("#rpsChoiceRow .diceChoice[data-rps]").forEach(n=>n.classList.remove("sel")),t.classList.add("sel"),s.rpsChoice=t.dataset.rps,document.getElementById("rpsMyHand").textContent=Nt[s.rpsChoice]})});function dn(t,n){return t===n?"tie":{rock:"scissors",scissors:"paper",paper:"rock"}[t]===n?"win":"lose"}let Xt=!1;document.getElementById("rpsPlay").addEventListener("click",()=>{if(Xt)return;const t=Math.max(1,Math.floor(+document.getElementById("rpsBet").value||0)),n=document.getElementById("rpsResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}Xt=!0,s.coins-=t,R();const i=document.getElementById("rpsMyHand"),c=document.getElementById("rpsCpuHand"),d=Object.keys(Nt);let f=0;const k=setInterval(()=>{if(c.textContent=Nt[d[Math.floor(Math.random()*3)]],i.style.transform=f%2===0?"scale(1.15)":"scale(1)",z.tick(),f++,f>9){clearInterval(k),i.style.transform="scale(1)",i.textContent=Nt[s.rpsChoice];const x=d[Math.floor(Math.random()*3)];c.textContent=Nt[x];const S=dn(s.rpsChoice,x);if(S==="win"){const G=t*2;s.coins+=G,n.textContent=`${Vt[s.rpsChoice]} vs ${Vt[x]} → 승리! +${A(G)} Coin`,n.className="resultBanner win",z.win(),Mt(24)}else S==="tie"?(s.coins+=t,s.coinSpentTotal=Math.max(0,(s.coinSpentTotal||0)-t),n.textContent=`${Vt[s.rpsChoice]} vs ${Vt[x]} → 비겼습니다! 베팅 반환`,n.className="resultBanner"):(n.textContent=`${Vt[s.rpsChoice]} vs ${Vt[x]} → 패배 (-${A(t)} Coin)`,n.className="resultBanner lose",z.lose());R(),Xt=!1}},90)});const on=[{id:"miss1",label:"놓침",mult:0,from:0,to:10,color:"#3a3f4b"},{id:"small",label:"잔챙이",mult:1,from:10,to:50,color:"#5a6272"},{id:"normal",label:"물고기",mult:1.2,from:50,to:60,color:"#3fe0ff"},{id:"miss3",label:"놓침",mult:0,from:60,to:85,color:"#3a3f4b"},{id:"gold",label:"황금 물고기",mult:3,from:85,to:88,color:"#ffd23f"},{id:"legend",label:"전설의 물고기",mult:12,from:88,to:90,color:"legend"},{id:"miss2",label:"놓침",mult:0,from:90,to:100,color:"#3a3f4b"}];function Jn(){const t=document.getElementById("fishTimingBar");if(!t)return;t.innerHTML="",on.forEach(i=>{const c=document.createElement("div");c.className="fishZone"+(i.color==="legend"?" legendZone":""),c.style.left=i.from+"%",c.style.width=i.to-i.from+"%",i.color!=="legend"&&(c.style.background=i.color);const d=document.createElement("div");d.className="fishZoneLabel",d.textContent=i.mult>0?i.mult+"x":"",c.appendChild(d),t.appendChild(c)});const n=document.createElement("div");n.className="fishMarker",n.id="fishMarkerEl",n.style.left="0%",t.appendChild(n)}function zn(){const t=document.getElementById("fishPayTable");t&&(t.innerHTML=on.filter(n=>n.mult>0).map(n=>`<span>${n.label} <b>${n.mult}x</b></span>`).join("")+"<span>놓침 <b>0x</b></span>")}zn();function sn(t,n){const i=document.getElementById("fishStatusText");i&&(i.textContent=t,i.classList.toggle("alert",!!n))}let h=!1,p=null,W=0,Q=1,Se=0,Ce=null;document.getElementById("fishPlay").addEventListener("click",()=>{if(h)return;const t=Math.max(1,Math.floor(+document.getElementById("fishBet").value||0)),n=document.getElementById("fishResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}h=!0,Se=t,s.coins-=t,R(),n.textContent="낚싯줄을 던졌습니다...",n.className="resultBanner",document.getElementById("fishTimingWrap").style.display="none";const i=document.getElementById("fishBobber");i.className="fishBobber idle",sn("입질을 기다리는 중...",!1),z.tick();const c=1200+Math.random()*2500;setTimeout(()=>{h&&(i.className="fishBobber bite",sn("지금이다! 챔질하세요!",!0),z.rareFanfare(2),Re())},c)});function Re(){const t=document.getElementById("fishTimingWrap");Jn(),t.style.display="flex",W=0,Q=1;const n=3+Math.random()*1.5;function i(){W+=Q*n,W>=100&&(W=100,Q=-1),W<=0&&(W=0,Q=1);const c=document.getElementById("fishMarkerEl");c&&(c.style.left=W+"%"),p=requestAnimationFrame(i)}p=requestAnimationFrame(i),clearTimeout(Ce),Ce=setTimeout(()=>{h&&Pe(!0)},2600)}document.getElementById("fishStrikeBtn").addEventListener("click",()=>{!h||document.getElementById("fishTimingWrap").style.display==="none"||Pe(!1)});function Pe(t){cancelAnimationFrame(p),clearTimeout(Ce);const n=document.getElementById("fishResult"),i=W,c=t?on[0]:on.find(d=>i>=d.from&&i<d.to)||on[0];if(document.getElementById("fishTimingWrap").style.display="none",c.mult<=0)document.getElementById("fishBobber").className="fishBobber idle",sn(t?"너무 늦었습니다...":"물고기가 도망갔습니다...",!1),n.textContent=`🥾 놓쳤습니다... (-${A(Se)} Coin)`,n.className="resultBanner lose",z.lose();else{const d=Math.round(Se*c.mult);s.coins+=d,document.getElementById("fishBobber").className="fishBobber idle",sn(c.label+" 낚았습니다!",!1);const f=c.id==="legend"?"🌈":c.id==="gold"?"🐠":"🐟";n.textContent=`${f} ${c.label} 낚았습니다! +${A(d)} Coin (${c.mult}x)`,c.id==="legend"?(n.className="resultBanner jackpot",z.jackpot(),ea()):c.id==="gold"?(n.className="resultBanner jackpot",z.win(),Mt(40)):(n.className="resultBanner win",z.win(),Mt(18))}R(),h=!1}const V=["2","3","4","5","6","7","8","9","10","J","Q","K","A"],ae=["♠","♥","♦","♣"],ft=.96;function We(t){return t==="J"?11:t==="Q"?12:t==="K"?13:t==="A"?14:parseInt(t,10)}let ht=[];function Gt(){const t=[];for(const n of ae)for(const i of V)t.push({r:i,s:n});for(let n=t.length-1;n>0;n--){const i=Math.floor(Math.random()*(n+1)),c=t[n];t[n]=t[i],t[i]=c}return t}function Ft(){return ht.length<6&&(ht=Gt()),ht.pop()}let Tt=!1,Et=0,it=1,Lt=null,un=[];function na(t){const n=14-t,i=t-2,c=n>0?13/n*ft:null,d=i>0?13/i*ft:null,f=13/1*ft;return{highOdds:c,lowOdds:d,tieOdds:f,higherCount:n,lowerCount:i}}function aa(){const t=document.getElementById("hiloHand");t.innerHTML="",un.forEach(n=>t.appendChild(gn(n,!1)))}function Qn(){document.getElementById("hiloMultVal").textContent=it.toFixed(2)+"x",document.getElementById("hiloPayoutVal").textContent=A(Math.round(Et*it))}function Zn(){const t=document.getElementById("hiloHigh"),n=document.getElementById("hiloLow"),i=document.getElementById("hiloHighOdds"),c=document.getElementById("hiloLowOdds");if(!Lt)return;const d=We(Lt.r),f=na(d);f.highOdds?(t.disabled=!1,i&&(i.textContent=`(${f.highOdds.toFixed(2)}x)`)):(t.disabled=!0,i&&(i.textContent="(불가)")),f.lowOdds?(n.disabled=!1,c&&(c.textContent=`(${f.lowOdds.toFixed(2)}x)`)):(n.disabled=!0,c&&(c.textContent="(불가)"))}document.getElementById("hiloStart").addEventListener("click",()=>{if(Tt)return;const t=Math.max(1,Math.floor(+document.getElementById("hiloBet").value||0)),n=document.getElementById("hiloResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}Tt=!0,Et=t,it=1,s.coins-=t,R(),ht=Gt(),Lt=Ft(),un=[Lt],aa(),Qn(),Zn(),z.tick(),n.textContent="다음 카드가 더 높을지, 낮을지, 같을지 골라보세요! (A가 가장 높은 카드입니다)",n.className="resultBanner",document.getElementById("hiloActionRow").style.display="flex",document.getElementById("hiloCashoutRow").style.display="none"});function Ln(t){if(!Tt)return;const n=document.getElementById("hiloResult"),i=We(Lt.r),c=na(i);if(t==="high"&&!c.highOdds||t==="low"&&!c.lowOdds)return;document.getElementById("hiloActionRow").style.display="none";const d=Ft(),f=We(d.r);let k;if(f===i?k="tie":k=f>i?"high":"low",un.push(d),aa(),t===k){let S;t==="tie"?S=c.tieOdds:t==="high"?S=c.highOdds:S=c.lowOdds,it*=S,Lt=d,Qn(),Zn(),z.win(),Mt(t==="tie"?40:S>=4?30:16),n.textContent=`✅ 정답! (${d.r}${d.s}) ${S.toFixed(2)}x 배당 적용 → 누적 ${it.toFixed(2)}x`,n.className="resultBanner win",document.getElementById("hiloActionRow").style.display="flex",document.getElementById("hiloCashoutRow").style.display="flex"}else Lt=d,z.lose(),n.textContent=`❌ 틀렸습니다... (${d.r}${d.s}) · 배팅금을 잃었습니다. (-${A(Et)} Coin)`,n.className="resultBanner lose",document.getElementById("hiloCashoutRow").style.display="none",Tt=!1}document.getElementById("hiloHigh").addEventListener("click",()=>Ln("high")),document.getElementById("hiloLow").addEventListener("click",()=>Ln("low")),document.getElementById("hiloTie").addEventListener("click",()=>Ln("tie")),document.getElementById("hiloCashout").addEventListener("click",()=>{if(!Tt)return;const t=document.getElementById("hiloResult"),n=Math.round(Et*it);s.coins+=n,R(),t.textContent=`✅ 수령 완료! +${A(n)} Coin (${it.toFixed(2)}x)`,t.className="resultBanner win",z.win(),Mt(24),document.getElementById("hiloActionRow").style.display="none",document.getElementById("hiloCashoutRow").style.display="none",Tt=!1});const Xn=6,ha=.95,ga=[{n:1,label:"총알 1발",sub:"안전 · 저배당"},{n:2,label:"총알 2발",sub:"보통 위험"},{n:3,label:"총알 3발",sub:"고위험 · 고배당"}];let Yn=1,Ut=!1,fn=[],Dt=0,ln=new Set,jn=0,mn=Xn,Yt=1,Sn=0;function pn(){const t=document.getElementById("rrBulletRow");t&&(t.innerHTML="",ga.forEach(n=>{const i=document.createElement("button");i.className="rrBulletBtn"+(n.n===Yn?" sel":"")+(Ut?" locked":""),i.innerHTML=`${n.label}<span class="rrbSub">${n.sub}</span>`,i.disabled=Ut,i.addEventListener("click",()=>{Ut||(Yn=n.n,pn())}),t.appendChild(i)}))}pn();function ba(t,n){return(t-n)/t}function En(t,n,i,c,d){const f=document.getElementById(t||"rrCylinder");if(!f)return;f.innerHTML="";const k=78;for(let x=0;x<n.length;x++){const S=Math.PI*2*x/n.length-Math.PI/2,G=110+Math.cos(S)*k,te=110+Math.sin(S)*k,ie=document.createElement("div");let Ne="rrChamber";c.has(x)&&(Ne+=" spent"),x===i&&(Ne+=" current"),x===d&&(Ne+=" bulletReveal"),ie.className=Ne,ie.style.left=G+"px",ie.style.top=te+"px",ie.textContent=x===d?"💥":c.has(x)?"·":"",f.appendChild(ie)}}function oa(){document.getElementById("rrMultiVal").textContent=Yt.toFixed(2)+"x",document.getElementById("rrPayoutVal").textContent=A(Math.round(Sn*Yt))}function _t(t,n){const i=document.getElementById("rrStatusText");i.textContent=t,i.classList.toggle("alert",!!n)}document.getElementById("rrPlay").addEventListener("click",()=>{if(Ut)return;const t=Math.max(1,Math.floor(+document.getElementById("rrBet").value||0)),n=document.getElementById("rrResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}Ut=!0,Sn=t,s.coins-=t,R(),pn(),fn=Array.from({length:Xn},(d,f)=>f),ln=new Set,Dt=0,jn=Yn,mn=Xn,Yt=1,n.textContent="실린더를 돌리는 중...",n.className="resultBanner",_t("실린더를 돌리는 중...",!1),document.getElementById("rrActionRow").style.display="none";const i=document.getElementById("rrCylinder");i.classList.add("spinning"),En("rrCylinder",fn,-1,ln,-1);const c=setInterval(()=>z.rrTick(),90);setTimeout(()=>{clearInterval(c),i.classList.remove("spinning"),En("rrCylinder",fn,Dt,ln,-1),oa(),_t("방아쇠를 당기거나 지금까지의 배당을 수령하세요",!1),document.getElementById("rrActionRow").style.display="flex"},900)}),document.getElementById("rrTrigger").addEventListener("click",()=>{if(!Ut)return;const t=document.getElementById("rrResult");document.getElementById("rrActionRow").style.display="none",_t("방아쇠를 당기는 중...",!1),z.rrTick(),setTimeout(()=>{const n=ba(mn,jn);if(!(Math.random()<n)){En("rrCylinder",fn,Dt,ln,Dt),_t("탕! 총알이 발사되었습니다...",!0),t.textContent=`💥 빵! 총알에 맞았습니다... (-${A(Sn)} Coin)`,t.className="resultBanner lose",z.rrBang(),Ut=!1,pn();return}if(ln.add(Dt),mn-=1,Dt+=1,Yt=Yt*(1/n)*ha,En("rrCylinder",fn,Dt,ln,-1),oa(),z.tick(),mn<=jn){_t("빈 칸을 모두 통과했습니다! 자동으로 수령합니다.",!1),t.textContent="🎉 실린더의 빈 칸을 모두 통과! 최고 배당 획득!",t.className="resultBanner jackpot",Wn(!0);return}_t(`살아남았습니다! (${mn}칸 중 ${jn}발 남음)`,!1),t.textContent="한 번 더 당길까요, 아니면 지금 수령할까요?",t.className="resultBanner win",document.getElementById("rrActionRow").style.display="flex"},550)});function Wn(t){const n=document.getElementById("rrResult"),i=Math.round(Sn*Yt);s.coins+=i,R(),t?n.className="resultBanner jackpot":(n.textContent=`✅ 수령 완료! +${A(i)} Coin (${Yt.toFixed(2)}x)`,n.className="resultBanner win"),z.win(),Mt(t?45:22),document.getElementById("rrActionRow").style.display="none",_t("총알 개수를 고르고 다시 장전하세요",!1),Ut=!1,pn()}document.getElementById("rrCashout").addEventListener("click",()=>{Ut&&Wn(!1)}),document.querySelectorAll("[data-lchoice]").forEach(t=>{t.addEventListener("click",()=>{document.querySelectorAll("[data-lchoice]").forEach(n=>n.classList.remove("sel")),t.classList.add("sel"),s.ladderChoice=+t.dataset.lchoice})});const a=7;function l(t,n){t.innerHTML="";const i=55,c=155,d=15,f=225,k=(f-d)/(a+1),x="http://www.w3.org/2000/svg";return[i,c].forEach(S=>{const G=document.createElementNS(x,"line");G.setAttribute("x1",S),G.setAttribute("x2",S),G.setAttribute("y1",d),G.setAttribute("y2",f),G.setAttribute("stroke","#2c303c"),G.setAttribute("stroke-width","4"),G.setAttribute("stroke-linecap","round"),t.appendChild(G)}),n.forEach((S,G)=>{if(!S)return;const te=d+k*(G+1),ie=document.createElementNS(x,"line");ie.setAttribute("x1",i),ie.setAttribute("x2",c),ie.setAttribute("y1",te),ie.setAttribute("y2",te),ie.setAttribute("stroke","#454c5c"),ie.setAttribute("stroke-width","4"),ie.setAttribute("stroke-linecap","round"),t.appendChild(ie)}),{xL:i,xR:c,top:d,bottom:f,rowH:k}}function o(t,n,i){let c=n;const d=[{x:c===0?i.xL:i.xR,y:i.top}];return t.forEach((f,k)=>{const x=i.top+i.rowH*(k+1);f&&(d.push({x:c===0?i.xL:i.xR,y:x}),c=1-c,d.push({x:c===0?i.xL:i.xR,y:x}))}),d.push({x:c===0?i.xL:i.xR,y:i.bottom}),{pts:d,finalLane:c}}let u=!1;document.getElementById("ladderPlay").addEventListener("click",()=>{if(u)return;const t=Math.max(1,Math.floor(+document.getElementById("ladderBet").value||0)),n=document.getElementById("ladderResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}u=!0,s.coins-=t,R();const i=Array.from({length:a},()=>Math.random()<.5),c=document.getElementById("ladderSvg"),d=l(c,i),{pts:f,finalLane:k}=o(i,s.ladderChoice,d),S=document.createElementNS("http://www.w3.org/2000/svg","polyline"),G=f.map(Ne=>Ne.x+","+Ne.y).join(" ");S.setAttribute("points",G),S.setAttribute("fill","none"),S.setAttribute("stroke","#3fe0ff"),S.setAttribute("stroke-width","5"),S.setAttribute("stroke-linecap","round"),S.setAttribute("stroke-linejoin","round"),S.style.filter="drop-shadow(0 0 6px rgba(63,224,255,.6))",c.appendChild(S);const te=S.getTotalLength();S.style.strokeDasharray=te,S.style.strokeDashoffset=te,S.style.transition="stroke-dashoffset 1.4s ease-in-out";const ie=setInterval(()=>z.tick(),110);requestAnimationFrame(()=>{requestAnimationFrame(()=>{S.style.strokeDashoffset=0})}),setTimeout(()=>{if(clearInterval(ie),k===1){const jt=t*2;s.coins+=jt,S.setAttribute("stroke","#3fe07a"),S.style.filter="drop-shadow(0 0 8px rgba(63,224,122,.8))",n.textContent=`당첨! +${A(jt)} Coin`,n.className="resultBanner win",z.win(),Mt(24)}else S.setAttribute("stroke","#ff4d6a"),S.style.filter="drop-shadow(0 0 8px rgba(255,77,106,.7))",n.textContent=`꽝! (-${A(t)} Coin)`,n.className="resultBanner lose",z.lose();R(),u=!1},1550)});function g(t){const n=document.createElement("div");return n.className="sym"+(t.seven?" symSeven":""),n.textContent=t.seven?"7":t.sym,n}function b(){const t=document.getElementById("slotMachine");t.innerHTML="";for(let n=0;n<5;n++){const i=document.createElement("div");i.className="reel",i.id="reel"+n;const c=document.createElement("div");c.className="reelStrip",c.id="strip"+n;for(let d=0;d<8;d++)c.appendChild(g(N(Y,"weight")));i.appendChild(c),t.appendChild(i)}}b();function U(){const t=document.getElementById("slotPayTable");t&&(t.innerHTML=Y.map(n=>{const i=n.seven?'<span class="paySeven">7</span>':n.sym,c=n.seven?`<b style="color:var(--gold-txt)">${n.pay5}x JACKPOT</b>`:`<b>${n.pay5}x</b>`;return`<span>${i} 3개 <b>${n.pay3}x</b> · 4개 <b>${n.pay4}x</b> · 5개 ${c}</span>`}).join(""))}U();function r(t){const n=t[0].sym;let i=1;for(let f=1;f<t.length&&t[f].sym===n;f++)i++;if(i<3)return null;const c=Y.find(f=>f.sym===n),d=i>=5?c.pay5:i===4?c.pay4:c.pay3;return{sym:n,count:i,payMult:d,data:c}}function v(t,n,i){return new Promise(c=>{const d=document.getElementById("strip"+t),f=68,k=18+t*3;let x=document.createDocumentFragment();for(let te=0;te<k;te++)x.appendChild(g(N(Y,"weight")));x.appendChild(g(n)),d.innerHTML="",d.appendChild(x),d.style.transition="none",d.style.transform="translateY(0px)",d.style.filter="blur(0px)",d.offsetHeight;const S=k*f;d.style.transition=`transform ${i/1e3}s cubic-bezier(.12,.82,.2,1), filter .3s ease`,requestAnimationFrame(()=>{d.style.transform=`translateY(-${S}px)`,d.style.filter="blur(7px)"}),setTimeout(()=>{d.style.filter="blur(0px)"},Math.max(0,i-260));const G=setInterval(()=>z.tick(),60);setTimeout(()=>{clearInterval(G),c()},i)})}let w=!1;document.getElementById("slotPlay").addEventListener("click",async()=>{if(w)return;const t=Math.max(1,Math.floor(+document.getElementById("slotBet").value||0)),n=document.getElementById("slotResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}w=!0,s.coins-=t,R(),n.textContent="스핀 중...",n.className="resultBanner";for(let f=0;f<5;f++)document.getElementById("reel"+f).classList.remove("jackGlow");const i=[N(Y,"weight"),N(Y,"weight"),N(Y,"weight"),N(Y,"weight"),N(Y,"weight")],c=[550,550,600,650,800];for(let f=0;f<5;f++)await v(f,i[f],c[f]);const d=r(i);if(d){const f=t*d.payMult,k=d.data.seven?"7":d.sym;if(d.data.seven&&d.count>=5){s.coins+=f,s.achievements=s.achievements||{},s.achievements.slotJackpotHit=!0,typeof In=="function"&&In();for(let x=0;x<5;x++)document.getElementById("reel"+x).classList.add("jackGlow");n.textContent=`🎊 JACKPOT!! 7 7 7 7 7 → +${A(f)} Coin 🎊`,n.className="resultBanner jackpot",z.jackpot(),ea(),R(),w=!1}else n.textContent=`${k} ${d.count}개 일치! +${A(f)} Coin`,n.className="resultBanner win",z.win(),Mt(20+d.count*4),R(),be(f)}else n.textContent=`아쉽네요, 일치한 심볼이 없어요 (-${A(t)} Coin)`,n.className="resultBanner lose",z.lose(),R(),w=!1});let P=0;const D=document.getElementById("slotDoubleUp"),ee=document.getElementById("slotDoubleUpBanner");function be(t){P=t,ee.textContent=`🃏 현재 상금 ${A(P)} Coin! 더블업(50%)에 도전할까요?`,ee.className="resultBanner",D.style.display="block"}document.getElementById("slotDoubleUpGo").addEventListener("click",()=>{const t=Math.random()<.5;z.tick(),t?(P*=2,ee.textContent=`🎉 성공! 상금이 ${A(P)} Coin으로 늘었습니다! 계속 더블업 하시겠어요?`,ee.className="resultBanner win",z.win(),Mt(16)):(P=0,ee.textContent="💥 실패! 상금을 모두 잃었습니다...",ee.className="resultBanner lose",z.lose(),D.style.display="none",R(),w=!1)}),document.getElementById("slotDoubleUpStop").addEventListener("click",()=>{s.coins+=P,document.getElementById("slotResult").textContent=`💰 ${A(P)} Coin을 수령했습니다!`,document.getElementById("slotResult").className="resultBanner win",D.style.display="none",R(),w=!1});const gt=["♠","♥","♦","♣"],rn=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];function yn(){const t=[];for(const n of gt)for(const i of rn)t.push({r:i,s:n});for(let n=t.length-1;n>0;n--){const i=Math.floor(Math.random()*(n+1)),c=t[n];t[n]=t[i],t[i]=c}return t}function hn(t){return t.r==="A"?11:t.r==="K"||t.r==="Q"||t.r==="J"?10:parseInt(t.r,10)}function Ct(t){let n=t.reduce((c,d)=>c+hn(d),0),i=t.filter(c=>c.r==="A").length;for(;n>21&&i>0;)n-=10,i--;return n}function Mn(t){return t.length===2&&Ct(t)===21}function gn(t,n){const i=document.createElement("div");if(n)return i.className="card back",i;const c=t.s==="♥"||t.s==="♦";return i.className="card"+(c?" red":""),i.innerHTML=`<div>${t.r}</div><div class="suit">${t.s}</div>`,i}let _n=[],$t=[],bn=[],en=0,xa=!1,$n=!0;function Bn(){return _n.length<8&&(_n=yn()),_n.pop()}function ia(t){const n=document.getElementById("bjPlayerHand"),i=document.getElementById("bjDealerHand");n.innerHTML="",i.innerHTML="",$t.forEach(c=>n.appendChild(gn(c,!1))),bn.forEach((c,d)=>i.appendChild(gn(c,!t&&d===1))),document.getElementById("bjPlayerScore").textContent="("+Ct($t)+")",document.getElementById("bjDealerScore").textContent=t?"("+Ct(bn)+")":"("+hn(bn[0])+" + ?)"}function Hn(t,n){document.getElementById("bjActions").style.display=t?"flex":"none",document.getElementById("bjHit").disabled=!t,document.getElementById("bjStand").disabled=!t,document.getElementById("bjDouble").disabled=!t||!n}function xn(t){const n=document.getElementById("bjResult");if(ia(!0),t==="blackjack"){const i=Math.round(en*2.5);s.coins+=i,n.textContent=`🂡 블랙잭! +${A(i)} Coin (3:2 배당)`,n.className="resultBanner jackpot",z.jackpot(),Mt(45)}else if(t==="win"){const i=en*2;s.coins+=i,n.textContent=`승리! +${A(i)} Coin`,n.className="resultBanner win",z.win(),Mt(24)}else t==="push"?(s.coins+=en,s.coinSpentTotal=Math.max(0,(s.coinSpentTotal||0)-en),n.textContent="푸시(무승부) · 베팅금 반환",n.className="resultBanner"):(n.textContent=`패배 (-${A(en)} Coin)`,n.className="resultBanner lose",z.lose());R(),Hn(!1,!1),xa=!1,$n=!0}function Ta(){for(;Ct(bn)<17;)bn.push(Bn());const t=Ct($t),n=Ct(bn);n>21||t>n?xn("win"):xn(t===n?"push":"lose")}document.getElementById("bjDeal").addEventListener("click",()=>{if(xa)return;const t=Math.max(1,Math.floor(+document.getElementById("bjBet").value||0)),n=document.getElementById("bjResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}xa=!0,$n=!1,en=t,s.coins-=t,R(),n.textContent="카드를 나누는 중...",n.className="resultBanner",_n.length<15&&(_n=yn()),$t=[Bn(),Bn()],bn=[Bn(),Bn()],ia(!1),z.tick();const i=Mn($t),c=Mn(bn);if(i||c){xn(i&&c?"push":i?"blackjack":"lose");return}Hn(!0,s.coins>=en)}),document.getElementById("bjHit").addEventListener("click",()=>{$n||($t.push(Bn()),z.tick(),ia(!1),Hn(!0,!1),Ct($t)>21&&xn("lose"))}),document.getElementById("bjStand").addEventListener("click",()=>{$n||(Hn(!1,!1),document.getElementById("bjResult").textContent="딜러 진행 중...",setTimeout(Ta,500))}),document.getElementById("bjDouble").addEventListener("click",()=>{$n||$t.length!==2||s.coins<en||(s.coins-=en,en*=2,R(),$t.push(Bn()),z.tick(),ia(!1),Hn(!1,!1),Ct($t)>21?xn("lose"):(document.getElementById("bjResult").textContent="딜러 진행 중...",setTimeout(Ta,500)))}),Hn(!1,!1);const Nn=[{id:"fx_ember",name:"불씨",cost:15e3,fx:"fx_ember",desc:"칩 아래에서 불씨가 피어올라 위로 흩날리고, 열기가 일렁이며 주황빛으로 달아오릅니다."},{id:"fx_frost",name:"서리",cost:28e3,fx:"fx_frost",desc:"성에가 낀 듯 차갑게 반짝이고, 얼음 결정이 은은하게 깜빡입니다."},{id:"fx_aurora",name:"오로라",cost:55e3,fx:"fx_aurora",desc:"초록·파랑·보라빛 커튼이 칩 위로 천천히 흐르고 테두리 빛이 계속 바뀝니다."},{id:"fx_glitch",name:"글리치",cost:9e4,fx:"fx_glitch",desc:"가끔 화면이 깨지듯 RGB가 갈라지고 스캔라인이 번쩍이는 사이버 이펙트."},{id:"fx_void",name:"공허의 틈",cost:15e4,fx:"fx_void",desc:"어두운 칩 테두리를 보랏빛 균열이 빙글빙글 돌며 감싸는 최상급 이펙트."}],Qa=Nn.map(t=>t.fx),Gn=[{id:"bg_dawn",name:"새벽 안개",cls:"bg_dawn",cost:18e3,desc:"푸른 안개가 깔린 고요한 새벽 하늘."},{id:"bg_moss",name:"이끼 숲",cls:"bg_moss",cost:38e3,desc:"이끼 낀 깊은 숲속의 초록빛 그늘."},{id:"bg_magma",name:"용암 지대",cls:"bg_magma",cost:52e3,desc:"붉은 용암이 천천히 흘러가는 화산 지대."},{id:"bg_city",name:"네온 시티",cls:"bg_city",cost:78e3,desc:"네온 격자가 흐르는 사이버 도시의 밤."},{id:"bg_galaxy",name:"은하수",cls:"bg_galaxy",cost:115e3,desc:"별이 흘러가는 깊은 우주의 성운."}],tn=t=>(s.lifetimeOres||{})[t]||0;function Za(){let t=0;return Nn.concat(Gn).forEach(n=>{(s.cosmetics||{})[n.id]&&t++}),Dn.forEach(n=>{(s.ownedBorders||{})[n.id]&&t++}),t}const On=[{id:"tt_newbie",tier:"common",name:"새내기 광부",req:"누적 채굴 100회 달성",check:()=>(s.totalOresMined||0)>=100},{id:"tt_stone",tier:"common",name:"돌 수집가",req:"돌멩이 누적 500개 채굴",check:()=>tn("stone")>=500},{id:"tt_iron",tier:"common",name:"철의 사나이",req:"철광석 누적 300개 채굴",check:()=>tn("iron")>=300},{id:"tt_attend",tier:"common",name:"성실한 일꾼",req:"일일 보너스 3일 연속 수령",check:()=>(s.dailyStreak||0)>=3},{id:"tt_abyss",tier:"common",name:"폐광 탐험가",req:"폐광 갱도 해금",check:()=>!!(s.unlockedMines||{})[1]},{id:"tt_veteran",tier:"rare",name:"베테랑",req:"누적 채굴 5,000회 달성",check:()=>(s.totalOresMined||0)>=5e3},{id:"tt_silver",tier:"rare",name:"은빛 사냥꾼",req:"은광석 누적 150개 채굴",check:()=>tn("silver")>=150},{id:"tt_goldhand",tier:"rare",name:"황금 손",req:"금광석 누적 100개 채굴",check:()=>tn("gold")>=100},{id:"tt_pickmaster",tier:"rare",name:"곡괭이 장인",req:"다이아 곡괭이 이상 장착",check:()=>s.pickaxeIdx>=6},{id:"tt_dex",tier:"rare",name:"광물 박사",req:"모든 종류의 광물을 1개 이상 채굴",check:()=>B.every(t=>tn(t.id)>=1)},{id:"tt_streak",tier:"rare",name:"개근왕",req:"일일 보너스 7일 연속 수령",check:()=>(s.dailyStreak||0)>=7},{id:"tt_coinrich",tier:"rare",name:"동전 부자",req:"Coin 10,000 이상 보유",check:()=>(s.coins||0)>=1e4},{id:"tt_camp_quest",tier:"rare",name:"의뢰 해결사",req:"오늘의 의뢰 보상 누적 10회 수령",check:()=>!!CAMP&&CAMP.n("qd")>=10},{id:"tt_camp_gob",tier:"rare",name:"도깨비 사냥꾼",req:"도깨비 누적 10마리 포획",check:()=>!!CAMP&&CAMP.n("gc")>=10},{id:"tt_diamond",tier:"epic",name:"다이아 핸드",req:"다이아몬드 누적 100개 채굴",check:()=>tn("diamond")>=100},{id:"tt_mithril",tier:"epic",name:"미스릴 장인",req:"미스릴 원석 누적 100개 채굴",check:()=>tn("mithril")>=100},{id:"tt_obsidian",tier:"epic",name:"흑요석 군주",req:"흑요석 누적 50개 채굴",check:()=>tn("obsidian")>=50},{id:"tt_dark",tier:"epic",name:"암흑 연금술사",req:"암흑물질 광석 누적 10개 채굴",check:()=>tn("dark")>=10},{id:"tt_highroller",tier:"epic",name:"하이롤러",req:"Coin 누적 100,000 소모",check:()=>(s.coinSpentTotal||0)>=1e5},{id:"tt_lucky",tier:"epic",name:"행운아",req:"슬롯머신 잭팟(7 7 7 7 7) 1회 달성",check:()=>!!(s.achievements||{}).slotJackpotHit},{id:"tt_night",tier:"epic",name:"올빼미 광부",req:"새벽 0시~4시 사이 채굴 1회",check:()=>!!(s.achievements||{}).midnightMined},{id:"tt_bigspender",tier:"epic",name:"큰손",req:"Gold 누적 1,000,000 소모",check:()=>(s.goldSpentTotal||0)>=1e6},{id:"tt_stylist",tier:"epic",name:"스타일리스트",req:"이펙트·배경·테두리 합계 5개 보유",check:()=>Za()>=5},{id:"tt_camp_shiny",tier:"epic",name:"반짝이 수집가",req:"반짝 광석 누적 50개 채굴",check:()=>!!CAMP&&CAMP.n("sc")>=50},{id:"tt_camp_boss",tier:"epic",name:"광부 반장",req:"고용 광부 10명 모두 고용",check:()=>!!CAMP&&CAMP.miners()>=CAMP.CFG.minerMax},{id:"tt_void",tier:"legend",name:"심연의 지배자",req:"공허의 파편 누적 20개 채굴",check:()=>tn("voidshard")>=20},{id:"tt_king",tier:"legend",name:"광산의 제왕",req:"누적 채굴 20,000회 달성",check:()=>(s.totalOresMined||0)>=2e4},{id:"tt_tycoon",tier:"legend",name:"재벌",req:"보유 Gold 10,000,000 이상",check:()=>(s.gold||0)>=1e7},{id:"tt_whale",tier:"legend",name:"전설의 큰손",req:"Coin 누적 1,000,000 소모",check:()=>(s.coinSpentTotal||0)>=1e6},{id:"tt_final",tier:"legend",name:"최후의 곡괭이",req:"최고 등급 곡괭이(공허 파쇄자) 장착",check:()=>s.pickaxeIdx>=ke.length-1},{id:"tt_core",tier:"epic",name:"별의 무덤 개척자",req:"별의 무덤 광산 개방",check:()=>!!(s.unlockedMines||{})[2]},{id:"tt_star",tier:"epic",name:"별 수집가",req:"별조각 누적 300개 채굴",check:()=>tn("starshard")>=300},{id:"tt_primal",tier:"legend",name:"태초의 지배자",req:"태초의 결정 누적 30개 채굴",check:()=>tn("primal")>=30},{id:"tt_relic",tier:"legend",name:"유물 장인",req:"신전 유물 3종 모두 제작",check:()=>!!(gxl("rl_star")&&gxl("rl_neu")&&gxl("rl_pri"))},{id:"tt_camp_legend",tier:"legend",name:"도깨비 대왕",req:"전설의 도깨비 1마리 포획",check:()=>!!CAMP&&CAMP.n("gl")>=1}];function In(){s.ownedTitles=s.ownedTitles||{};let t=!1;On.forEach(n=>{!s.ownedTitles[n.id]&&n.check()&&(s.ownedTitles[n.id]=!0,t=!0,Ae(`🏅 업적 달성! "${n.name}" 칭호를 획득했습니다!`),z.rareFanfare(4),Mt(28),CAMP&&CAMP.onTitle(n))}),t&&(Be(),typeof vn=="function"&&vn())}const Dn=[{id:"bd_steel",name:"강철 링",cls:"border_steel",cost:25e3,desc:"단단하게 겹친 이중 강철 고리."},{id:"bd_emerald",name:"에메랄드",cls:"border_emerald",cost:6e4,desc:"초록빛 보석 광채가 숨 쉬듯 맥동합니다."},{id:"bd_inferno",name:"인페르노",cls:"border_inferno",cost:95e3,desc:"타오르는 불꽃이 테두리에서 일렁입니다."},{id:"bd_aurora",name:"오로라 링",cls:"border_aurora",cost:14e4,desc:"오로라 빛깔의 고리가 쉬지 않고 회전합니다."},{id:"bd_royal",name:"로열 크라운",cls:"border_royal",cost:22e4,desc:"황금 고리가 번뜩이고 네 방향에 보석이 박힙니다."}],Xa=!0,Ca={ring_gold:18e3,ring_neon:32e3,ring_cyan:32e3,ring_rainbow:12e4,bg_theme:45e3,bg_normal:2e4,bg_nebula:95e3,border_gold:6e4,border_neon:8e4,border_rainbow:15e4};function sa(){if(typeof s>"u")return!1;const t=new Set(Nn.concat(Gn).map(f=>f.id)),n=new Set(Dn.map(f=>f.id)),i=new Set(On.map(f=>f.id));let c=0,d=!1;if(s.cosmetics=s.cosmetics||{},s.ownedBorders=s.ownedBorders||{},s.ownedTitles=s.ownedTitles||{},Object.keys(s.cosmetics).forEach(f=>{t.has(f)||(c+=Ca[f]||0,delete s.cosmetics[f],d=!0)}),Object.keys(s.ownedBorders).forEach(f=>{n.has(f)||(c+=Ca[f]||0,delete s.ownedBorders[f],d=!0)}),Object.keys(s.ownedTitles).forEach(f=>{i.has(f)||(delete s.ownedTitles[f],d=!0)}),s.equippedCosmetic&&!Nn.some(f=>f.id===s.equippedCosmetic)&&(s.equippedCosmetic=null,d=!0),s.equippedBg&&!Gn.some(f=>f.id===s.equippedBg)&&(s.equippedBg=null,d=!0),s.equippedBorder&&!Dn.some(f=>f.id===s.equippedBorder)&&(s.equippedBorder=null,d=!0),s.equippedTitle&&!i.has(s.equippedTitle)&&(s.equippedTitle=null,d=!0),c>0&&Xa){s.gold=(s.gold||0)+c,s.goldSpentTotal=Math.max(0,(s.goldSpentTotal||0)-c);try{Ae("스킨이 새로 바뀌어 기존 스킨 구매 금액 "+A(c)+" G를 환불했어요!")}catch{}}if(d){try{la()}catch{}try{In()}catch{}try{R()}catch{}try{Be()}catch{}}return d}function Ya(t,n){return t==="fx"?`<div class="stat-chip coin fx ${n.fx} skinPrevChip"><span class="val">12,345</span></div>`:t==="bg"?`<div class="skinPrevBg ${n.cls}"></div>`:t==="border"?`<div class="skinPrevAv ${n.cls}">⛏️</div>`:""}function va(t,n,i,c,d){const f=document.getElementById(t);if(!f)return;if(f.innerHTML="",n.forEach(x=>{const S=!!i[x.id],G=s[c]===x.id,te=document.createElement("div");te.className="pick-card"+(S?" owned":"")+(G?" current":""),te.innerHTML=`
+  `,document.getElementById("mineLevelBuy").addEventListener("click",()=>{s.coins>=n&&(s.coins-=n,s.mineLevel+=1,z.rareFanfare(5),R(),rt())})}function zt(t){if(window.__mpActiveRoom&&t!=="casino"){typeof window.__mpBlockedWarning=="function"&&window.__mpBlockedWarning();return}document.querySelectorAll(".navBtn").forEach(n=>n.classList.toggle("active",n.dataset.view===t)),document.querySelectorAll(".view").forEach(n=>n.classList.toggle("active",n.dataset.view===t)),t==="shop"&&typeof rt=="function"&&rt(),t==="temple"&&tpR(),t==="exchangeView"&&(ca(),_()),t==="camp"&&CAMP&&CAMP.render()}document.querySelectorAll(".navBtn").forEach(t=>{t.addEventListener("click",()=>zt(t.dataset.view))});const cn=[{id:"dice",label:"홀짝"},{id:"ladder",label:"사다리"},{id:"slot",label:"슬롯머신"},{id:"rps",label:"✌️가위바위보"},{id:"fishing",label:"낚시"},{id:"hilo",label:"하이로우"},{id:"roulette-rr",label:"러시안 룰렛"},{id:"blackjack",label:"21(블랙잭)"},{id:"reaction",label:"⚡반응속도"},{id:"bomb",label:"💣폭탄돌리기"},{id:"wordchain",label:"📝끝말잇기"},{id:"ballfight",label:"⚽볼파이트"},{id:"mgmines",label:"💎지뢰밭"},{id:"mgmemory",label:"🧩짝맞추기"},{id:"mgupdown",label:"🔢업다운"},{id:"mgwhack",label:"🔨두더지(무료)"}];function wn(){const t=document.getElementById("tabbar");cn.forEach((n,i)=>{const c=document.createElement("button");c.className="tabbtn"+(i===0?" active":""),c.textContent=n.label,c.dataset.tab=n.id,c.addEventListener("click",()=>Rn(n.id)),t.appendChild(c)}),document.querySelector('.tabpane[data-pane="dice"]').classList.add("active")}function Rn(t){if(window.__mpActiveRoom&&t!==window.__mpActiveRoom.pane){typeof window.__mpBlockedWarning=="function"&&window.__mpBlockedWarning();return}document.querySelectorAll(".tabbtn").forEach(n=>n.classList.toggle("active",n.dataset.tab===t)),document.querySelectorAll(".tabpane").forEach(n=>n.classList.toggle("active",n.dataset.pane===t))}function Un(){document.querySelectorAll(".betRow").forEach(t=>{t.querySelectorAll(".chipbtn").forEach(n=>{n.addEventListener("click",()=>{const i=t.querySelector("input[type=number]");if(!i)return;let c=parseInt(i.value)||0;const d=n.dataset.bet;d==="+1"?c+=1:d==="+10"?c+=10:d==="max"&&(c=s.coins),i.value=Math.max(1,c||1)})})})}document.getElementById("g2cMax").addEventListener("click",()=>{document.getElementById("g2cInput").value=Math.floor(s.gold/Ge)*Ge}),document.getElementById("c2gMax").addEventListener("click",()=>{document.getElementById("c2gInput").value=s.coins}),document.getElementById("g2cGo").addEventListener("click",()=>{const t=Math.max(0,Math.floor(+document.getElementById("g2cInput").value||0)),n=document.getElementById("exResult");if(t<=0||t>s.gold){n.textContent="환전할 Gold 수량을 확인하세요.",n.className="resultBanner lose";return}const i=Math.floor(t/Ge);if(i<=0){n.textContent=Ge+" Gold 미만은 환전할 수 없습니다.",n.className="resultBanner lose";return}s.gold-=i*Ge,s.coins+=i,n.textContent=A(i*Ge)+" Gold → "+A(i)+" Coin 환전 완료!",n.className="resultBanner win",z.tick(),R()});function Kn(t){const n=Math.max(0,Math.floor(t||0));if(n<=0||n>s.coins)return null;const i=n*Ge,c=Math.round(i*(1-ce));return s.coins-=n,s.gold+=c,{coinsSpent:n,rawGold:i,goldAfterFee:c}}document.getElementById("c2gGo").addEventListener("click",()=>{const t=Math.max(0,Math.floor(+document.getElementById("c2gInput").value||0)),n=document.getElementById("exResult");if(t<=0||t>s.coins){n.textContent="환전할 Coin 수량을 확인하세요.",n.className="resultBanner lose";return}const i=Kn(t);if(!i){n.textContent="환전할 Coin 수량을 확인하세요.",n.className="resultBanner lose";return}n.textContent=`${A(i.coinsSpent)} Coin → ${A(i.goldAfterFee)} Gold 환전 완료! (수수료 5% 적용, 원래 가치 ${A(i.rawGold)}G)`,n.className="resultBanner win",z.tick(),R()}),document.querySelectorAll(".diceChoice[data-choice]").forEach(t=>{t.addEventListener("click",()=>{document.querySelectorAll(".diceChoice[data-choice]").forEach(n=>n.classList.remove("sel")),t.classList.add("sel"),s.diceChoice=t.dataset.choice})});const Pn={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};function Qt(t){const n=document.querySelectorAll("#die .pip");n.forEach(i=>i.classList.remove("on")),(Pn[t]||[4]).forEach(i=>n[i].classList.add("on"))}Qt(1);let Zt=!1;document.getElementById("dicePlay").addEventListener("click",()=>{if(Zt)return;const t=Math.max(1,Math.floor(+document.getElementById("diceBet").value||0)),n=document.getElementById("diceResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}Zt=!0,s.coins-=t,R();const i=document.getElementById("die");i.classList.add("rolling");let c=0;const d=setInterval(()=>{if(Qt(1+Math.floor(Math.random()*6)),z.tick(),c++,c>12){clearInterval(d),i.classList.remove("rolling");const f=1+Math.floor(Math.random()*6);Qt(f);const k=f%2===1;if(k&&s.diceChoice==="odd"||!k&&s.diceChoice==="even"){const S=t*2;s.coins+=S,n.textContent=`🎲 ${f} 나왔습니다! 승리! +${A(S)} Coin`,n.className="resultBanner win",z.win(),Mt(26)}else n.textContent=`🎲 ${f} 나왔습니다. 아쉽게 패배 (-${A(t)} Coin)`,n.className="resultBanner lose",z.lose();R(),Zt=!1}},70)});const Nt={rock:"✊",scissors:"✌️",paper:"🖐️"},Vt={rock:"바위",scissors:"가위",paper:"보"};s.rpsChoice="rock",document.querySelectorAll("#rpsChoiceRow .diceChoice[data-rps]").forEach(t=>{t.addEventListener("click",()=>{document.querySelectorAll("#rpsChoiceRow .diceChoice[data-rps]").forEach(n=>n.classList.remove("sel")),t.classList.add("sel"),s.rpsChoice=t.dataset.rps,document.getElementById("rpsMyHand").textContent=Nt[s.rpsChoice]})});function dn(t,n){return t===n?"tie":{rock:"scissors",scissors:"paper",paper:"rock"}[t]===n?"win":"lose"}let Xt=!1;document.getElementById("rpsPlay").addEventListener("click",()=>{if(Xt)return;const t=Math.max(1,Math.floor(+document.getElementById("rpsBet").value||0)),n=document.getElementById("rpsResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}Xt=!0,s.coins-=t,R();const i=document.getElementById("rpsMyHand"),c=document.getElementById("rpsCpuHand"),d=Object.keys(Nt);let f=0;const k=setInterval(()=>{if(c.textContent=Nt[d[Math.floor(Math.random()*3)]],i.style.transform=f%2===0?"scale(1.15)":"scale(1)",z.tick(),f++,f>9){clearInterval(k),i.style.transform="scale(1)",i.textContent=Nt[s.rpsChoice];const x=d[Math.floor(Math.random()*3)];c.textContent=Nt[x];const S=dn(s.rpsChoice,x);if(S==="win"){const G=t*2;s.coins+=G,n.textContent=`${Vt[s.rpsChoice]} vs ${Vt[x]} → 승리! +${A(G)} Coin`,n.className="resultBanner win",z.win(),Mt(24)}else S==="tie"?(s.coins+=t,s.coinSpentTotal=Math.max(0,(s.coinSpentTotal||0)-t),n.textContent=`${Vt[s.rpsChoice]} vs ${Vt[x]} → 비겼습니다! 베팅 반환`,n.className="resultBanner"):(n.textContent=`${Vt[s.rpsChoice]} vs ${Vt[x]} → 패배 (-${A(t)} Coin)`,n.className="resultBanner lose",z.lose());R(),Xt=!1}},90)});const on=[{id:"miss1",label:"놓침",mult:0,from:0,to:10,color:"#3a3f4b"},{id:"small",label:"잔챙이",mult:1,from:10,to:50,color:"#5a6272"},{id:"normal",label:"물고기",mult:1.2,from:50,to:60,color:"#3fe0ff"},{id:"miss3",label:"놓침",mult:0,from:60,to:85,color:"#3a3f4b"},{id:"gold",label:"황금 물고기",mult:3,from:85,to:88,color:"#ffd23f"},{id:"legend",label:"전설의 물고기",mult:12,from:88,to:90,color:"legend"},{id:"miss2",label:"놓침",mult:0,from:90,to:100,color:"#3a3f4b"}];function Jn(){const t=document.getElementById("fishTimingBar");if(!t)return;t.innerHTML="",on.forEach(i=>{const c=document.createElement("div");c.className="fishZone"+(i.color==="legend"?" legendZone":""),c.style.left=i.from+"%",c.style.width=i.to-i.from+"%",i.color!=="legend"&&(c.style.background=i.color);const d=document.createElement("div");d.className="fishZoneLabel",d.textContent=i.mult>0?i.mult+"x":"",c.appendChild(d),t.appendChild(c)});const n=document.createElement("div");n.className="fishMarker",n.id="fishMarkerEl",n.style.left="0%",t.appendChild(n)}function zn(){const t=document.getElementById("fishPayTable");t&&(t.innerHTML=on.filter(n=>n.mult>0).map(n=>`<span>${n.label} <b>${n.mult}x</b></span>`).join("")+"<span>놓침 <b>0x</b></span>")}zn();function sn(t,n){const i=document.getElementById("fishStatusText");i&&(i.textContent=t,i.classList.toggle("alert",!!n))}let h=!1,p=null,W=0,Q=1,Se=0,Ce=null;document.getElementById("fishPlay").addEventListener("click",()=>{if(h)return;const t=Math.max(1,Math.floor(+document.getElementById("fishBet").value||0)),n=document.getElementById("fishResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}h=!0,Se=t,s.coins-=t,R(),n.textContent="낚싯줄을 던졌습니다...",n.className="resultBanner",document.getElementById("fishTimingWrap").style.display="none";const i=document.getElementById("fishBobber");i.className="fishBobber idle",sn("입질을 기다리는 중...",!1),z.tick();const c=1200+Math.random()*2500;setTimeout(()=>{h&&(i.className="fishBobber bite",sn("지금이다! 챔질하세요!",!0),z.rareFanfare(2),Re())},c)});function Re(){const t=document.getElementById("fishTimingWrap");Jn(),t.style.display="flex",W=0,Q=1;const n=3+Math.random()*1.5;function i(){W+=Q*n,W>=100&&(W=100,Q=-1),W<=0&&(W=0,Q=1);const c=document.getElementById("fishMarkerEl");c&&(c.style.left=W+"%"),p=requestAnimationFrame(i)}p=requestAnimationFrame(i),clearTimeout(Ce),Ce=setTimeout(()=>{h&&Pe(!0)},2600)}document.getElementById("fishStrikeBtn").addEventListener("click",()=>{!h||document.getElementById("fishTimingWrap").style.display==="none"||Pe(!1)});function Pe(t){cancelAnimationFrame(p),clearTimeout(Ce);const n=document.getElementById("fishResult"),i=W,c=t?on[0]:on.find(d=>i>=d.from&&i<d.to)||on[0];if(document.getElementById("fishTimingWrap").style.display="none",c.mult<=0)document.getElementById("fishBobber").className="fishBobber idle",sn(t?"너무 늦었습니다...":"물고기가 도망갔습니다...",!1),n.textContent=`🥾 놓쳤습니다... (-${A(Se)} Coin)`,n.className="resultBanner lose",z.lose();else{const d=Math.round(Se*c.mult);s.coins+=d,document.getElementById("fishBobber").className="fishBobber idle",sn(c.label+" 낚았습니다!",!1);const f=c.id==="legend"?"🌈":c.id==="gold"?"🐠":"🐟";n.textContent=`${f} ${c.label} 낚았습니다! +${A(d)} Coin (${c.mult}x)`,c.id==="legend"?(n.className="resultBanner jackpot",z.jackpot(),ea()):c.id==="gold"?(n.className="resultBanner jackpot",z.win(),Mt(40)):(n.className="resultBanner win",z.win(),Mt(18))}R(),h=!1}const V=["2","3","4","5","6","7","8","9","10","J","Q","K","A"],ae=["♠","♥","♦","♣"],ft=.96;function We(t){return t==="J"?11:t==="Q"?12:t==="K"?13:t==="A"?14:parseInt(t,10)}let ht=[];function Gt(){const t=[];for(const n of ae)for(const i of V)t.push({r:i,s:n});for(let n=t.length-1;n>0;n--){const i=Math.floor(Math.random()*(n+1)),c=t[n];t[n]=t[i],t[i]=c}return t}function Ft(){return ht.length<6&&(ht=Gt()),ht.pop()}let Tt=!1,Et=0,it=1,Lt=null,un=[];function na(t){const n=14-t,i=t-2,c=n>0?13/n*ft:null,d=i>0?13/i*ft:null,f=13/1*ft;return{highOdds:c,lowOdds:d,tieOdds:f,higherCount:n,lowerCount:i}}function aa(){const t=document.getElementById("hiloHand");t.innerHTML="",un.forEach(n=>t.appendChild(gn(n,!1)))}function Qn(){document.getElementById("hiloMultVal").textContent=it.toFixed(2)+"x",document.getElementById("hiloPayoutVal").textContent=A(Math.round(Et*it))}function Zn(){const t=document.getElementById("hiloHigh"),n=document.getElementById("hiloLow"),i=document.getElementById("hiloHighOdds"),c=document.getElementById("hiloLowOdds");if(!Lt)return;const d=We(Lt.r),f=na(d);f.highOdds?(t.disabled=!1,i&&(i.textContent=`(${f.highOdds.toFixed(2)}x)`)):(t.disabled=!0,i&&(i.textContent="(불가)")),f.lowOdds?(n.disabled=!1,c&&(c.textContent=`(${f.lowOdds.toFixed(2)}x)`)):(n.disabled=!0,c&&(c.textContent="(불가)"))}document.getElementById("hiloStart").addEventListener("click",()=>{if(Tt)return;const t=Math.max(1,Math.floor(+document.getElementById("hiloBet").value||0)),n=document.getElementById("hiloResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}Tt=!0,Et=t,it=1,s.coins-=t,R(),ht=Gt(),Lt=Ft(),un=[Lt],aa(),Qn(),Zn(),z.tick(),n.textContent="다음 카드가 더 높을지, 낮을지, 같을지 골라보세요! (A가 가장 높은 카드입니다)",n.className="resultBanner",document.getElementById("hiloActionRow").style.display="flex",document.getElementById("hiloCashoutRow").style.display="none"});function Ln(t){if(!Tt)return;const n=document.getElementById("hiloResult"),i=We(Lt.r),c=na(i);if(t==="high"&&!c.highOdds||t==="low"&&!c.lowOdds)return;document.getElementById("hiloActionRow").style.display="none";const d=Ft(),f=We(d.r);let k;if(f===i?k="tie":k=f>i?"high":"low",un.push(d),aa(),t===k){let S;t==="tie"?S=c.tieOdds:t==="high"?S=c.highOdds:S=c.lowOdds,it*=S,Lt=d,Qn(),Zn(),z.win(),Mt(t==="tie"?40:S>=4?30:16),n.textContent=`✅ 정답! (${d.r}${d.s}) ${S.toFixed(2)}x 배당 적용 → 누적 ${it.toFixed(2)}x`,n.className="resultBanner win",document.getElementById("hiloActionRow").style.display="flex",document.getElementById("hiloCashoutRow").style.display="flex"}else Lt=d,z.lose(),n.textContent=`❌ 틀렸습니다... (${d.r}${d.s}) · 배팅금을 잃었습니다. (-${A(Et)} Coin)`,n.className="resultBanner lose",document.getElementById("hiloCashoutRow").style.display="none",Tt=!1}document.getElementById("hiloHigh").addEventListener("click",()=>Ln("high")),document.getElementById("hiloLow").addEventListener("click",()=>Ln("low")),document.getElementById("hiloTie").addEventListener("click",()=>Ln("tie")),document.getElementById("hiloCashout").addEventListener("click",()=>{if(!Tt)return;const t=document.getElementById("hiloResult"),n=Math.round(Et*it);s.coins+=n,R(),t.textContent=`✅ 수령 완료! +${A(n)} Coin (${it.toFixed(2)}x)`,t.className="resultBanner win",z.win(),Mt(24),document.getElementById("hiloActionRow").style.display="none",document.getElementById("hiloCashoutRow").style.display="none",Tt=!1});const Xn=6,ha=.95,ga=[{n:1,label:"총알 1발",sub:"안전 · 저배당"},{n:2,label:"총알 2발",sub:"보통 위험"},{n:3,label:"총알 3발",sub:"고위험 · 고배당"}];let Yn=1,Ut=!1,fn=[],Dt=0,ln=new Set,jn=0,mn=Xn,Yt=1,Sn=0;function pn(){const t=document.getElementById("rrBulletRow");t&&(t.innerHTML="",ga.forEach(n=>{const i=document.createElement("button");i.className="rrBulletBtn"+(n.n===Yn?" sel":"")+(Ut?" locked":""),i.innerHTML=`${n.label}<span class="rrbSub">${n.sub}</span>`,i.disabled=Ut,i.addEventListener("click",()=>{Ut||(Yn=n.n,pn())}),t.appendChild(i)}))}pn();function ba(t,n){return(t-n)/t}function En(t,n,i,c,d){const f=document.getElementById(t||"rrCylinder");if(!f)return;f.innerHTML="";const k=78;for(let x=0;x<n.length;x++){const S=Math.PI*2*x/n.length-Math.PI/2,G=110+Math.cos(S)*k,te=110+Math.sin(S)*k,ie=document.createElement("div");let Ne="rrChamber";c.has(x)&&(Ne+=" spent"),x===i&&(Ne+=" current"),x===d&&(Ne+=" bulletReveal"),ie.className=Ne,ie.style.left=G+"px",ie.style.top=te+"px",ie.textContent=x===d?"💥":c.has(x)?"·":"",f.appendChild(ie)}}function oa(){document.getElementById("rrMultiVal").textContent=Yt.toFixed(2)+"x",document.getElementById("rrPayoutVal").textContent=A(Math.round(Sn*Yt))}function _t(t,n){const i=document.getElementById("rrStatusText");i.textContent=t,i.classList.toggle("alert",!!n)}document.getElementById("rrPlay").addEventListener("click",()=>{if(Ut)return;const t=Math.max(1,Math.floor(+document.getElementById("rrBet").value||0)),n=document.getElementById("rrResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}Ut=!0,Sn=t,s.coins-=t,R(),pn(),fn=Array.from({length:Xn},(d,f)=>f),ln=new Set,Dt=0,jn=Yn,mn=Xn,Yt=1,n.textContent="실린더를 돌리는 중...",n.className="resultBanner",_t("실린더를 돌리는 중...",!1),document.getElementById("rrActionRow").style.display="none";const i=document.getElementById("rrCylinder");i.classList.add("spinning"),En("rrCylinder",fn,-1,ln,-1);const c=setInterval(()=>z.rrTick(),90);setTimeout(()=>{clearInterval(c),i.classList.remove("spinning"),En("rrCylinder",fn,Dt,ln,-1),oa(),_t("방아쇠를 당기거나 지금까지의 배당을 수령하세요",!1),document.getElementById("rrActionRow").style.display="flex"},900)}),document.getElementById("rrTrigger").addEventListener("click",()=>{if(!Ut)return;const t=document.getElementById("rrResult");document.getElementById("rrActionRow").style.display="none",_t("방아쇠를 당기는 중...",!1),z.rrTick(),setTimeout(()=>{const n=ba(mn,jn);if(!(Math.random()<n)){En("rrCylinder",fn,Dt,ln,Dt),_t("탕! 총알이 발사되었습니다...",!0),t.textContent=`💥 빵! 총알에 맞았습니다... (-${A(Sn)} Coin)`,t.className="resultBanner lose",z.rrBang(),Ut=!1,pn();return}if(ln.add(Dt),mn-=1,Dt+=1,Yt=Yt*(1/n)*ha,En("rrCylinder",fn,Dt,ln,-1),oa(),z.tick(),mn<=jn){_t("빈 칸을 모두 통과했습니다! 자동으로 수령합니다.",!1),t.textContent="🎉 실린더의 빈 칸을 모두 통과! 최고 배당 획득!",t.className="resultBanner jackpot",Wn(!0);return}_t(`살아남았습니다! (${mn}칸 중 ${jn}발 남음)`,!1),t.textContent="한 번 더 당길까요, 아니면 지금 수령할까요?",t.className="resultBanner win",document.getElementById("rrActionRow").style.display="flex"},550)});function Wn(t){const n=document.getElementById("rrResult"),i=Math.round(Sn*Yt);s.coins+=i,R(),t?n.className="resultBanner jackpot":(n.textContent=`✅ 수령 완료! +${A(i)} Coin (${Yt.toFixed(2)}x)`,n.className="resultBanner win"),z.win(),Mt(t?45:22),document.getElementById("rrActionRow").style.display="none",_t("총알 개수를 고르고 다시 장전하세요",!1),Ut=!1,pn()}document.getElementById("rrCashout").addEventListener("click",()=>{Ut&&Wn(!1)}),document.querySelectorAll("[data-lchoice]").forEach(t=>{t.addEventListener("click",()=>{document.querySelectorAll("[data-lchoice]").forEach(n=>n.classList.remove("sel")),t.classList.add("sel"),s.ladderChoice=+t.dataset.lchoice})});const a=7;function l(t,n){t.innerHTML="";const i=55,c=155,d=15,f=225,k=(f-d)/(a+1),x="http://www.w3.org/2000/svg";return[i,c].forEach(S=>{const G=document.createElementNS(x,"line");G.setAttribute("x1",S),G.setAttribute("x2",S),G.setAttribute("y1",d),G.setAttribute("y2",f),G.setAttribute("stroke","#2c303c"),G.setAttribute("stroke-width","4"),G.setAttribute("stroke-linecap","round"),t.appendChild(G)}),n.forEach((S,G)=>{if(!S)return;const te=d+k*(G+1),ie=document.createElementNS(x,"line");ie.setAttribute("x1",i),ie.setAttribute("x2",c),ie.setAttribute("y1",te),ie.setAttribute("y2",te),ie.setAttribute("stroke","#454c5c"),ie.setAttribute("stroke-width","4"),ie.setAttribute("stroke-linecap","round"),t.appendChild(ie)}),{xL:i,xR:c,top:d,bottom:f,rowH:k}}function o(t,n,i){let c=n;const d=[{x:c===0?i.xL:i.xR,y:i.top}];return t.forEach((f,k)=>{const x=i.top+i.rowH*(k+1);f&&(d.push({x:c===0?i.xL:i.xR,y:x}),c=1-c,d.push({x:c===0?i.xL:i.xR,y:x}))}),d.push({x:c===0?i.xL:i.xR,y:i.bottom}),{pts:d,finalLane:c}}let u=!1;document.getElementById("ladderPlay").addEventListener("click",()=>{if(u)return;const t=Math.max(1,Math.floor(+document.getElementById("ladderBet").value||0)),n=document.getElementById("ladderResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}u=!0,s.coins-=t,R();const i=Array.from({length:a},()=>Math.random()<.5),c=document.getElementById("ladderSvg"),d=l(c,i),{pts:f,finalLane:k}=o(i,s.ladderChoice,d),S=document.createElementNS("http://www.w3.org/2000/svg","polyline"),G=f.map(Ne=>Ne.x+","+Ne.y).join(" ");S.setAttribute("points",G),S.setAttribute("fill","none"),S.setAttribute("stroke","#3fe0ff"),S.setAttribute("stroke-width","5"),S.setAttribute("stroke-linecap","round"),S.setAttribute("stroke-linejoin","round"),S.style.filter="drop-shadow(0 0 6px rgba(63,224,255,.6))",c.appendChild(S);const te=S.getTotalLength();S.style.strokeDasharray=te,S.style.strokeDashoffset=te,S.style.transition="stroke-dashoffset 1.4s ease-in-out";const ie=setInterval(()=>z.tick(),110);requestAnimationFrame(()=>{requestAnimationFrame(()=>{S.style.strokeDashoffset=0})}),setTimeout(()=>{if(clearInterval(ie),k===1){const jt=t*2;s.coins+=jt,S.setAttribute("stroke","#3fe07a"),S.style.filter="drop-shadow(0 0 8px rgba(63,224,122,.8))",n.textContent=`당첨! +${A(jt)} Coin`,n.className="resultBanner win",z.win(),Mt(24)}else S.setAttribute("stroke","#ff4d6a"),S.style.filter="drop-shadow(0 0 8px rgba(255,77,106,.7))",n.textContent=`꽝! (-${A(t)} Coin)`,n.className="resultBanner lose",z.lose();R(),u=!1},1550)});function g(t){const n=document.createElement("div");return n.className="sym"+(t.seven?" symSeven":""),n.textContent=t.seven?"7":t.sym,n}function b(){const t=document.getElementById("slotMachine");t.innerHTML="";for(let n=0;n<5;n++){const i=document.createElement("div");i.className="reel",i.id="reel"+n;const c=document.createElement("div");c.className="reelStrip",c.id="strip"+n;for(let d=0;d<8;d++)c.appendChild(g(N(Y,"weight")));i.appendChild(c),t.appendChild(i)}}b();function U(){const t=document.getElementById("slotPayTable");t&&(t.innerHTML=Y.map(n=>{const i=n.seven?'<span class="paySeven">7</span>':n.sym,c=n.seven?`<b style="color:var(--gold-txt)">${n.pay5}x JACKPOT</b>`:`<b>${n.pay5}x</b>`;return`<span>${i} 3개 <b>${n.pay3}x</b> · 4개 <b>${n.pay4}x</b> · 5개 ${c}</span>`}).join(""))}U();function r(t){const n=t[0].sym;let i=1;for(let f=1;f<t.length&&t[f].sym===n;f++)i++;if(i<3)return null;const c=Y.find(f=>f.sym===n),d=i>=5?c.pay5:i===4?c.pay4:c.pay3;return{sym:n,count:i,payMult:d,data:c}}function v(t,n,i){return new Promise(c=>{const d=document.getElementById("strip"+t),f=68,k=18+t*3;let x=document.createDocumentFragment();for(let te=0;te<k;te++)x.appendChild(g(N(Y,"weight")));x.appendChild(g(n)),d.innerHTML="",d.appendChild(x),d.style.transition="none",d.style.transform="translateY(0px)",d.style.filter="blur(0px)",d.offsetHeight;const S=k*f;d.style.transition=`transform ${i/1e3}s cubic-bezier(.12,.82,.2,1), filter .3s ease`,requestAnimationFrame(()=>{d.style.transform=`translateY(-${S}px)`,d.style.filter="blur(7px)"}),setTimeout(()=>{d.style.filter="blur(0px)"},Math.max(0,i-260));const G=setInterval(()=>z.tick(),60);setTimeout(()=>{clearInterval(G),c()},i)})}let w=!1;document.getElementById("slotPlay").addEventListener("click",async()=>{if(w)return;const t=Math.max(1,Math.floor(+document.getElementById("slotBet").value||0)),n=document.getElementById("slotResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}w=!0,s.coins-=t,R(),n.textContent="스핀 중...",n.className="resultBanner";for(let f=0;f<5;f++)document.getElementById("reel"+f).classList.remove("jackGlow");const i=[N(Y,"weight"),N(Y,"weight"),N(Y,"weight"),N(Y,"weight"),N(Y,"weight")],c=[550,550,600,650,800];for(let f=0;f<5;f++)await v(f,i[f],c[f]);const d=r(i);if(d){const f=t*d.payMult,k=d.data.seven?"7":d.sym;if(d.data.seven&&d.count>=5){s.coins+=f,s.achievements=s.achievements||{},s.achievements.slotJackpotHit=!0,typeof In=="function"&&In();for(let x=0;x<5;x++)document.getElementById("reel"+x).classList.add("jackGlow");n.textContent=`🎊 JACKPOT!! 7 7 7 7 7 → +${A(f)} Coin 🎊`,n.className="resultBanner jackpot",z.jackpot(),ea(),R(),w=!1}else n.textContent=`${k} ${d.count}개 일치! +${A(f)} Coin`,n.className="resultBanner win",z.win(),Mt(20+d.count*4),R(),be(f)}else n.textContent=`아쉽네요, 일치한 심볼이 없어요 (-${A(t)} Coin)`,n.className="resultBanner lose",z.lose(),R(),w=!1});let P=0;const D=document.getElementById("slotDoubleUp"),ee=document.getElementById("slotDoubleUpBanner");function be(t){P=t,ee.textContent=`🃏 현재 상금 ${A(P)} Coin! 더블업(50%)에 도전할까요?`,ee.className="resultBanner",D.style.display="block"}document.getElementById("slotDoubleUpGo").addEventListener("click",()=>{const t=Math.random()<.5;z.tick(),t?(P*=2,ee.textContent=`🎉 성공! 상금이 ${A(P)} Coin으로 늘었습니다! 계속 더블업 하시겠어요?`,ee.className="resultBanner win",z.win(),Mt(16)):(P=0,ee.textContent="💥 실패! 상금을 모두 잃었습니다...",ee.className="resultBanner lose",z.lose(),D.style.display="none",R(),w=!1)}),document.getElementById("slotDoubleUpStop").addEventListener("click",()=>{s.coins+=P,document.getElementById("slotResult").textContent=`💰 ${A(P)} Coin을 수령했습니다!`,document.getElementById("slotResult").className="resultBanner win",D.style.display="none",R(),w=!1});const gt=["♠","♥","♦","♣"],rn=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];function yn(){const t=[];for(const n of gt)for(const i of rn)t.push({r:i,s:n});for(let n=t.length-1;n>0;n--){const i=Math.floor(Math.random()*(n+1)),c=t[n];t[n]=t[i],t[i]=c}return t}function hn(t){return t.r==="A"?11:t.r==="K"||t.r==="Q"||t.r==="J"?10:parseInt(t.r,10)}function Ct(t){let n=t.reduce((c,d)=>c+hn(d),0),i=t.filter(c=>c.r==="A").length;for(;n>21&&i>0;)n-=10,i--;return n}function Mn(t){return t.length===2&&Ct(t)===21}function gn(t,n){const i=document.createElement("div");if(n)return i.className="card back",i;const c=t.s==="♥"||t.s==="♦";return i.className="card"+(c?" red":""),i.innerHTML=`<div>${t.r}</div><div class="suit">${t.s}</div>`,i}let _n=[],$t=[],bn=[],en=0,xa=!1,$n=!0;function Bn(){return _n.length<8&&(_n=yn()),_n.pop()}function ia(t){const n=document.getElementById("bjPlayerHand"),i=document.getElementById("bjDealerHand");n.innerHTML="",i.innerHTML="",$t.forEach(c=>n.appendChild(gn(c,!1))),bn.forEach((c,d)=>i.appendChild(gn(c,!t&&d===1))),document.getElementById("bjPlayerScore").textContent="("+Ct($t)+")",document.getElementById("bjDealerScore").textContent=t?"("+Ct(bn)+")":"("+hn(bn[0])+" + ?)"}function Hn(t,n){document.getElementById("bjActions").style.display=t?"flex":"none",document.getElementById("bjHit").disabled=!t,document.getElementById("bjStand").disabled=!t,document.getElementById("bjDouble").disabled=!t||!n}function xn(t){const n=document.getElementById("bjResult");if(ia(!0),t==="blackjack"){const i=Math.round(en*2.5);s.coins+=i,n.textContent=`🂡 블랙잭! +${A(i)} Coin (3:2 배당)`,n.className="resultBanner jackpot",z.jackpot(),Mt(45)}else if(t==="win"){const i=en*2;s.coins+=i,n.textContent=`승리! +${A(i)} Coin`,n.className="resultBanner win",z.win(),Mt(24)}else t==="push"?(s.coins+=en,s.coinSpentTotal=Math.max(0,(s.coinSpentTotal||0)-en),n.textContent="푸시(무승부) · 베팅금 반환",n.className="resultBanner"):(n.textContent=`패배 (-${A(en)} Coin)`,n.className="resultBanner lose",z.lose());R(),Hn(!1,!1),xa=!1,$n=!0}function Ta(){for(;Ct(bn)<17;)bn.push(Bn());const t=Ct($t),n=Ct(bn);n>21||t>n?xn("win"):xn(t===n?"push":"lose")}document.getElementById("bjDeal").addEventListener("click",()=>{if(xa)return;const t=Math.max(1,Math.floor(+document.getElementById("bjBet").value||0)),n=document.getElementById("bjResult");if(t>s.coins){n.textContent="Coin이 부족합니다.",n.className="resultBanner lose";return}xa=!0,$n=!1,en=t,s.coins-=t,R(),n.textContent="카드를 나누는 중...",n.className="resultBanner",_n.length<15&&(_n=yn()),$t=[Bn(),Bn()],bn=[Bn(),Bn()],ia(!1),z.tick();const i=Mn($t),c=Mn(bn);if(i||c){xn(i&&c?"push":i?"blackjack":"lose");return}Hn(!0,s.coins>=en)}),document.getElementById("bjHit").addEventListener("click",()=>{$n||($t.push(Bn()),z.tick(),ia(!1),Hn(!0,!1),Ct($t)>21&&xn("lose"))}),document.getElementById("bjStand").addEventListener("click",()=>{$n||(Hn(!1,!1),document.getElementById("bjResult").textContent="딜러 진행 중...",setTimeout(Ta,500))}),document.getElementById("bjDouble").addEventListener("click",()=>{$n||$t.length!==2||s.coins<en||(s.coins-=en,en*=2,R(),$t.push(Bn()),z.tick(),ia(!1),Hn(!1,!1),Ct($t)>21?xn("lose"):(document.getElementById("bjResult").textContent="딜러 진행 중...",setTimeout(Ta,500)))}),Hn(!1,!1);const Nn=[{id:"fx_ember",name:"불씨",cost:15e3,fx:"fx_ember",desc:"칩 아래에서 불씨가 피어올라 위로 흩날리고, 열기가 일렁이며 주황빛으로 달아오릅니다."},{id:"fx_frost",name:"서리",cost:28e3,fx:"fx_frost",desc:"성에가 낀 듯 차갑게 반짝이고, 얼음 결정이 은은하게 깜빡입니다."},{id:"fx_aurora",name:"오로라",cost:55e3,fx:"fx_aurora",desc:"초록·파랑·보라빛 커튼이 칩 위로 천천히 흐르고 테두리 빛이 계속 바뀝니다."},{id:"fx_glitch",name:"글리치",cost:9e4,fx:"fx_glitch",desc:"가끔 화면이 깨지듯 RGB가 갈라지고 스캔라인이 번쩍이는 사이버 이펙트."},{id:"fx_void",name:"공허의 틈",cost:15e4,fx:"fx_void",desc:"어두운 칩 테두리를 보랏빛 균열이 빙글빙글 돌며 감싸는 최상급 이펙트."}],Qa=Nn.map(t=>t.fx),Gn=[{id:"bg_dawn",name:"새벽 안개",cls:"bg_dawn",cost:18e3,desc:"푸른 안개가 깔린 고요한 새벽 하늘."},{id:"bg_moss",name:"이끼 숲",cls:"bg_moss",cost:38e3,desc:"이끼 낀 깊은 숲속의 초록빛 그늘."},{id:"bg_magma",name:"용암 지대",cls:"bg_magma",cost:52e3,desc:"붉은 용암이 천천히 흘러가는 화산 지대."},{id:"bg_city",name:"네온 시티",cls:"bg_city",cost:78e3,desc:"네온 격자가 흐르는 사이버 도시의 밤."},{id:"bg_galaxy",name:"은하수",cls:"bg_galaxy",cost:115e3,desc:"별이 흘러가는 깊은 우주의 성운."}],tn=t=>(s.lifetimeOres||{})[t]||0;function Za(){let t=0;return Nn.concat(Gn).forEach(n=>{(s.cosmetics||{})[n.id]&&t++}),Dn.forEach(n=>{(s.ownedBorders||{})[n.id]&&t++}),t}const On=[{id:"tt_newbie",tier:"common",name:"새내기 광부",req:"누적 채굴 100회 달성",check:()=>(s.totalOresMined||0)>=100},{id:"tt_stone",tier:"common",name:"돌 수집가",req:"돌멩이 누적 500개 채굴",check:()=>tn("stone")>=500},{id:"tt_iron",tier:"common",name:"철의 사나이",req:"철광석 누적 300개 채굴",check:()=>tn("iron")>=300},{id:"tt_attend",tier:"common",name:"성실한 일꾼",req:"일일 보너스 3일 연속 수령",check:()=>(s.dailyStreak||0)>=3},{id:"tt_abyss",tier:"common",name:"폐광 탐험가",req:"폐광 갱도 해금",check:()=>!!(s.unlockedMines||{})[1]},{id:"tt_veteran",tier:"rare",name:"베테랑",req:"누적 채굴 5,000회 달성",check:()=>(s.totalOresMined||0)>=5e3},{id:"tt_silver",tier:"rare",name:"은빛 사냥꾼",req:"은광석 누적 150개 채굴",check:()=>tn("silver")>=150},{id:"tt_goldhand",tier:"rare",name:"황금 손",req:"금광석 누적 100개 채굴",check:()=>tn("gold")>=100},{id:"tt_pickmaster",tier:"rare",name:"곡괭이 장인",req:"다이아 곡괭이 이상 장착",check:()=>s.pickaxeIdx>=6},{id:"tt_dex",tier:"rare",name:"광물 박사",req:"모든 종류의 광물을 1개 이상 채굴",check:()=>B.every(t=>tn(t.id)>=1)},{id:"tt_streak",tier:"rare",name:"개근왕",req:"일일 보너스 7일 연속 수령",check:()=>(s.dailyStreak||0)>=7},{id:"tt_coinrich",tier:"rare",name:"동전 부자",req:"Coin 10,000 이상 보유",check:()=>(s.coins||0)>=1e4},{id:"tt_camp_quest",tier:"rare",name:"의뢰 해결사",req:"오늘의 의뢰 보상 누적 10회 수령",check:()=>!!CAMP&&CAMP.n("qd")>=10},{id:"tt_camp_gob",tier:"rare",name:"도깨비 사냥꾼",req:"도깨비 누적 10마리 포획",check:()=>!!CAMP&&CAMP.n("gc")>=10},{id:"tt_diamond",tier:"epic",name:"다이아 핸드",req:"다이아몬드 누적 100개 채굴",check:()=>tn("diamond")>=100},{id:"tt_mithril",tier:"epic",name:"미스릴 장인",req:"미스릴 원석 누적 100개 채굴",check:()=>tn("mithril")>=100},{id:"tt_obsidian",tier:"epic",name:"흑요석 군주",req:"흑요석 누적 50개 채굴",check:()=>tn("obsidian")>=50},{id:"tt_dark",tier:"epic",name:"암흑 연금술사",req:"암흑물질 광석 누적 10개 채굴",check:()=>tn("dark")>=10},{id:"tt_highroller",tier:"epic",name:"하이롤러",req:"Coin 누적 100,000 소모",check:()=>(s.coinSpentTotal||0)>=1e5},{id:"tt_lucky",tier:"epic",name:"행운아",req:"슬롯머신 잭팟(7 7 7 7 7) 1회 달성",check:()=>!!(s.achievements||{}).slotJackpotHit},{id:"tt_night",tier:"epic",name:"올빼미 광부",req:"새벽 0시~4시 사이 채굴 1회",check:()=>!!(s.achievements||{}).midnightMined},{id:"tt_bigspender",tier:"epic",name:"큰손",req:"Gold 누적 1,000,000 소모",check:()=>(s.goldSpentTotal||0)>=1e6},{id:"tt_stylist",tier:"epic",name:"스타일리스트",req:"이펙트·배경·테두리 합계 5개 보유",check:()=>Za()>=5},{id:"tt_camp_shiny",tier:"epic",name:"반짝이 수집가",req:"반짝 광석 누적 50개 채굴",check:()=>!!CAMP&&CAMP.n("sc")>=50},{id:"tt_camp_boss",tier:"epic",name:"광부 반장",req:"고용 광부 10명 모두 고용",check:()=>!!CAMP&&CAMP.miners()>=CAMP.CFG.minerMax},{id:"tt_void",tier:"legend",name:"심연의 지배자",req:"공허의 파편 누적 20개 채굴",check:()=>tn("voidshard")>=20},{id:"tt_king",tier:"legend",name:"광산의 제왕",req:"누적 채굴 20,000회 달성",check:()=>(s.totalOresMined||0)>=2e4},{id:"tt_tycoon",tier:"legend",name:"재벌",req:"보유 Gold 10,000,000 이상",check:()=>(s.gold||0)>=1e7},{id:"tt_whale",tier:"legend",name:"전설의 큰손",req:"Coin 누적 1,000,000 소모",check:()=>(s.coinSpentTotal||0)>=1e6},{id:"tt_final",tier:"legend",name:"최후의 곡괭이",req:"최고 등급 곡괭이(공허 파쇄자) 장착",check:()=>s.pickaxeIdx>=ke.length-1},{id:"tt_core",tier:"epic",name:"별의 무덤 개척자",req:"별의 무덤 광산 개방",check:()=>!!(s.unlockedMines||{})[2]},{id:"tt_star",tier:"epic",name:"별 수집가",req:"별조각 누적 300개 채굴",check:()=>tn("starshard")>=300},{id:"tt_primal",tier:"legend",name:"태초의 지배자",req:"태초의 결정 누적 30개 채굴",check:()=>tn("primal")>=30},{id:"tt_relic",tier:"legend",name:"유물 장인",req:"신전 유물 3종 모두 제작",check:()=>!!(gxl("rl_star")&&gxl("rl_neu")&&gxl("rl_pri"))},{id:"tt_camp_legend",tier:"legend",name:"도깨비 대왕",req:"전설의 도깨비 1마리 포획",check:()=>!!CAMP&&CAMP.n("gl")>=1}];function In(){s.ownedTitles=s.ownedTitles||{};let t=!1;On.forEach(n=>{!s.ownedTitles[n.id]&&n.check()&&(s.ownedTitles[n.id]=!0,t=!0,Ae(`🏅 업적 달성! "${n.name}" 칭호를 획득했습니다!`),z.rareFanfare(4),Mt(28),CAMP&&CAMP.onTitle(n))}),t&&(Be(),typeof vn=="function"&&vn())}const Dn=[{id:"bd_steel",name:"강철 링",cls:"border_steel",cost:25e3,desc:"단단하게 겹친 이중 강철 고리."},{id:"bd_emerald",name:"에메랄드",cls:"border_emerald",cost:6e4,desc:"초록빛 보석 광채가 숨 쉬듯 맥동합니다."},{id:"bd_inferno",name:"인페르노",cls:"border_inferno",cost:95e3,desc:"타오르는 불꽃이 테두리에서 일렁입니다."},{id:"bd_aurora",name:"오로라 링",cls:"border_aurora",cost:14e4,desc:"오로라 빛깔의 고리가 쉬지 않고 회전합니다."},{id:"bd_royal",name:"로열 크라운",cls:"border_royal",cost:22e4,desc:"황금 고리가 번뜩이고 네 방향에 보석이 박힙니다."}],Xa=!0,Ca={ring_gold:18e3,ring_neon:32e3,ring_cyan:32e3,ring_rainbow:12e4,bg_theme:45e3,bg_normal:2e4,bg_nebula:95e3,border_gold:6e4,border_neon:8e4,border_rainbow:15e4};function sa(){if(typeof s>"u")return!1;const t=new Set(Nn.concat(Gn).map(f=>f.id)),n=new Set(Dn.map(f=>f.id)),i=new Set(On.map(f=>f.id));let c=0,d=!1;if(s.cosmetics=s.cosmetics||{},s.ownedBorders=s.ownedBorders||{},s.ownedTitles=s.ownedTitles||{},Object.keys(s.cosmetics).forEach(f=>{t.has(f)||(c+=Ca[f]||0,delete s.cosmetics[f],d=!0)}),Object.keys(s.ownedBorders).forEach(f=>{n.has(f)||(c+=Ca[f]||0,delete s.ownedBorders[f],d=!0)}),Object.keys(s.ownedTitles).forEach(f=>{i.has(f)||(delete s.ownedTitles[f],d=!0)}),s.equippedCosmetic&&!Nn.some(f=>f.id===s.equippedCosmetic)&&(s.equippedCosmetic=null,d=!0),s.equippedBg&&!Gn.some(f=>f.id===s.equippedBg)&&(s.equippedBg=null,d=!0),s.equippedBorder&&!Dn.some(f=>f.id===s.equippedBorder)&&(s.equippedBorder=null,d=!0),s.equippedTitle&&!i.has(s.equippedTitle)&&(s.equippedTitle=null,d=!0),c>0&&Xa){s.gold=(s.gold||0)+c,s.goldSpentTotal=Math.max(0,(s.goldSpentTotal||0)-c);try{Ae("스킨이 새로 바뀌어 기존 스킨 구매 금액 "+A(c)+" G를 환불했어요!")}catch{}}if(d){try{la()}catch{}try{In()}catch{}try{R()}catch{}try{Be()}catch{}}return d}function Ya(t,n){return t==="fx"?`<div class="stat-chip coin fx ${n.fx} skinPrevChip"><span class="val">12,345</span></div>`:t==="bg"?`<div class="skinPrevBg ${n.cls}"></div>`:t==="border"?`<div class="skinPrevAv ${n.cls}">⛏️</div>`:""}function va(t,n,i,c,d){const f=document.getElementById(t);if(!f)return;if(f.innerHTML="",n.forEach(x=>{const S=!!i[x.id],G=s[c]===x.id,te=document.createElement("div");te.className="pick-card"+(S?" owned":"")+(G?" current":""),te.innerHTML=`
       <div class="skinPrev">${Ya(d,x)}</div>
       <div class="info">
         <div class="name">${x.name}</div>
@@ -1605,10 +1715,416 @@ return{
   onSpawn:onSpawn,onBreak:onBreak,onCombo:onCombo,onTitle:onTitle,
   refresh:refresh,render:function(){render(true)},
   n:function(k){return num(ex().st[k])},
+  pay:function(ore){const g=addGold(rewardGold(ore));topGold();return g},   /* 다른 모듈(새 미니게임)이 Gold 보상을 줄 때 */
+  day:dayKey,
   miners:function(){return ex().m.n},
   CFG:CFG
 };
 })()}catch(err){try{console.error("[광부 캠프] 초기화 실패 — 이 기능만 빼고 계속 실행합니다.",err)}catch(_){}return null}})();
+var MG=(function(){try{return(function(){
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════
+   🎮 새 미니게임 4종 (v1.3) — 미니게임 존에 탭으로 추가
+   💎 지뢰밭(Coin) · 🧩 짝맞추기(Coin) · 🔢 업다운(Coin) · 🔨 두더지(무료·Gold)
+   ───────────────────────────────────────────────────────────────────
+   · 지뢰밭은 어떻게 해도 평균 환급률 96%, 업다운은 최선으로 해도 약 91%,
+     짝맞추기는 완벽하게 외워도 약 100%(사람은 더 낮음)가 되도록 배당을 맞췄어요.
+     → Coin(=1,000 Gold)을 계속 찍어내는 방법이 없어요.
+   · 순발력 게임(두더지)은 잘하는 사람이 Coin을 벌 수 있게 되므로 Coin 대신
+     "하루 N판 무료 · Gold 보상"으로 만들었어요. (보상은 ⛺캠프와 같은 '광석 N개 분량')
+   · 밸런스는 바로 아래 CFG 숫자만 고치면 돼요.
+   · 실패해도 게임 본체는 그대로 돌아가도록 try/catch로 감쌌어요.
+   ═══════════════════════════════════════════════════════════════════ */
+const CFG={
+  mines:{size:25,bombs:[3,6,10],edge:0.96,maxMult:200},     /* edge=환급률 · maxMult=최대 배당 */
+  updown:{max:100,tries:7,pay:[15,6,3,2,1,0.4,0.2]},       /* N번째에 맞히면 배당 pay[N-1] */
+  memory:{pairs:8,pay:[[10,5],[11,2.4],[12,1.05],[13,0.65],[14,0.45],[15,0.25],[16,0.12]]}, /* [이 횟수 이하, 배당] */
+  whack:{plays:5,dur:20,spawns:28,step:700,lifeStart:850,lifeEnd:450,decoy:0.15,penalty:2,
+         tbl:[[23,150],[20,90],[17,55],[14,30],[11,15],[8,6],[0,2]]}  /* [이 점수 이상, 광석 N개 분량 Gold] */
+};
+
+/* ─── 작은 도우미들 ─── */
+function byId(id){return document.getElementById(id)}
+function num(v){return typeof v==="number"&&isFinite(v)?v:0}
+function clamp(v,lo,hi){return v<lo?lo:v>hi?hi:v}
+function fmt(v){return A(Math.max(0,Math.round(num(+v))))}
+function rnd(n){return Math.floor(Math.random()*n)}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1),t=a[i];a[i]=a[j];a[j]=t}return a}
+function sfx(n){try{n==="win"?z.win():n==="lose"?z.lose():n==="tick"?z.tick():n==="chip"?z.chip():n==="hit"?z.mineHit():n==="big"?z.jackpot():z.rareFanfare(n)}catch(_){}}
+function conf(n){try{Mt(n)}catch(_){}}
+function rerender(){try{R()}catch(_){}}
+function say(id,t,cls){const e=byId(id);if(!e)return;e.textContent=t;e.className="resultBanner"+(cls?" "+cls:"")}
+function setInfo(id,html){const e=byId(id);if(e)e.innerHTML=html}
+function betOf(id){const e=byId(id);return Math.max(1,Math.floor(+(e&&e.value)||0))}
+function take(bet,banner){                      /* 베팅 차감(부족하면 false) */
+  if(!(bet>=1)||bet>s.coins){say(banner,"Coin이 부족합니다.","lose");return false}
+  s.coins-=bet;rerender();return true
+}
+function give(p){if(p>0)s.coins+=p;rerender()}
+function xs(m){return(Math.round(m*100)/100).toString().replace(/(\.\d*?)0+$/,"$1").replace(/\.$/,"")}
+
+/* ─── 직접 그린 보석/폭탄/두더지 ─── */
+const GEMS=[
+  ["M20 4 L34 14 L20 36 L6 14Z","#4fd8ff"],
+  ["M12 5H28L35 12V28L28 35H12L5 28V12Z","#3fe07a"],
+  ["M20 4C31 4 35 13 35 20C35 28 29 36 20 36C11 36 5 28 5 20C5 13 9 4 20 4Z","#ff4d6a"],
+  ["M20 4L36 33H4Z","#ffa53a"],
+  ["M20 4L34 12V28L20 36L6 28V12Z","#b46bff"],
+  ["M20 3L25 14.5L37.5 15.5L28 23.5L31 36L20 29.5L9 36L12 23.5L2.5 15.5L15 14.5Z","#ffd23f"],
+  ["M20 3C27 13 33 19 33 26A13 13 0 0 1 7 26C7 19 13 13 20 3Z","#5b8cff"],
+  ["M12 6H28Q34 6 34 12V28Q34 34 28 34H12Q6 34 6 28V12Q6 6 12 6Z","#ff7ad9"]
+];
+function gemSvg(i){
+  const g=GEMS[i%GEMS.length];
+  return'<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="'+g[0]+'" fill="'+g[1]+'" stroke="#0b0e14" stroke-opacity=".6" stroke-width="1.6" stroke-linejoin="round"/>'
+   +'<path d="'+g[0]+'" fill="#fff" opacity=".38" transform="translate(20 20) scale(.52) translate(-20 -20)"/>'
+   +'<ellipse cx="14" cy="12" rx="3.2" ry="1.8" fill="#fff" opacity=".75" transform="rotate(-30 14 12)"/></svg>';
+}
+function bombSvg(){
+  return'<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M25 13Q30 7 35 9" stroke="#c9a36a" stroke-width="3" fill="none" stroke-linecap="round"/>'
+   +'<circle cx="19" cy="24" r="13" fill="#2b3040" stroke="#07090d" stroke-width="2"/><circle cx="19" cy="24" r="13" fill="#ff4d6a" opacity=".18"/>'
+   +'<ellipse cx="13.5" cy="18.5" rx="4" ry="2.4" fill="#fff" opacity=".35" transform="rotate(-35 13.5 18.5)"/>'
+   +'<circle cx="36" cy="8" r="3.4" fill="#ffd23f"/><circle cx="36" cy="8" r="1.6" fill="#fff"/></svg>';
+}
+function moleSvg(){
+  return'<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">'
+   +'<ellipse cx="11" cy="38" rx="6" ry="7" fill="#7a4d2e" stroke="#3b2414" stroke-width="2"/><ellipse cx="53" cy="38" rx="6" ry="7" fill="#7a4d2e" stroke="#3b2414" stroke-width="2"/>'
+   +'<ellipse cx="32" cy="40" rx="22" ry="21" fill="#8a5a3a" stroke="#3b2414" stroke-width="2"/>'
+   +'<ellipse cx="32" cy="48" rx="13" ry="9.5" fill="#d2a780"/>'
+   +'<ellipse cx="32" cy="43" rx="5.2" ry="3.7" fill="#ff8fa3" stroke="#3b2414" stroke-width="1.6"/>'
+   +'<circle cx="22.5" cy="34" r="3.6" fill="#fff"/><circle cx="41.5" cy="34" r="3.6" fill="#fff"/><circle cx="23" cy="34.6" r="2" fill="#1a0c06"/><circle cx="41" cy="34.6" r="2" fill="#1a0c06"/>'
+   +'<path d="M26 51Q32 55 38 51" stroke="#3b2414" stroke-width="1.8" fill="none" stroke-linecap="round"/><rect x="29.2" y="51.5" width="2.6" height="4" rx="1" fill="#fff" stroke="#3b2414" stroke-width=".8"/><rect x="32.4" y="51.5" width="2.6" height="4" rx="1" fill="#fff" stroke="#3b2414" stroke-width=".8"/>'
+   +'<path d="M10 30Q12 9 32 8Q52 9 54 30Z" fill="#ffcf3a" stroke="#3b2414" stroke-width="2" stroke-linejoin="round"/><path d="M10 30H54" stroke="#3b2414" stroke-width="2"/>'
+   +'<circle cx="32" cy="14.5" r="5.5" fill="#fff6b0" stroke="#3b2414" stroke-width="1.8"/></svg>';
+}
+function tntSvg(){
+  return'<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="14" y="22" width="36" height="34" rx="5" fill="#d8402f" stroke="#3b1410" stroke-width="2"/>'
+   +'<rect x="14" y="32" width="36" height="12" fill="#f1ead8" stroke="#3b1410" stroke-width="2"/><text x="32" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="10" fill="#3b1410">TNT</text>'
+   +'<path d="M32 22Q32 12 40 9" stroke="#c9a36a" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="42" cy="8" r="4.5" fill="#ffd23f"/><circle cx="42" cy="8" r="2" fill="#fff"/></svg>';
+}
+
+/* ═══════════ 💎 보석 지뢰밭 ═══════════ */
+const MN={on:false,bet:0,m:3,pick:3,bombs:[],open:{},k:0};
+function mnMult(k,m){
+  let x=CFG.mines.edge;
+  for(let i=0;i<k;i++)x*=(CFG.mines.size-i)/(CFG.mines.size-m-i);
+  return Math.min(x,CFG.mines.maxMult);
+}
+function mnSafeTotal(){return CFG.mines.size-MN.m}
+function mnBuild(){
+  const g=byId("mnGrid");if(!g)return;
+  g.innerHTML="";
+  for(let i=0;i<CFG.mines.size;i++){
+    const b=document.createElement("button");b.type="button";b.className="mgTile";b.dataset.i=i;b.disabled=true;
+    b.setAttribute("aria-label","칸 "+(i+1));b.innerHTML='<i class="mgDot"></i>';g.appendChild(b);
+  }
+}
+function mnInfo(){
+  const m=MN.on?MN.m:MN.pick,k=MN.on?MN.k:0;
+  if(MN.on){
+    const cur=k>0?mnMult(k,m):0,next=mnMult(k+1,m),pSafe=(CFG.mines.size-m-k)/(CFG.mines.size-k);
+    setInfo("mnInfo","열린 안전 칸 <b>"+k+"</b>/"+(CFG.mines.size-m)+" · 현재 배당 <b>x"+xs(cur)+"</b> · 수령 <b>"+fmt(Math.floor(MN.bet*cur))+"</b> Coin<br>다음 칸 안전 확률 "+Math.round(pSafe*100)+"% → 배당 x"+xs(next));
+  }else{
+    setInfo("mnInfo","폭탄 "+m+"개 · 첫 칸 x"+xs(mnMult(1,m))+" · 3칸 x"+xs(mnMult(3,m))+" · 5칸 x"+xs(mnMult(5,m))+" · 8칸 x"+xs(mnMult(8,m)));
+  }
+  const c=byId("mnCash");if(c){c.disabled=!(MN.on&&MN.k>0);c.textContent=MN.on&&MN.k>0?"💰 "+fmt(Math.floor(MN.bet*mnMult(MN.k,MN.m)))+" Coin 수령하기":"💰 지금 수령하기"}
+}
+function mnReveal(hitIdx){
+  const tiles=byId("mnGrid").children;
+  for(let i=0;i<tiles.length;i++){
+    const b=tiles[i];b.disabled=true;
+    if(MN.bombs.indexOf(i)>=0){b.className="mgTile boom"+(i===hitIdx?" hit":"");b.innerHTML=bombSvg()}
+    else if(!MN.open[i]){b.className="mgTile dim";b.innerHTML=gemSvg(rnd(8))}
+  }
+}
+function mnEnd(){
+  MN.on=false;byId("mnStart").disabled=false;
+  const bs=byId("mnBombs");if(bs)for(const b of bs.children)b.disabled=false;
+  mnInfo();
+}
+function mnCash(auto){
+  if(!MN.on||MN.k<1)return;
+  const mult=mnMult(MN.k,MN.m),p=Math.floor(MN.bet*mult);
+  give(p);mnReveal(-1);
+  const prof=p-MN.bet;
+  say("mnResult",(auto?"모든 안전 칸을 열었어요! ":"")+"x"+xs(mult)+" 수령 → +"+fmt(p)+" Coin"+(prof>0?" (순이익 +"+fmt(prof)+")":prof<0?" (-"+fmt(-prof)+")":""),prof>=0?"win":"");
+  sfx(mult>=10?"big":"win");conf(mult>=10?60:mult>=3?30:14);
+  mnEnd();
+}
+function mnClick(i){
+  if(!MN.on||MN.open[i])return;
+  if(MN.bombs.indexOf(i)>=0){
+    mnReveal(i);sfx("lose");
+    say("mnResult","💥 폭탄! 베팅 "+fmt(MN.bet)+" Coin을 잃었어요… (열린 안전 칸 "+MN.k+"개)","lose");
+    mnEnd();return;
+  }
+  MN.open[i]=1;MN.k++;
+  const b=byId("mnGrid").children[i];b.className="mgTile safe";b.innerHTML=gemSvg(rnd(8));b.disabled=true;
+  sfx("hit");
+  if(MN.k>=mnSafeTotal()||mnMult(MN.k,MN.m)>=CFG.mines.maxMult){mnCash(true);return}
+  mnInfo();
+  say("mnResult","안전! 계속 열거나 수령하세요.","");
+}
+function mnStart(){
+  if(MN.on)return;
+  const bet=betOf("mnBet");
+  if(!take(bet,"mnResult"))return;
+  MN.on=true;MN.bet=bet;MN.m=MN.pick;MN.k=0;MN.open={};
+  MN.bombs=shuffle(Array.from({length:CFG.mines.size},function(_,i){return i})).slice(0,MN.m);
+  const tiles=byId("mnGrid").children;
+  for(const b of tiles){b.className="mgTile";b.innerHTML='<i class="mgDot"></i>';b.disabled=false}
+  byId("mnStart").disabled=true;
+  const bs=byId("mnBombs");if(bs)for(const b of bs.children)b.disabled=true;
+  say("mnResult","폭탄 "+MN.m+"개가 숨어 있어요. 칸을 열어 보세요!","");
+  mnInfo();sfx("tick");
+}
+function mnInit(){
+  const bs=byId("mnBombs");
+  CFG.mines.bombs.forEach(function(n,idx){
+    const b=document.createElement("button");b.type="button";b.className="diceChoice"+(idx===0?" sel":"");b.dataset.n=n;b.textContent="폭탄 "+n+"개";
+    b.addEventListener("click",function(){if(MN.on)return;MN.pick=n;for(const x of bs.children)x.classList.toggle("sel",x===b);mnInfo()});
+    bs.appendChild(b);
+  });
+  mnBuild();
+  byId("mnGrid").addEventListener("click",function(e){const b=e.target.closest(".mgTile");if(b&&!b.disabled)mnClick(+b.dataset.i)});
+  byId("mnStart").addEventListener("click",mnStart);
+  byId("mnCash").addEventListener("click",function(){mnCash(false)});
+  mnInfo();
+}
+
+/* ═══════════ 🔢 업다운 ═══════════ */
+const UD={on:false,bet:0,secret:0,tries:0,lo:1,hi:100};
+function udPayHtml(){
+  return CFG.updown.pay.map(function(m,i){return'<span data-t="'+(i+1)+'">'+(i+1)+"번 <b>x"+xs(m)+"</b></span>"}).join("")+"<span>실패 <b>x0</b></span>";
+}
+function udMark(){
+  const t=byId("udPayTable");if(!t)return;
+  for(const sp of t.children)sp.classList.toggle("cur",UD.on&&+sp.dataset.t===UD.tries+1);
+}
+function udUi(){
+  setText("udRange",(UD.on?UD.lo+" ~ "+UD.hi:"1 ~ "+CFG.updown.max));
+  const left=CFG.updown.tries-UD.tries;
+  setInfo("udInfo",UD.on?"남은 기회 <b>"+left+"</b>번 · 지금 맞히면 <b>x"+xs(CFG.updown.pay[UD.tries])+"</b> ("+fmt(Math.floor(UD.bet*CFG.updown.pay[UD.tries]))+" Coin)":"비밀 숫자는 1~"+CFG.updown.max+" · 한 번에 반으로 줄이면 가장 유리해요!");
+  const g=byId("udGuess"),b=byId("udGo");if(g)g.disabled=!UD.on;if(b)b.disabled=!UD.on;
+  byId("udStart").disabled=UD.on;
+  udMark();
+}
+function setText(id,t){const e=byId(id);if(e)e.textContent=t}
+function udChip(v,cls,txt){
+  const h=byId("udHist"),c=document.createElement("span");c.className="mgChip "+cls;c.textContent=txt||v;h.appendChild(c);
+}
+function udStart(){
+  if(UD.on)return;
+  const bet=betOf("udBet");if(!take(bet,"udResult"))return;
+  UD.on=true;UD.bet=bet;UD.secret=1+rnd(CFG.updown.max);UD.tries=0;UD.lo=1;UD.hi=CFG.updown.max;
+  byId("udHist").innerHTML="";
+  say("udResult","숫자를 하나 정했어요! 맞혀 보세요.","");
+  udUi();sfx("tick");const g=byId("udGuess");if(g){g.value="";try{g.focus()}catch(_){}}
+}
+function udGuess(){
+  if(!UD.on)return;
+  const g=byId("udGuess"),v=Math.floor(+g.value);
+  if(!(v>=1&&v<=CFG.updown.max)||g.value===""){say("udResult","1~"+CFG.updown.max+" 사이의 숫자를 넣어 주세요.","lose");return}
+  UD.tries++;g.value="";
+  if(v===UD.secret){
+    const m=CFG.updown.pay[UD.tries-1],p=Math.floor(UD.bet*m);
+    udChip(v,"hit",v+" ✓");give(p);UD.on=false;
+    const prof=p-UD.bet;
+    say("udResult",UD.tries+"번 만에 정답! x"+xs(m)+" → +"+fmt(p)+" Coin"+(prof>0?" (순이익 +"+fmt(prof)+")":""),prof>=0?"win":"");
+    sfx(m>=6?"big":"win");conf(m>=6?50:m>=2?24:10);udUi();return;
+  }
+  if(v<UD.secret){UD.lo=Math.max(UD.lo,v+1);udChip(v,"up",v+" ↑")}else{UD.hi=Math.min(UD.hi,v-1);udChip(v,"down",v+" ↓")}
+  sfx("tick");
+  if(UD.tries>=CFG.updown.tries){
+    UD.on=false;say("udResult","기회 소진! 정답은 "+UD.secret+" 이었어요. (-"+fmt(UD.bet)+" Coin)","lose");sfx("lose");udUi();return;
+  }
+  say("udResult",v<UD.secret?"↑ 더 커요!":"↓ 더 작아요!","");
+  udUi();try{g.focus()}catch(_){}
+}
+function udInit(){
+  setInfo("udPayTable",udPayHtml());
+  byId("udStart").addEventListener("click",udStart);
+  byId("udGo").addEventListener("click",udGuess);
+  byId("udGuess").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();udGuess()}});
+  udUi();
+}
+
+/* ═══════════ 🧩 짝맞추기 ═══════════ */
+const MM={on:false,bet:0,cards:[],done:[],first:-1,lock:false,tries:0,pairs:0};
+function mmMult(t){for(const r of CFG.memory.pay)if(t<=r[0])return r[1];return 0}
+function mmPayHtml(){
+  const p=CFG.memory.pay;
+  return p.map(function(r,i){return'<span data-m="'+r[0]+'">'+(i===0?"≤":"")+r[0]+"회 <b>x"+xs(r[1])+"</b></span>"}).join("")+"<span>"+(p[p.length-1][0]+1)+"회~ <b>x0</b></span>";
+}
+function mmInfo(){
+  setInfo("mmInfo",MM.on||MM.tries>0?"시도 <b>"+MM.tries+"</b>회 · 맞힌 쌍 <b>"+MM.pairs+"</b>/"+CFG.memory.pairs+(MM.on?" · 지금 끝내면 x"+xs(mmMult(MM.tries+1)):""):"카드 두 장을 연달아 뒤집어 같은 보석을 찾으세요");
+  const t=byId("mmPayTable");if(t){let cur=null;if(MM.on){for(const r of CFG.memory.pay){if(MM.tries+1<=r[0]){cur=r[0];break}}}for(const sp of t.children)sp.classList.toggle("cur",cur!==null&&+sp.dataset.m===cur)}
+  byId("mmStart").disabled=MM.on;
+}
+function mmBuild(){
+  const g=byId("mmGrid");g.innerHTML="";
+  for(let i=0;i<CFG.memory.pairs*2;i++){
+    const b=document.createElement("button");b.type="button";b.className="mgTile mgCard";b.dataset.i=i;b.disabled=true;
+    b.setAttribute("aria-label","카드 "+(i+1));b.innerHTML='<span class="mgBack">?</span>';g.appendChild(b);
+  }
+}
+function mmFace(i,up){
+  const b=byId("mmGrid").children[i];if(!b)return;
+  if(up){b.classList.add("up");b.innerHTML=gemSvg(MM.cards[i])}
+  else{b.classList.remove("up");b.innerHTML='<span class="mgBack">?</span>'}
+}
+function mmStart(){
+  if(MM.on)return;
+  const bet=betOf("mmBet");if(!take(bet,"mmResult"))return;
+  const n=CFG.memory.pairs;
+  MM.on=true;MM.bet=bet;MM.first=-1;MM.lock=false;MM.tries=0;MM.pairs=0;
+  MM.cards=shuffle(Array.from({length:n*2},function(_,i){return i%n}));
+  MM.done=MM.cards.map(function(){return false});
+  mmBuild();for(const b of byId("mmGrid").children)b.disabled=false;
+  say("mmResult","카드를 뒤집어 보세요!","");mmInfo();sfx("tick");
+}
+function mmFinish(){
+  MM.on=false;
+  const m=mmMult(MM.tries),p=Math.floor(MM.bet*m),prof=p-MM.bet;
+  give(p);
+  say("mmResult",MM.tries+"번 만에 완성! x"+xs(m)+" → "+(p>0?"+"+fmt(p)+" Coin":"배당 없음")+(prof>0?" (순이익 +"+fmt(prof)+")":prof<0?" (-"+fmt(-prof)+")":""),prof>0?"win":prof<0?"lose":"");
+  if(prof>0){sfx(m>=2?"big":"win");conf(m>=2?50:16)}else sfx("lose");
+  mmInfo();
+}
+function mmClick(i){
+  if(!MM.on||MM.lock||MM.done[i]||i===MM.first)return;
+  mmFace(i,true);sfx("chip");
+  if(MM.first<0){MM.first=i;return}
+  const a=MM.first;MM.first=-1;MM.tries++;
+  if(MM.cards[a]===MM.cards[i]){
+    MM.done[a]=MM.done[i]=true;MM.pairs++;
+    const g=byId("mmGrid").children;g[a].classList.add("ok");g[i].classList.add("ok");g[a].disabled=g[i].disabled=true;
+    sfx("hit");mmInfo();
+    if(MM.pairs>=CFG.memory.pairs)mmFinish();
+  }else{
+    MM.lock=true;mmInfo();
+    setTimeout(function(){mmFace(a,false);mmFace(i,false);MM.lock=false},700);
+  }
+}
+function mmInit(){
+  setInfo("mmPayTable",mmPayHtml());
+  mmBuild();
+  byId("mmGrid").addEventListener("click",function(e){const b=e.target.closest(".mgCard");if(b&&!b.disabled)mmClick(+b.dataset.i)});
+  byId("mmStart").addEventListener("click",mmStart);
+  mmInfo();
+}
+
+/* ═══════════ 🔨 두더지 잡기 (무료 · Gold 보상) ═══════════ */
+const WK={on:false,score:0,hits:0,bad:0,moles:0,timers:[],cells:[],hud:0,endAt:0,t0:0};
+function dayNow(){try{if(typeof CAMP!=="undefined"&&CAMP)return CAMP.day()}catch(_){}return Math.floor((Date.now()+324e5)/864e5)}
+function wkDaily(){
+  if(!s.ex||typeof s.ex!=="object"||Array.isArray(s.ex))s.ex={};
+  let m=s.ex.mg;const d=Math.max(dayNow(),m&&typeof m==="object"?num(m.d):0);   /* 날짜는 거꾸로 가지 않아요 */
+  if(!m||typeof m!=="object"||m.d!==d)m=s.ex.mg={d:d,p:0};
+  m.p=clamp(Math.floor(num(m.p)),0,999);
+  return m;
+}
+function wkLeft(){return Math.max(0,CFG.whack.plays-wkDaily().p)}
+function wkRewardOre(score){for(const r of CFG.whack.tbl)if(score>=r[0])return r[1];return 0}
+function wkPayHtml(){
+  const t=CFG.whack.tbl;
+  return t.map(function(r,i){return'<span>'+(r[0]===0?"그 외":r[0]+"점~")+" <b>광석 "+r[1]+"개 분량</b></span>"}).join("");
+}
+function wkUi(){
+  const left=wkLeft(),e=byId("wkPlays");
+  if(e)e.innerHTML="오늘 남은 판 <b>"+left+"</b>/"+CFG.whack.plays;
+  const b=byId("wkStart");if(b){b.disabled=WK.on||left<=0||!hasCamp();b.textContent=left<=0?"내일 또 도전!":"시작"}
+}
+function hasCamp(){try{return typeof CAMP!=="undefined"&&!!CAMP&&typeof CAMP.pay==="function"}catch(_){return false}}
+function wkBuild(){
+  const g=byId("wkBoard");g.innerHTML="";WK.cells=[];
+  for(let i=0;i<9;i++){
+    const b=document.createElement("button");b.type="button";b.className="wkCell";b.dataset.i=i;
+    b.setAttribute("aria-label","구멍 "+(i+1));
+    b.innerHTML='<span class="wkHole"></span><span class="wkMole"></span><span class="wkFront"></span>';
+    g.appendChild(b);WK.cells.push({el:b,mole:b.querySelector(".wkMole"),up:false,bad:false,t:0});
+  }
+}
+function wkClear(){
+  WK.timers.forEach(clearTimeout);WK.timers=[];clearInterval(WK.hud);WK.hud=0;
+  WK.cells.forEach(function(c){c.up=false;c.el.classList.remove("up","bad","hitf")});
+}
+function wkSpawn(k){
+  if(!WK.on)return;
+  const free=[];WK.cells.forEach(function(c,i){if(!c.up)free.push(i)});
+  if(!free.length)return;
+  const c=WK.cells[free[rnd(free.length)]];
+  const bad=k>=3&&Math.random()<CFG.whack.decoy;
+  const w=CFG.whack,life=w.lifeStart+(w.lifeEnd-w.lifeStart)*(k/(w.spawns-1));
+  c.up=true;c.bad=bad;c.mole.innerHTML=bad?tntSvg():moleSvg();
+  c.el.classList.remove("hitf");c.el.classList.toggle("bad",bad);
+  void c.el.offsetWidth;c.el.classList.add("up");
+  if(!bad)WK.moles++;
+  const my=++c.t;
+  WK.timers.push(setTimeout(function(){if(c.up&&c.t===my){c.up=false;c.el.classList.remove("up","bad")}},life));
+}
+function wkTap(i){
+  if(!WK.on)return;
+  const c=WK.cells[i];if(!c||!c.up)return;
+  c.up=false;c.el.classList.add("hitf");
+  setTimeout(function(){c.el.classList.remove("up","bad","hitf")},170);
+  if(c.bad){WK.bad++;WK.score-=CFG.whack.penalty;sfx("lose")}
+  else{WK.hits++;WK.score++;sfx("hit")}
+  wkHud();
+}
+function wkHud(){
+  const left=Math.max(0,WK.endAt-Date.now()),tot=WK.endAt-WK.t0;
+  const bar=byId("wkBar");if(bar)bar.style.width=(tot>0?clamp(left/tot*100,0,100):0)+"%";
+  setText("wkHud","점수 "+WK.score+" · 남은 시간 "+(left/1e3).toFixed(1)+"초");
+}
+function wkFinish(){
+  if(!WK.on)return;
+  WK.on=false;wkClear();
+  const score=Math.max(0,WK.score),ore=wkRewardOre(score);
+  let g=0;try{g=ore>0?CAMP.pay(ore):0}catch(_){}
+  setText("wkHud","끝! 최종 점수 "+WK.score);
+  const bar=byId("wkBar");if(bar)bar.style.width="0%";
+  say("wkResult","점수 "+WK.score+"점 (두더지 "+WK.hits+"/"+WK.moles+" · TNT "+WK.bad+"번) → Gold +"+fmt(g)+"!",g>0?"win":"");
+  if(ore>=90){sfx("big");conf(60)}else if(ore>=30){sfx("win");conf(28)}else if(g>0){sfx("win");conf(10)}
+  rerender();wkUi();
+}
+function wkStart(){
+  if(WK.on)return;
+  if(!hasCamp()){say("wkResult","지금은 이 게임을 할 수 없어요.","lose");return}
+  if(wkLeft()<=0){say("wkResult","오늘은 모두 했어요! 한국시간 0시에 다시 열려요.","");wkUi();return}
+  const m=wkDaily();m.p++;rerender();               /* 시작하면 1판으로 셈(중간에 나가도 되돌리지 않아요) */
+  wkBuild();
+  WK.on=true;WK.score=0;WK.hits=0;WK.bad=0;WK.moles=0;
+  const w=CFG.whack,lead=700;
+  WK.t0=Date.now();WK.endAt=WK.t0+lead+(w.spawns-1)*w.step+w.lifeEnd+200;
+  for(let k=0;k<w.spawns;k++)(function(k){WK.timers.push(setTimeout(function(){wkSpawn(k)},lead+k*w.step))})(k);
+  WK.timers.push(setTimeout(wkFinish,WK.endAt-WK.t0));
+  WK.hud=setInterval(wkHud,100);
+  say("wkResult","시작! 구멍에서 올라오는 두더지를 빨리 누르세요!","");
+  wkUi();wkHud();sfx("tick");
+}
+function wkInit(){
+  setInfo("wkPayTable",wkPayHtml());
+  wkBuild();
+  const bd=byId("wkBoard");
+  bd.addEventListener("pointerdown",function(e){const c=e.target.closest(".wkCell");if(c){e.preventDefault();wkTap(+c.dataset.i)}});
+  bd.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){const c=e.target.closest(".wkCell");if(c){e.preventDefault();wkTap(+c.dataset.i)}}});
+  byId("wkStart").addEventListener("click",wkStart);
+  wkUi();
+  setInterval(function(){try{if(!WK.on)wkUi()}catch(_){}},5000);   /* 날짜가 바뀌면 남은 판 수 갱신 */
+}
+
+/* ─── 시작 ─── */
+function boot(){
+  const pieces=[mnInit,udInit,mmInit,wkInit];
+  pieces.forEach(function(f){try{f()}catch(e){try{console.error("[새 미니게임] 일부 초기화 실패:",e)}catch(_){}}});
+}
+boot();
+
+return{
+  CFG:CFG
+};
+})()}catch(err){try{console.error("[새 미니게임] 초기화 실패 — 이 기능만 빼고 계속 실행합니다.",err)}catch(_){}return null}})();
 const ka="9f4a707e7991c314131369a8d221f43e43d7cf49055d516f5e41b91c9d2d8a6c",ao="";if(sessionStorage.getItem("passed_auth")!==ka.slice(0,24)){(window.top||window).location.replace("index.html");throw new Error("Access Denied")}if(window.__g2fail)throw new Error("Access Denied");let La=!1,Bt="";function da(t){return String(t??"").replace(/[&<>"']/g,n=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[n])}function Rt(t,n){const i=document.getElementById("adminMsg");i&&(i.textContent=t,i.className="resultBanner"+(n?" "+n:""),i.style.display="block")}function ua(){const t=document.getElementById("adminTarget");if(t){if(typeof T>"u"||!T){t.innerHTML='<option value="">서버 미연결</option>';return}t.dataset.keep=t.value||t.dataset.keep||"",t.innerHTML='<option value="">불러오는 중...</option>',ta(),Promise.all([T.ref("accounts").once("value").catch(()=>null),T.ref("leaderboard").once("value").catch(()=>null)]).then(([n,i])=>{const c=new Set;n&&n.forEach(k=>{k.key&&c.add(k.key)}),i&&i.forEach(k=>{const x=k.val();x&&x.name&&c.add(x.name)});const d=Array.from(c).sort((k,x)=>k.localeCompare(x,"ko"));Bt&&d.indexOf(Bt)<0&&(Bt="");const f=t.dataset.keep||"";t.innerHTML='<option value="">-- 유저를 선택하세요 --</option><option value="__ALL__">👥 전체 유저 ('+d.length+"명)</option>"+d.map(k=>`<option value="${da(k)}">${da(k)}</option>`).join(""),f&&(f==="__ALL__"||d.indexOf(f)>=0)&&(t.value=f),Aa()}).catch(()=>{t.innerHTML='<option value="">목록을 불러오지 못했어요</option>'})}}let fa=null;function ta(){const t=document.getElementById("adminUserList");if(t){if(typeof T>"u"||!T){t.innerHTML='<div class="adminUserEmpty">서버 미연결</div>';return}Promise.all([T.ref("accounts").once("value").catch(()=>null),T.ref("leaderboard").once("value").catch(()=>null)]).then(([n,i])=>{const c={};n&&n.forEach(x=>{x.key&&(c[x.key]=null)}),i&&i.forEach(x=>{const S=x.val();S&&S.name&&(c[S.name]={gold:+S.gold||0,coins:+S.coins||0,total:+S.totalValue||0})});const d=Object.keys(c).map(x=>({name:x,d:c[x]})).sort((x,S)=>(S.d?S.d.total:-1)-(x.d?x.d.total:-1)||x.name.localeCompare(S.name,"ko"));if(!d.length){t.innerHTML='<div class="adminUserEmpty">유저가 없어요</div>';return}const f=Bt;t.innerHTML='<div class="adminUserRow head"><span class="un">유저</span><span class="ug">💰 Gold</span><span class="uc">🪙 Coin</span></div>'+d.map(x=>`<div class="adminUserRow${f===x.name?" sel":""}" data-user="${da(x.name)}">
           <span class="un">${da(x.name)}</span>
           <span class="ug">${x.d?A(x.d.gold):"-"}</span>
@@ -2196,6 +2712,22 @@ function haInner(){if(y.f.forEach(a=>{const l=y.ex||0,o=y.phase===1&&l>0;a.rx=o?
     <div class="attnModalSub">새로운 소식과 업데이트 내용을 확인하세요!</div>
     <div id="noticeList">
       <details open>
+        <summary><span class="ntTag p">패치</span>v1.3 · 새 미니게임 4종<small>2026.10.18</small></summary>
+        <div class="ntBody">
+          <h4>🎮 미니게임 존에 탭 4개 추가</h4>
+          <ul>
+            <li><b>💎 지뢰밭</b> (Coin): 5×5 칸에서 안전한 칸을 열 때마다 배당이 올라가요. 폭탄을 밟기 전에 <b>수령</b>하세요! 폭탄 개수(3·6·10)를 고를 수 있어요.</li>
+            <li><b>🧩 짝맞추기</b> (Coin): 보석 카드 16장에서 같은 그림 8쌍을 찾아요. 적은 시도로 끝낼수록 배당이 커져요.</li>
+            <li><b>🔢 업다운</b> (Coin): 1~100 사이 비밀 숫자를 7번 안에 맞혀요. 빨리 맞힐수록 큰 배당!</li>
+            <li><b>🔨 두더지</b> (무료): Coin 없이 하루 5판! 구멍에서 올라오는 두더지를 눌러 점수를 내면 <b>Gold</b>를 받아요. TNT를 누르면 감점이에요.</li>
+          </ul>
+          <h4>💡 참고</h4>
+          <ul>
+            <li>두더지 보상은 ⛺광부 캠프와 같은 "광석 N개 분량" 기준이라 초반에도 후반에도 알맞게 커져요.</li>
+          </ul>
+        </div>
+      </details>
+      <details>
         <summary><span class="ntTag p">패치</span>v1.2 · 광부 캠프 &amp; Gold 수급처 추가<small>2026.10.16</small></summary>
         <div class="ntBody">
           <h4>⛺ 새 탭 「광부 캠프」</h4>
@@ -2255,7 +2787,7 @@ function haInner(){if(y.f.forEach(a=>{const l=y.ex||0,o=y.phase===1&&l>0;a.rx=o?
   </div>
 </div>
 <script>
-(function(){var V="v1.2-2026-10-16",K="gems_notice_seen",m=document.getElementById("noticeModal"),b=document.getElementById("noticeFabBtn"),g=document.getElementById("noticeFabBadge");
+(function(){var V="v1.3-2026-10-18",K="gems_notice_seen",m=document.getElementById("noticeModal"),b=document.getElementById("noticeFabBtn"),g=document.getElementById("noticeFabBadge");
 function seen(){try{return localStorage.getItem(K)===V}catch(e){return false}}
 function mark(){try{localStorage.setItem(K,V)}catch(e){}g&&(g.style.display="none")}
 g&&(g.style.display=seen()?"none":"block");
