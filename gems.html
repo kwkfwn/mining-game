@@ -105,7 +105,9 @@ try{window.stop()}catch(e){}
 .mgChip.hit{color:var(--win);border-color:var(--win)}
 .payTable .cur{color:var(--gold-txt);font-weight:900}
 .pkWrap{max-width:430px;margin:4px auto 6px}
-#pkCanvas{width:100%;display:block;border-radius:12px;background:radial-gradient(ellipse at 50% 0%,#17102b,#0a0d15 70%);border:1px solid #33264f;box-shadow:0 0 26px -12px rgba(192,75,255,.6)}
+#pkCanvas{width:100%;display:block;border-radius:14px;background:radial-gradient(ellipse at 50% 0%,#1d1238,#0a0d15 72%);border:1px solid #4a3480;box-shadow:0 0 34px -10px rgba(192,75,255,.75),inset 0 0 40px rgba(120,70,220,.18)}
+#pkCanvas.pkShake{animation:pkShake .5s ease}
+@keyframes pkShake{0%,100%{transform:translate(0,0)}15%{transform:translate(-5px,2px)}30%{transform:translate(5px,-3px)}45%{transform:translate(-4px,-2px)}60%{transform:translate(4px,3px)}80%{transform:translate(-2px,1px)}}
 .playBtn.pkMulti{margin-left:auto;background:linear-gradient(180deg,#3fe0ff,#1a8fc0);box-shadow:0 6px 18px -6px rgba(63,224,255,.6);color:#04222c}
 .playBtn.pkOne{margin-left:0}
 .mgRow .diceChoice small{font-weight:600;opacity:.75;margin-left:4px;font-size:10.5px}
@@ -1682,8 +1684,8 @@ const CFG={
   updown:{max:100,tries:7,pay:[15,6,3,2,1,0.4,0.2]},       /* N번째에 맞히면 배당 pay[N-1] */
   plinko:{rows:12,maxBalls:12,multi:5,rowMs:150,
     /* 위험도별 배당표(왼쪽 끝~가운데, 오른쪽은 대칭). 칸 13개 · 이항분포 확률로 계산하면 평균 환급률 ≈ 96% */
-    mults:{low:[8.5,3,1.6,1.3,1.1,1,0.4],mid:[33,11,4,2,1.1,0.6,0.2],high:[110,22,7,2.2,0.75,0.3,0.1]},
-    names:{low:"안전",mid:"보통",high:"대박"}}
+    mults:{mid:[33,11,4,2,1.1,0.6,0.2],high:[110,22,7,2.2,0.75,0.3,0.1]},
+    names:{mid:"보통",high:"대박"}}
 };
 
 /* ─── 작은 도우미들 ─── */
@@ -1762,7 +1764,7 @@ function udInit(){
 }
 
 /* ═══════════ 💎 플링코 (순수한 운) ═══════════ */
-const PK={risk:"mid",balls:[],raf:0,flash:{},g:null,lastTick:0};
+const PK={risk:"mid",balls:[],raf:0,flash:{},pegs:{},parts:[],floats:[],g:null,lastTick:0};
 function pkMults(r){const h=CFG.plinko.mults[r];return h.concat(h.slice(0,-1).reverse())}
 function binom(n,k){let r=1;for(let i=1;i<=k;i++)r=r*(n-k+i)/i;return r}
 function pkRtp(r){const N=CFG.plinko.rows,m=pkMults(r);let t=0;for(let k=0;k<=N;k++)t+=binom(N,k)/Math.pow(2,N)*m[k];return t}
@@ -1792,34 +1794,88 @@ function pkBallPos(b,g,now){
   const p0=pkPt(g,i,k0),p1=pkPt(g,i+1,k1),e=0.5-0.5*Math.cos(Math.PI*u);
   return{x:p0.x+(p1.x-p0.x)*e,y:p0.y+(p1.y-p0.y)*u-Math.sin(Math.PI*u)*g.dy*0.32,done:false,row:i,u:u};
 }
+/* ── 볼거리: 반짝이는 별 배경 · 못 번쩍임 · 보석 공(꼬리) · 칸 빛 · 터지는 불꽃 · 떠오르는 글자 ── */
+const PKSTARS=Array.from({length:46},function(){return{x:Math.random(),y:Math.random(),s:0.6+Math.random()*1.4,p:Math.random()*6.28}});
+function pkBurst(x,y,color,n,power){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*6.2832,v=(0.6+Math.random())*power;
+    PK.parts.push({x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-power*0.6,t0:performance.now(),life:650+Math.random()*500,c:Math.random()<0.35?"#fffbd0":color,s:1.6+Math.random()*2.6});
+  }
+}
+function pkGem(ctx,x,y,r,rot,hi){
+  ctx.save();ctx.translate(x,y);ctx.rotate(rot);
+  ctx.shadowColor=hi;ctx.shadowBlur=r*1.8;
+  const pts=[[0,-1],[0.86,-0.4],[0.86,0.4],[0,1],[-0.86,0.4],[-0.86,-0.4]];
+  ctx.beginPath();pts.forEach(function(p,i){i?ctx.lineTo(p[0]*r,p[1]*r):ctx.moveTo(p[0]*r,p[1]*r)});ctx.closePath();
+  const g=ctx.createLinearGradient(-r,-r,r,r);g.addColorStop(0,"#fffbe0");g.addColorStop(0.45,"#ffd23f");g.addColorStop(1,"#d9801a");
+  ctx.fillStyle=g;ctx.fill();ctx.shadowBlur=0;
+  ctx.strokeStyle="rgba(70,40,0,.75)";ctx.lineWidth=1.3;ctx.stroke();
+  ctx.strokeStyle="rgba(255,255,255,.65)";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(-0.86*r,-0.4*r);ctx.lineTo(0,0);ctx.lineTo(0.86*r,-0.4*r);ctx.moveTo(0,-r);ctx.lineTo(0,0);ctx.moveTo(0,0);ctx.lineTo(0,r);ctx.stroke();
+  ctx.fillStyle="rgba(255,255,255,.55)";ctx.beginPath();ctx.moveTo(-0.5*r,-0.55*r);ctx.lineTo(-0.1*r,-0.8*r);ctx.lineTo(0,-0.3*r);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
 function pkDraw(now){
   const g=pkGeo();if(!g)return;
   const cv=byId("pkCanvas"),ctx=cv.getContext("2d"),N=CFG.plinko.rows;
   ctx.setTransform(g.dpr,0,0,g.dpr,0,0);ctx.clearRect(0,0,g.W,g.H);
-  /* 못 */
-  ctx.fillStyle="#9aa4bd";
+  /* 배경: 별 + 은은한 빛줄기 */
+  const bg=ctx.createRadialGradient(g.cx,g.top*0.4,10,g.cx,g.H*0.55,g.H*0.9);
+  bg.addColorStop(0,"rgba(120,70,220,.28)");bg.addColorStop(0.55,"rgba(30,20,70,.12)");bg.addColorStop(1,"rgba(0,0,0,0)");
+  ctx.fillStyle=bg;ctx.fillRect(0,0,g.W,g.H);
+  PKSTARS.forEach(function(st){
+    const a=0.25+0.45*(0.5+0.5*Math.sin(now/700+st.p));
+    ctx.fillStyle="rgba(200,215,255,"+a.toFixed(3)+")";ctx.beginPath();ctx.arc(st.x*g.W,st.y*(g.slotY-4),st.s*0.7,0,6.2832);ctx.fill();
+  });
+  /* 못 (공이 맞으면 번쩍) */
+  const pr=Math.max(2.6,g.dx*0.1);
   for(let i=0;i<N;i++)for(let j=0;j<=i;j++){
-    const x=g.cx+(j-i/2)*g.dx,y=g.top+i*g.dy;
-    ctx.beginPath();ctx.arc(x,y,Math.max(2.6,g.dx*0.1),0,6.2832);ctx.fill();
+    const x=g.cx+(j-i/2)*g.dx,y=g.top+i*g.dy,fk=i+","+j,f=PK.pegs[fk]&&PK.pegs[fk]>now?(PK.pegs[fk]-now)/320:0;
+    if(f>0){
+      const gl=ctx.createRadialGradient(x,y,0,x,y,pr*5);gl.addColorStop(0,"rgba(255,235,150,"+(0.85*f).toFixed(3)+")");gl.addColorStop(1,"rgba(255,235,150,0)");
+      ctx.fillStyle=gl;ctx.beginPath();ctx.arc(x,y,pr*5,0,6.2832);ctx.fill();
+    }
+    const pg=ctx.createRadialGradient(x-pr*0.3,y-pr*0.3,0.3,x,y,pr);pg.addColorStop(0,f>0?"#ffffff":"#e6ecff");pg.addColorStop(1,f>0?"#ffd96a":"#7f8bb0");
+    ctx.fillStyle=pg;ctx.beginPath();ctx.arc(x,y,pr*(1+0.35*f),0,6.2832);ctx.fill();
   }
-  /* 칸 */
+  /* 칸: 빛나는 테두리 + 그라데이션 */
   const ms=pkMults(PK.risk);
   ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="800 "+Math.max(9,Math.floor(g.dx*0.3))+"px ui-monospace,Consolas,monospace";
   for(let k=0;k<=N;k++){
-    const x=g.cx+(k-N/2)*g.dx,w=g.dx*0.9,y=g.slotY,f=PK.flash[k]&&PK.flash[k]>now?(PK.flash[k]-now)/450:0;
-    ctx.fillStyle=pkColor(ms[k]);ctx.globalAlpha=0.78+0.22*f;
-    ctx.beginPath();ctx.roundRect?ctx.roundRect(x-w/2,y+f*-5,w,g.slotH,6):ctx.rect(x-w/2,y,w,g.slotH);ctx.fill();
-    ctx.globalAlpha=1;ctx.fillStyle="#0a0d15";ctx.fillText(pkLabel(ms[k]),x,y+g.slotH/2+(f?-5:0)+1);
+    const x=g.cx+(k-N/2)*g.dx,w=g.dx*0.9,fl=PK.flash[k]&&PK.flash[k]>now?(PK.flash[k]-now)/450:0,y=g.slotY-fl*7,col=pkColor(ms[k]);
+    ctx.save();ctx.shadowColor=col;ctx.shadowBlur=6+fl*22;
+    const sg=ctx.createLinearGradient(0,y,0,y+g.slotH);sg.addColorStop(0,"#ffffff55");sg.addColorStop(0.18,col);sg.addColorStop(1,col+"aa");
+    ctx.fillStyle=sg;ctx.beginPath();ctx.roundRect?ctx.roundRect(x-w/2,y,w,g.slotH,7):ctx.rect(x-w/2,y,w,g.slotH);ctx.fill();
+    ctx.shadowBlur=0;ctx.lineWidth=1.2;ctx.strokeStyle="rgba(255,255,255,"+(0.25+0.6*fl).toFixed(2)+")";ctx.stroke();ctx.restore();
+    ctx.fillStyle="#0a0d15";ctx.fillText(pkLabel(ms[k]),x,y+g.slotH/2+1);
   }
-  /* 공 */
+  /* 공 꼬리 + 보석 */
   PK.balls.forEach(function(b){
     const p=pkBallPos(b,g,now);if(!p)return;
-    const r=g.r,grd=ctx.createRadialGradient(p.x-r*0.35,p.y-r*0.4,r*0.1,p.x,p.y,r);
-    grd.addColorStop(0,"#fffbd0");grd.addColorStop(0.5,"#ffd23f");grd.addColorStop(1,"#c98a10");
-    ctx.shadowColor="rgba(255,210,63,.8)";ctx.shadowBlur=10;
-    ctx.fillStyle=grd;ctx.beginPath();ctx.arc(p.x,p.y,r,0,6.2832);ctx.fill();ctx.shadowBlur=0;
-    ctx.strokeStyle="rgba(60,40,0,.7)";ctx.lineWidth=1.2;ctx.stroke();
+    b.trail=b.trail||[];b.trail.push({x:p.x,y:p.y});if(b.trail.length>12)b.trail.shift();
+    b.trail.forEach(function(q,i){
+      const a=(i+1)/b.trail.length;ctx.fillStyle="rgba(255,205,80,"+(a*0.32).toFixed(3)+")";
+      ctx.beginPath();ctx.arc(q.x,q.y,g.r*0.75*a,0,6.2832);ctx.fill();
+    });
+    pkGem(ctx,p.x,p.y,g.r,now/260+b.t0,"rgba(255,210,70,.95)");
   });
+  /* 불꽃 · 떠오르는 글자 */
+  PK.parts=PK.parts.filter(function(q){return now-q.t0<q.life});
+  PK.parts.forEach(function(q){
+    const u=(now-q.t0)/1000,a=1-(now-q.t0)/q.life;
+    const x=q.x+q.vx*u*60,y=q.y+q.vy*u*60+0.5*520*u*u;
+    ctx.fillStyle=q.c;ctx.globalAlpha=Math.max(0,a);ctx.beginPath();ctx.arc(x,y,q.s*(0.5+0.5*a),0,6.2832);ctx.fill();
+  });
+  ctx.globalAlpha=1;
+  PK.floats=PK.floats.filter(function(f){return now-f.t0<1300});
+  PK.floats.forEach(function(f){
+    const u=(now-f.t0)/1300,a=u<0.7?1:(1-u)/0.3;
+    ctx.globalAlpha=Math.max(0,a);ctx.font="900 "+Math.floor(g.dx*(f.big?0.62:0.46))+"px ui-monospace,Consolas,monospace";
+    const hw=ctx.measureText(f.text).width/2+4,fx=Math.min(g.W-hw,Math.max(hw,f.x));   /* 가장자리 칸에서도 글자가 안 잘리게 */
+    ctx.lineWidth=4;ctx.strokeStyle="rgba(0,0,0,.75)";ctx.strokeText(f.text,fx,f.y-u*g.dy*2.4);
+    ctx.fillStyle=f.color;ctx.fillText(f.text,fx,f.y-u*g.dy*2.4);
+  });
+  ctx.globalAlpha=1;
 }
 /* 공이 지나갈 길(왼/오 12번)과 들어갈 칸 */
 function pkRoll(){
@@ -1829,11 +1885,22 @@ function pkRoll(){
 }
 /* 소수점 보상은 확률로 올림 → 작은 베팅에서도 기대값이 정확히 유지돼요 */
 function pkPay(raw){const fl=Math.floor(raw);return fl+(Math.random()<raw-fl?1:0)}
+function cv0(){return byId("pkCanvas")}
 function pkLand(b){
   if(b.landed)return;b.landed=true;
   give(b.pay);
   const m=b.mult,k=b.k;
-  PK.flash[k]=performance.now()+450;
+  const nowT=performance.now();
+  PK.flash[k]=nowT+450;
+  try{
+    const g=PK.g;
+    if(g){
+      const sx=g.cx+(k-CFG.plinko.rows/2)*g.dx,col=pkColor(m);
+      pkBurst(sx,g.slotY,col,m>=25?70:m>=5?42:m>=1?22:8,m>=5?5.5:3.6);
+      PK.floats.push({x:sx,y:g.slotY-6,t0:nowT,text:b.pay>0?"+"+fmt(b.pay):"꽝",color:m>=1?"#ffe27a":"#9fb4d8",big:m>=5});
+      if(m>=25){const w=cv0();if(w){w.classList.remove("pkShake");void w.offsetWidth;w.classList.add("pkShake")}}
+    }
+  }catch(_){}
   const prof=b.pay-b.bet;
   const h=byId("pkHist");
   if(h){
@@ -1850,7 +1917,7 @@ function pkLoop(){
   if(g){
     PK.balls.forEach(function(b){
       const p=pkBallPos(b,g,now);
-      if(p&&p.row!==b.lastRow&&p.row<CFG.plinko.rows&&now-PK.lastTick>55){b.lastRow=p.row;PK.lastTick=now;sfx("tick")}
+      if(p&&p.row!==b.lastRow&&p.row<CFG.plinko.rows){if(b.lastRow>=0||p.row===0)PK.pegs[p.row+","+b.cum[p.row]]=now+320;b.lastRow=p.row;if(now-PK.lastTick>55){PK.lastTick=now;sfx("tick")}}
       if(p&&p.done)pkLand(b);
     });
   }
@@ -1858,7 +1925,7 @@ function pkLoop(){
   pkDraw(now);
   pkUi();
   const flashing=Object.keys(PK.flash).some(function(k){return PK.flash[k]>now});
-  if(PK.balls.length||flashing)PK.raf=requestAnimationFrame(pkLoop);
+  if(PK.balls.length||flashing||PK.parts.length||PK.floats.length)PK.raf=requestAnimationFrame(pkLoop);
 }
 function pkKick(){if(!PK.raf)PK.raf=requestAnimationFrame(pkLoop)}
 function pkUi(){
@@ -1873,6 +1940,7 @@ function pkDrop(count,force){
   const P=CFG.plinko,N=P.rows;
   if(PK.balls.length+count>P.maxBalls){say("pkResult","공이 너무 많아요. 조금만 기다려 주세요!","lose");return}
   const bet=betOf("pkBet");
+  if(count>1&&bet*count>s.coins){say("pkResult","Coin이 부족해요! 연속 "+count+"개는 베팅 "+fmt(bet)+" × "+count+" = "+fmt(bet*count)+" Coin이 필요해요. (MAX 대신 베팅을 줄여 보세요)","lose");return}
   if(!take(bet*count,"pkResult"))return;
   const ms=pkMults(PK.risk),now=performance.now();
   for(let c=0;c<count;c++){
@@ -1893,7 +1961,7 @@ function pkInfo(){
 }
 function pkInit(){
   const rb=byId("pkRisk");
-  ["low","mid","high"].forEach(function(r){
+  ["mid","high"].forEach(function(r){
     const b=document.createElement("button");b.type="button";b.className="diceChoice"+(r===PK.risk?" sel":"");
     b.innerHTML=CFG.plinko.names[r]+"<small>x"+pkLabel(CFG.plinko.mults[r][0])+"</small>";
     b.addEventListener("click",function(){if(PK.balls.length)return;PK.risk=r;for(const x of rb.children)x.classList.toggle("sel",x===b);pkInfo();pkDraw(performance.now())});
@@ -2513,7 +2581,7 @@ function haInner(){if(y.f.forEach(a=>{const l=y.ex||0,o=y.phase===1&&l>0;a.rx=o?
           <h4>💎 플링코 (Coin · 순수한 운)</h4>
           <ul>
             <li>보석을 떨어뜨리면 못을 맞고 튕기며 내려가 아래 13칸 중 한 곳에 들어가요. 칸마다 배당이 달라요!</li>
-            <li>위험도 <b>안전 · 보통 · 대박</b> 중에 고를 수 있어요. 대박은 양 끝 칸이 최대 <b>x110</b>!</li>
+            <li>위험도 <b>보통 · 대박</b> 중에 고를 수 있어요. 대박은 양 끝 칸이 최대 <b>x110</b>!</li>
             <li>한 번에 5개를 연달아 떨어뜨리는 <b>연속 5개</b> 버튼도 있어요.</li>
           </ul>
           <h4>🔢 업다운 (Coin)</h4>
