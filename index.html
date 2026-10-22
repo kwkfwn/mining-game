@@ -157,6 +157,13 @@ html[data-device=desktop] .wrap{max-width:1280px;padding:28px 28px 48px;}
 html[data-device=desktop] .grid{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:26px;}
 html[data-device=desktop] .card,html[data-device=desktop] .tab,html[data-device=desktop] .gbtn{cursor:pointer;}
 @media (max-width:360px){.dopts{grid-template-columns:1fr;}}
+/* ---------- 퀴즈 ---------- */
+#quiz{min-height:100%;display:flex;align-items:center;justify-content:center;padding:calc(24px + var(--top)) 18px calc(24px + var(--bot));position:relative;overflow:hidden;}
+#quiz .gcard{max-width:420px;}
+.qq{margin:0 0 16px;font-size:20px;font-weight:900;line-height:1.4;word-break:keep-all;text-shadow:0 2px 0 #000a;}
+#qMsg{min-height:22px;margin:2px 0 12px;font-weight:800;font-size:14px;color:#ff7b7b;}
+#qGo{width:100%;font-size:18px;padding:12px 22px;}
+#qGo:disabled{filter:grayscale(.6) brightness(.8);cursor:default;}
 /* ---------- 계정 ---------- */
 #acct{min-height:100%;display:flex;align-items:center;justify-content:center;padding:calc(24px + var(--top)) 18px calc(24px + var(--bot));position:relative;overflow:hidden;}
 .acard{max-width:420px;}
@@ -203,6 +210,19 @@ html[data-device=mobile] .popt:hover{transform:none;}
     <input id="pw" type="password" autocomplete="off" placeholder="PASSWORD" maxlength="64">
     <div id="gateMsg"></div>
     <button class="gbtn orange" id="enter" type="button">ENTER &#9654;</button>
+  </div>
+</section>
+
+<!-- 퀴즈 -->
+<section id="quiz" hidden>
+  <div class="rays"></div>
+  <div class="gcard" id="qcard">
+    <div class="logo" id="qlogo"></div>
+    <p>퀴즈를 맞히면 입장할 수 있어요</p>
+    <h2 class="qq">노원섭이 나온 중학교의 이름은?</h2>
+    <input class="afield" id="qa" type="text" autocomplete="off" placeholder="정답" maxlength="30" spellcheck="false">
+    <div id="qMsg"></div>
+    <button class="gbtn orange" id="qGo" type="button">확인 &#9654;</button>
   </div>
 </section>
 
@@ -294,7 +314,7 @@ document.addEventListener("keydown",function(e){
   if((e.ctrlKey||e.metaKey)&&(k==="u"||k==="U"||k==="s"||k==="S")) { e.preventDefault(); return; }
 });
 /* ============ 설정 ============ */
-var _AH="24dd5e21e1f0bf75a4b24ac3690a2500c8135a528074d83c2341a1795627fac1";
+var _AH="185a8046e869d575dd0d78d58c315a6720263517ed7f34d8912b02be24c455f9";
 var _TK="9f4a707e7991c314131369a8"; /* 게임 파일들이 확인하는 통과 토큰 — 비밀번호를 바꿔도 이 값은 그대로 둬야 게임이 열려요 */
 var GAMES=[
   {id:"gems",  title:"뒷산에서 보석 캐기", sub:"", src:"gems.html", badge:"hot", tags:["광산","블랙잭","룰렛","볼파이트"], cat:"all",
@@ -363,6 +383,32 @@ function showDevice(){
 }
 function chooseDev(m){ ss("device_mode",m); applyDev(m); $("device").hidden=true; enterPortal(); }
 $("devSwitch").addEventListener("click",function(){ showDevice(); });
+
+/* ============ 퀴즈 (비밀번호 다음 단계) ============ */
+var _QH="53e1033f4e13d046a1b22a842bb875562609f6f62f910a4cc9616df849a6fb6d";
+var qFails=0,qLock=false;
+function showQuiz(){
+  closeGame(true);
+  $("gate").hidden=true; $("acct").hidden=true; $("device").hidden=true; $("portal").hidden=true; $("quiz").hidden=false;
+  if(!$("qlogo").innerHTML) $("qlogo").innerHTML=LOGO+'<div><b>FLASH ZONE</b><small>GAME ARCADE</small></div>';
+  $("qa").value=""; $("qMsg").textContent="";
+  setTimeout(function(){ $("qa").focus(); },60);
+}
+function tryQuiz(){
+  if(qLock) return;
+  var v=$("qa").value.replace(/\s+/g,""); if(!v) return;
+  qLock=true; $("qGo").disabled=true;
+  setTimeout(function(){
+    if(_ph("quiz:"+v)===_QH){ ss("passed_auth",_TK); ss("passed_pw",null); qFails=0; qLock=false; $("qGo").disabled=false; $("quiz").hidden=true; showAccount(); return; }
+    qFails++; var c=$("qcard"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake"); $("qa").value="";
+    var left=qFails>2?Math.min(8,qFails-1):0;
+    if(left<=0){ qLock=false; $("qGo").disabled=false; $("qMsg").textContent="틀렸어요. 다시 생각해 보세요"; $("qa").focus(); return; }
+    $("qMsg").textContent="틀렸어요 ("+left+"초 후 다시 시도)";
+    var tm=setInterval(function(){ left--; if(left<=0){ clearInterval(tm); qLock=false; $("qGo").disabled=false; $("qMsg").textContent="틀렸어요. 다시 생각해 보세요"; $("qa").focus(); } else $("qMsg").textContent="틀렸어요 ("+left+"초 후 다시 시도)"; },1000);
+  },30);
+}
+$("qGo").addEventListener("click",tryQuiz);
+$("qa").addEventListener("keydown",function(e){ if(e.key==="Enter") tryQuiz(); });
 
 /* ============ 계정 (이 브라우저에 저장) ============ */
 function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); return true; }catch(e){ return null; } }
@@ -516,14 +562,14 @@ $("who").addEventListener("click",showAccount);
 
 /* ============ 입장 화면 ============ */
 var fails=0,locked=false;
-function showGate(){ $("acct").hidden=true; $("device").hidden=true; $("portal").hidden=true; $("gate").hidden=false; setTimeout(function(){ $("pw").focus(); },60); }
+function showGate(){ $("quiz").hidden=true; $("acct").hidden=true; $("device").hidden=true; $("portal").hidden=true; $("gate").hidden=false; setTimeout(function(){ $("pw").focus(); },60); }
 function tryEnter(){
   if(locked) return;
   var v=$("pw").value;
   if(!v) return;
   if(_ph(v)===_AH){
-    ss("passed_auth",_TK); fails=0; $("pw").value=""; $("gateMsg").textContent="";
-    showAccount(); return;
+    ss("passed_pw","1"); fails=0; $("pw").value=""; $("gateMsg").textContent="";
+    showQuiz(); return;
   }
   fails++; var c=$("gcard"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake");
   $("pw").value="";
@@ -568,7 +614,7 @@ function enterPortal(){
   var id=(location.hash||"").replace("#","");
   if(id&&GAMES.some(function(g){return g.id===id;})) openGame(id,false);
 }
-$("lock").addEventListener("click",function(){ pushSaves(); ss("fz_cloud",null); ss("fz_acct",null); ss("fz_user",null); ss("passed_auth",null); ss("device_mode",null); applyDev(""); closeGame(true); $("device").hidden=true; showGate(); });
+$("lock").addEventListener("click",function(){ pushSaves(); ss("fz_cloud",null); ss("fz_acct",null); ss("passed_pw",null); ss("fz_user",null); ss("passed_auth",null); ss("device_mode",null); applyDev(""); closeGame(true); $("device").hidden=true; showGate(); });
 
 /* ============ 길건너 친구들: 2D / 3D 선택 ============ */
 function hidePick(){ $("pick").hidden=true; $("popts").innerHTML=""; }
@@ -674,7 +720,7 @@ $("pFull").addEventListener("click",function(){
 });
 
 /* ============ 시작 ============ */
-if(authed()){ if(!acctDone()) showAccount(); else { var _m=getDev(); if(_m){ applyDev(_m); enterPortal(); } else showDevice(); } } else showGate();
+if(authed()){ if(!acctDone()) showAccount(); else { var _m=getDev(); if(_m){ applyDev(_m); enterPortal(); } else showDevice(); } } else if(ss("passed_pw")==="1") showQuiz(); else showGate();
 })();
 </script>
 </body>
