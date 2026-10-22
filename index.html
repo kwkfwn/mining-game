@@ -155,6 +155,23 @@ html[data-device=desktop] .wrap{max-width:1280px;padding:28px 28px 48px;}
 html[data-device=desktop] .grid{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:26px;}
 html[data-device=desktop] .card,html[data-device=desktop] .tab,html[data-device=desktop] .gbtn{cursor:pointer;}
 @media (max-width:360px){.dopts{grid-template-columns:1fr;}}
+/* ---------- 계정 ---------- */
+#acct{min-height:100%;display:flex;align-items:center;justify-content:center;padding:calc(24px + var(--top)) 18px calc(24px + var(--bot));position:relative;overflow:hidden;}
+.acard{max-width:420px;}
+.acard .logo{justify-content:center;margin-bottom:4px;}
+.acard h2{margin:12px 0 12px;font-size:21px;font-weight:900;text-shadow:0 2px 0 #000a;}
+.acard .tabs{justify-content:center;}
+.acard p{margin:14px 0 14px;}
+.afield{display:block;width:100%;margin:0 0 10px;padding:12px 14px;font-family:inherit;font-size:17px;text-align:center;border-radius:12px;border:3px solid #0a0d2a;outline:none;color:#fff;
+  background:linear-gradient(#0a0e30,#171f5c);box-shadow:inset 0 3px 8px rgba(0,0,0,.6),0 0 0 2px #5668e8;-webkit-user-select:text;user-select:text;}
+.afield::placeholder{color:#6f7fc8;}
+.afield:focus{box-shadow:inset 0 3px 8px rgba(0,0,0,.6),0 0 0 3px var(--yellow),0 0 18px rgba(255,228,92,.55);}
+#acMsg{min-height:22px;margin:2px 0 12px;font-weight:800;font-size:14px;color:#ff7b7b;}
+#acGo{width:100%;font-size:18px;padding:12px 22px;}
+#acGo:disabled{filter:grayscale(.6) brightness(.8);cursor:default;}
+#acSkip{margin-top:16px;}
+#who{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+@media (max-width:560px){.top{flex-wrap:wrap;}.topbtns{flex-wrap:wrap;}}
 /* ---------- 버전 선택 (길건너 친구들 2D / 3D) ---------- */
 #pick{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;padding:calc(16px + var(--top)) 16px calc(16px + var(--bot));background:rgba(5,6,26,.86);overflow:hidden;}
 .pkcard{max-width:660px;max-height:100%;overflow:auto;}
@@ -187,6 +204,23 @@ html[data-device=mobile] .popt:hover{transform:none;}
   </div>
 </section>
 
+<!-- 계정 -->
+<section id="acct" hidden>
+  <div class="rays"></div>
+  <div class="gcard acard" id="acard">
+    <div class="logo" id="alogo"></div>
+    <h2>계정</h2>
+    <div class="tabs" id="acTabs"><button class="tab on" data-m="login" type="button">로그인</button><button class="tab" data-m="create" type="button">계정 만들기</button></div>
+    <p id="acHint"></p>
+    <input class="afield" id="acName" type="text" autocomplete="username" placeholder="닉네임" maxlength="12" autocapitalize="off" spellcheck="false">
+    <input class="afield" id="acPw" type="password" autocomplete="current-password" placeholder="비밀번호" maxlength="64">
+    <input class="afield" id="acPw2" type="password" autocomplete="new-password" placeholder="비밀번호 확인" maxlength="64" hidden>
+    <div id="acMsg"></div>
+    <button class="gbtn orange" id="acGo" type="button">로그인 &#9654;</button>
+    <button class="gbtn blue sm" id="acSkip" type="button">계정 없이 계속하기</button>
+  </div>
+</section>
+
 <!-- 기기 선택 -->
 <section id="device" hidden>
   <div class="rays"></div>
@@ -206,7 +240,7 @@ html[data-device=mobile] .popt:hover{transform:none;}
 <section id="portal" hidden>
   <header class="top">
     <div class="logo"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#ff8a1e"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="15" fill="url(#lg1)" stroke="#3a1a02" stroke-width="3"/><circle cx="32" cy="22" r="9" fill="#e02828" stroke="#3a1a02" stroke-width="3"/><circle cx="29" cy="19" r="2.6" fill="#fff" opacity=".8"/><rect x="29" y="29" width="6" height="14" fill="#3a1a02"/><rect x="11" y="41" width="42" height="13" rx="6.5" fill="#1a2260" stroke="#3a1a02" stroke-width="3"/><circle cx="21" cy="47.5" r="3.4" fill="#7dff7a"/><circle cx="32" cy="47.5" r="3.4" fill="#ffe45c"/><circle cx="43" cy="47.5" r="3.4" fill="#ff7a7a"/></svg><div><b>FLASH ZONE</b><small>GAME ARCADE</small></div></div>
-    <div class="topbtns"><button class="gbtn blue sm" id="devSwitch" type="button">기기 변경</button><button class="gbtn blue sm" id="lock" type="button">LOCK</button></div>
+    <div class="topbtns"><button class="gbtn blue sm" id="who" type="button"></button><button class="gbtn blue sm" id="devSwitch" type="button">기기 변경</button><button class="gbtn blue sm" id="lock" type="button">LOCK</button></div>
   </header>
   <div class="ticker"><span class="tag">NEW</span><span class="run" id="run"></span></div>
   <main class="wrap">
@@ -317,7 +351,7 @@ function guessDev(){
 }
 function showDevice(){
   closeGame(true);
-  $("gate").hidden=true; $("portal").hidden=true; $("device").hidden=false;
+  $("acct").hidden=true; $("gate").hidden=true; $("portal").hidden=true; $("device").hidden=false;
   if(!$("dlogo").innerHTML) $("dlogo").innerHTML=LOGO+'<div><b>FLASH ZONE</b><small>GAME ARCADE</small></div>';
   var g=guessDev();
   [].forEach.call($("device").querySelectorAll(".dopt"),function(b){
@@ -328,16 +362,84 @@ function showDevice(){
 function chooseDev(m){ ss("device_mode",m); applyDev(m); $("device").hidden=true; enterPortal(); }
 $("devSwitch").addEventListener("click",function(){ showDevice(); });
 
+/* ============ 계정 (이 브라우저에 저장) ============ */
+function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); return true; }catch(e){ return null; } }
+function getAccts(){ try{ var o=JSON.parse(ls("fz_accounts")||"{}"); return (o&&typeof o==="object"&&!Array.isArray(o))?o:{}; }catch(e){ return {}; } }
+function acctDone(){ return !!ss("fz_acct"); }
+function renderWho(){ var n=ss("fz_user"); $("who").textContent=n?("\uD83D\uDC64 "+n):"\uD83D\uDC64 로그인"; }
+var acMode="login",acBusy=false,acFails=0,acWaitT=null;
+function acMsg(t,ok){ var m=$("acMsg"); m.textContent=t||""; m.style.color=ok?"#7dff7a":"#ff7b7b"; }
+function acShake(){ var c=$("acard"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake"); }
+function acSetMode(m){
+  acMode=m; acMsg("");
+  [].forEach.call($("acTabs").querySelectorAll(".tab"),function(b){ b.classList.toggle("on",b.getAttribute("data-m")===m); });
+  $("acPw2").hidden=(m!=="create");
+  $("acPw").setAttribute("autocomplete",m==="create"?"new-password":"current-password");
+  $("acGo").innerHTML=m==="create"?"계정 만들기 &#9654;":"로그인 &#9654;";
+  $("acHint").textContent=m==="create"?"닉네임 2~12자 (한글·영문·숫자·_) · 비밀번호 4자 이상":"만들어 둔 계정으로 로그인하세요";
+}
+function showAccount(){
+  closeGame(true);
+  $("gate").hidden=true; $("device").hidden=true; $("portal").hidden=true; $("acct").hidden=false;
+  if(!$("alogo").innerHTML) $("alogo").innerHTML=LOGO+'<div><b>FLASH ZONE</b><small>GAME ARCADE</small></div>';
+  acBusy=false; clearInterval(acWaitT); $("acGo").disabled=false;
+  acSetMode(Object.keys(getAccts()).length>0?"login":"create");
+  $("acName").value=""; $("acPw").value=""; $("acPw2").value="";
+  setTimeout(function(){ $("acName").focus(); },60);
+}
+function acEnter(name,guest){
+  ss("fz_acct",guest?"guest":"user"); ss("fz_user",guest?null:name);
+  $("acct").hidden=true; renderWho();
+  var m=getDev(); if(m){ applyDev(m); enterPortal(); } else showDevice();
+}
+function acSubmit(){
+  if(acBusy) return;
+  var name=$("acName").value.trim(), pw=$("acPw").value, key="u:"+name.toLowerCase();
+  if(!/^[0-9A-Za-z_가-힣]{2,12}$/.test(name)){ acMsg("닉네임은 2~12자, 한글·영문·숫자·_ 만 쓸 수 있어요"); acShake(); return; }
+  if(pw.length<4){ acMsg("비밀번호는 4자 이상이어야 해요"); acShake(); return; }
+  var accts=getAccts();
+  if(acMode==="create"){
+    if(pw!==$("acPw2").value){ acMsg("비밀번호 확인이 서로 달라요"); acShake(); return; }
+    if(accts[key]){ acMsg("이미 있는 닉네임이에요. 다른 닉네임을 써 주세요"); acShake(); return; }
+    if(Object.keys(accts).length>=30){ acMsg("이 브라우저에는 계정을 더 만들 수 없어요"); return; }
+  } else if(!accts[key]){ acMsg("없는 계정이에요. '계정 만들기'에서 먼저 만들어 주세요"); acShake(); return; }
+  acBusy=true; $("acGo").disabled=true; acMsg("확인 중...",true);
+  setTimeout(function(){
+    acBusy=false; $("acGo").disabled=false;
+    if(acMode==="create"){
+      var salt=Date.now().toString(36)+Math.random().toString(36).slice(2);
+      try{ var arr=new Uint8Array(12); crypto.getRandomValues(arr); salt=[].map.call(arr,function(x){ return ("0"+x.toString(16)).slice(-2); }).join(""); }catch(e){}
+      accts[key]={name:name,salt:salt,hash:_ph(salt+":"+pw),created:Date.now()};
+      if(ls("fz_accounts",JSON.stringify(accts))!==true){ acMsg("이 브라우저에서는 계정을 저장할 수 없어요 (시크릿 모드인지 확인해 보세요)"); return; }
+      acEnter(name,false); return;
+    }
+    var r=accts[key];
+    if(r&&typeof r.hash==="string"&&_ph(r.salt+":"+pw)===r.hash){ acFails=0; acEnter(r.name||name,false); return; }
+    acFails++; acShake(); $("acPw").value="";
+    var wait=acFails>2?Math.min(8,acFails-1):0;
+    if(wait>0){
+      acBusy=true; $("acGo").disabled=true; var left=wait; acMsg("비밀번호가 틀렸어요 ("+left+"초 후 다시 시도)");
+      clearInterval(acWaitT);
+      acWaitT=setInterval(function(){ left--; if(left<=0){ clearInterval(acWaitT); acBusy=false; $("acGo").disabled=false; acMsg("비밀번호가 틀렸어요"); $("acPw").focus(); } else acMsg("비밀번호가 틀렸어요 ("+left+"초 후 다시 시도)"); },1000);
+    } else { acMsg("비밀번호가 틀렸어요"); $("acPw").focus(); }
+  },30);
+}
+$("acGo").addEventListener("click",acSubmit);
+[].forEach.call($("acct").querySelectorAll("input"),function(i){ i.addEventListener("keydown",function(e){ if(e.key==="Enter") acSubmit(); }); });
+[].forEach.call($("acTabs").querySelectorAll(".tab"),function(b){ b.addEventListener("click",function(){ if(!acBusy) acSetMode(b.getAttribute("data-m")); }); });
+$("acSkip").addEventListener("click",function(){ acEnter("",true); });
+$("who").addEventListener("click",showAccount);
+
 /* ============ 입장 화면 ============ */
 var fails=0,locked=false;
-function showGate(){ $("device").hidden=true; $("portal").hidden=true; $("gate").hidden=false; setTimeout(function(){ $("pw").focus(); },60); }
+function showGate(){ $("acct").hidden=true; $("device").hidden=true; $("portal").hidden=true; $("gate").hidden=false; setTimeout(function(){ $("pw").focus(); },60); }
 function tryEnter(){
   if(locked) return;
   var v=$("pw").value;
   if(!v) return;
   if(_ph(v)===_AH){
     ss("passed_auth",_TK); fails=0; $("pw").value=""; $("gateMsg").textContent="";
-    showDevice(); return;
+    showAccount(); return;
   }
   fails++; var c=$("gcard"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake");
   $("pw").value="";
@@ -375,14 +477,14 @@ function renderGrid(){
   });
 }
 function enterPortal(){
-  $("gate").hidden=true; $("device").hidden=true; $("portal").hidden=false;
+  $("acct").hidden=true; $("gate").hidden=true; $("device").hidden=true; $("portal").hidden=false; renderWho();
   $("run").textContent="새 게임이 추가됐어요!  \u2605  길건너 친구들 2D · 3D  \u2605  NEON KNUCKLE 격투 대전 (온라인 지원)  \u2605  SUPER PIXEL BROS.  \u2605  전설의 검 키우기 : 100강의 지배자  \u2605  뒷산에서 보석 캐기 업데이트  \u2605  게임은 계속 추가돼요";
   renderTabs(); renderGrid();
   setTimeout(function(){ GAMES.forEach(function(g){ if(!g.src) return; try{ var l=document.createElement("link"); l.rel="prefetch"; l.href=g.src; document.head.appendChild(l); }catch(e){} }); },800);
   var id=(location.hash||"").replace("#","");
   if(id&&GAMES.some(function(g){return g.id===id;})) openGame(id,false);
 }
-$("lock").addEventListener("click",function(){ ss("passed_auth",null); ss("device_mode",null); applyDev(""); closeGame(true); $("device").hidden=true; showGate(); });
+$("lock").addEventListener("click",function(){ ss("fz_acct",null); ss("fz_user",null); ss("passed_auth",null); ss("device_mode",null); applyDev(""); closeGame(true); $("device").hidden=true; showGate(); });
 
 /* ============ 길건너 친구들: 2D / 3D 선택 ============ */
 function hidePick(){ $("pick").hidden=true; $("popts").innerHTML=""; }
@@ -488,7 +590,7 @@ $("pFull").addEventListener("click",function(){
 });
 
 /* ============ 시작 ============ */
-if(authed()){ var _m=getDev(); if(_m){ applyDev(_m); enterPortal(); } else showDevice(); } else showGate();
+if(authed()){ if(!acctDone()) showAccount(); else { var _m=getDev(); if(_m){ applyDev(_m); enterPortal(); } else showDevice(); } } else showGate();
 })();
 </script>
 </body>
