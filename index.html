@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>FLASH ZONE · 게임 모음</title>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ff9d2e'/%3E%3Ccircle cx='32' cy='24' r='9' fill='%23fff'/%3E%3Crect x='28' y='30' width='8' height='14' fill='%23fff'/%3E%3Crect x='14' y='42' width='36' height='10' rx='5' fill='%231a2260'/%3E%3C/svg%3E">
@@ -366,7 +368,7 @@ $("devSwitch").addEventListener("click",function(){ showDevice(); });
 function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); return true; }catch(e){ return null; } }
 function getAccts(){ try{ var o=JSON.parse(ls("fz_accounts")||"{}"); return (o&&typeof o==="object"&&!Array.isArray(o))?o:{}; }catch(e){ return {}; } }
 function acctDone(){ return !!ss("fz_acct"); }
-function renderWho(){ var n=ss("fz_user"); $("who").textContent=n?("\uD83D\uDC64 "+n):"\uD83D\uDC64 로그인"; }
+function renderWho(){ var n=ss("fz_user"),c=ss("fz_cloud")==="1",w=$("who"); w.textContent=n?("\uD83D\uDC64 "+n+(c?(cloudOK===false?" \u26A0":" \u2601"):" \uD83D\uDCBE")):"\uD83D\uDC64 로그인"; w.title=n?(c?(cloudOK===false?"서버에 저장하지 못했어요 (이 기기에만 저장돼요)":"서버에 저장돼요"):"이 기기에만 저장돼요"):""; }
 var acMode="login",acBusy=false,acFails=0,acWaitT=null;
 function acMsg(t,ok){ var m=$("acMsg"); m.textContent=t||""; m.style.color=ok?"#7dff7a":"#ff7b7b"; }
 function acShake(){ var c=$("acard"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake"); }
@@ -376,23 +378,105 @@ function acSetMode(m){
   $("acPw2").hidden=(m!=="create");
   $("acPw").setAttribute("autocomplete",m==="create"?"new-password":"current-password");
   $("acGo").innerHTML=m==="create"?"계정 만들기 &#9654;":"로그인 &#9654;";
-  $("acHint").textContent=m==="create"?"닉네임 2~12자 (한글·영문·숫자·_) · 비밀번호 4자 이상":"만들어 둔 계정으로 로그인하세요";
+  $("acHint").textContent=m==="create"?"닉네임 2~12자 (한글·영문·숫자) · 비밀번호 4~20자":"허브 전용 계정이에요 (gems 계정과는 따로예요)";
 }
 function showAccount(){
   closeGame(true);
   $("gate").hidden=true; $("device").hidden=true; $("portal").hidden=true; $("acct").hidden=false;
   if(!$("alogo").innerHTML) $("alogo").innerHTML=LOGO+'<div><b>FLASH ZONE</b><small>GAME ARCADE</small></div>';
   acBusy=false; clearInterval(acWaitT); $("acGo").disabled=false;
-  acSetMode(Object.keys(getAccts()).length>0?"login":"create");
+  acSetMode((FB()||Object.keys(getAccts()).length>0)?"login":"create");
   $("acName").value=""; $("acPw").value=""; $("acPw2").value="";
   setTimeout(function(){ $("acName").focus(); },60);
 }
-function acEnter(name,guest){
-  ss("fz_acct",guest?"guest":"user"); ss("fz_user",guest?null:name);
-  $("acct").hidden=true; renderWho();
-  var m=getDev(); if(m){ applyDev(m); enterPortal(); } else showDevice();
+/* ---- 서버(Firebase) 계정/저장: gems와 같은 데이터베이스 ---- */
+var cloudOK=null,cloudBase={},fbDb=null;
+function FB(){
+  if(fbDb) return fbDb;
+  try{
+    if(!window.firebase||!firebase.database) return null;
+    if(!firebase.apps.length){
+      firebase.initializeApp({databaseURL:"https://flash-b1715-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"flash-b1715"});
+    }
+    fbDb=firebase.database();
+  }catch(e){ fbDb=null; }
+  return fbDb;
+}
+function acHash(t){
+  var n=t+"_mineGame_salt_2026";
+  function fb(){ var i=0; for(var c=0;c<n.length;c++) i=Math.imul(i,31)+n.charCodeAt(c)|0; return "f"+Math.abs(i).toString(16); }
+  try{ if(window.crypto&&window.crypto.subtle) return crypto.subtle.digest("SHA-256",new TextEncoder().encode(n)).then(function(b){ return Array.from(new Uint8Array(b)).map(function(x){ return x.toString(16).padStart(2,"0"); }).join(""); }).catch(fb); }catch(e){}
+  return Promise.resolve(fb());
+}
+function tmo(ms){ return new Promise(function(_,rj){ setTimeout(function(){ rj(new Error("timeout")); },ms); }); }
+function PFX(n){ return "fz:"+String(n).toLowerCase()+":"; }
+function enc(k){ return encodeURIComponent(k).replace(/\./g,"%2E"); }
+function dec(k){ try{ return decodeURIComponent(k); }catch(e){ return k; } }
+function tmap(n){ try{ return JSON.parse(ls("fz_t:"+String(n).toLowerCase())||"{}")||{}; }catch(e){ return {}; } }
+function tsave(n,T){ ls("fz_t:"+String(n).toLowerCase(),JSON.stringify(T)); }
+function setCloud(ok){ cloudOK=ok; renderWho(); }
+function localSaves(n){ var P=PFX(n),o={}; try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.indexOf(P)===0) o[k.slice(P.length)]=localStorage.getItem(k); } }catch(e){} return o; }
+function pullSaves(){
+  var n=ss("fz_user"),d=FB(); cloudBase={};
+  if(!n||!d||ss("fz_cloud")!=="1") return Promise.resolve();
+  var P=PFX(n),T=tmap(n);
+  return Promise.race([d.ref("hub/saves/"+n).once("value"),tmo(7000)]).then(function(s){
+    var v=s.val()||{};
+    Object.keys(v).forEach(function(ek){
+      var k=dec(ek),r=v[ek],loc=null; if(!r||typeof r.v!=="string") return;
+      try{ loc=localStorage.getItem(P+k); }catch(e){}
+      if(loc===r.v){ cloudBase[k]=r.v; T[k]=r.t||0; }
+      else if(loc===null||(r.t||0)>(T[k]||0)){ try{ localStorage.setItem(P+k,r.v); cloudBase[k]=r.v; T[k]=r.t||0; }catch(e){} }
+    });
+    tsave(n,T); setCloud(true);
+  }).catch(function(){ setCloud(false); });
+}
+function pushSaves(){
+  var n=ss("fz_user"),d=FB(); if(!n||!d||ss("fz_cloud")!=="1") return;
+  var loc=localSaves(n),up={},c=0,now=Date.now();
+  Object.keys(loc).forEach(function(k){ if(cloudBase[k]!==loc[k]){ up[enc(k)]={v:loc[k],t:now}; c++; } });
+  if(!c) return;
+  d.ref("hub/saves/"+n).update(up).then(function(){
+    var T=tmap(n); Object.keys(up).forEach(function(ek){ var k=dec(ek); cloudBase[k]=up[ek].v; T[k]=now; }); tsave(n,T); setCloud(true);
+  }).catch(function(){ setCloud(false); });
+}
+setInterval(pushSaves,6000);
+document.addEventListener("visibilitychange",function(){ if(document.hidden) pushSaves(); });
+window.addEventListener("pagehide",pushSaves);
+function acEnter(name,guest,cloud){
+  ss("fz_acct",guest?"guest":"user"); ss("fz_user",guest?null:name); ss("fz_cloud",cloud?"1":null); cloudOK=null;
+  var go=function(){ $("acct").hidden=true; renderWho(); var m=getDev(); if(m){ applyDev(m); enterPortal(); } else showDevice(); };
+  if(cloud){ acMsg("저장을 불러오는 중...",true); pullSaves().then(go,go); } else go();
+}
+function acCool(){
+  var wait=acFails>2?Math.min(8,acFails-1):0;
+  if(wait<=0){ acMsg("비밀번호가 틀렸어요"); $("acPw").focus(); return; }
+  acBusy=true; $("acGo").disabled=true; var left=wait; acMsg("비밀번호가 틀렸어요 ("+left+"초 후 다시 시도)"); clearInterval(acWaitT);
+  acWaitT=setInterval(function(){ left--; if(left<=0){ clearInterval(acWaitT); acBusy=false; $("acGo").disabled=false; acMsg("비밀번호가 틀렸어요"); $("acPw").focus(); } else acMsg("비밀번호가 틀렸어요 ("+left+"초 후 다시 시도)"); },1000);
+}
+function acCloud(d,name,pw){
+  acBusy=true; $("acGo").disabled=true; acMsg("서버 확인 중...",true);
+  var free=function(){ acBusy=false; $("acGo").disabled=false; };
+  Promise.race([acHash(pw).then(function(h){ return d.ref("hub/accounts/"+name).once("value").then(function(s){ return [h,s]; }); }),tmo(9000)]).then(function(r){
+    var h=r[0],s=r[1],ex=s.exists();
+    if(acMode==="create"){
+      if(ex){ free(); acMsg("이미 있는 닉네임이에요. 내 계정이면 '로그인'으로 들어오세요"); acShake(); return; }
+      return d.ref("hub/accounts/"+name).set({passwordHash:h,createdAt:Date.now()}).then(function(){ free(); acFails=0; acEnter(name,false,true); });
+    }
+    if(!ex){ free(); acMsg("없는 계정이에요. '계정 만들기'에서 먼저 만들어 주세요"); acShake(); return; }
+    if((s.val()||{}).passwordHash!==h){ free(); acFails++; acShake(); $("acPw").value=""; acCool(); return; }
+    free(); acFails=0; acEnter(name,false,true);
+  }).catch(function(e){ free(); if(/permission/i.test(String(e&&(e.code||e.message)))){ acLocal(); return; } acMsg("서버에 연결하지 못했어요. 잠시 뒤 다시 시도해 주세요"); });
 }
 function acSubmit(){
+  if(acBusy) return;
+  var name=$("acName").value.trim(),pw=$("acPw").value;
+  if(!/^[가-힣a-zA-Z0-9]{2,12}$/.test(name)){ acMsg("닉네임은 2~12자, 한글·영문·숫자만 쓸 수 있어요"); acShake(); return; }
+  if(pw.length<4||pw.length>20){ acMsg("비밀번호는 4~20자로 입력해 주세요"); acShake(); return; }
+  if(acMode==="create"&&pw!==$("acPw2").value){ acMsg("비밀번호 확인이 서로 달라요"); acShake(); return; }
+  var d=FB(); if(d) acCloud(d,name,pw); else acLocal();
+}
+function acLocal(){
   if(acBusy) return;
   var name=$("acName").value.trim(), pw=$("acPw").value, key="u:"+name.toLowerCase();
   if(!/^[0-9A-Za-z_가-힣]{2,12}$/.test(name)){ acMsg("닉네임은 2~12자, 한글·영문·숫자·_ 만 쓸 수 있어요"); acShake(); return; }
@@ -484,7 +568,7 @@ function enterPortal(){
   var id=(location.hash||"").replace("#","");
   if(id&&GAMES.some(function(g){return g.id===id;})) openGame(id,false);
 }
-$("lock").addEventListener("click",function(){ ss("fz_acct",null); ss("fz_user",null); ss("passed_auth",null); ss("device_mode",null); applyDev(""); closeGame(true); $("device").hidden=true; showGate(); });
+$("lock").addEventListener("click",function(){ pushSaves(); ss("fz_cloud",null); ss("fz_acct",null); ss("fz_user",null); ss("passed_auth",null); ss("device_mode",null); applyDev(""); closeGame(true); $("device").hidden=true; showGate(); });
 
 /* ============ 길건너 친구들: 2D / 3D 선택 ============ */
 function hidePick(){ $("pick").hidden=true; $("popts").innerHTML=""; }
@@ -552,7 +636,7 @@ function openGame(id,push){
     setPct(Math.min(92,pct+(92-pct)*.08+.6));
   },90);
 }
-function closeGame(skipHistory){
+function closeGame(skipHistory){ try{ pushSaves(); }catch(e){}
   if(!playing&&$("player").hidden) return;
   playing=null; loadId++; curFinish=null; clearInterval(progTimer); clearInterval(tipTimer);
   /* 화면부터 즉시 닫고, 게임은 그 다음에 제거 */
