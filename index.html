@@ -314,8 +314,9 @@ document.addEventListener("keydown",function(e){
   if((e.ctrlKey||e.metaKey)&&(k==="u"||k==="U"||k==="s"||k==="S")) { e.preventDefault(); return; }
 });
 /* ============ 설정 ============ */
-var _AH="185a8046e869d575dd0d78d58c315a6720263517ed7f34d8912b02be24c455f9";
-var _TK="9f4a707e7991c314131369a8"; /* 게임 파일들이 확인하는 통과 토큰 — 비밀번호를 바꿔도 이 값은 그대로 둬야 게임이 열려요 */
+/* 비밀번호·퀴즈 정답·통과 토큰은 이 파일에 평문으로 들어 있지 않아요 (아래 암호화된 값만 있어요).
+   바꾸고 싶으면 rekey-tool.html 로 바꾸세요 (이 줄을 손으로 고치면 입장이 안 돼요). 게임용 통과 토큰 값은 바꿔도 그대로라서 게임은 계속 열려요. */
+/*C-BEGIN*/var _C={"it":1000000,"sp":"7ee707a45652aa56f51071b9beea3b65","vp":"cee2535a0974d3ba996a973003c28f6327dae7a2be158bfe64f0f70e7b17431d","sq":"9f96f095628068cc9886287d4a6d0c49","vq":"7e9cac5baa03fdeb9e88d95c2787e5cc67f16f33a35389a632706bfa605282fe","tkc":"72093e3e351e4bec714fb6de06257502deb3a161f0e6dd2f","tkh":"d0ce52ab314ea75fac2e7e4b250cd7b13eb7c56c36d9cdbf51fc8f65004fbfe5"};/*C-END*/
 var GAMES=[
   {id:"gems",  title:"뒷산에서 보석 캐기", sub:"", src:"gems.html", badge:"hot", tags:["광산","블랙잭","룰렛","볼파이트"], cat:"all",
    desc:"곡괭이를 들고 뒷산 광산으로! 보석을 캐서 골드로 바꾸고, 블랙잭 · 러시안 룰렛 · 반응속도 · 볼파이트 대전까지 즐기는 종합 게임이에요.", thumb:"gems"},
@@ -338,6 +339,74 @@ var TIPS=["게임은 이 창 안에서 실행돼요. 왼쪽 위 '목록' 버튼�
 /* ============ 비밀번호 해시 (게임들과 같은 방식) ============ */
 function _s256(str){var d=new TextEncoder().encode(str),l=d.length,K=[],H0=[],i,j,w=[];var P=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311];function f(x){return((x-Math.floor(x))*4294967296)|0}for(i=0;i<64;i++){K[i]=f(Math.pow(P[i],1/3));if(i<8)H0[i]=f(Math.sqrt(P[i]))}var nb=((l+9+63)>>6)<<6,b=new Uint8Array(nb);b.set(d);b[l]=128;var bl=l*8;b[nb-4]=bl>>>24;b[nb-3]=bl>>>16&255;b[nb-2]=bl>>>8&255;b[nb-1]=bl&255;var h=H0.slice(),R=function(x,n){return(x>>>n)|(x<<(32-n))};for(var o=0;o<nb;o+=64){for(i=0;i<16;i++)w[i]=(b[o+i*4]<<24)|(b[o+i*4+1]<<16)|(b[o+i*4+2]<<8)|b[o+i*4+3];for(i=16;i<64;i++){var s0=R(w[i-15],7)^R(w[i-15],18)^(w[i-15]>>>3),s1=R(w[i-2],17)^R(w[i-2],19)^(w[i-2]>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)|0}var a=h[0],bb=h[1],c=h[2],dd=h[3],e=h[4],ff=h[5],g=h[6],hh=h[7];for(i=0;i<64;i++){var S1=R(e,6)^R(e,11)^R(e,25),ch=(e&ff)^(~e&g),t1=(hh+S1+ch+K[i]+w[i])|0,S0=R(a,2)^R(a,13)^R(a,22),mj=(a&bb)^(a&c)^(bb&c),t2=(S0+mj)|0;hh=g;g=ff;ff=e;e=(dd+t1)|0;dd=c;c=bb;bb=a;a=(t1+t2)|0}h[0]=(h[0]+a)|0;h[1]=(h[1]+bb)|0;h[2]=(h[2]+c)|0;h[3]=(h[3]+dd)|0;h[4]=(h[4]+e)|0;h[5]=(h[5]+ff)|0;h[6]=(h[6]+g)|0;h[7]=(h[7]+hh)|0}return h.map(function(x){return('00000000'+(x>>>0).toString(16)).slice(-8)}).join('')}
 function _ph(p){var h='gm-v1:'+String(p);for(var i=0;i<20000;i++)h=_s256(h+i);return h}
+/* ============ 비밀번호·퀴즈 보호 ============
+   이 파일에는 비밀번호·퀴즈 정답이 들어 있지 않아요. 소금(salt)을 섞은 PBKDF2-SHA256 100만 회 계산으로만 확인해요.
+   퀴즈 확인에는 비밀번호도 함께 쓰여서, 비밀번호를 모르면 정답을 하나씩 대입해 볼 수도 없어요.
+   게임 통과 토큰은 퀴즈까지 맞혀야 풀리는 암호문으로만 들어 있어요. */
+function _hx(u){var s="";for(var i=0;i<u.length;i++)s+=("0"+u[i].toString(16)).slice(-2);return s}
+function _fx(h){var u=new Uint8Array(h.length>>1);for(var i=0;i<u.length;i++)u[i]=parseInt(h.substr(i*2,2),16);return u}
+var _K256=null;
+function _pbJS(key,salt,n){
+  var P=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311],i,j,q;
+  if(!_K256){_K256=new Int32Array(64);for(q=0;q<64;q++){var x0=Math.pow(P[q],1/3);_K256[q]=((x0-Math.floor(x0))*4294967296)|0}}
+  var K=_K256,W=new Int32Array(64),H0=new Int32Array(8);
+  for(q=0;q<8;q++){var y0=Math.sqrt(P[q]);H0[q]=((y0-Math.floor(y0))*4294967296)|0}
+  function cmp(H){
+    var i,a,b,c,d,e,f,g,h,t1,t2,x,y;
+    for(i=16;i<64;i++){x=W[i-15];y=W[i-2];W[i]=(W[i-16]+(((x>>>7)|(x<<25))^((x>>>18)|(x<<14))^(x>>>3))+W[i-7]+(((y>>>17)|(y<<15))^((y>>>19)|(y<<13))^(y>>>10)))|0}
+    a=H[0];b=H[1];c=H[2];d=H[3];e=H[4];f=H[5];g=H[6];h=H[7];
+    for(i=0;i<64;i++){
+      t1=(h+(((e>>>6)|(e<<26))^((e>>>11)|(e<<21))^((e>>>25)|(e<<7)))+((e&f)^(~e&g))+K[i]+W[i])|0;
+      t2=((((a>>>2)|(a<<30))^((a>>>13)|(a<<19))^((a>>>22)|(a<<10)))+((a&b)^(a&c)^(b&c)))|0;
+      h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0}
+    H[0]=(H[0]+a)|0;H[1]=(H[1]+b)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0;H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0}
+  function load(b,o){for(var k=0;k<16;k++)W[k]=(b[o+k*4]<<24)|(b[o+k*4+1]<<16)|(b[o+k*4+2]<<8)|b[o+k*4+3]}
+  function sha(m){
+    var l=m.length,nb=((l+9+63)>>6)<<6,b=new Uint8Array(nb),H=new Int32Array(H0),o,k,bl=l*8;
+    b.set(m);b[l]=128;b[nb-4]=bl>>>24;b[nb-3]=bl>>>16&255;b[nb-2]=bl>>>8&255;b[nb-1]=bl&255;
+    for(o=0;o<nb;o+=64){load(b,o);cmp(H)}
+    var r=new Uint8Array(32);for(k=0;k<8;k++){r[k*4]=H[k]>>>24;r[k*4+1]=H[k]>>>16&255;r[k*4+2]=H[k]>>>8&255;r[k*4+3]=H[k]&255}return r}
+  if(key.length>64)key=sha(key);
+  var ik=new Uint8Array(64),ok=new Uint8Array(64);ik.fill(54);ok.fill(92);
+  for(i=0;i<key.length;i++){ik[i]^=key[i];ok[i]^=key[i]}
+  var IS=new Int32Array(H0),OS=new Int32Array(H0);
+  load(ik,0);cmp(IS);load(ok,0);cmp(OS);
+  if(salt.length>51)throw new Error("salt");
+  var m=salt.length+4,mb=new Uint8Array(64),bl=(64+m)*8;
+  mb.set(salt);mb[salt.length+3]=1;mb[m]=128;mb[62]=bl>>>8&255;mb[63]=bl&255;
+  var H=new Int32Array(IS),U=new Int32Array(8),T=new Int32Array(8);
+  load(mb,0);cmp(H);
+  for(j=0;j<8;j++)W[j]=H[j];W[8]=-2147483648;for(j=9;j<15;j++)W[j]=0;W[15]=768;
+  H.set(OS);cmp(H);
+  for(j=0;j<8;j++){U[j]=H[j];T[j]=H[j]}
+  for(var it=1;it<n;it++){
+    for(j=0;j<8;j++)W[j]=U[j];H.set(IS);cmp(H);
+    for(j=0;j<8;j++)W[j]=H[j];H.set(OS);cmp(H);
+    for(j=0;j<8;j++){U[j]=H[j];T[j]^=H[j]}}
+  var r=new Uint8Array(32);for(j=0;j<8;j++){r[j*4]=T[j]>>>24;r[j*4+1]=T[j]>>>16&255;r[j*4+2]=T[j]>>>8&255;r[j*4+3]=T[j]&255}
+  return r}
+function _pb(pass,saltHex,n){
+  var kb=new TextEncoder().encode(pass),sb=_fx(saltHex);
+  function js(){return new Promise(function(res){setTimeout(function(){res(_pbJS(kb,sb,n))},20)})}
+  try{
+    if(typeof crypto!=="undefined"&&crypto.subtle&&crypto.subtle.importKey)
+      return crypto.subtle.importKey("raw",kb,"PBKDF2",false,["deriveBits"]).then(function(k){
+        return crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:sb,iterations:n},k,256)
+      }).then(function(b){return new Uint8Array(b)}).catch(js);
+  }catch(e){}
+  return js()}
+/* 비밀번호 확인: 맞으면 (퀴즈 확인에 쓸) 비밀번호 해시를, 틀리면 null */
+function _chkPw(pw,C){
+  var hp=_ph(pw);
+  return _pb(hp,C.sp,C.it).then(function(t){return _s256("vp:"+_hx(t))===C.vp?hp:null})}
+/* 퀴즈 확인: 비밀번호 해시 + 정답이 모두 맞아야 통과 토큰이 풀려요. 틀리면 null */
+function _chkQz(hp,ans,C){
+  var kq=_s256(hp+":"+_ph("quiz:"+ans));
+  return _pb(kq,C.sq,C.it).then(function(t){
+    var th=_hx(t);if(_s256("vq:"+th)!==C.vq)return null;
+    var mk=_fx(_s256("mk:"+th)),cc=_fx(C.tkc),o="";
+    for(var i=0;i<cc.length;i++)o+=String.fromCharCode(cc[i]^mk[i]);
+    return _s256("tk:"+o)===C.tkh?o:null})}
 
 /* ============ 썸네일 ============ */
 var THUMBS={
@@ -357,7 +426,7 @@ var LOGO='<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="
 /* ============ 유틸 ============ */
 function $(id){return document.getElementById(id);}
 function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);v===null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v);}catch(e){return null;}}
-function authed(){return ss("passed_auth")===_TK;}
+function authed(){var t=ss("passed_auth");return !!t&&_s256("tk:"+t)===_C.tkh;}
 
 
 /* ============ 기기 선택 (모바일 / 컴퓨터) ============ */
@@ -385,8 +454,7 @@ function chooseDev(m){ ss("device_mode",m); applyDev(m); $("device").hidden=true
 $("devSwitch").addEventListener("click",function(){ showDevice(); });
 
 /* ============ 퀴즈 (비밀번호 다음 단계) ============ */
-var _QH="53e1033f4e13d046a1b22a842bb875562609f6f62f910a4cc9616df849a6fb6d";
-var qFails=0,qLock=false;
+var qFails=0,qLock=false,_pk="";
 function showQuiz(){
   closeGame(true);
   $("gate").hidden=true; $("acct").hidden=true; $("device").hidden=true; $("portal").hidden=true; $("quiz").hidden=false;
@@ -397,14 +465,17 @@ function showQuiz(){
 function tryQuiz(){
   if(qLock) return;
   var v=$("qa").value.replace(/\s+/g,""); if(!v) return;
-  qLock=true; $("qGo").disabled=true;
+  if(!_pk){ showGate(); return; }
+  qLock=true; $("qGo").disabled=true; $("qMsg").textContent="확인하는 중...";
   setTimeout(function(){
-    if(_ph("quiz:"+v)===_QH){ ss("passed_auth",_TK); ss("passed_pw",null); qFails=0; qLock=false; $("qGo").disabled=false; $("quiz").hidden=true; showAccount(); return; }
-    qFails++; var c=$("qcard"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake"); $("qa").value="";
-    var left=qFails>2?Math.min(8,qFails-1):0;
-    if(left<=0){ qLock=false; $("qGo").disabled=false; $("qMsg").textContent="틀렸어요. 다시 생각해 보세요"; $("qa").focus(); return; }
-    $("qMsg").textContent="틀렸어요 ("+left+"초 후 다시 시도)";
-    var tm=setInterval(function(){ left--; if(left<=0){ clearInterval(tm); qLock=false; $("qGo").disabled=false; $("qMsg").textContent="틀렸어요. 다시 생각해 보세요"; $("qa").focus(); } else $("qMsg").textContent="틀렸어요 ("+left+"초 후 다시 시도)"; },1000);
+    _chkQz(_pk,v,_C).then(function(tk){
+      if(tk){ ss("passed_auth",tk); ss("passed_pw",null); _pk=""; qFails=0; qLock=false; $("qGo").disabled=false; $("qMsg").textContent=""; $("quiz").hidden=true; showAccount(); return; }
+      qFails++; var c=$("qcard"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake"); $("qa").value="";
+      var left=qFails>2?Math.min(8,qFails-1):0;
+      if(left<=0){ qLock=false; $("qGo").disabled=false; $("qMsg").textContent="틀렸어요. 다시 생각해 보세요"; $("qa").focus(); return; }
+      $("qMsg").textContent="틀렸어요 ("+left+"초 후 다시 시도)";
+      var tm=setInterval(function(){ left--; if(left<=0){ clearInterval(tm); qLock=false; $("qGo").disabled=false; $("qMsg").textContent="틀렸어요. 다시 생각해 보세요"; $("qa").focus(); } else $("qMsg").textContent="틀렸어요 ("+left+"초 후 다시 시도)"; },1000);
+    },function(){ qLock=false; $("qGo").disabled=false; $("qMsg").textContent="확인하지 못했어요. 새로고침 후 다시 시도해 주세요"; });
   },30);
 }
 $("qGo").addEventListener("click",tryQuiz);
@@ -567,16 +638,19 @@ function tryEnter(){
   if(locked) return;
   var v=$("pw").value;
   if(!v) return;
-  if(_ph(v)===_AH){
-    ss("passed_pw","1"); fails=0; $("pw").value=""; $("gateMsg").textContent="";
-    showQuiz(); return;
-  }
-  fails++; var c=$("gcard"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake");
-  $("pw").value="";
-  var wait=Math.min(8,fails>2?fails-1:0);
-  if(wait>0){ locked=true; var left=wait; $("gateMsg").textContent="비밀번호가 틀렸어요 ("+left+"초 후 다시 시도)";
-    var t=setInterval(function(){ left--; if(left<=0){ clearInterval(t); locked=false; $("gateMsg").textContent="비밀번호가 틀렸어요"; $("pw").focus(); } else $("gateMsg").textContent="비밀번호가 틀렸어요 ("+left+"초 후 다시 시도)"; },1000); }
-  else { $("gateMsg").textContent="비밀번호가 틀렸어요"; $("pw").focus(); }
+  locked=true; $("enter").disabled=true; $("gateMsg").textContent="확인하는 중...";
+  setTimeout(function(){
+    _chkPw(v,_C).then(function(hp){
+      $("enter").disabled=false;
+      if(hp){ _pk=hp; locked=false; fails=0; $("pw").value=""; $("gateMsg").textContent=""; showQuiz(); return; }
+      fails++; var c=$("gcard"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake");
+      $("pw").value="";
+      var wait=Math.min(8,fails>2?fails-1:0);
+      if(wait>0){ var left=wait; $("gateMsg").textContent="비밀번호가 틀렸어요 ("+left+"초 후 다시 시도)";
+        var t=setInterval(function(){ left--; if(left<=0){ clearInterval(t); locked=false; $("gateMsg").textContent="비밀번호가 틀렸어요"; $("pw").focus(); } else $("gateMsg").textContent="비밀번호가 틀렸어요 ("+left+"초 후 다시 시도)"; },1000); }
+      else { locked=false; $("gateMsg").textContent="비밀번호가 틀렸어요"; $("pw").focus(); }
+    },function(){ locked=false; $("enter").disabled=false; $("gateMsg").textContent="확인하지 못했어요. 새로고침 후 다시 시도해 주세요"; });
+  },30);
 }
 $("enter").addEventListener("click",tryEnter);
 $("pw").addEventListener("keydown",function(e){ if(e.key==="Enter") tryEnter(); });
@@ -614,7 +688,7 @@ function enterPortal(){
   var id=(location.hash||"").replace("#","");
   if(id&&GAMES.some(function(g){return g.id===id;})) openGame(id,false);
 }
-$("lock").addEventListener("click",function(){ pushSaves(); ss("fz_cloud",null); ss("fz_acct",null); ss("passed_pw",null); ss("fz_user",null); ss("passed_auth",null); ss("device_mode",null); applyDev(""); closeGame(true); $("device").hidden=true; showGate(); });
+$("lock").addEventListener("click",function(){ pushSaves(); ss("fz_cloud",null); ss("fz_acct",null); ss("passed_pw",null); _pk=""; ss("fz_user",null); ss("passed_auth",null); ss("device_mode",null); applyDev(""); closeGame(true); $("device").hidden=true; showGate(); });
 
 /* ============ 길건너 친구들: 2D / 3D 선택 ============ */
 function hidePick(){ $("pick").hidden=true; $("popts").innerHTML=""; }
@@ -720,7 +794,7 @@ $("pFull").addEventListener("click",function(){
 });
 
 /* ============ 시작 ============ */
-if(authed()){ if(!acctDone()) showAccount(); else { var _m=getDev(); if(_m){ applyDev(_m); enterPortal(); } else showDevice(); } } else if(ss("passed_pw")==="1") showQuiz(); else showGate();
+if(authed()){ if(!acctDone()) showAccount(); else { var _m=getDev(); if(_m){ applyDev(_m); enterPortal(); } else showDevice(); } } else showGate();
 })();
 </script>
 </body>
