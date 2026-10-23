@@ -864,7 +864,7 @@ function koreanParticle(name,withBatchim,withoutBatchim){const s=String(name||''
 function battleSubject(name){return `${name}${koreanParticle(name,'은','는')}`}
 function battleSubjectGa(name){return `${name}${koreanParticle(name,'이','가')}`}
 function battleObject(name){return `${name}${koreanParticle(name,'을','를')}`}
-function battleMoveLine(mon,move){return `${battleSubject(mon.name)} ${battleObject(move.name)} 썼다!`}async function useMove(index){if(state.inAction||!state.enemy)return;const p=state.party[state.active],e=state.enemy,m=p.moves[index];if(!m||(m.currentPP??m.pp)<=0){state.inAction=true;await battleDialogue(['이 기술은 PP가 없어!']);state.inAction=false;showBattleMainMenu();return}state.inAction=true;m.currentPP=Math.max(0,(m.currentPP??m.pp)-1);saveGame();renderBattle();const foeUsable=state.enemy.moves.filter(x=>(x.currentPP??x.pp)>0);const foeBest=foeUsable.sort((a,b)=>(b.priority||0)-(a.priority||0)||stagedStat(state.enemy,'speed')-stagedStat(p,'speed'))[0];const foeActsFirst=foeBest&&((foeBest.priority||0)>(m.priority||0)||((foeBest.priority||0)===(m.priority||0)&&stagedStat(state.enemy,'speed')>stagedStat(p,'speed')));if(foeActsFirst){await foeTurn();if(!state.enemy||p.hp<=0||state.party[state.active]!==p)return;state.inAction=true}const blocked=canAct(p);if(blocked){await battleDialogue([blocked]);if(p.hp<=0){await handlePlayerFaint();return}await foeTurn();return}const moveLine=battleMoveLine(p,m);if(!moveAccuracy(p,e,m)){await battleDialogue([moveLine,'하지만 기술이 빗나갔다!']);await foeTurn();return}let parts=[];const hit=e.protected?{damage:0,effect:1,critical:false,hits:1}:damageFor(p,e,m);if(e.protected){e.protected=false;parts.push(`${battleSubject(e.name)} 방어 기술로 공격을 막았다!`)}if(hit.damage>0||m.power===0&&m.damage_class!=='status'){e.hp=Math.max(0,e.hp-hit.damage);parts.push(`${e.name}에게 ${hit.damage} 데미지를 줬다!`);if(hit.critical)parts.push('급소에 맞았다!');if(hit.effect>1)parts.push('효과가 굉장했다!');if(hit.effect>0&&hit.effect<1)parts.push('효과가 별로인 듯하다…');if(hit.effect===0)parts.push('효과가 없는 것 같다…');if(hit.hits>1)parts.push(`${hit.hits}회 연속 공격!`);if(hit.damage>0&&m.drain){const h=Math.max(1,Math.floor(hit.damage*m.drain/100));p.hp=Math.min(p.maxHp,p.hp+h);parts.push(`${battleSubject(p.name)} HP를 ${h} 회복했다!`)}}if(m.stat_changes?.length&&!['swords-dance','agility','iron-defense','calm-mind','nasty-plot','bulk-up','double-team','minimize','harden','withdraw','amnesia','barrier','rock-polish','growl','tail-whip','leer','sand-attack','string-shot','scary-face','charm','screech','fake-tears','metal-sound'].includes(m.slug)&&(m.effect_chance==null||Math.random()*100<m.effect_chance)){const who=moveTargetsUser(m)?p:e;parts.push(...applyStatChanges(who,m.stat_changes))}const ail=tryAilment(e,m);if(ail)parts.push(ail);parts.push(...applyMoveExtras(p,e,m,hit.damage||0));if(!parts.length)parts.push('하지만 아무 일도 일어나지 않았다!');renderBattle();await battleDialogue([moveLine,...parts]);if(e.hp<=0){await winEnemy();return}const dot=endTurnDamage(e);if(dot){renderBattle();await battleDialogue([dot]);if(e.hp<=0){await winEnemy();return}}await foeTurn()}
+function battleMoveLine(mon,move){return `${battleSubject(mon.name)} ${battleObject(move.name)} 썼다!`}async function useMove(index){if(state.inAction||!state.enemy)return;const p=state.party[state.active],e=state.enemy,m=p.moves[index];if(!m||(m.currentPP??m.pp)<=0){state.inAction=true;await battleDialogue(['이 기술은 PP가 없어!']);state.inAction=false;showBattleMainMenu();return}state.inAction=true;m.currentPP=Math.max(0,(m.currentPP??m.pp)-1);saveGame();renderBattle();const foeUsable=state.enemy.moves.filter(x=>(x.currentPP??x.pp)>0);const foeBest=foeUsable.sort((a,b)=>(b.priority||0)-(a.priority||0)||stagedStat(state.enemy,'speed')-stagedStat(p,'speed'))[0];const foeActsFirst=foeBest&&((foeBest.priority||0)>(m.priority||0)||((foeBest.priority||0)===(m.priority||0)&&stagedStat(state.enemy,'speed')>stagedStat(p,'speed')));if(foeActsFirst){await foeTurn();if(!state.enemy||p.hp<=0||state.party[state.active]!==p)return;state.inAction=true}const blocked=canAct(p);if(blocked){await battleDialogue([blocked]);if(p.hp<=0){await handlePlayerFaint();return}await foeTurn();return}const moveLine=battleMoveLine(p,m);if(!moveAccuracy(p,e,m)){await battleDialogue([moveLine,'하지만 기술이 빗나갔다!']);await foeTurn();return}let parts=[];const hit=e.protected?{damage:0,effect:1,critical:false,hits:1}:damageFor(p,e,m);if(e.protected){e.protected=false;parts.push(`${battleSubject(e.name)} 방어 기술로 공격을 막았다!`)}if(hit.damage>0||m.power===0&&m.damage_class!=='status'){e.hp=Math.max(0,e.hp-hit.damage);parts.push(`${e.name}에게 ${hit.damage} 데미지를 줬다!`);if(hit.critical)parts.push('급소에 맞았다!');if(hit.effect>1)parts.push('효과가 굉장했다!');if(hit.effect>0&&hit.effect<1)parts.push('효과가 별로인 듯하다…');if(hit.effect===0)parts.push('효과가 없는 것 같다…');if(hit.hits>1)parts.push(`${hit.hits}회 연속 공격!`);if(hit.damage>0&&m.drain){const h=Math.max(1,Math.floor(hit.damage*m.drain/100));p.hp=Math.min(p.maxHp,p.hp+h);parts.push(`${battleSubject(p.name)} HP를 ${h} 회복했다!`)}}if(m.stat_changes?.length&&!['swords-dance','agility','iron-defense','calm-mind','nasty-plot','bulk-up','double-team','minimize','harden','withdraw','amnesia','barrier','rock-polish','growl','tail-whip','leer','sand-attack','string-shot','scary-face','charm','screech','fake-tears','metal-sound'].includes(m.slug)&&(m.effect_chance==null||Math.random()*100<m.effect_chance)){const who=moveTargetsUser(m)?p:e;parts.push(...applyStatChanges(who,m.stat_changes))}const ail=tryAilment(e,m);if(ail)parts.push(ail);parts.push(...applyMoveExtras(p,e,m,hit.damage||0));if(!parts.length)parts.push('하지만 아무 일도 일어나지 않았다!');renderBattle();await battleDialogue([moveLine,...parts]);if(e.hp<=0){await winEnemy();return}if(p.hp<=0){await handlePlayerFaint();return}const dot=endTurnDamage(e);if(dot){renderBattle();await battleDialogue([dot]);if(e.hp<=0){await winEnemy();return}}await foeTurn()}
 function setBattleMsg(s){$('battleMessage').textContent=s;renderBattle()}
 async function handlePlayerFaint(){const fainted=state.party[state.active];state.inAction=true;await battleDialogue([`${battleSubject(fainted.name)} 쓰러졌다!`]);let next=state.party.findIndex(mon=>mon.hp>0);if(next>=0){state.active=next;renderBattle();await battleDialogue([`가랏! ${state.party[next].name}!`]);state.inAction=false;renderBattle();if(window.showBattleMainMenu)window.showBattleMainMenu()}else await loseBattle()}
 async function foeTurn(){if(!state.enemy){state.inAction=false;return}state.inAction=true;let p=state.party[state.active],e=state.enemy;const blocked=canAct(e);if(blocked){await battleDialogue([blocked]);if(e.hp<=0){await winEnemy();return}const dot=endTurnDamage(e);if(dot){await battleDialogue([dot]);if(e.hp<=0){await winEnemy();return}}state.inAction=false;renderBattle();saveGame();return}let usable=e.moves.filter(x=>(x.currentPP??x.pp)>0);if(!usable.length)usable=[{name:'몸통박치기',slug:'tackle',power:40,accuracy:100,type:'normal',damage_class:'physical',currentPP:1,pp:1,priority:0}];usable.sort((a,b)=>{const da=damageFor(e,p,b).damage,db=damageFor(e,p,a).damage;return da-db});const m=usable[0];m.currentPP=Math.max(0,(m.currentPP??m.pp)-1);const moveLine=battleMoveLine(e,m);let lines=[];if(!moveAccuracy(e,p,m))lines.push('하지만 기술이 빗나갔다!');else{const hit=p.protected?{damage:0,effect:1,critical:false,hits:1}:damageFor(e,p,m);if(p.protected){p.protected=false;lines.push(`${battleSubject(p.name)} 방어 기술로 공격을 막았다!`)}if(hit.damage>0){p.hp=Math.max(0,p.hp-hit.damage);lines.push(`${battleSubject(p.name)} ${hit.damage} 데미지를 입었다!`);if(hit.critical)lines.push('급소에 맞았다!');if(hit.effect>1)lines.push('효과가 굉장했다!');if(hit.effect>0&&hit.effect<1)lines.push('효과가 별로인 듯하다…');if(hit.effect===0)lines.push('효과가 없는 것 같다…')}if(m.stat_changes?.length&&!['swords-dance','agility','iron-defense','calm-mind','nasty-plot','bulk-up','double-team','minimize','harden','withdraw','amnesia','barrier','rock-polish','growl','tail-whip','leer','sand-attack','string-shot','scary-face','charm','screech','fake-tears','metal-sound'].includes(m.slug)&&(m.effect_chance==null||Math.random()*100<m.effect_chance)){const who=moveTargetsUser(m)?e:p;lines.push(...applyStatChanges(who,m.stat_changes))}const ail=tryAilment(p,m);if(ail)lines.push(ail);lines.push(...applyMoveExtras(e,p,m,hit.damage||0))}if(!lines.length)lines.push('하지만 아무 일도 일어나지 않았다!');const dot=endTurnDamage(p);if(dot)lines.push(dot);renderBattle();await battleDialogue([moveLine,...lines]);if(p.hp<=0){await handlePlayerFaint();return}if(e.hp<=0){await winEnemy();return}state.inAction=false;renderBattle();saveGame()}
@@ -1559,4 +1559,315 @@ $('map').addEventListener('click',e=>{if(!state.started||state.enemy)return;cons
     };
   }
 })();
-</script></body></html>
+</script><script id="pokemon-abilities-and-recoil-fix">
+(function(){
+  "use strict";
+  var abilityKo={overgrow:"심록",blaze:"맹화",torrent:"급류",swarm:"벌레의알림",intimidate:"위협",static:"정전기","flame-body":"불꽃몸","poison-point":"독가시","effect-spore":"포자",levitate:"부유","flash-fire":"타오르는불꽃","water-absorb":"저수","volt-absorb":"축전","dry-skin":"건조피부","sap-sipper":"초식","storm-drain":"마중물","lightning-rod":"피뢰침",sturdy:"옹골참",pressure:"프레셔","huge-power":"천하장사","pure-power":"순수한힘",guts:"근성","thick-fat":"두꺼운지방",multiscale:"멀티스케일",filter:"필터","solid-rock":"하드록","prism-armor":"프리즘아머",technician:"테크니션",adaptability:"적응력","compound-eyes":"복안",hustle:"의욕","serene-grace":"하늘의은총","quick-feet":"속보","clear-body":"클리어바디","white-smoke":"하얀연기","full-metal-body":"메탈프로텍트","hyper-cutter":"괴력집게","keen-eye":"날카로운눈","big-pecks":"부풀린가슴",contrary:"심술꾸러기",simple:"단순",insomnia:"불면","vital-spirit":"의기양양",limber:"유연",immunity:"면역","water-veil":"수의베일","magma-armor":"마그마의무장","own-tempo":"마이페이스","wonder-guard":"불가사의부적","mold-breaker":"틀깨기",teravolt:"테라볼티지",turboblaze:"터보블레이즈","no-guard":"노가드"};
+  var defaults={bulbasaur:"overgrow",ivysaur:"overgrow",venusaur:"overgrow",charmander:"blaze",charmeleon:"blaze",charizard:"blaze",squirtle:"torrent",wartortle:"torrent",blastoise:"torrent"};
+  var selfDrops=new Set(["close-combat","superpower","overheat","draco-meteor","leaf-storm","psycho-boost","v-create","hammer-arm","dragon-ascent","make-it-rain","armor-cannon","spin-out","mind-blown","scale-shot","fillet-away","ice-hammer","shell-smash"]);
+  var recoil={"double-edge":33,"brave-bird":33,"flare-blitz":33,"volt-tackle":33,"wood-hammer":33,"wave-crash":33,"head-smash":50,"light-of-ruin":50,"wild-charge":25,"take-down":25,submission:25,"head-charge":25,"struggle":25};
+  var fixedRecoil={"steel-beam":.5,chloroblast:.5,struggle:.25};
+  function ab(mon){return String(mon&& (mon.ability||mon.abilitySlug)||"").toLowerCase().replace(/_/g,"-")}
+  function abName(mon){var k=ab(mon);return abilityKo[k]||String(k).replace(/(^|-)([a-z])/g,function(_,a,b){return (a?" ":"")+b.toUpperCase()})}
+  function preferred(p){var list=(p&&p.abilities)||[];var regular=list.filter(function(x){return !x.is_hidden});return regular[0]&&regular[0].ability&&regular[0].ability.name||(list[0]&&list[0].ability&&list[0].ability.name)||defaults[p&&p.name]||""}
+  function ensureMon(mon){if(!mon)return mon;var pdata=state.pokemonCache&&state.pokemonCache["pokemon/"+mon.slug];if(!mon.ability)mon.ability=preferred(pdata)||defaults[mon.slug]||"";(mon.moves||[]).forEach(function(m){fixMove(m)});return mon}
+  function fixMove(m){if(!m)return m;var slug=m.slug||m.id||"";if(selfDrops.has(slug))m.target="user";var raw=state.moveCache&&state.moveCache[slug];if(raw&&raw.flags)m.flags=raw.flags.map(function(f){return f.name});if(m.drain==null)m.drain=Number(m.meta&&m.meta.drain)||0;if(!m.drain&&recoil[slug])m.drain=-recoil[slug];return m}
+  function blockAbility(attacker,defender,move,effect){if(["mold-breaker","teravolt","turboblaze"].includes(ab(attacker)))return "";var a=ab(defender),type=move&&move.type;var map={ground:["levitate"],fire:["flash-fire"],water:["water-absorb","dry-skin","storm-drain"],electric:["volt-absorb","lightning-rod"],grass:["sap-sipper"]};if((map[type]||[]).includes(a))return a;if(a==="wonder-guard"&&effect>0&&effect<=1)return a;return ""}
+  function change(target,changes,source){if(!target)return [];var a=ab(target),src=source||state._abilitySource||target,adjusted=[],blocked=[];(changes||[]).forEach(function(c){var key=c.stat&&c.stat.name,delta=Number(c.change)||0;if(!key||!delta)return;if(delta<0&&src!==target&&(["clear-body","white-smoke","full-metal-body"].includes(a)||(a==="hyper-cutter"&&key==="attack")||(a==="keen-eye"&&key==="accuracy")||(a==="big-pecks"&&key==="defense"))){blocked.push(key);return}if(a==="contrary")delta=-delta;if(a==="simple")delta*=2;adjusted.push(Object.assign({},c,{change:delta}))});var lines=window.__baseApplyStatChanges?window.__baseApplyStatChanges(target,adjusted):[];if(blocked.length)lines.push("특성 "+abName(target)+" 때문에 능력치가 떨어지지 않았다!");return lines}
+  function canStatus(mon,status){var a=ab(mon);return ((status==="poison"||status==="badly-poisoned")&&a==="immunity")||(status==="sleep"&&["insomnia","vital-spirit"].includes(a))||(status==="paralysis"&&a==="limber")||(status==="burn"&&a==="water-veil")||(status==="freeze"&&a==="magma-armor")||(status==="confusion"&&a==="own-tempo")}
+  function applyBlock(attacker,defender,move,ability){if(!ability)return [];var lines=["특성 "+abName(defender)+" 발동!"];if(["water-absorb","volt-absorb","dry-skin"].includes(ability)){var h=Math.max(1,Math.floor(defender.maxHp/4)),actual=Math.min(h,defender.maxHp-defender.hp);defender.hp+=actual;if(actual)lines.push(defender.name+"의 HP가 "+actual+" 회복됐다!")}else if(ability==="flash-fire"){defender.flashFireActive=true;lines.push(defender.name+"의 불꽃 기술 위력이 강해졌다!")}else if(ability==="sap-sipper")lines=lines.concat(change(defender,[{stat:{name:"attack"},change:1}],defender));else if(["storm-drain","lightning-rod"].includes(ability))lines=lines.concat(change(defender,[{stat:{name:"special-attack"},change:1}],defender));else if(ability==="wonder-guard")lines.push("효과가 없는 것 같다…");return lines}
+  function entryLines(mon,opponent){if(!mon||!opponent||ab(mon)!=="intimidate")return [];return [mon.name+"의 특성 위협 발동!"].concat(change(opponent,[{stat:{name:"attack"},change:-1}],mon))}
+  function isContact(move){if(move&&move.flags&&move.flags.includes("contact"))return true;return ["tackle","scratch","bite","quick-attack","body-slam","headbutt","take-down","double-edge","close-combat","superpower","flare-blitz","brave-bird","wild-charge","wood-hammer","iron-tail","thunder-punch","fire-punch","ice-punch","scratch","pound","slash"].includes(move&&move.slug)}
+  function contactAbility(attacker,defender,move,damage){if(!attacker||!defender||damage<=0||defender.hp<=0||attacker.status||!isContact(move)||Math.random()>=.3)return [];var a=ab(defender),ail=({static:"paralysis","flame-body":"burn","poison-point":"poison","effect-spore":["poison","paralysis","sleep"]})[a];if(!ail)return [];if(Array.isArray(ail))ail=ail[Math.floor(Math.random()*ail.length)];var status=ail;if(canStatus(attacker,status))return ["특성 "+abName(defender)+" 발동!"];if(status==="poison"&&(attacker.types||[]).some(function(t){return t==="poison"||t==="steel"}))return [];if(status==="burn"&&(attacker.types||[]).includes("fire"))return [];if(status==="freeze"&&(attacker.types||[]).includes("ice"))return [];attacker.status=status;return ["특성 "+abName(defender)+" 발동!",attacker.name+"은(는) "+statusKo(status)+" 상태가 되었다!"]}
+  var oldGetMove=window.getMove;
+  if(oldGetMove)window.getMove=async function(slug){var m=await oldGetMove(slug);return fixMove(m)};
+  var oldMakeMon=window.makeMon;
+  if(oldMakeMon)window.makeMon=async function(slug,level){return ensureMon(await oldMakeMon(slug,level))};
+  window.__baseApplyStatChanges=window.applyStatChanges;
+  window.applyStatChanges=change;
+  var oldTryAilment=window.tryAilment;
+  if(oldTryAilment)window.tryAilment=function(target,move){var ail=move&&(move.ailment||(move.meta&&move.meta.ailment&&move.meta.ailment.name));if(ail&&canStatus(target,ail))return "특성 "+abName(target)+" 때문에 상태 이상에 걸리지 않았다!";return oldTryAilment(target,move)};
+  var oldAccuracy=window.moveAccuracy;
+  if(oldAccuracy)window.moveAccuracy=function(attacker,target,move){state._pendingAbilityBlock="";state._pendingSturdy=false;state._pendingContact=null;if(ab(attacker)==="no-guard"||ab(target)==="no-guard")return true;if(move.accuracy==null)return oldAccuracy(attacker,target,move);var a=stages(attacker).accuracy||0,e=stages(target).evasion||0,ratio=(a>=0?(3+a)/3:3/(3-a))/(e>=0?(3+e)/3:3/(3-e)),chance=move.accuracy*ratio;if(ab(attacker)==="compound-eyes")chance*=1.3;if(ab(attacker)==="hustle"&&move.damage_class==="physical")chance*=.8;return Math.random()*100<Math.max(1,Math.min(100,chance))};
+  var oldStagedStat=window.stagedStat;if(oldStagedStat)window.stagedStat=function(mon,key){var value=oldStagedStat(mon,key);return key==="speed"&&ab(mon)==="quick-feet"&&mon.status?Math.floor(value*1.5):value};
+  var oldCalculate=window.calculateDamage;
+  if(oldCalculate)window.calculateDamage=function(attacker,defender,move,random){var result=oldCalculate(attacker,defender,move,random),a=ab(attacker),d=ab(defender),type=move.type||"normal",power=Number(move.power)||0,blocked="";if(move.damage_class!=="status"){blocked=blockAbility(attacker,defender,move,result.effect);if(!blocked&&d==="wonder-guard"&&result.effect>0&&result.effect<=1&&!["mold-breaker","teravolt","turboblaze"].includes(a))blocked="wonder-guard";if(blocked){result.damage=0;result.effect=0;result.abilityBlocked=blocked}else if(result.damage>0){var mult=1;if(["huge-power","pure-power"].includes(a)&&move.damage_class==="physical")mult*=2;if(a==="guts"&&attacker.status)mult*=attacker.status==="burn"&&move.damage_class==="physical"?3:1.5;if(a==="hustle"&&move.damage_class==="physical")mult*=1.5;if(a==="technician"&&power>0&&power<=60)mult*=1.5;if(d==="thick-fat"&&(type==="fire"||type==="ice"))mult*=.5;if(d==="multiscale"&&defender.hp>=defender.maxHp)mult*=.5;if(["filter","solid-rock","prism-armor"].includes(d)&&result.effect>1)mult*=.75;if(attacker.flashFireActive&&type==="fire")mult*=1.5;if(attacker.hp>0&&attacker.hp/attacker.maxHp<=1/3&&((a==="blaze"&&type==="fire")||(a==="torrent"&&type==="water")||(a==="overgrow"&&type==="grass")||(a==="swarm"&&type==="bug")))mult*=1.5;if((attacker.types||[]).includes(type)&&a==="adaptability")mult*=4/3;result.damage=Math.max(1,Math.floor(result.damage*mult));if(d==="sturdy"&&defender.hp>=defender.maxHp&&result.damage>=defender.hp){result.damage=Math.max(0,defender.hp-1);result.abilitySturdy=true}if(move.slug==="false-swipe"||move.name==="칼등치기")result.damage=defender.hp<=1?0:Math.min(result.damage,defender.hp-1)}}state._pendingAbilityBlock=result.abilityBlocked||"";state._pendingSturdy=!!result.abilitySturdy;state._pendingContact=result.damage>0&&isContact(move)?{attacker:attacker,defender:defender,move:move,damage:result.damage}:null;return result};
+  var oldDamageFor=window.damageFor;
+  if(oldDamageFor)window.damageFor=function(attacker,defender,move){var result=window.calculateDamage(attacker,defender,move);return result};
+  var oldExtras=window.applyMoveExtras;
+  if(oldExtras)window.applyMoveExtras=function(attacker,target,move,damage){var saved=state._activeMoveDrain,playerMove=attacker===state.party[state.active],fixed=fixedRecoil[move.slug],oldDrain=move.drain,result=[];if(playerMove&&saved!==undefined)move.drain=saved>0?0:saved;if(fixed&&damage>0)move.drain=0;try{result=oldExtras(attacker,target,move,damage)}finally{if(playerMove&&saved!==undefined)move.drain=0;else move.drain=oldDrain}if(fixed&&damage>0){var amount=Math.min(attacker.hp,Math.max(1,Math.floor(attacker.maxHp*fixed)));attacker.hp=Math.max(0,attacker.hp-amount);result.push(attacker.name+"도 반동으로 "+amount+" 데미지를 입었다!")}return result};
+  var oldDialogue=window.battleDialogue;
+  if(oldDialogue)window.battleDialogue=function(lines,delay){var list=Array.isArray(lines)?lines.slice():[lines],texts=list.map(function(x){return String(x||"")});if(texts.some(function(x){return x.indexOf("돌아와!")>=0})&&state.party[state.active])state.party[state.active].flashFireActive=false;if(state.enemy&&texts.some(function(x){return x.indexOf("가랏!")===0})){var entrant=state.party[state.active];if(entrant&&entrant!==state._abilityLastPlayerEntry){list.push(...entryLines(entrant,state.enemy));state._abilityLastPlayerEntry=entrant}}if(state.enemy&&texts.some(function(x){return x.indexOf("내보냈다!")>=0})&&state.enemy!==state._abilityLastEnemyEntry){list.push(...entryLines(state.enemy,state.party[state.active]));state._abilityLastEnemyEntry=state.enemy}if(state._pendingAbilityBlock){var trigger=applyBlock(state._abilitySource||state.party[state.active],state._abilityTarget||state.enemy,state._abilityMove||{},state._pendingAbilityBlock);list.splice(Math.min(1,list.length),0,...trigger);state._pendingAbilityBlock=""}if(state._pendingSturdy){list.splice(Math.min(1,list.length),0,"특성 옹골참으로 HP가 1 남았다!");state._pendingSturdy=false}if(state._pendingContact){var c=state._pendingContact;list.push(...contactAbility(c.attacker,c.defender,c.move,c.damage));state._pendingContact=null}return oldDialogue(list,delay)};
+  var oldUseMove=window.useMove;
+  if(oldUseMove)window.useMove=async function(index){var user=state.party[state.active],target=state.enemy,move=user&&user.moves[index],pressure=target&&ab(target)==="pressure"&&move&&move.target!=="user";state._abilitySource=user;state._abilityTarget=target;state._abilityMove=move;state._pendingAbilityBlock="";state._pendingSturdy=false;state._pendingContact=null;if(move){fixMove(move);state._activeMoveDrain=Number(move.drain??(move.meta&&move.meta.drain))||0;move.drain=state._activeMoveDrain>0?state._activeMoveDrain:0}try{var result=await oldUseMove(index);if(pressure&&move){move.currentPP=Math.max(0,(move.currentPP??move.pp??1)-1);if(window.renderBattle)renderBattle();if(window.saveGame)saveGame();await oldDialogue(["특성 프레셔! 기술 PP가 1 더 줄었다!"])}return result}finally{if(move)move.drain=state._activeMoveDrain;state._activeMoveDrain=undefined;state._abilitySource=null;state._abilityTarget=null;state._abilityMove=null}};
+  var oldFoeTurn=window.foeTurn;
+  if(oldFoeTurn)window.foeTurn=async function(){var previous=state._abilitySource,enemy=state.enemy,player=state.party[state.active],before=(enemy&&enemy.moves||[]).map(function(m){return {move:m,pp:m.currentPP??m.pp??0}});state._abilitySource=enemy;state._abilityTarget=player;state._pendingAbilityBlock="";state._pendingSturdy=false;state._pendingContact=null;try{var result=await oldFoeTurn();if(player&&ab(player)==="pressure"&&state.enemy===enemy){var used=before.find(function(x){return x.pp>(x.move.currentPP??x.move.pp??0)&&x.move.target!=="user"});if(used){used.move.currentPP=Math.max(0,(used.move.currentPP??used.move.pp??1)-1);if(window.renderBattle)renderBattle();if(window.saveGame)saveGame();await oldDialogue(["특성 프레셔! 상대 기술 PP가 1 더 줄었다!"])}}return result}finally{state._abilitySource=previous;state._abilityTarget=null;state._abilityMove=null}};
+  var oldShowBattle=window.showBattle;
+  if(oldShowBattle)window.showBattle=async function(message,isTrainer,opening){var p=state.party[state.active],e=state.enemy,lines=Array.isArray(opening)?opening.slice():(message?[message]:[]);state._abilityEntrySerial=(state._abilityEntrySerial||0)+1;state._abilityLastPlayerEntry=null;state._abilityLastEnemyEntry=null;if(p&&e){lines=lines.concat(entryLines(p,e),entryLines(e,p));state._abilityLastPlayerEntry=p;state._abilityLastEnemyEntry=e}return oldShowBattle(message,isTrainer,lines)};
+  var oldCloseToWorld=window.closeToWorld;if(oldCloseToWorld)window.closeToWorld=function(){(state.party||[]).concat(state.enemy?[state.enemy]:[]).forEach(function(mon){if(mon)mon.flashFireActive=false});return oldCloseToWorld.apply(this,arguments)};
+  var oldRender=window.renderBattle;
+  if(oldRender)window.renderBattle=function(){oldRender();var p=state.party[state.active],e=state.enemy;if(p&&e){var ps=document.getElementById("myStatus"),es=document.getElementById("enemyStatus");if(ps&&ab(p))ps.textContent=(ps.textContent?ps.textContent+" · ":"")+"특성: "+abName(p);if(es&&ab(e))es.textContent=(es.textContent?es.textContent+" · ":"")+"특성: "+abName(e)}};
+  var oldLoad=window.loadGame;
+  if(oldLoad)window.loadGame=function(){var result=oldLoad();(state.party||[]).forEach(function(mon){ensureMon(mon);if(!mon.ability&&window.getPokemon)getPokemon(mon.slug).then(function(data){mon.ability=preferred(data);if(window.saveGame)saveGame();if(window.renderParty)renderParty()}).catch(function(){})});if(state.enemy)ensureMon(state.enemy);if(window.saveGame)saveGame();if(window.renderParty)renderParty();return result};
+})();
+</script><script id="town-item-shop-system">
+(function(){
+  "use strict";
+  var ITEMS=[
+    {id:"pokeball",name:"몬스터볼",price:200,description:"야생 포켓몬을 잡을 때 사용한다.",type:"ball",ballMultiplier:1.0},
+    {id:"greatball",name:"수퍼볼",price:600,description:"몬스터볼보다 포획하기 쉽다.",type:"ball",ballMultiplier:1.5},
+    {id:"ultraball",name:"하이퍼볼",price:1200,description:"포획률이 높은 고성능 몬스터볼.",type:"ball",ballMultiplier:2.0},
+    {id:"potion",name:"상처약",price:200,description:"포켓몬의 HP를 20 회복한다.",type:"potion",effectValue:20},
+    {id:"super-potion",name:"좋은상처약",price:700,description:"포켓몬의 HP를 50 회복한다.",type:"potion",effectValue:50},
+    {id:"hyper-potion",name:"고급상처약",price:1500,description:"포켓몬의 HP를 200 회복한다.",type:"potion",effectValue:200},
+    {id:"antidote",name:"해독제",price:100,description:"독·맹독 상태를 치료한다.",type:"cure",effectValue:["poison","badly_poisoned"]},
+    {id:"paralyze-heal",name:"마비치료제",price:200,description:"마비 상태를 치료한다.",type:"cure",effectValue:["paralysis"]},
+    {id:"awakening",name:"잠깨는약",price:200,description:"잠듦 상태를 치료한다.",type:"cure",effectValue:["sleep"]},
+    {id:"burn-heal",name:"화상치료제",price:200,description:"화상 상태를 치료한다.",type:"cure",effectValue:["burn"]},
+    {id:"ice-heal",name:"얼음치료제",price:200,description:"얼음 상태를 치료한다.",type:"cure",effectValue:["freeze"]},
+    {id:"mind-heal",name:"마인드치료제",price:200,description:"혼란 상태를 치료한다.",type:"cure",effectValue:["confusion"]},
+    {id:"full-heal",name:"만병통치제",price:600,description:"포켓몬의 모든 주요 상태 이상을 치료한다.",type:"cure",effectValue:"all"}
+  ];
+  var byId=Object.create(null);
+  ITEMS.forEach(function(item){byId[item.id]=item});
+  var ballIds=ITEMS.filter(function(item){return item.type==="ball"}).map(function(item){return item.id});
+  var medicineIds=ITEMS.filter(function(item){return item.type==="potion"||item.type==="cure"}).map(function(item){return item.id});
+  var oldSave=window.saveGame,oldLoad=window.loadGame,oldRender=window.renderBattle,oldThrow=window.throwBall,oldStartNew=window.startNewAdventure,oldStart=window.startGame;
+  // 콘솔 예시: displayShopMenu(); buyItem("greatball",2);
+  function emptyInventory(){var inv={};ITEMS.forEach(function(item){inv[item.id]=0});return inv}
+  function ensureInventory(){
+    if(!state.inventory||typeof state.inventory!=="object"){
+      state.inventory=emptyInventory();
+      state.inventory.pokeball=Math.max(0,Math.floor(Number(state.ball)||0));
+      state.inventory.potion=Math.max(0,Math.floor(Number(state.potions)||0))
+    }
+    ITEMS.forEach(function(item){
+      var value=Number(state.inventory[item.id]);
+      if(!Number.isFinite(value))value=item.id==="pokeball"?Number(state.ball)||0:item.id==="potion"?Number(state.potions)||0:0;
+      state.inventory[item.id]=Math.max(0,Math.floor(value));
+    });
+    if(!Number.isFinite(Number(state.money)))state.money=Number(state.gold)||0;
+    state.money=Math.max(0,Math.floor(Number(state.money)||0));
+    state.gold=state.money;
+    if(state._usingBallItem)state.inventory[state._usingBallItem]=Math.max(0,Math.floor(Number(state.ball)||0));
+    else state.ball=state.inventory.pokeball;
+    state.potions=state.inventory.potion;
+    return state.inventory
+  }
+  function itemFor(item){return typeof item==="string"?byId[item]:item&&byId[item.id]}
+  function notice(message){
+    if(typeof window.setNotice==="function")window.setNotice(message);
+    else if(document.getElementById("notice"))document.getElementById("notice").textContent=message;
+    return message
+  }
+  function buyItem(item,quantity){
+    ensureInventory();
+    var data=itemFor(item),qty=Number(quantity);
+    if(!data)return notice("상품을 찾을 수 없습니다.");
+    if(!Number.isInteger(qty)||qty<1)return notice("구매 수량을 1개 이상 입력해 주세요.");
+    var total=data.price*qty;
+    if(state.money<total)return notice("소지금이 부족합니다.");
+    state.money-=total;state.gold=state.money;state.inventory[data.id]+=qty;
+    if(data.id==="pokeball")state.ball=state.inventory.pokeball;
+    if(data.id==="potion")state.potions=state.inventory.potion;
+    var message=data.name+" "+qty+"개를 구매했습니다! (남은 골드: "+state.money+"원)";
+    notice(message);if(window.updateHud)window.updateHud();syncBattleInventory();if(window.saveGame)window.saveGame();
+    return message
+  }
+  function displayShopMenu(){
+    var rows=ITEMS.map(function(item){return {id:item.id,name:item.name,price:item.price+"원",type:item.type,description:item.description,ballMultiplier:item.ballMultiplier||"",effectValue:Array.isArray(item.effectValue)?item.effectValue.join(", "):(item.effectValue||"")}});
+    if(window.console&&console.table)console.table(rows);
+    return rows
+  }
+  function shopHtml(){
+    return '<div class="shop-summary">보유 골드 <b id="shopGold">'+state.money+'원</b></div><div class="shop-items">'+ITEMS.map(function(item){
+      var extra=item.type==="ball"?" · 포획 보정 "+item.ballMultiplier+"배":item.type==="potion"?" · HP "+item.effectValue+" 회복":"";
+      return '<article class="shop-item"><div class="shop-item-copy"><b>'+txt(item.name)+'</b><small>'+txt(item.description)+extra+'</small></div><strong>'+item.price+'원</strong><label><span class="sr-only">구매 수량</span><input type="number" min="1" step="1" value="1" id="shopQty-'+item.id+'" aria-label="'+txt(item.name)+' 구매 수량"></label><button class="btn small" type="button" data-shop-buy="'+item.id+'">구매</button></article>'
+    }).join("")+'</div><p id="shopResult" class="shop-result" aria-live="polite">필요한 도구를 골라 구매해.</p>'
+  }
+  function openShop(){
+    ensureInventory();
+    showModal("마을 상점",shopHtml(),[{label:"닫기",primary:true,onClick:closeModal}]);
+    document.querySelectorAll("[data-shop-buy]").forEach(function(button){
+      button.onclick=function(){
+        var id=button.getAttribute("data-shop-buy"),input=document.getElementById("shopQty-"+id),message=buyItem(id,input?input.value:1),result=document.getElementById("shopResult"),gold=document.getElementById("shopGold");
+        if(result)result.textContent=message;
+        if(gold)gold.textContent=state.money+"원"
+      }
+    })
+  }
+  function openBag(){
+    ensureInventory();
+    var html='<div class="bag-gold">소지금 <b>'+state.money+'원</b></div><div class="bag-items">'+ITEMS.map(function(item){
+      var count=state.inventory[item.id]||0,usable=item.type==="potion"||item.type==="cure";
+      return '<article class="bag-item"><span><b>'+txt(item.name)+'</b><small>'+txt(item.description)+'</small></span><strong>'+count+'개</strong>'+(usable?'<button class="btn small" type="button" data-bag-use="'+item.id+'" '+(count<=0?"disabled":"")+'>사용</button>':"<small>배틀 중 사용</small>")+'</article>'
+    }).join("")+'</div>';
+    showModal("가방",html,[{label:"닫기",primary:true,onClick:closeModal}]);
+    document.querySelectorAll("[data-bag-use]").forEach(function(button){button.onclick=async function(){var id=button.getAttribute("data-bag-use");closeModal();await useItem(id)}})
+  }
+  function createSelect(row,id,label){
+    var select=document.getElementById(id);if(select)return select;
+    var button=row.querySelector(".btn");select=document.createElement("select");select.id=id;select.className="btn small";select.setAttribute("aria-label",label);select.style.maxWidth="155px";select.style.padding="5px 4px";
+    row.insertBefore(select,button);return select
+  }
+  var ballSelect=createSelect(document.getElementById("throwBallBtn").closest(".inventory-item"),"battleBallType","사용할 몬스터볼");
+  var itemRow=document.getElementById("potionBtn").closest(".inventory-item");
+  var itemLabel=itemRow.querySelector("span");if(itemLabel)itemLabel.textContent="🧪 회복·치료";
+  var medicineSelect=createSelect(itemRow,"battleItemType","사용할 회복·치료 도구");
+  function fillSelect(select,items){
+    if(!select)return;
+    var previous=select.value,available=items.filter(function(item){return state.inventory[item.id]>0});
+    select.innerHTML=items.map(function(item){return '<option value="'+item.id+'" '+(state.inventory[item.id]<=0?"disabled":"")+'>'+txt(item.name)+" ("+(state.inventory[item.id]||0)+"개)"+'</option>'}).join("");
+    if(available.some(function(item){return item.id===previous}))select.value=previous;
+    else if(available.length)select.value=available[0].id
+  }
+  function syncBattleInventory(){
+    ensureInventory();
+    if(!ballSelect||!medicineSelect)return;
+    fillSelect(ballSelect,ITEMS.filter(function(item){return item.type==="ball"}));
+    fillSelect(medicineSelect,ITEMS.filter(function(item){return item.type==="potion"||item.type==="cure"}));
+    var ballId=ballSelect.value,medicineId=medicineSelect.value;
+    var ballCount=state.inventory[ballId]||0,medicineCount=state.inventory[medicineId]||0;
+    document.getElementById("battleBallCount").textContent=ballCount+"개";
+    document.getElementById("battlePotionCount").textContent=medicineCount+"개";
+    document.getElementById("throwBallBtn").disabled=state.battleKind!=="wild"||state.inAction||ballCount<=0;
+    document.getElementById("potionBtn").disabled=state.inAction||medicineCount<=0;
+    document.getElementById("battleMoneyCount").textContent="₽ "+state.money
+  }
+  ballSelect.onchange=syncBattleInventory;medicineSelect.onchange=syncBattleInventory;
+  window.renderBattle=function(){
+    if(oldRender)oldRender.apply(this,arguments);
+    syncBattleInventory()
+  };
+  window.saveGame=function(){
+    ensureInventory();
+    if(oldSave)oldSave.apply(this,arguments);
+    try{
+      var raw=localStorage.getItem("pm_save_v3"),data=raw?JSON.parse(raw):{};
+      data.inventory=state.inventory;data.money=state.money;data.gold=state.money;
+      data.ball=state.inventory.pokeball;data.potions=state.inventory.potion;
+      localStorage.setItem("pm_save_v3",JSON.stringify(data))
+    }catch(error){console.warn("가방 저장 실패:",error)}
+  };
+  window.loadGame=function(){
+    var saved=null;try{saved=JSON.parse(localStorage.getItem("pm_save_v3")||"null")}catch(error){}
+    if(!saved||!saved.inventory)state.inventory=null;
+    var result=oldLoad?oldLoad.apply(this,arguments):undefined;
+    if(!saved||!saved.started){ensureInventory();syncBattleInventory();return result}
+    if(saved&&saved.inventory)state.inventory=saved.inventory;
+    ensureInventory();if(window.updateHud)window.updateHud();if(window.renderParty)window.renderParty();if(window.saveGame)window.saveGame();syncBattleInventory();
+    return result
+  };
+  window.startNewAdventure=function(){
+    state.inventory=null;
+    var result=oldStartNew?oldStartNew.apply(this,arguments):undefined;
+    ensureInventory();syncBattleInventory();if(window.saveGame)window.saveGame();return result
+  };
+  window.startGame=async function(){
+    state.inventory=null;
+    var result=oldStart?await oldStart.apply(this,arguments):undefined;
+    ensureInventory();syncBattleInventory();if(window.saveGame)window.saveGame();return result
+  };
+  window.throwBall=async function(ballType){
+    ensureInventory();
+    if(!state.enemy||state.battleKind!=="wild"||state.inAction)return;
+    var id=typeof ballType==="string"&&byId[ballType]&&byId[ballType].type==="ball"?ballType:
+      Number(ballType)===1.5?"greatball":Number(ballType)===2?"ultraball":"pokeball";
+    var item=byId[id];
+    if(!state.inventory[id]){
+      state.inAction=true;await battleDialogue([item.name+"이(가) 없어! 마을 상점에서 구입해."]);state.inAction=false;if(window.showBattleMainMenu)window.showBattleMainMenu();syncBattleInventory();return
+    }
+    state._usingBallItem=id;state.ball=state.inventory[id];
+    try{return await oldThrow.call(this,item.ballMultiplier)}
+    finally{
+      state.inventory[id]=Math.max(0,Math.floor(Number(state.ball)||0));state._usingBallItem=null;
+      state.ball=state.inventory.pokeball;state.potions=state.inventory.potion;
+      if(window.updateHud)window.updateHud();syncBattleInventory();if(window.saveGame)window.saveGame()
+    }
+  };
+  async function useItem(id){
+    ensureInventory();
+    var item=byId[id],mon=state.party[state.active],inBattle=!!state.enemy;
+    if(!item||!(item.type==="potion"||item.type==="cure"))return notice("사용할 수 없는 도구야.");
+    if(state.inAction)return;
+    if(!state.inventory[id]){
+      var noItem=item.name+"이(가) 없어!";
+      if(inBattle){state.inAction=true;await battleDialogue([noItem]);state.inAction=false;if(window.showBattleMainMenu)window.showBattleMainMenu()}
+      else notice(noItem);
+      return noItem
+    }
+    if(!mon||mon.hp<=0)return notice("사용할 포켓몬이 없어.");
+    var messageLines=[];
+    if(item.type==="potion"){
+      if(mon.hp>=mon.maxHp){var full=mon.name+"의 HP는 이미 가득 차 있다!";if(inBattle){state.inAction=true;await battleDialogue([full]);state.inAction=false;if(window.showBattleMainMenu)window.showBattleMainMenu()}else notice(full);return full}
+      var heal=Math.min(item.effectValue,mon.maxHp-mon.hp);mon.hp+=heal;state.inventory[id]--;
+      messageLines=[item.name+"을(를) 사용했다!",mon.name+"의 HP가 "+heal+" 회복됐다!"]
+    }else{
+      var curable=item.effectValue==="all"?["poison","badly_poisoned","paralysis","sleep","burn","freeze","confusion"]:item.effectValue;
+      if(!curable.includes(mon.status)){
+        var noEffect=mon.name+"은(는) 치료할 상태 이상이 없다!";
+        if(inBattle){state.inAction=true;await battleDialogue([noEffect]);state.inAction=false;if(window.showBattleMainMenu)window.showBattleMainMenu()}else notice(noEffect);
+        return noEffect
+      }
+      var priorStatus=mon.status;mon.status=null;mon.sleepTurns=0;mon.confusionTurns=0;state.inventory[id]--;
+      messageLines=[item.name+"을(를) 사용했다!",mon.name+"의 "+statusKo(priorStatus)+" 상태가 나았다!"]
+    }
+    ensureInventory();if(window.renderParty)window.renderParty();if(inBattle&&window.renderBattle)window.renderBattle();if(window.updateHud)window.updateHud();syncBattleInventory();if(window.saveGame)window.saveGame();
+    if(inBattle){state.inAction=true;await battleDialogue(messageLines);if(state.enemy)await foeTurn();else state.inAction=false}
+    else notice(messageLines.join(" "));
+    return messageLines.join(" ")
+  }
+  window.useItem=useItem;
+  window.usePotion=function(itemId){return useItem(itemId||medicineSelect.value||"potion")};
+  window.openShop=openShop;window.openBag=openBag;window.buyItem=buyItem;window.displayShopMenu=displayShopMenu;window.SHOP_ITEMS=ITEMS;window.player=state;
+  document.getElementById("shopBtn").onclick=openShop;document.getElementById("bagBtn").onclick=openBag;
+  document.getElementById("throwBallBtn").onclick=function(){return window.throwBall(ballSelect.value||"pokeball")};
+  document.getElementById("potionBtn").onclick=function(){return useItem(medicineSelect.value||"potion")};
+  document.getElementById("enterOakLab").onclick=window.startNewAdventure;
+  document.getElementById("loadBtn").onclick=window.loadGame;document.getElementById("continueBtn").onclick=window.loadGame;
+  var oldUpdateHud=window.updateHud;
+  if(oldUpdateHud)window.updateHud=function(){ensureInventory();oldUpdateHud.apply(this,arguments)};
+  var style=document.createElement("style");
+  style.textContent=".shop-summary,.bag-gold{padding:8px 10px;margin-bottom:8px;background:#e8eedf;border:2px solid #71816c;font-weight:800}.shop-items,.bag-items{display:grid;gap:6px;max-height:52vh;overflow:auto;padding:2px}.shop-item,.bag-item{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:8px;padding:7px;background:#fff;border:2px solid #a6b4a0}.bag-item{grid-template-columns:minmax(0,1fr) auto auto}.shop-item-copy,.bag-item span{min-width:0}.shop-item small,.bag-item small{display:block;font-size:11px;font-weight:500;color:#59645a}.shop-item input{width:58px;padding:6px;border:2px solid #9eaa98}.shop-result{min-height:20px;font-weight:800;color:#2b6332}.battle-inventory .inventory-item{grid-template-columns:minmax(0,1fr) auto minmax(110px,auto) auto}.battle-inventory select{max-width:155px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:520px){.shop-item{grid-template-columns:minmax(0,1fr) auto auto;}.shop-item strong{grid-column:2;grid-row:1}.shop-item label{grid-column:1;grid-row:2}.shop-item button{grid-column:3;grid-row:1/3}.shop-item-copy small{line-height:1.25}.bag-item{gap:4px;font-size:12px}.battle-inventory .inventory-item{grid-template-columns:minmax(0,1fr) auto}.battle-inventory .inventory-item select{grid-column:1;grid-row:2}.battle-inventory .inventory-item .btn{grid-column:2;grid-row:2}}";
+  document.head.appendChild(style);
+  syncBattleInventory();displayShopMenu();
+})();
+</script>
+<script id="choose-next-pokemon-after-faint">
+(function(){
+  "use strict";
+  async function handlePlayerFaint(){
+    if(state._forcedSwitchChoosing||!state.enemy)return;
+    state.inAction=true;
+    var fainted=state.party[state.active];
+    if(fainted)await battleDialogue([battleSubject(fainted.name)+" 쓰러졌다!"]);
+    var choices=state.party.map(function(mon,index){return {mon:mon,index:index}}).filter(function(entry){return entry.index!==state.active&&entry.mon.hp>0});
+    if(!choices.length){
+      state._forcedSwitchChoosing=false;
+      await loseBattle();
+      return
+    }
+    state._forcedSwitchChoosing=true;
+    var html='<p class="forced-switch-prompt">누구를 내보낼까? 원하는 포켓몬을 선택해.</p><div class="move-list forced-switch-list">'+choices.map(function(entry){
+      var mon=entry.mon,ratio=Math.max(0,Math.min(100,mon.hp/Math.max(1,mon.maxHp)*100));
+      return '<button type="button" class="move-entry forced-switch-choice" data-faint-switch="'+entry.index+'"><img src="'+txt(mon.sprite||spriteURL(mon))+'" alt=""><span><b>'+txt(mon.name)+'</b><small>Lv.'+mon.level+' · HP '+mon.hp+'/'+mon.maxHp+'</small><span class="forced-switch-hp"><i style="width:'+ratio+'%"></i></span></span><strong>선택</strong></button>'
+    }).join("")+'</div>';
+    showModal("다음 포켓몬 선택",html,[]);
+    document.querySelectorAll("[data-faint-switch]").forEach(function(button){
+      button.onclick=async function(){
+        if(!state._forcedSwitchChoosing)return;
+        var next=Number(button.getAttribute("data-faint-switch"));
+        if(!state.party[next]||state.party[next].hp<=0)return;
+        state._forcedSwitchChoosing=false;closeModal();state.active=next;state.inAction=true;
+        renderBattle();await battleDialogue(["가랏! "+state.party[next].name+"!"]);
+        state.inAction=false;renderBattle();if(window.showBattleMainMenu)window.showBattleMainMenu();if(window.saveGame)saveGame()
+      }
+    })
+  }
+  window.handlePlayerFaint=handlePlayerFaint;
+  var style=document.createElement("style");
+  style.textContent=".forced-switch-prompt{font-weight:900;margin:0 0 8px}.forced-switch-list{max-height:52vh;overflow:auto}.forced-switch-choice{width:100%;text-align:left;display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:8px}.forced-switch-choice img{width:42px;height:42px;object-fit:contain;image-rendering:pixelated}.forced-switch-choice small{display:block}.forced-switch-hp{display:block;height:7px;background:#d2d5d2;border:1px solid #414851;margin-top:4px}.forced-switch-hp i{display:block;height:100%;background:linear-gradient(#82d46d,#36a84b)}";
+  document.head.appendChild(style)
+})();
+</script>
+</body></html>
