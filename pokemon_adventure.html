@@ -465,7 +465,70 @@ html[data-device-mode="desktop"] body.in-battle #battleScreen .binfo #myHpText{d
 @media(max-height:650px){
  html[data-device-mode="desktop"] .map-wrap{height:min(68vh,calc(100dvh - 190px))!important;min-height:330px!important}
  html[data-device-mode="desktop"] #classicTools>.btn{min-height:36px}
-}html[data-device-mode="desktop"] body.in-battle #battleScreen .binfo.enemy,html[data-device-mode="desktop"] body.in-battle #battleScreen .binfo.player{width:clamp(250px,34vw,430px)!important}</style></head>
+}html[data-device-mode="desktop"] body.in-battle #battleScreen .binfo.enemy,html[data-device-mode="desktop"] body.in-battle #battleScreen .binfo.player{width:clamp(250px,34vw,430px)!important}</style>
+<style id="capture-ball-motion">
+#battleScreen .capture-ball{
+  position:absolute;z-index:6;left:18%;top:78%;width:clamp(34px,4.2vw,48px);aspect-ratio:1;
+  border:3px solid #27352f;border-radius:50%;
+  background:linear-gradient(to bottom,#e84b43 0 43%,#252e2b 43% 56%,#f7f3df 56% 100%);
+  box-shadow:0 4px 0 #31443c88,inset 2px 2px 0 #ffffff77;
+  opacity:0;pointer-events:none;transform:translate(-50%,-50%);will-change:left,top,transform,opacity;
+}
+#battleScreen .capture-ball:before{content:"";position:absolute;left:50%;top:50%;width:36%;aspect-ratio:1;transform:translate(-50%,-50%);border:3px solid #28342f;border-radius:50%;background:#f8f5e8;box-shadow:inset 0 0 0 2px #d6d9cb}
+#battleScreen .capture-ball span{position:absolute;left:50%;top:50%;width:13%;aspect-ratio:1;transform:translate(-50%,-50%);z-index:1;border-radius:50%;background:#fff;box-shadow:0 0 2px #27352f}
+#battleScreen .capture-ball:after{content:"";position:absolute;inset:-12px;border:3px solid #ffe67c;border-radius:50%;opacity:0;pointer-events:none}
+#battleScreen .capture-ball.capture-throwing{opacity:1;animation:captureBallThrow .62s cubic-bezier(.2,.68,.32,1) forwards}
+#battleScreen .capture-ball.capture-held{left:78%;top:40%;opacity:1;transform:translate(-50%,-50%)}
+#battleScreen .capture-ball.capture-shaking{animation:captureBallShake .48s ease-in-out both}
+#battleScreen .capture-ball.capture-caught{animation:captureBallCaught .46s ease-out both}
+#battleScreen .capture-ball.capture-breaking{animation:captureBallBreak .38s ease-out both}
+#battleScreen .capture-ball.capture-breaking:after{animation:captureBallFlash .38s ease-out both}
+#battleScreen .battle-scene.capture-absorbing #enemySprite{animation:capturePokemonAbsorb .24s ease-in forwards!important}
+#battleScreen .battle-scene.capture-contained #enemySprite{visibility:hidden!important;opacity:0!important}
+#battleScreen .battle-scene.capture-escape #enemySprite{visibility:visible!important;animation:capturePokemonEscape .42s ease-out both!important}
+@keyframes captureBallThrow{
+  0%{left:18%;top:78%;opacity:0;transform:translate(-50%,-50%) scale(.48) rotate(0)}
+  16%{opacity:1}
+  62%{left:78%;top:40%;opacity:1;transform:translate(-50%,-50%) scale(1.12) rotate(430deg)}
+  100%{left:78%;top:40%;opacity:1;transform:translate(-50%,-50%) scale(1) rotate(540deg)}
+}
+@keyframes captureBallShake{
+  0%,100%{transform:translate(-50%,-50%) rotate(0)}
+  18%{transform:translate(calc(-50% - 7px),-50%) rotate(-20deg)}
+  38%{transform:translate(calc(-50% + 6px),-50%) rotate(17deg)}
+  58%{transform:translate(calc(-50% - 5px),-50%) rotate(-13deg)}
+  78%{transform:translate(calc(-50% + 4px),-50%) rotate(9deg)}
+}
+@keyframes captureBallCaught{
+  0%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  38%{opacity:1;filter:brightness(1.4);box-shadow:0 0 0 13px #ffe67c66,0 0 28px 13px #fff5b5}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(.18)}
+}
+@keyframes captureBallBreak{
+  0%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  42%{opacity:1;filter:brightness(1.8);transform:translate(-50%,-50%) scale(1.3)}
+  100%{opacity:0;filter:brightness(1.5);transform:translate(-50%,-50%) scale(.55)}
+}
+@keyframes captureBallFlash{
+  0%{opacity:0;transform:scale(.4)}
+  35%{opacity:1;transform:scale(1.2)}
+  100%{opacity:0;transform:scale(1.8)}
+}
+@keyframes capturePokemonAbsorb{
+  0%{opacity:1;transform:scale(1)}
+  100%{opacity:0;transform:scale(.06)}
+}
+@keyframes capturePokemonEscape{
+  0%{opacity:0;transform:scale(.06)}
+  70%{opacity:1;transform:scale(1.08)}
+  100%{opacity:1;transform:scale(1)}
+}
+@media(prefers-reduced-motion:reduce){
+  #battleScreen .capture-ball.capture-throwing,#battleScreen .capture-ball.capture-shaking,
+  #battleScreen .capture-ball.capture-caught,#battleScreen .capture-ball.capture-breaking,
+  #battleScreen .battle-scene.capture-absorbing #enemySprite,#battleScreen .battle-scene.capture-escape #enemySprite{animation-duration:.01ms!important}
+}
+</style></head>
 <body><div id="app">
 <header><div><h1>🎮 포켓몬 모험 · 오박사를 찾아서</h1><small>픽셀 월드 · 턴제 배틀 · 포켓몬 도감 · 라이벌 스토리 · <span class="mode-badge"></span></small></div><div class="head-actions"><button class="btn small" id="saveBtn">💾 저장</button><button class="btn small" id="loadBtn">불러오기</button></div></header>
 <main class="main">
@@ -490,7 +553,7 @@ html[data-device-mode="desktop"] body.in-battle #battleScreen .binfo #myHpText{d
 <div class="panel"><div class="section-title">여행 메뉴</div><div class="subactions"><button class="btn" id="pokedexBtn">📖 포켓몬 도감</button><button class="btn" id="moveDexBtn">✨ 기술 도감</button><button class="btn" id="bagBtn">🎒 가방</button><button class="btn" id="healBtn">🏥 회복</button><button class="btn" id="shopBtn">🛒 상점</button><button class="btn" id="questBtn">🏅 배지 / 목표</button></div></div>
 </div><aside class="side-box"><div class="panel"><div class="section-title">여행 안내</div><p style="font-size:13px;line-height:1.5;margin:0">마을에서 준비하고 길로 나가자. 사람과 대화하려면 가까이 다가간 뒤 <b>A</b>를 눌러. 체육관 관장을 이기면 배지를 받을 수 있어.</p><hr style="border:0;border-top:1px solid #c9d8c0;margin:10px 0"><div class="section-title">획득한 배지</div><div id="badgeList">아직 배지가 없어.</div><div class="muted" style="margin-top:8px">진행 상황은 이 기기에 저장할 수 있어.</div></div><div class="panel" style="margin-top:9px"><div class="section-title">빠른 정보</div><div id="quickInfo" style="font-size:12px;line-height:1.7">풀숲 탐험을 시작해!</div></div></aside></div>
 </section>
-<section id="battleScreen" class="hidden"><div class="panel battle-top"><b id="battleTitle">야생 포켓몬이 나타났다!</b><span id="battleKind" class="pill">야생 배틀</span></div><div class="battle-scene"><div class="binfo enemy"><span id="enemyName">포켓몬</span> <span id="enemyLevel">Lv. 3</span><div class="hpbar"><b class="hp-label">HP</b><span class="hp-track"><i id="enemyHp"></i></span></div><small id="enemyHpText">HP 0/0</small><small id="enemyStatus"></small></div><img id="enemySprite" class="bsprite" alt="상대 포켓몬"><img id="mySprite" class="bsprite" alt="내 포켓몬"><div class="binfo player"><span id="myName">포켓몬</span> <span id="myLevel">Lv. 5</span><div class="hpbar"><b class="hp-label">HP</b><span class="hp-track"><i id="myHp"></i></span></div><small id="myHpText"></small><small id="myStatus"></small></div></div><div id="battleMessage" class="panel" style="min-height:48px;font-weight:800">상대 포켓몬이 나타났다!</div><div class="battle-command-grid"><section class="battle-command-panel"><div class="section-title">⚔️ 기술 선택</div><div id="moveButtons" class="battle-actions"></div></section><section class="battle-command-panel battle-bag-panel"><div class="section-title">🎒 가방 · 전투 도구</div><div class="battle-inventory"><div class="inventory-item"><span>🔴 몬스터볼</span><b id="battleBallCount">5개</b><button class="btn small" id="throwBallBtn">던지기</button></div><div class="inventory-item"><span>🧪 상처약</span><b id="battlePotionCount">3개</b><button class="btn small" id="potionBtn">사용</button></div><div class="inventory-item"><span>💰 소지금</span><b id="battleMoneyCount">₽ 3000</b></div></div><div class="battle-utility"><button class="btn" id="switchBattleBtn">🔄 포켓몬 교체</button><button class="btn red" id="runBtn">🏃 도망가기</button></div></section></div></section>
+<section id="battleScreen" class="hidden"><div class="panel battle-top"><b id="battleTitle">야생 포켓몬이 나타났다!</b><span id="battleKind" class="pill">야생 배틀</span></div><div class="battle-scene"><div class="binfo enemy"><span id="enemyName">포켓몬</span> <span id="enemyLevel">Lv. 3</span><div class="hpbar"><b class="hp-label">HP</b><span class="hp-track"><i id="enemyHp"></i></span></div><small id="enemyHpText">HP 0/0</small><small id="enemyStatus"></small></div><img id="enemySprite" class="bsprite" alt="상대 포켓몬"><img id="mySprite" class="bsprite" alt="내 포켓몬"><div id="captureBall" class="capture-ball" aria-hidden="true"><span></span></div><div class="binfo player"><span id="myName">포켓몬</span> <span id="myLevel">Lv. 5</span><div class="hpbar"><b class="hp-label">HP</b><span class="hp-track"><i id="myHp"></i></span></div><small id="myHpText"></small><small id="myStatus"></small></div></div><div id="battleMessage" class="panel" style="min-height:48px;font-weight:800">상대 포켓몬이 나타났다!</div><div class="battle-command-grid"><section class="battle-command-panel"><div class="section-title">⚔️ 기술 선택</div><div id="moveButtons" class="battle-actions"></div></section><section class="battle-command-panel battle-bag-panel"><div class="section-title">🎒 가방 · 전투 도구</div><div class="battle-inventory"><div class="inventory-item"><span>🔴 몬스터볼</span><b id="battleBallCount">5개</b><button class="btn small" id="throwBallBtn">던지기</button></div><div class="inventory-item"><span>🧪 상처약</span><b id="battlePotionCount">3개</b><button class="btn small" id="potionBtn">사용</button></div><div class="inventory-item"><span>💰 소지금</span><b id="battleMoneyCount">₽ 3000</b></div></div><div class="battle-utility"><button class="btn" id="switchBattleBtn">🔄 포켓몬 교체</button><button class="btn red" id="runBtn">🏃 도망가기</button></div></section></div></section>
 <section id="dexScreen" class="panel hidden"><div class="spread"><h2 id="dexHeading" style="margin:0">포켓몬 도감</h2><button class="btn small" id="closeDexBtn">돌아가기</button></div><p id="dexSummary" class="muted"></p><div class="dex-tools"><input id="dexSearch" placeholder="이름 검색 (한국어/영어)" autocomplete="off"><select id="dexFilter"><option value="all">전체</option><option value="seen">발견함</option><option value="caught">포획함</option></select></div><div id="dexGrid" class="dex-list" style="margin-top:9px"></div><button class="btn" id="dexMoreBtn" style="width:100%;margin-top:9px">더 보기</button></section>
 <section id="moveDexScreen" class="panel hidden"><div class="spread"><h2 style="margin:0">✨ 기술 도감</h2><button class="btn small" id="closeMoveDexBtn">돌아가기</button></div><p id="moveDexSummary" class="muted">실제 포켓몬 기술 데이터베이스에서 목록을 불러와.</p><div class="dex-tools"><input id="moveSearch" placeholder="기술 이름 검색 (한국어/영어)" autocomplete="off"></div><div id="moveList" class="move-list" style="margin-top:9px"></div><button class="btn" id="moveMoreBtn" style="width:100%;margin-top:9px">더 보기</button></section>
 </main><footer>팬 제작 비공식 게임 · Pokémon 및 관련 캐릭터는 각 권리자의 상표/저작물입니다. 공식 게임이 아니며 데이터는 PokéAPI를 통해 불러옵니다.</footer></div>
@@ -501,6 +564,10 @@ const API='https://pokeapi.co/api/v2/';
 const TYPE_KO={normal:'노말',fire:'불꽃',water:'물',electric:'전기',grass:'풀',ice:'얼음',fighting:'격투',poison:'독',ground:'땅',flying:'비행',psychic:'에스퍼',bug:'벌레',rock:'바위',ghost:'고스트',dragon:'드래곤',dark:'악',steel:'강철',fairy:'페어리'};
 const CLASS_KO={physical:'물리',special:'특수',status:'변화'};
 const FALLBACK_MOVES=[['tackle','몸통박치기',40,100,35,'normal','physical'],['quick-attack','전광석화',40,100,30,'normal','physical'],['scratch','할퀴기',40,100,35,'normal','physical'],['growl','울음소리',0,100,40,'normal','status'],['vine-whip','덩굴채찍',45,100,25,'grass','physical'],['razor-leaf','잎날가르기',55,95,25,'grass','physical'],['ember','불꽃세례',40,100,25,'fire','special'],['flamethrower','화염방사',90,100,15,'fire','special'],['water-gun','물대포',40,100,25,'water','special'],['bubble','거품',40,100,30,'water','special'],['thunder-shock','전기쇼크',40,100,30,'electric','special'],['thunderbolt','10만볼트',90,100,15,'electric','special'],['tail-whip','꼬리흔들기',0,100,30,'normal','status'],['poison-powder','독가루',0,75,35,'poison','status'],['sleep-powder','수면가루',0,75,15,'grass','status'],['confusion','염동력',50,100,25,'psychic','special'],['psybeam','환상빔',65,100,20,'psychic','special'],['bite','물기',60,100,25,'dark','physical'],['rock-throw','돌떨구기',50,90,15,'rock','physical'],['gust','바람일으키기',40,100,35,'flying','special'],['absorb','흡수',20,100,25,'grass','special'],['leech-seed','씨뿌리기',0,90,10,'grass','status'],['pound','막치기',40,100,35,'normal','physical'],['double-slap','연속뺨치기',15,85,10,'normal','physical'],['headbutt','박치기',70,100,15,'normal','physical'],['scratch','할퀴기',40,100,35,'normal','physical'],['swift','스피드스타',60,Infinity,20,'normal','special'],['earthquake','지진',100,100,10,'ground','physical'],['ice-beam','냉동빔',90,100,10,'ice','special'],['shadow-ball','섀도볼',80,100,15,'ghost','special'],['dragon-claw','드래곤크루',80,100,15,'dragon','physical']];
+const SPECIES_CATCH_RATE_FALLBACK=Object.freeze({bulbasaur:45,charmander:45,squirtle:45,pikachu:190,eevee:45,snorlax:25,pidgey:255,rattata:255,caterpie:255,weedle:255,magikarp:255,mewtwo:3,articuno:3,zapdos:3,moltres:3,lugia:3,'ho-oh':3,raikou:3,entei:3,suicune:3,rayquaza:3,kyogre:3,groudon:3,deoxys:3});
+function speciesCatchRate(slug,value){const rate=Number(value);if(Number.isFinite(rate)&&rate>=1)return Math.min(255,Math.floor(rate));return SPECIES_CATCH_RATE_FALLBACK[slug]||45}
+const CAPTURE_BALLS=Object.freeze({pokeball:{name:'몬스터볼',multiplier:1},greatball:{name:'수퍼볼',multiplier:1.5},ultraball:{name:'하이퍼볼',multiplier:2},'몬스터볼':{name:'몬스터볼',multiplier:1},'수퍼볼':{name:'수퍼볼',multiplier:1.5},'하이퍼볼':{name:'하이퍼볼',multiplier:2}});
+function captureBallInfo(ballType){if(typeof ballType==='number')return {name:'몬스터볼',multiplier:ballType};if(ballType&&typeof ballType==='object'&&Number.isFinite(Number(ballType.multiplier)))return {name:ballType.name||'몬스터볼',multiplier:Number(ballType.multiplier)};const key=String(ballType||'pokeball').toLowerCase();const ball=CAPTURE_BALLS[key];if(!ball)throw new RangeError('알 수 없는 몬스터볼 종류입니다.');return ball}
 const fallbackSpecies=[{name:'bulbasaur',url:'https://pokeapi.co/api/v2/pokemon-species/1/'},{name:'charmander',url:'https://pokeapi.co/api/v2/pokemon-species/4/'},{name:'squirtle',url:'https://pokeapi.co/api/v2/pokemon-species/7/'},{name:'pikachu',url:'https://pokeapi.co/api/v2/pokemon-species/25/'},{name:'eevee',url:'https://pokeapi.co/api/v2/pokemon-species/133/'},{name:'snorlax',url:'https://pokeapi.co/api/v2/pokemon-species/143/'},{name:'pidgey',url:'https://pokeapi.co/api/v2/pokemon-species/16/'},{name:'rattata',url:'https://pokeapi.co/api/v2/pokemon-species/19/'}];
 const $=id=>document.getElementById(id); const state={started:false,trainer:'초보 트레이너',loc:'home',x:12,y:12,steps:0,party:[],active:0,enemy:null,battleKind:'wild',enemyTeam:[],enemyIndex:0,ball:0,potions:0,money:3000,badges:[],seen:new Set(),caught:new Set(),defeatedNPC:new Set(),tiles:{},starterGen:1,rivalStarter:'',pokedexObtained:false,openingDone:false,tutorialStage:'intro',species:[],moves:[],speciesKorean:{},pokemonCache:{},moveCache:{},speciesCache:{},lastMsg:'',dexPage:0,movePage:0,dexMode:'all',inAction:false};
 const moveFallbackMap=Object.fromEntries(FALLBACK_MOVES.map(m=>[m[0],{id:m[0],name:m[1],power:m[2],accuracy:m[3],pp:m[4],type:m[5],damage_class:m[6],effect_entries:[],meta:{}}]));
@@ -521,15 +588,15 @@ state.species=species;state.moves=moves;status.classList.remove('loading');statu
 }catch(e){state.species=fallbackSpecies;state.moves=FALLBACK_MOVES.map(m=>({name:m[0],url:API+'move/'+m[0]+'/'}));status.classList.remove('loading');status.textContent='온라인 데이터 연결 실패. 제한된 기본 데이터로 실행 중이야. 연결 후 다시 시도하면 전체 목록을 불러와.';$('moveDexSummary').textContent='오프라인 예비 목록만 표시 중이야. 전체 기술을 보려면 인터넷 연결 후 다시 연결해 줘.';populateTypeFilter();return false}}
 function populateTypeFilter(){}
 function nameFromNames(names,fallback){let ko=(names||[]).find(n=>n.language?.name==='ko');return ko?.name||fallback}
-async function getSpeciesInfo(slug){if(state.speciesCache[slug])return state.speciesCache[slug];try{let data=await api('pokemon-species/'+slug);let nm=nameFromNames(data.names,koFix[slug]||titleCase(slug));let info={id:data.id,name:nm,english:slug,gen:data.generation?.name,legendary:data.is_legendary,mythical:data.is_mythical,catchRate:data.capture_rate||45};state.speciesCache[slug]=info;state.speciesKorean[slug]=nm;return info}catch{return {id:0,name:koFix[slug]||titleCase(slug),english:slug}}}
+async function getSpeciesInfo(slug){if(state.speciesCache[slug])return state.speciesCache[slug];try{let data=await api('pokemon-species/'+slug);let nm=nameFromNames(data.names,koFix[slug]||titleCase(slug));let info={id:data.id,name:nm,english:slug,gen:data.generation?.name,legendary:data.is_legendary,mythical:data.is_mythical,catchRate:speciesCatchRate(slug,data.capture_rate)};state.speciesCache[slug]=info;state.speciesKorean[slug]=nm;return info}catch{return {id:0,name:koFix[slug]||titleCase(slug),english:slug,catchRate:speciesCatchRate(slug)}}}
 async function getMove(slug){if(state.moveCache[slug]&&state.moveCache[slug].power!==undefined)return normalizeMove(state.moveCache[slug],slug);try{let d=await api('move/'+slug);let nm=nameFromNames(d.names,titleCase(d.name));let effect=(d.effect_entries||[]).find(x=>x.language?.name==='ko')?.short_effect||(d.effect_entries||[]).find(x=>x.language?.name==='en')?.short_effect||'기술 데이터에 효과 설명이 없어.';let type=d.type?.name||'normal';let out={id:d.name,slug:d.name,name:nm,power:d.power,accuracy:d.accuracy,pp:d.pp,type,damage_class:d.damage_class?.name||'status',priority:d.priority||0,target:d.target?.name||'selected-pokemon',effect:effect.replace(/\n/g,' '),effect_chance:d.effect_chance,meta:d.meta||{},stat_changes:d.stat_changes||[],ailment:d.meta?.ailment?.name||'none',drain:d.meta?.drain||0,healing:d.meta?.healing||0,min_hits:d.meta?.min_hits||1,max_hits:d.meta?.max_hits||1};state.moveCache[slug]=d;state.moveCache['detail:'+slug]=out;return out}catch{let f=moveFallbackMap[slug];return f?{...f,slug,name:f.name,effect:'기본 기술 데이터'}:{id:slug,slug,name:titleCase(slug),power:40,accuracy:100,pp:20,type:'normal',damage_class:'physical',priority:0,effect:'기본 효과',meta:{}}}}
 function normalizeMove(d,slug){if(d?.id&&d?.slug&&d?.power!==undefined)return d;return state.moveCache['detail:'+slug]||moveFallbackMap[slug]||{id:slug,slug,name:titleCase(slug),power:40,accuracy:100,pp:20,type:'normal',damage_class:'physical',priority:0,effect:'기본 효과',meta:{}}}
 async function getPokemon(slug){try{return await api('pokemon/'+slug)}catch(e){return null}}
 function pokemonSlug(entry){return entry.name||slugFromUrl(entry.url)}
 function spriteURL(p,back=false){if(p?.sprites){return (back?p.sprites.back_default:null)||p.sprites.front_default||`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`}let id=p?.id||1;return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`}
 function artURL(p){return p?.sprites?.other?.['official-artwork']?.front_default||`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p?.id||1}.png`}
-async function makeMon(slug,level=5){let p=await getPokemon(slug);if(!p){let name=koFix[slug]||titleCase(slug);return {slug,name,english:slug,id:1,level,xp:0,hp:50,maxHp:50,atk:30,def:30,spAtk:30,spDef:30,speed:30,types:['normal'],moves:await fallbackMovesFor(slug),learnset:[],status:null,sprite:spriteURL({id:1})}}
-let info=await getSpeciesInfo(slug);let stats={};for(const s of p.stats)stats[s.stat.name]=s.base_stat;let mon={slug,name:info.name,english:slug,id:p.id,catchRate:info.catchRate||45,level,xp:0,hp:0,maxHp:Math.floor((2*stats.hp*level)/100)+level+10,atk:Math.floor((2*stats.attack*level)/100)+5,def:Math.floor((2*stats.defense*level)/100)+5,spAtk:Math.floor((2*stats['special-attack']*level)/100)+5,spDef:Math.floor((2*stats['special-defense']*level)/100)+5,speed:Math.floor((2*stats.speed*level)/100)+5,types:p.types.map(t=>t.type.name),moves:[],learnset:(p.moves||[]).map(m=>({slug:m.move.name,methods:[...new Set((m.version_group_details||[]).map(d=>d.move_learn_method?.name).filter(Boolean))]})),status:null,sprite:spriteURL(p),art:artURL(p),baseStats:stats};mon.hp=mon.maxHp;
+async function makeMon(slug,level=5){let p=await getPokemon(slug);if(!p){let name=koFix[slug]||titleCase(slug);return {slug,name,english:slug,id:1,catchRate:speciesCatchRate(slug),level,xp:0,hp:50,maxHp:50,atk:30,def:30,spAtk:30,spDef:30,speed:30,types:['normal'],moves:await fallbackMovesFor(slug),learnset:[],status:null,sprite:spriteURL({id:1})}}
+let info=await getSpeciesInfo(slug);let stats={};for(const s of p.stats)stats[s.stat.name]=s.base_stat;let mon={slug,name:info.name,english:slug,id:p.id,catchRate:speciesCatchRate(slug,info.catchRate),level,xp:0,hp:0,maxHp:Math.floor((2*stats.hp*level)/100)+level+10,atk:Math.floor((2*stats.attack*level)/100)+5,def:Math.floor((2*stats.defense*level)/100)+5,spAtk:Math.floor((2*stats['special-attack']*level)/100)+5,spDef:Math.floor((2*stats['special-defense']*level)/100)+5,speed:Math.floor((2*stats.speed*level)/100)+5,types:p.types.map(t=>t.type.name),moves:[],learnset:(p.moves||[]).map(m=>({slug:m.move.name,methods:[...new Set((m.version_group_details||[]).map(d=>d.move_learn_method?.name).filter(Boolean))]})),status:null,sprite:spriteURL(p),art:artURL(p),baseStats:stats};mon.hp=mon.maxHp;
 let all=[];for(const m of p.moves||[]){let details=m.version_group_details||[];let levels=details.filter(d=>d.move_learn_method?.name==='level-up'&&d.level_learned_at<=level).map(d=>d.level_learned_at);if(levels.length)all.push({slug:m.move.name,level:Math.max(...levels)})}all.sort((a,b)=>b.level-a.level);let chosen=[...new Map(all.map(m=>[m.slug,m])).values()].slice(0,4);for(const cm of chosen){let mv=await getMove(cm.slug);mon.moves.push({...mv,currentPP:mv.pp||20})}if(!mon.moves.length)mon.moves=await fallbackMovesFor(slug);return mon}
 async function fallbackMovesFor(slug){let keys=slug==='charmander'?['scratch','ember','growl','quick-attack']:slug==='squirtle'?['tackle','water-gun','tail-whip','bubble']:slug==='bulbasaur'?['tackle','vine-whip','growl','razor-leaf']:['tackle','quick-attack','growl','scratch'];return Promise.all(keys.map(async k=>({...await getMove(k),currentPP:(await getMove(k)).pp||20})))}
 function allNamesList(){return state.species.map(s=>({slug:pokemonSlug(s),id:Number(slugFromUrl(s.url)),english:pokemonSlug(s)})).sort((a,b)=>a.id-b.id)}
@@ -654,7 +721,164 @@ async function winEnemy(){if(!state.enemy)return;state.inAction=true;let defeate
 function endBattle(msg){state.enemy=null;state.inAction=false;state.party.forEach(m=>{m.hp=Math.max(1,Math.floor(m.maxHp/2))});closeToWorld(msg||'포켓몬센터로 돌아왔어. 포켓몬이 조금 회복됐어.');saveGame()}
 async function loseBattle(){const openingRival=state.currentNPC?.id==='rival-opening';state.inAction=true;await battleDialogue(['모든 포켓몬이 쓰러졌다!','포켓몬센터로 돌아간다…']);if(!openingRival)state.money=Math.max(0,state.money-100);state.enemy=null;state.inAction=false;state.loc='town';state.x=4;state.y=6;healParty();if(openingRival){state.openingDone=true;state.defeatedNPC.add('rival-opening');closeToWorld('오박사의 도움으로 회복했어. 모험은 계속할 수 있어!');saveGame();showModal('다시 일어나자!',`<div style="text-align:center"><div style="font-size:44px">💚</div><b>오박사</b><p>“처음부터 이기는 게 중요한 건 아니란다. 포켓몬을 회복했으니 이제 길을 나서서 경험을 쌓으렴!”</p><p>라이벌은 먼저 연구소를 떠났다.</p></div>`,[{label:'모험 계속하기',primary:true,onClick:()=>{closeModal();setNotice('포켓몬을 회복했어. 마을 밖으로 나가 모험을 시작하자!');saveGame()}}]);return}closeToWorld('포켓몬이 모두 쓰러져 포켓몬센터로 돌아왔어. ₽100을 잃었어.');saveGame()}
 function healParty(){state.party.forEach(m=>{m.hp=m.maxHp;m.status=null;m.moves.forEach(mv=>mv.currentPP=mv.pp)});renderParty();updateHud();saveGame()}
-async function throwBall(){if(!state.enemy||state.battleKind!=='wild'||state.inAction)return;state.inAction=true;if(state.ball<=0){await battleDialogue(['몬스터볼이 없어! 상점에서 구입해.']);state.inAction=false;showBattleMainMenu();return}await battleDialogue(['가랏! 몬스터볼!']);state.ball--;let e=state.enemy,base=Number(e.catchRate??45)/255,statusBonus=['sleep','freeze'].includes(e.status)?2:['poison','badly_poisoned','paralysis','burn'].includes(e.status)?1.5:1,chance=Math.max(.03,Math.min(.95,((3*e.maxHp-2*e.hp)*base/(3*e.maxHp))*statusBonus));if(Math.random()<chance){state.caught.add(e.slug);e.stages={attack:0,defense:0,'special-attack':0,'special-defense':0,speed:0,accuracy:0,evasion:0};e.status=null;e.hp=Math.max(1,e.hp);if(state.party.length<6){state.party.push(e);await battleDialogue([`${battleObject(e.name)} 잡았다!`,`${battleSubjectGa(e.name)} 파티에 들어왔다!`])}else await battleDialogue([`${battleObject(e.name)} 잡았다!`,'파티가 가득 차서 포획 기록에 등록했다!']);renderParty();updateHud();saveGame();closeToWorld(`${e.name} 포획 성공!`)}else{await battleDialogue([`앗! ${battleSubjectGa(e.name)} 몬스터볼에서 빠져나왔다!`]);await foeTurn()}}
+/**
+ * 3세대식 포획률 계산을 바탕으로, 게임 요청에 맞춰 4번 난수 검사를 수행합니다.
+ * @param {{catchRate:number,hp:number,maxHp:number,status?:string}} pokemon 야생 포켓몬
+ * @param {number} ballMultiplier 몬스터볼 1.0, 수퍼볼 1.5, 하이퍼볼 2.0
+ * @param {Function} random 0 이상 1 미만 난수 함수 (기본값 Math.random)
+ * @returns {{isCaught:boolean, shakes:number}} 성공 여부와 연출용 흔들림 횟수
+ */
+function throwPokeball(pokemon,ballMultiplier=1.0,random=Math.random){
+  if(!pokemon||typeof pokemon!=="object")throw new TypeError("포켓몬 정보가 필요합니다.");
+  const catchRateInput=Number(pokemon.catchRate),hp=Number(pokemon.hp),maxHp=Number(pokemon.maxHp);
+  if(!Number.isFinite(catchRateInput)||!Number.isFinite(hp)||!Number.isFinite(maxHp)||maxHp<=0)throw new RangeError("포획률과 HP 값을 확인해 주세요.");
+  if(!Number.isFinite(ballMultiplier)||ballMultiplier<=0)throw new RangeError("몬스터볼 계수는 0보다 커야 합니다.");
+  if(typeof random!=="function")throw new TypeError("random은 함수여야 합니다.");
+  const catchRate=Math.min(255,Math.max(1,Math.floor(catchRateInput)));
+  const currentHp=Math.min(maxHp,Math.max(0,hp));
+  let odds=Math.floor(catchRate*(3*maxHp-2*currentHp)*ballMultiplier/(3*maxHp));
+  const status=String(pokemon.status||"").trim().toLowerCase();
+  const sleepOrFreeze=["sleep","asleep","freeze","frozen","수면","잠듦","빙결","얼음"];
+  const otherStatus=["paralysis","paralyzed","poison","poisoned","badly_poisoned","toxic","burn","burned","마비","독","맹독","화상"];
+  if(sleepOrFreeze.includes(status))odds*=2;
+  else if(otherStatus.includes(status))odds=Math.floor(odds*15/10);
+  if(odds>254)return {isCaught:true,shakes:3};
+  if(odds<=0)return {isCaught:false,shakes:0};
+  const shakeThreshold=Math.floor(1048560/Math.sqrt(Math.sqrt(16711680/odds)));
+  let shakes=0;
+  for(let check=1;check<=4;check++){
+    const roll=random();
+    if(!Number.isFinite(roll)||roll<0||roll>=1)throw new RangeError("random은 0 이상 1 미만 값을 반환해야 합니다.");
+    if(Math.floor(roll*65536)>=shakeThreshold)return {isCaught:false,shakes};
+    if(check<=3)shakes++;
+  }
+  return {isCaught:true,shakes:3};
+}
+
+function waitForCaptureMotion(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+function clearCaptureVisuals(){
+  const scene=document.querySelector('#battleScreen .battle-scene');
+  const ball=$('captureBall');
+  if(scene)scene.classList.remove('capture-absorbing','capture-contained','capture-escape');
+  if(ball)ball.className='capture-ball';
+}
+async function playCaptureThrow(){
+  const scene=document.querySelector('#battleScreen .battle-scene');
+  const ball=$('captureBall');
+  if(!scene||!ball)return;
+  clearCaptureVisuals();
+  void ball.offsetWidth;
+  ball.classList.add('capture-throwing');
+  await waitForCaptureMotion(620);
+  scene.classList.add('capture-absorbing');
+  await waitForCaptureMotion(240);
+  scene.classList.remove('capture-absorbing');
+  scene.classList.add('capture-contained');
+  ball.className='capture-ball capture-held';
+}
+async function playCaptureShake(){
+  const ball=$('captureBall');
+  if(!ball)return;
+  ball.className='capture-ball capture-held';
+  void ball.offsetWidth;
+  ball.classList.add('capture-shaking');
+  await waitForCaptureMotion(500);
+}
+async function playCaptureOutcome(isCaught){
+  const scene=document.querySelector('#battleScreen .battle-scene');
+  const ball=$('captureBall');
+  if(!scene||!ball)return;
+  if(isCaught){
+    ball.className='capture-ball capture-held capture-caught';
+    await waitForCaptureMotion(470);
+    return;
+  }
+  ball.className='capture-ball capture-held capture-breaking';
+  scene.classList.remove('capture-contained');
+  scene.classList.add('capture-escape');
+  await waitForCaptureMotion(430);
+  clearCaptureVisuals();
+}
+/**
+ * 포획 판정, 몬스터볼 연출, 자동 대사, 포획 후 파티 등록까지 처리합니다.
+ * 볼 계수: pokeball=1.0, greatball=1.5, ultraball=2.0
+ * 예시: await attemptCatch(state.party[state.active], state.enemy, 'greatball')
+ */
+async function attemptCatch(attacker,targetPokemon,ballType='pokeball',random=Math.random){
+  if(!attacker||!targetPokemon)throw new TypeError('플레이어 포켓몬과 대상 포켓몬이 필요합니다.');
+  if(state.battleKind!=='wild'||state.enemy!==targetPokemon)throw new Error('야생 포켓몬 배틀에서만 포획할 수 있습니다.');
+  const ball=captureBallInfo(ballType);
+  const catchRate=speciesCatchRate(targetPokemon.slug||targetPokemon.english,targetPokemon.catchRate);
+  targetPokemon.catchRate=catchRate;
+  const result=throwPokeball({catchRate:catchRate,hp:targetPokemon.hp,maxHp:targetPokemon.maxHp,status:targetPokemon.status},ball.multiplier,random);
+  state.inAction=true;
+
+  await Promise.all([
+    battleDialogue([battleSubjectGa(attacker.name)+' '+battleObject(ball.name)+' 던졌다!'],900),
+    playCaptureThrow()
+  ]);
+  for(let i=0;i<result.shakes;i++){
+    await Promise.all([battleDialogue(['흔들...!'],900),playCaptureShake()]);
+  }
+  if(result.isCaught){
+    await Promise.all([
+      battleDialogue(['신난다! '+battleObject(targetPokemon.name)+' 잡았다!'],900),
+      playCaptureOutcome(true)
+    ]);
+    state.caught.add(targetPokemon.slug);
+    targetPokemon.stages={attack:0,defense:0,'special-attack':0,'special-defense':0,speed:0,accuracy:0,evasion:0};
+    targetPokemon.status=null;
+    targetPokemon.hp=Math.max(1,targetPokemon.hp);
+    if(state.party.length<6){
+      state.party.push(targetPokemon);
+      await battleDialogue([battleSubjectGa(targetPokemon.name)+' 파티에 들어왔다!'],900);
+    }else{
+      await battleDialogue(['파티가 가득 차서 포획 기록에 등록했다!'],900);
+    }
+    renderParty();
+    updateHud();
+    saveGame();
+    clearCaptureVisuals();
+    closeToWorld(targetPokemon.name+' 포획 성공!');
+  }else{
+    await Promise.all([
+      battleDialogue(['아깝다! 포켓몬이 볼에서 튀어나왔다!'],900),
+      playCaptureOutcome(false)
+    ]);
+    await foeTurn();
+  }
+  return result;
+}
+async function throwBall(ballType='pokeball'){
+  if(!state.enemy||state.battleKind!=='wild'||state.inAction)return;
+  state.inAction=true;
+  if(state.ball<=0){
+    await battleDialogue(['몬스터볼이 없어! 상점에서 구입해.']);
+    state.inAction=false;
+    showBattleMainMenu();
+    return;
+  }
+  try{captureBallInfo(ballType)}catch(error){
+    await battleDialogue(['그 몬스터볼은 사용할 수 없어.'],900);
+    state.inAction=false;
+    showBattleMainMenu();
+    return;
+  }
+  state.ball--;
+  updateHud();
+  saveGame();
+  try{
+    return await attemptCatch(state.party[state.active],state.enemy,ballType);
+  }catch(error){
+    console.error('포획 처리 오류:',error);
+    clearCaptureVisuals();
+    state.ball++;
+    updateHud();
+    saveGame();
+    state.inAction=false;
+    showBattleMainMenu();
+  }
+}
 async function usePotion(){if(state.inAction)return;if(state.potions<=0){state.inAction=true;await battleDialogue(['상처약이 없어!']);state.inAction=false;showBattleMainMenu();return}let p=state.party[state.active];if(p.hp===p.maxHp){state.inAction=true;await battleDialogue([`${p.name}의 HP는 이미 가득 차 있다!`]);state.inAction=false;showBattleMainMenu();return}state.inAction=true;state.potions--;let heal=Math.min(20,p.maxHp-p.hp);p.hp+=heal;renderBattle();await battleDialogue(['상처약을 사용했다!',`${p.name}의 HP가 ${heal} 회복됐다!`]);await foeTurn()}
 function switchBattle(){let available=state.party.map((m,i)=>({m,i})).filter(o=>o.m.hp>0&&o.i!==state.active);if(!available.length){state.inAction=true;battleDialogue(['교체할 수 있는 포켓몬이 없어!']).then(()=>{state.inAction=false;showBattleMainMenu()});return}showModal('포켓몬 교체',`<div class="move-list">${available.map(({m,i})=>`<button class="move-entry" data-switch="${i}"><img style="width:38px;height:38px;object-fit:contain" src="${m.sprite}"><span><b>${txt(m.name)}</b><small>Lv.${m.level} · HP ${m.hp}/${m.maxHp}</small></span></button>`).join('')}</div>`,[{label:'취소',onClick:closeModal}]);document.querySelectorAll('[data-switch]').forEach(b=>b.onclick=async()=>{if(state.inAction)return;const old=state.party[state.active],next=Number(b.dataset.switch);state.inAction=true;closeModal();await battleDialogue([`${old.name}, 돌아와!`]);state.active=next;renderBattle();await battleDialogue([`가랏! ${state.party[next].name}!`]);await foeTurn()})}
 async function runAway(){if(state.battleKind!=='wild'||state.inAction)return;state.inAction=true;if(Math.random()<.8){await battleDialogue(['무사히 도망쳤다!']);closeToWorld('무사히 도망쳤다!')}else{await battleDialogue(['하지만 도망칠 수 없었다!']);await foeTurn()}}
@@ -705,7 +929,7 @@ function returnToOakWorld(){if(state.started){$('start').classList.add('hidden')
 function confirmStarter(slug,ko,gen){showModal('파트너 포켓몬 선택',`<div style="display:flex;align-items:center;gap:12px"><img style="width:105px;height:105px;object-fit:contain" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${STARTER_GENERATIONS.find(g=>g.gen===gen).starters.find(x=>x[0]===slug)[3]}.png"><div><b>${ko}</b><p>레벨 5 · ${gen}세대 스타팅</p><p class="muted">이 포켓몬을 첫 파트너로 선택할까?</p></div></div>`,[{label:'다시 고르기',onClick:closeModal},{label:'이 포켓몬을 파트너로 받기',primary:true,onClick:()=>{closeModal();startGame(slug,gen)}}]);}
 // UI wiring
 $('enterOakLab').onclick=startNewAdventure;$('backOakIntro').onclick=returnToOakWorld;document.querySelectorAll('[data-dir]').forEach(b=>b.onclick=()=>move(b.dataset.dir));document.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d','W','A','S','D'].includes(e.key)){if(!$('gameScreen').classList.contains('hidden')){e.preventDefault();move(({ArrowUp:'up',w:'up',W:'up',ArrowDown:'down',s:'down',S:'down',ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right'})[e.key])}}else if(e.key===' '&&!$('gameScreen').classList.contains('hidden')){e.preventDefault();interact()}});
-$('map').addEventListener('click',e=>{if(!state.started||state.enemy)return;const r=$('map').getBoundingClientRect();const tx=Math.floor((e.clientX-r.left)/r.width*24),ty=Math.floor((e.clientY-r.top)/r.height*16);const dx=tx-state.x,dy=ty-state.y;if(Math.abs(dx)+Math.abs(dy)>0)move(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'))});$('interactBtn').onclick=interact;$('healBtn').onclick=()=>{healParty();setNotice('파티 전체의 HP와 PP를 회복했어.');};$('pokedexBtn').onclick=openDex;$('moveDexBtn').onclick=showMoveDex;$('bagBtn').onclick=openBag;$('shopBtn').onclick=openShop;$('partyBtn').onclick=openPartyManage;$('questBtn').onclick=openQuest;$('saveBtn').onclick=()=>{saveGame();showModal('저장 완료','모험 진행 상황을 이 브라우저에 저장했어.',[{label:'확인',primary:true,onClick:closeModal}])};$('loadBtn').onclick=loadGame;$('continueBtn').onclick=loadGame;$('retryApi').onclick=loadReferenceData;$('allPokemonPick').onclick=openStarterDex;$('closeDexBtn').onclick=backToGame;$('closeMoveDexBtn').onclick=backToGame;$('dexSearch').oninput=()=>{state.dexPage=0;renderDex()};$('dexFilter').onchange=()=>{state.dexPage=0;renderDex()};$('dexMoreBtn').onclick=()=>{state.dexPage++;renderDex()};$('moveSearch').oninput=()=>{state.movePage=0;renderMoveDex()};$('moveMoreBtn').onclick=()=>{state.movePage++;renderMoveDex()};$('throwBallBtn').onclick=throwBall;$('potionBtn').onclick=usePotion;$('switchBattleBtn').onclick=switchBattle;$('runBtn').onclick=runAway;
+$('map').addEventListener('click',e=>{if(!state.started||state.enemy)return;const r=$('map').getBoundingClientRect();const tx=Math.floor((e.clientX-r.left)/r.width*24),ty=Math.floor((e.clientY-r.top)/r.height*16);const dx=tx-state.x,dy=ty-state.y;if(Math.abs(dx)+Math.abs(dy)>0)move(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'))});$('interactBtn').onclick=interact;$('healBtn').onclick=()=>{healParty();setNotice('파티 전체의 HP와 PP를 회복했어.');};$('pokedexBtn').onclick=openDex;$('moveDexBtn').onclick=showMoveDex;$('bagBtn').onclick=openBag;$('shopBtn').onclick=openShop;$('partyBtn').onclick=openPartyManage;$('questBtn').onclick=openQuest;$('saveBtn').onclick=()=>{saveGame();showModal('저장 완료','모험 진행 상황을 이 브라우저에 저장했어.',[{label:'확인',primary:true,onClick:closeModal}])};$('loadBtn').onclick=loadGame;$('continueBtn').onclick=loadGame;$('retryApi').onclick=loadReferenceData;$('allPokemonPick').onclick=openStarterDex;$('closeDexBtn').onclick=backToGame;$('closeMoveDexBtn').onclick=backToGame;$('dexSearch').oninput=()=>{state.dexPage=0;renderDex()};$('dexFilter').onchange=()=>{state.dexPage=0;renderDex()};$('dexMoreBtn').onclick=()=>{state.dexPage++;renderDex()};$('moveSearch').oninput=()=>{state.movePage=0;renderMoveDex()};$('moveMoreBtn').onclick=()=>{state.movePage++;renderMoveDex()};$('throwBallBtn').onclick=()=>throwBall(1.0);$('potionBtn').onclick=usePotion;$('switchBattleBtn').onclick=switchBattle;$('runBtn').onclick=runAway;
 // Starter picker is accessible even when API is not ready.
 (async()=>{await loadReferenceData();if(readCache('pm_save_v3'))$('continueBtn').style.display='inline-block';})();
 </script><script>
