@@ -776,22 +776,7 @@ $('map').addEventListener('click',e=>{if(!state.started||state.enemy)return;cons
     else if(kind==="rug"){rect(c,px,py,20,20,"#d4b982");rect(c,px+1,py+1,18,18,"#a9514b");rect(c,px+4,py+4,12,12,"#e1b887")}
     else {drawGrass(c,x,y,px,py);if(kind==="exit")rect(c,px+7,py+7,6,8,"#f9f0c6")}
   }
-  function drawPerson(c,n,px,py,player){
-    var oak=n.kind==="oak",nurse=n.kind==="healer",mom=n.kind==="mother";
-    var clothes=player?"#315caa":oak?"#f3f0df":nurse?"#f0eee4":mom?"#c56f8f":n.kind==="rival"?"#916ac2":n.kind==="gym"?"#b84949":n.kind==="old"?"#ac7646":"#e3a743";
-    rect(c,px+4,py+16,12,3,"#4e7550"); /* soft shadow */
-    rect(c,px+6,py+4,8,6,oak?"#f1eee0":mom?"#d8ad8b":"#edc69c");
-    if(oak){rect(c,px+5,py+2,10,3,"#d4d1c3");rect(c,px+5,py+1,2,2,"#fff");rect(c,px+13,py+1,2,2,"#fff")}
-    else if(player){rect(c,px+4,py+2,12,4,"#d43e3e");rect(c,px+5,py+1,10,2,"#e74c49");rect(c,px+6,py+5,8,2,"#3d342c")}
-    else if(nurse){rect(c,px+5,py+1,10,3,"#f7f7ef");rect(c,px+8,py+1,4,2,"#c84c56")}
-    else {rect(c,px+5,py+2,10,3,mom?"#704a3e":"#493c36")}
-    if(!player&&n.kind!=="oak"){rect(c,px+6,py+6,2,1,"#303731");rect(c,px+12,py+6,2,1,"#303731")}
-    rect(c,px+5,py+10,10,7,clothes);rect(c,px+4,py+11,2,5,clothes);rect(c,px+14,py+11,2,5,clothes);
-    if(player){rect(c,px+6,py+11,8,3,"#d94b43");rect(c,px+6,py+14,2,2,"#f3d15d")}
-    else if(oak){rect(c,px+9,py+10,2,5,"#687b8e");rect(c,px+7,py+16,3,3,"#514d47");rect(c,px+12,py+16,3,3,"#514d47")}
-    rect(c,px+6,py+17,3,3,"#35423a");rect(c,px+12,py+17,3,3,"#35423a");
-    if(nurse){rect(c,px+9,py+11,2,5,"#d9434b");rect(c,px+7,py+12,6,2,"#d9434b")}
-  }
+  function drawPerson(c,n,px,py,player){ window.drawPokemonTrainerSprite(c,n.kind,px,py,player); }
   function drawClassicMap(){
     if(!state.started||!mapCanvas)return;
     var ctx=mapCanvas.getContext("2d"),g=grid(),cam=Math.max(0,Math.min(24-viewCols,state.x-Math.floor(viewCols/2)));
@@ -907,10 +892,7 @@ $('map').addEventListener('click',e=>{if(!state.started||state.enemy)return;cons
    else if(k==="gymRock"){q.fillStyle="#c6b487";q.fillRect(px,py,t,t);q.fillStyle="#5d5c56";q.fillRect(px+3,py+8,14,9);q.fillStyle="#77776e";q.fillRect(px+4,py+5,11,10);q.fillStyle="#b9b49e";q.fillRect(px+6,py+6,4,2)}
    else if(k==="gymDoor"){q.fillStyle="#9e8057";q.fillRect(px,py,t,t);q.fillStyle="#4e3c32";q.fillRect(px+3,py+1,14,19);q.fillStyle="#f4e6b7";q.fillRect(px+6,py+4,8,11)}
   }
-  function person(x,y,kind,player){var px=(x-cam)*t,py=y*t;if(px<-t||px>=c.width)return;q.fillStyle="rgba(48,43,33,.25)";q.fillRect(px+4,py+16,13,3);
-   if(player){q.fillStyle="#bd493d";q.fillRect(px+5,py+2,11,4);q.fillStyle="#ead0a5";q.fillRect(px+6,py+6,9,6);q.fillStyle="#315caa";q.fillRect(px+5,py+12,11,5);q.fillStyle="#243b37";q.fillRect(px+5,py+17,4,2);q.fillRect(px+12,py+17,4,2)}
-   else {q.fillStyle=kind==="gymLeader"?"#56564f":"#4b3931";q.fillRect(px+5,py+2,11,4);q.fillStyle="#edc79a";q.fillRect(px+6,py+5,9,7);q.fillStyle=kind==="gymLeader"?"#b95744":"#4f8a57";q.fillRect(px+5,py+12,11,5);q.fillStyle="#39413c";q.fillRect(px+5,py+17,4,2);q.fillRect(px+12,py+17,4,2)}
-  }
+  function person(x,y,kind,player){var px=(x-cam)*t,py=y*t;if(px<-t||px>=c.width)return;window.drawPokemonTrainerSprite(q,kind,px,py,player)}
   var actors=npcList().map(function(n){return{x:n.x,y:n.y,n:n,player:false}});actors.push({x:state.x,y:state.y,n:{kind:"player"},player:true});actors.sort(function(a,b){return a.y-b.y});actors.forEach(function(a){person(a.x,a.y,a.n.kind,a.player)});
   var label=document.getElementById("locationLabel");if(label)label.textContent=MAPS.gym.name
  }
@@ -953,5 +935,85 @@ $('map').addEventListener('click',e=>{if(!state.started||state.enemy)return;cons
   return interact0()
  };
  var interactBtn=document.getElementById('interactBtn');if(interactBtn)interactBtn.onclick=window.interact;
+})();
+</script><script id="pokemon-sprite-and-victory-fix">
+(function(){
+  "use strict";
+  var spriteBase="https://raw.githubusercontent.com/pret/pokefirered/master/graphics/object_events/pics/people/";
+  var spriteFiles={
+    player:"red_normal.png", oak:"prof_oak.png", old:"old_man_1.png",
+    mother:"mom.png", healer:"nurse.png", gym:"brock.png",
+    gymLeader:"brock.png", gymTrainer:"gym_guy.png",
+    trainer:"bug_catcher.png", rival:"blue.png"
+  };
+  var spriteCache=Object.create(null);
+  window.drawPokemonTrainerSprite=function(ctx,kind,x,y,isPlayer){
+    if(!ctx)return;
+    var file=isPlayer?spriteFiles.player:(spriteFiles[kind]||spriteFiles.trainer);
+    var img=spriteCache[file];
+    if(!img){
+      img=spriteCache[file]=new Image();
+      img.onload=function(){if(typeof state!=="undefined"&&state.started&&window.drawMap)window.drawMap()};
+      img.src=spriteBase+file;
+    }
+    if(!img.complete||!img.naturalWidth||!img.naturalHeight)return;
+    var frameW=img.naturalWidth/3,frameH=img.naturalHeight/4;
+    if(!frameW||!frameH)return;
+    var facing=isPlayer?(window.__trainerFacing||"down"):"down";
+    var row={down:0,up:1,left:2,right:3}[facing]||0;
+    var h=28,w=h*frameW/frameH;
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(img,frameW,row*frameH,frameW,frameH,x+(20-w)/2,y+20-h,w,h);
+  };
+  var originalWinEnemy=window.winEnemy;
+  if(typeof originalWinEnemy==="function"){
+    window.winEnemy=async function(){
+      if(state.battleKind!=="wild")return originalWinEnemy();
+      var defeated=state.enemy;
+      if(!defeated||state._wildWinTransition)return;
+      state._wildWinTransition=true;
+      state.inAction=true;
+      try{
+        var p=state.party[state.active];
+        var lines=[battleSubject(defeated.name)+" 쓰러졌다!"];
+        if(p){
+          var xp=Math.max(10,defeated.level*12);
+          p.xp=(p.xp||0)+xp;
+          state.money+=Math.max(10,defeated.level*5);
+          lines.push(battleSubject(p.name)+" 경험치를 "+xp+" 얻었다!");
+          var needed=p.level*20;
+          if(p.xp>=needed){
+            p.xp-=needed;
+            p.level++;
+            p.maxHp+=3+Math.floor(p.level/3);
+            p.hp=Math.min(p.maxHp,p.hp+8);
+            p.atk+=2;p.def+=2;p.spAtk+=2;p.spDef+=2;p.speed+=1;
+            lines.push(battleSubject(p.name)+" 레벨이 올랐다!");
+            lines.push("Lv."+p.level+"이 되었다!");
+            if(typeof window.maybeLearnMove==="function"){
+              var learned=await window.maybeLearnMove(p);
+              if(learned)lines.push(learned);
+            }
+            if(typeof window.maybeEvolve==="function"){
+              var evolved=await window.maybeEvolve(p);
+              if(evolved)lines.push(evolved);
+            }
+          }
+          renderBattle();
+        }
+        saveGame();
+        var dialogue=battleDialogue(lines,900);
+        await Promise.race([dialogue,new Promise(function(resolve){setTimeout(resolve,10000)})]);
+      }catch(error){
+        console.error("Wild battle victory cleanup:",error);
+      }finally{
+        if(state.enemy===defeated){
+          closeToWorld("야생 포켓몬을 쓰러뜨렸다!");
+          saveGame();
+        }
+        state._wildWinTransition=false;
+      }
+    };
+  }
 })();
 </script></body></html>
