@@ -1870,4 +1870,145 @@ $('map').addEventListener('click',e=>{if(!state.started||state.enemy)return;cons
   document.head.appendChild(style)
 })();
 </script>
+<script id="pokemon-summary-modal-system">
+(function(){
+  "use strict";
+  var oldMakeMon=window.makeMon,oldRenderParty=window.renderParty,oldOpenParty=window.openPartyManage,oldLoad=window.loadGame;
+  var STAT_KEYS=[
+    {id:"hp",base:"hp",mon:"maxHp",label:"HP"},
+    {id:"attack",base:"attack",mon:"atk",label:"공격"},
+    {id:"defense",base:"defense",mon:"def",label:"방어"},
+    {id:"specialAttack",base:"special-attack",mon:"spAtk",label:"특수공격"},
+    {id:"specialDefense",base:"special-defense",mon:"spDef",label:"특수방어"},
+    {id:"speed",base:"speed",mon:"speed",label:"스피드"}
+  ];
+  var NATURES=[
+    ["hardy","노력",null,null],["lonely","외로움","attack","defense"],["brave","용감","attack","speed"],["adamant","고집","attack","specialAttack"],["naughty","개구쟁이","attack","specialDefense"],
+    ["bold","대담","defense","attack"],["docile","온순",null,null],["relaxed","무사태평","defense","speed"],["impish","장난꾸러기","defense","specialAttack"],["lax","촐랑","defense","specialDefense"],
+    ["timid","겁쟁이","speed","attack"],["hasty","성급","speed","defense"],["serious","성실",null,null],["jolly","명랑","speed","specialAttack"],["naive","천진난만","speed","specialDefense"],
+    ["modest","조심","specialAttack","attack"],["mild","의젓","specialAttack","defense"],["quiet","냉정","specialAttack","speed"],["bashful","수줍",null,null],["rash","덜렁","specialAttack","specialDefense"],
+    ["calm","차분","specialDefense","attack"],["gentle","얌전","specialDefense","defense"],["sassy","건방","specialDefense","speed"],["careful","신중","specialDefense","specialAttack"],["quirky","변덕",null,null]
+  ];
+  var NATURE_BY_ID=Object.create(null);
+  NATURES.forEach(function(row){NATURE_BY_ID[row[0]]=row});
+  var TYPE_COLORS={normal:"#a8a77a",fire:"#ee8130",water:"#6390f0",electric:"#f7d02c",grass:"#7ac74c",ice:"#96d9d6",fighting:"#c22e28",poison:"#a33ea1",ground:"#e2bf65",flying:"#a98ff3",psychic:"#f95587",bug:"#a6b91a",rock:"#b6a136",ghost:"#735797",dragon:"#6f35fc",dark:"#705746",steel:"#b7b7ce",fairy:"#d685ad"};
+  function natureFrom(mon){
+    var id=String(mon.natureId||"").toLowerCase();
+    var name=String(mon.nature||"").toLowerCase();
+    var row=NATURE_BY_ID[id]||NATURES.find(function(n){return n[0]===name||n[1]===mon.nature});
+    if(!row)row=NATURES[Math.floor(Math.random()*NATURES.length)];
+    mon.natureId=row[0];mon.nature=row[1];mon.natureEffect={up:row[2],down:row[3]};
+    return row
+  }
+  function baseValue(mon,key,monKey){
+    var value=Number(mon.baseStats&&mon.baseStats[key]);
+    if(Number.isFinite(value)&&value>0)return value;
+    var level=Math.max(1,Number(mon.level)||1),current=Number(mon[monKey]);
+    if(key==="hp")return Math.max(1,Math.round(((Number(mon.maxHp)||current||50)-level-10)*100/(2*level)));
+    return Math.max(1,Math.round(((current||30)-5)*100/(2*level)))
+  }
+  function syncActualStats(mon){
+    var level=Math.max(1,Number(mon.level)||1),ivs=mon.ivs||{},nature=natureFrom(mon);
+    if(!mon.baseStats||typeof mon.baseStats!=="object")mon.baseStats={};
+    STAT_KEYS.forEach(function(stat){
+      var iv=Math.max(0,Math.min(31,Math.floor(Number(ivs[stat.id])||0))),base=baseValue(mon,stat.base,stat.mon);
+      mon.baseStats[stat.base]=base;
+      var raw=Math.floor(((2*base+iv)*level)/100)+(stat.id==="hp"?level+10:5);
+      if(stat.id!=="hp"){
+        var up=nature[2]===stat.id,down=nature[3]===stat.id;
+        raw=Math.floor(raw*(up?1.1:down?.9:1))
+      }
+      if(stat.id==="hp"){
+        var priorMax=Math.max(1,Number(mon.maxHp)||raw),priorHp=Math.max(0,Number(mon.hp)||0),wasFull=priorHp>=priorMax;
+        mon.maxHp=Math.max(1,raw);
+        mon.hp=wasFull?mon.maxHp:Math.min(mon.maxHp,Math.max(0,Math.round(priorHp/priorMax*mon.maxHp)))
+      }else mon[stat.mon]=Math.max(1,raw)
+    });
+    mon.stats={hp:mon.maxHp,attack:mon.atk,defense:mon.def,specialAttack:mon.spAtk,specialDefense:mon.spDef,speed:mon.speed};
+    return mon
+  }
+  function ensureSummaryData(mon){
+    if(!mon)return mon;
+    var generated=false;
+    if(!mon.ivs||typeof mon.ivs!=="object"){mon.ivs={};generated=true}
+    STAT_KEYS.forEach(function(stat){if(!Number.isFinite(Number(mon.ivs[stat.id]))){mon.ivs[stat.id]=Math.floor(Math.random()*32);generated=true}else mon.ivs[stat.id]=Math.max(0,Math.min(31,Math.floor(Number(mon.ivs[stat.id]))))});
+    var hadNature=!!(mon.natureId||mon.nature);var nature=natureFrom(mon);
+    if(!mon.baseStats||typeof mon.baseStats!=="object")mon.baseStats={};
+    if(generated||!mon.stats){
+      syncActualStats(mon)
+    }else{
+      mon.stats={hp:Number(mon.maxHp)||mon.stats.hp||1,attack:Number(mon.atk)||mon.stats.attack||1,defense:Number(mon.def)||mon.stats.defense||1,specialAttack:Number(mon.spAtk)||mon.stats.specialAttack||1,specialDefense:Number(mon.spDef)||mon.stats.specialDefense||1,speed:Number(mon.speed)||mon.stats.speed||1};
+      if(!hadNature)mon.natureEffect={up:nature[2],down:nature[3]}
+    }
+    return mon
+  }
+  window.makeMon=async function(){
+    var mon=await oldMakeMon.apply(this,arguments);
+    return ensureSummaryData(mon)
+  };
+  function ivGrade(value){return value>=31?"S/V":value>=25?"A":value>=15?"B":"C"}
+  function statLabel(id){var found=STAT_KEYS.find(function(stat){return stat.id===id});return found?found.label:id}
+  function showPokemonSummary(index){
+    var mon=typeof index==="number"?state.party[index]:index;
+    if(!mon)return;
+    ensureSummaryData(mon);
+    var natureText=mon.nature;
+    if(mon.natureEffect&&(mon.natureEffect.up||mon.natureEffect.down)){
+      natureText+=" · "+(mon.natureEffect.up?statLabel(mon.natureEffect.up)+"↑":"")+" "+(mon.natureEffect.down?statLabel(mon.natureEffect.down)+"↓":"")
+    }else natureText+=" · 능력치 변화 없음";
+    var hpRatio=Math.max(0,Math.min(100,mon.hp/Math.max(1,mon.maxHp)*100));
+    var typeHtml=(mon.types||[]).map(function(type){return '<span class="summary-type" style="background:'+ (TYPE_COLORS[type]||"#777") +'">'+txt(koType(type))+'</span>'}).join("");
+    var statsHtml=STAT_KEYS.map(function(stat){
+      var value=stat.id==="hp"?mon.maxHp:mon.stats[stat.id==="specialAttack"?"specialAttack":stat.id==="specialDefense"?"specialDefense":stat.id];
+      var iv=mon.ivs[stat.id]||0;
+      return '<div class="summary-stat"><div class="summary-stat-head"><b>'+stat.label+'</b><span>'+value+'</span><em>개체값 '+iv+'/31 · '+ivGrade(iv)+'</em></div><div class="summary-stat-track"><i style="width:'+Math.max(2,Math.min(100,value/255*100))+'%"></i></div></div>'
+    }).join("");
+    var moves=(mon.moves||[]).slice(0,4);
+    var movesHtml=moves.length?moves.map(function(move){
+      var type=move.type||"normal",color=TYPE_COLORS[type]||"#777",power=Number(move.power)>0?move.power:"—",pp=move.currentPP??move.pp??0,maxPp=move.pp??"?";
+      return '<article class="summary-move" style="--move-color:'+color+'"><span class="summary-move-type">'+txt(koType(type))+'</span><div><b>'+txt(move.name||MOVE_KO_NAMES[move.slug]||move.slug||"기술")+'</b><small>위력 '+power+' · PP '+pp+'/'+maxPp+'</small></div></article>'
+    }).join(""):'<p class="muted">배운 기술이 없어.</p>';
+    var html='<div class="summary-profile"><img src="'+txt(mon.sprite||spriteURL(mon))+'" alt="'+txt(mon.name)+'"><div><h3>'+txt(mon.name)+' <small>Lv.'+mon.level+'</small></h3><div class="summary-types">'+typeHtml+'</div><p>성격: <b>'+txt(natureText)+'</b></p><div class="summary-hp"><b>HP</b><span class="summary-stat-track"><i style="width:'+hpRatio+'%"></i></span><strong>'+mon.hp+'/'+mon.maxHp+'</strong></div></div></div><section class="summary-section"><h4>능력치 · 개체값</h4><div class="summary-stats">'+statsHtml+'</div></section><section class="summary-section"><h4>배운 기술</h4><div class="summary-moves">'+movesHtml+'</div></section>';
+    showModal(txt(mon.name)+" 상태",html,[{label:"파티로 돌아가기",onClick:function(){closeModal();if(window.openPartyManage)window.openPartyManage()}},{label:"닫기",primary:true,onClick:closeModal}])
+  }
+  window.showPokemonSummary=showPokemonSummary;window.openPokemonSummary=showPokemonSummary;
+  window.renderParty=function(){
+    (state.party||[]).forEach(ensureSummaryData);
+    if(oldRenderParty)oldRenderParty.apply(this,arguments);
+    document.querySelectorAll("#partyList .party-card").forEach(function(card,index){
+      var image=card.querySelector("img");if(!image)return;
+      image.style.cursor="zoom-in";image.title="눌러서 "+(state.party[index]&&state.party[index].name||"포켓몬")+" 상태 보기";
+      image.onclick=function(event){event.stopPropagation();showPokemonSummary(index)}
+    })
+  };
+  window.openPartyManage=function(){
+    if(oldOpenParty)oldOpenParty.apply(this,arguments);
+    document.querySelectorAll("#modalBody [data-active]").forEach(function(activeButton){
+      var index=Number(activeButton.getAttribute("data-active")),row=activeButton.closest(".move-entry");
+      if(!row||row.querySelector("[data-summary-view]"))return;
+      var view=document.createElement("button");view.className="btn small";view.type="button";view.textContent="상태 보기";view.setAttribute("data-summary-view",String(index));
+      row.insertBefore(view,activeButton);
+      view.onclick=function(){showPokemonSummary(index)}
+    });
+    document.querySelectorAll("#modalBody .move-entry img").forEach(function(image){
+      var row=image.closest(".move-entry"),button=row&&row.querySelector("[data-active]");if(!button)return;
+      var index=Number(button.getAttribute("data-active"));image.style.cursor="zoom-in";
+      image.onclick=function(event){event.stopPropagation();showPokemonSummary(index)}
+    })
+  };
+  document.getElementById("partyBtn").onclick=window.openPartyManage;
+  window.loadGame=function(){
+    var result=oldLoad?oldLoad.apply(this,arguments):undefined;
+    (state.party||[]).forEach(ensureSummaryData);if(window.renderParty)renderParty();if(window.saveGame)saveGame();
+    return result
+  };
+  var oldSaveSummary=window.saveGame;
+  window.saveGame=function(){(state.party||[]).forEach(ensureSummaryData);return oldSaveSummary?oldSaveSummary.apply(this,arguments):undefined};
+  var style=document.createElement("style");
+  style.textContent=".summary-profile{display:grid;grid-template-columns:112px minmax(0,1fr);align-items:center;gap:12px;padding:10px;background:#fff;border:2px solid #a6b4a0}.summary-profile>img{width:108px;height:108px;object-fit:contain;image-rendering:pixelated}.summary-profile h3{margin:0 0 5px;font-size:20px}.summary-profile h3 small{font-size:14px}.summary-profile p{margin:7px 0 0}.summary-types{display:flex;flex-wrap:wrap;gap:4px}.summary-type,.summary-move-type{display:inline-block;padding:3px 8px;color:#fff;font-size:11px;font-weight:900;border-radius:99px;text-shadow:0 1px 2px #0005}.summary-hp{display:grid;grid-template-columns:auto minmax(55px,1fr) auto;align-items:center;gap:7px;margin-top:8px;font-size:12px}.summary-stat-track{display:block;height:9px;background:#d5d9d3;border:1px solid #58615a}.summary-stat-track i{display:block;height:100%;background:linear-gradient(90deg,#87cf63,#319d4a)}.summary-section{margin-top:10px;padding:9px;background:#f1f2eb;border:2px solid #a6b4a0}.summary-section h4{margin:0 0 7px}.summary-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}.summary-stat-head{display:flex;align-items:center;gap:6px;font-size:12px}.summary-stat-head span{font-weight:900}.summary-stat-head em{margin-left:auto;font-size:10px;font-style:normal;color:#59645a}.summary-stat .summary-stat-track{height:7px;margin-top:3px}.summary-moves{display:grid;grid-template-columns:1fr 1fr;gap:7px}.summary-move{display:flex;align-items:center;gap:8px;min-width:0;padding:8px;background:#fff;border:2px solid var(--move-color)}.summary-move-type{flex:0 0 auto;background:var(--move-color)}.summary-move div{min-width:0}.summary-move b,.summary-move small{display:block;overflow-wrap:anywhere}.summary-move small{font-size:11px;color:#59645a}.party-card img{cursor:zoom-in}@media(max-width:560px){.summary-profile{grid-template-columns:76px minmax(0,1fr);gap:8px;padding:7px}.summary-profile>img{width:72px;height:82px}.summary-profile h3{font-size:17px}.summary-stats,.summary-moves{grid-template-columns:1fr}.summary-stat-head{font-size:11px}.summary-stat-head em{font-size:9px}}";
+  document.head.appendChild(style);
+  (state.party||[]).forEach(ensureSummaryData);
+  if(window.renderParty)renderParty();
+})();
+</script>
 </body></html>
