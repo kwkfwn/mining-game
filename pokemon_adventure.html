@@ -345,9 +345,26 @@ body.in-battle #battleScreen>.battle-scene{height:100%;min-height:0}
 html[data-device-mode="desktop"] .play-layout{grid-template-columns:minmax(0,1fr) minmax(132px,34%);gap:8px}
 html[data-device-mode="desktop"] .map-side{display:flex;flex-direction:column;gap:8px}
 html[data-device-mode="desktop"] .map-side .party-box,html[data-device-mode="desktop"] .map-side .dpad-box{grid-column:auto}
-html[data-device-mode="desktop"] .battle-scene{min-height:280px;height:38vh}</style></head>
+html[data-device-mode="desktop"] .battle-scene{min-height:280px;height:38vh}
+html[data-device-mode="desktop"] .mode-badge:after{content:"컴퓨터 모드";font-weight:900;color:#ffe45c}
+html[data-device-mode="mobile"] .mode-badge:after{content:"모바일 모드";font-weight:900;color:#ffe45c}
+html[data-device-mode="desktop"] body.in-battle #battleScreen>.battle-command-grid{grid-template-columns:minmax(0,1fr) minmax(156px,.72fr)!important;grid-template-rows:auto auto!important;gap:7px!important;padding:7px!important}
+html[data-device-mode="desktop"] body.in-battle #battleScreen #battleMessage{min-height:92px!important;font-size:clamp(15px,2vw,23px)!important;padding:12px 24px 14px 12px!important}
+html[data-device-mode="desktop"] body.in-battle #battleScreen .battle-option{min-height:38px!important;font-size:clamp(12px,1.5vw,16px)!important}
+html[data-device-mode="desktop"] body.in-battle #battleScreen .battle-command-panel{padding:8px!important}
+html[data-device-mode="desktop"] .map-side{display:flex;flex-direction:column;gap:8px}
+html[data-device-mode="desktop"] .map-side .party-box,html[data-device-mode="desktop"] .map-side .dpad-box{grid-column:auto}
+html[data-device-mode="desktop"] .battle-scene{min-height:280px;height:38vh}html[data-device-mode="desktop"] body.in-battle #battleScreen{display:grid!important;grid-template-columns:minmax(0,1.2fr) minmax(210px,.8fr)!important;grid-template-rows:minmax(0,1fr)!important;gap:0!important;height:100dvh!important;min-height:0!important;}
+html[data-device-mode="desktop"] body.in-battle #battleScreen>.battle-scene{grid-column:1!important;grid-row:1!important;height:100%!important;min-height:0!important;max-height:none!important;}
+html[data-device-mode="desktop"] body.in-battle #battleScreen>.battle-command-grid{grid-column:2!important;grid-row:1!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto auto!important;align-content:start;gap:7px!important;padding:8px!important;min-height:0;overflow:auto;}
+html[data-device-mode="desktop"] body.in-battle #battleScreen #battleMessage{grid-column:1!important;grid-row:1!important;min-height:92px!important;font-size:clamp(14px,1.8vw,22px)!important;padding:12px 22px 14px 12px!important;}
+html[data-device-mode="desktop"] body.in-battle #battleScreen #battleMainMenu{grid-column:1!important;grid-row:2!important;min-height:82px!important;}
+html[data-device-mode="desktop"] body.in-battle #battleScreen .battle-command-panel{grid-column:1!important;grid-row:3!important;min-height:0;padding:8px!important;}
+html[data-device-mode="desktop"] body.in-battle #battleScreen .battle-option{min-height:38px!important;font-size:clamp(12px,1.5vw,16px)!important;}
+html[data-device-mode="desktop"] body.in-battle #battleScreen .binfo{font-size:clamp(10px,1.3vw,17px)!important;padding:7px 9px!important;}
+html[data-device-mode="desktop"] body.in-battle #battleScreen .binfo.enemy,html[data-device-mode="desktop"] body.in-battle #battleScreen .binfo.player{width:72%!important;}</style></head>
 <body><div id="app">
-<header><div><h1>🎮 포켓몬 모험 · 오박사를 찾아서</h1><small>픽셀 월드 · 턴제 배틀 · 포켓몬 도감 · 라이벌 스토리</small></div><div class="head-actions"><button class="btn small" id="saveBtn">💾 저장</button><button class="btn small" id="loadBtn">불러오기</button></div></header>
+<header><div><h1>🎮 포켓몬 모험 · 오박사를 찾아서</h1><small>픽셀 월드 · 턴제 배틀 · 포켓몬 도감 · 라이벌 스토리 · <span class="mode-badge"></span></small></div><div class="head-actions"><button class="btn small" id="saveBtn">💾 저장</button><button class="btn small" id="loadBtn">불러오기</button></div></header>
 <main class="main">
 <section id="start" class="panel">
 <p class="hero">포켓몬 모험을 시작하자!</p>
