@@ -748,7 +748,12 @@ function openGame(id,push){
     setTimeout(function(){ if(my!==loadId) return; $("preload").classList.add("done"); clearInterval(tipTimer); },250);
   }
   curFinish=finish;
-  var f=swapFrame(g.src);
+  var gameUrl=g.src;
+  if(g.id==="pokemon"){
+    var selectedDevice=getDev()||guessDev();
+    gameUrl+=(gameUrl.indexOf("?")<0?"?":"&")+"device="+encodeURIComponent(selectedDevice);
+  }
+  var f=swapFrame(gameUrl);
   f.onload=function(){ if(my===loadId&&playing){ finish(); try{ f.contentWindow.focus(); }catch(e){} } };
   progTimer=setInterval(function(){
     if(done||my!==loadId){ clearInterval(progTimer); return; }
