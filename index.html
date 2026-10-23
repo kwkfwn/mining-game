@@ -133,7 +133,7 @@ button{font-family:inherit;cursor:pointer;}
 .dopt{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 10px 16px;border-radius:18px;color:var(--text);border:3px solid #6b7bff;
   background:linear-gradient(180deg,#1c2566,#0f1547);box-shadow:inset 0 2px 0 rgba(255,255,255,.25),0 8px 20px rgba(0,0,0,.5);transition:transform .12s,border-color .15s,box-shadow .15s;}
 .dopt:hover{transform:translateY(-4px);border-color:var(--yellow);box-shadow:inset 0 2px 0 rgba(255,255,255,.3),0 14px 28px rgba(0,0,0,.55),0 0 24px rgba(255,228,92,.4);}
-.dopt:active{transform:translateY(1px) scale(.98);}
+.dopt:active{transform:translateY(1px) scale(.98);}.dopt.selected{border-color:var(--yellow);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),0 0 0 3px rgba(255,228,92,.25),0 8px 20px rgba(0,0,0,.5);}
 .dopt svg{width:64px;height:64px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.45));}
 .dopt b{font-size:20px;font-weight:900;text-shadow:0 2px 0 #000a;}
 .dopt span{word-break:keep-all;font-size:12px;font-weight:700;color:var(--muted);line-height:1.4;}
@@ -449,7 +449,7 @@ function showDevice(){
   if(!$("dlogo").innerHTML) $("dlogo").innerHTML=LOGO+'<div><b>FLASH ZONE</b><small>GAME ARCADE</small></div>';
   var g=guessDev();
   [].forEach.call($("device").querySelectorAll(".dopt"),function(b){
-    b.querySelector(".rec").hidden=(b.getAttribute("data-m")!==g);
+    b.querySelector(".rec").hidden=(b.getAttribute("data-m")!==g); b.classList.toggle("selected",b.getAttribute("data-m")===getDev());
     b.onclick=function(){ chooseDev(b.getAttribute("data-m")); };
   });
 }
@@ -565,7 +565,7 @@ document.addEventListener("visibilitychange",function(){ if(document.hidden) pus
 window.addEventListener("pagehide",pushSaves);
 function acEnter(name,guest,cloud){
   ss("fz_acct",guest?"guest":"user"); ss("fz_user",guest?null:name); ss("fz_cloud",cloud?"1":null); cloudOK=null;
-  var go=function(){ $("acct").hidden=true; renderWho(); var m=getDev(); if(m){ applyDev(m); enterPortal(); } else showDevice(); };
+  var go=function(){ $("acct").hidden=true; renderWho(); applyDev(getDev()); showDevice(); };
   if(cloud){ acMsg("저장을 불러오는 중...",true); pullSaves().then(go,go); } else go();
 }
 function acCool(){
@@ -802,7 +802,7 @@ $("pFull").addEventListener("click",function(){
 });
 
 /* ============ 시작 ============ */
-if(authed()){ if(!acctDone()) showAccount(); else { var _m=getDev(); if(_m){ applyDev(_m); enterPortal(); } else showDevice(); } } else showGate();
+if(authed()){ if(!acctDone()) showAccount(); else { applyDev(getDev()); showDevice(); } } else showGate();
 })();
 </script>
 </body>
