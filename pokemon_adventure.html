@@ -2782,4 +2782,331 @@ $('map').addEventListener('click',e=>{if(!state.started||state.enemy)return;cons
   window.__kantoRouteData=Object.freeze({maps:Object.keys(MAPS),badges:BADGE_NAMES,gridSize:[WORLD_W,WORLD_H]});
 })();
 </script>
+<script id="area-level-rules">
+(function(){
+  "use strict";
+  const WILD_LEVELS=Object.freeze({route:[2,4],route2:[3,5],forest:[4,7],lake:[5,8],route3:[8,11],mtMoon:[9,12],cave:[9,12],route4:[12,15]});
+  const TRAINER_LEVELS=Object.freeze({route:[3,5],route2:[4,6],forest:[5,7],lake:[6,8],route3:[9,11],mtMoon:[10,12],cave:[10,12],route4:[13,15]});
+  const RIVAL_LEVELS=Object.freeze({"rival-route":5,"rival-forest":8,"rival-lake":12});
+  function randomLevel(range){const min=range[0],max=range[1];return min+Math.floor(Math.random()*(max-min+1))}
+  function speciesChoices(){const list=(Array.isArray(state.species)?state.species:[]).filter(s=>s&&s.name&&!s.name.includes("-"));return list.length?list:fallbackSpecies.filter(s=>s&&s.name)}
+  window.randomEncounter=async function(){
+    if(state.inAction||state.enemy)return;
+    state.inAction=true;setNotice("풀숲이 흔들린다… 야생 포켓몬을 찾는 중!");
+    try{
+      const choices=speciesChoices();if(!choices.length)throw new Error("지역 야생 포켓몬 데이터가 없어.");
+      const entry=choices[Math.floor(Math.random()*choices.length)];
+      const level=randomLevel(WILD_LEVELS[state.loc]||[2,4]);
+      const mon=await makeMon(pokemonSlug(entry),level);
+      state.seen.add(mon.slug);state.enemy=mon;state.battleKind="wild";state.enemyTeam=[];state.enemyIndex=0;state.inAction=false;
+      showBattle("",false,["야생의 "+mon.name+koreanParticle(mon.name,"이","가")+" 나타났다!","가랏! "+state.party[state.active].name+"!"]);
+    }catch(error){state.inAction=false;setNotice("야생 포켓몬을 불러오지 못했어. 인터넷 연결 후 다시 풀숲으로 가 봐.");console.error("Wild encounter setup failed:",error)}
+  };
+  window.startTrainerBattle=async function(npc,gym=false){
+    if(state.inAction)return;
+    if(!state.party.length||state.party.every(mon=>mon.hp<=0)){setNotice("먼저 포켓몬센터에서 포켓몬을 회복해 줘.");return}
+    state.inAction=true;setNotice(npc.name+"에게 도전하는 중…");
+    try{
+      const choices=speciesChoices();if(!choices.length)throw new Error("트레이너 포켓몬 데이터가 없어.");
+      const teamSize=gym?3:2,range=gym?[11,15]:(TRAINER_LEVELS[state.loc]||[3,5]);
+      const firstLevel=gym?11:randomLevel(range),team=[];
+      for(let i=0;i<teamSize;i++){const entry=choices[Math.floor(Math.random()*choices.length)];const mon=await makeMon(pokemonSlug(entry),Math.min(range[1],firstLevel+i));if(mon)team.push(mon)}
+      if(!team.length)throw new Error("트레이너 포켓몬을 만들지 못했어.");
+      state.enemyTeam=team;state.enemyIndex=0;state.enemy=team[0];state.battleKind=gym?"gym":"trainer";state.currentNPC=npc;state.inAction=false;
+      await showBattle("",true,[battleSubjectGa(npc.name)+" 도전을 받아들였다!",battleSubject(npc.name)+" "+battleObject(state.enemy.name)+" 내보냈다!","가랏! "+state.party[state.active].name+"!"]);
+    }catch(error){console.error("Trainer battle setup failed:",error);state.enemy=null;state.enemyTeam=[];state.enemyIndex=0;state.inAction=false;closeToWorld("배틀을 시작하지 못했어. 다시 말을 걸어줘.");saveGame()}
+  };
+  window.startRivalBattle=async function(npc){
+    if(state.inAction||state.enemy)return;
+    if(state.party.every(m=>m.hp<=0)){setNotice("먼저 포켓몬센터에서 회복해!");return}
+    state.inAction=true;setNotice("라이벌의 지역별 포켓몬을 준비하고 있어.");
+    try{
+      const stage=npc.id==="rival-route"?1:npc.id==="rival-forest"?2:3,base=RIVAL_LEVELS[npc.id]||TRAINER_LEVELS[state.loc]?.[0]||5;
+      const choices=speciesChoices();if(!choices.length)throw new Error("라이벌 포켓몬 데이터가 없어.");
+      const slugs=[state.rivalStarter||"bulbasaur"];
+      while(slugs.length<stage){const available=choices.filter(s=>!slugs.includes(s.name)),list=available.length?available:choices;slugs.push(list[Math.floor(Math.random()*list.length)].name)}
+      const team=[];
+      for(let i=0;i<slugs.length;i++){
+        let slug=slugs[i];
+        if(i===0&&stage>=3){try{const sp=await api("pokemon-species/"+slug);const chain=sp?.evolution_chain?.url?await api(sp.evolution_chain.url):null;if(chain){let node=chain.chain;while(node.evolves_to?.length&&node.evolves_to[0].evolution_details?.some(d=>d.trigger?.name==="level-up"&&(!d.min_level||base+i>=d.min_level)))node=node.evolves_to[0];slug=node.species.name}}catch(e){}}
+        team.push(await makeMon(slug,base+i));
+      }
+      state.enemyTeam=team;state.enemyIndex=0;state.enemy=team[0];state.battleKind="trainer";state.currentNPC={id:npc.id,name:"라이벌"};state.inAction=false;
+      showBattle("",true,["라이벌이 돌아왔다! 이번에는 "+team.length+"마리로 승부한다!","라이벌은 "+battleObject(state.enemy.name)+" 내보냈다!","가랏! "+state.party[state.active].name+"!"]);
+    }catch(error){state.inAction=false;setNotice("라이벌의 포켓몬 데이터를 불러오지 못했어. 인터넷 연결을 확인해 봐.");console.error("Rival battle setup failed:",error)}
+  };
+})();
+</script>
+<script id="pokemon-evolution-system">
+(function(){
+  "use strict";
+
+  const evolutionChainCache = new Map();
+  const evolutionInProgress = new WeakSet();
+  const FALLBACK_LEVEL_EVOLUTIONS = Object.freeze({
+    bulbasaur:{level:16,to:"ivysaur"}, ivysaur:{level:32,to:"venusaur"},
+    charmander:{level:16,to:"charmeleon"}, charmeleon:{level:36,to:"charizard"},
+    squirtle:{level:16,to:"wartortle"}, wartortle:{level:36,to:"blastoise"},
+    caterpie:{level:7,to:"metapod"}, metapod:{level:10,to:"butterfree"},
+    weedle:{level:7,to:"kakuna"}, kakuna:{level:10,to:"beedrill"},
+    pidgey:{level:18,to:"pidgeotto"}, pidgeotto:{level:36,to:"pidgeot"},
+    rattata:{level:20,to:"raticate"}, spearow:{level:20,to:"fearow"},
+    ekans:{level:22,to:"arbok"}, sandshrew:{level:22,to:"sandslash"},
+    "nidoran-f":{level:16,to:"nidorina"}, "nidoran-m":{level:16,to:"nidorino"},
+    zubat:{level:22,to:"golbat"}, oddish:{level:21,to:"gloom"},
+    paras:{level:24,to:"parasect"}, venonat:{level:31,to:"venomoth"},
+    diglett:{level:26,to:"dugtrio"}, meowth:{level:28,to:"persian"},
+    psyduck:{level:33,to:"golduck"}, mankey:{level:28,to:"primeape"},
+    poliwag:{level:25,to:"poliwhirl"}, abra:{level:16,to:"kadabra"},
+    machop:{level:28,to:"machoke"}, bellsprout:{level:21,to:"weepinbell"},
+    tentacool:{level:30,to:"tentacruel"}, geodude:{level:25,to:"graveler"},
+    ponyta:{level:40,to:"rapidash"}, slowpoke:{level:37,to:"slowbro"},
+    magnemite:{level:30,to:"magneton"}, doduo:{level:31,to:"dodrio"},
+    seel:{level:34,to:"dewgong"}, grimer:{level:38,to:"muk"},
+    gastly:{level:25,to:"haunter"}, drowzee:{level:26,to:"hypno"},
+    krabby:{level:28,to:"kingler"}, voltorb:{level:30,to:"electrode"},
+    cubone:{level:28,to:"marowak"}, koffing:{level:35,to:"weezing"},
+    rhyhorn:{level:42,to:"rhydon"}, horsea:{level:32,to:"seadra"},
+    goldeen:{level:33,to:"seaking"}, magikarp:{level:20,to:"gyarados"},
+    omanyte:{level:40,to:"omastar"}, kabuto:{level:40,to:"kabutops"},
+    dratini:{level:30,to:"dragonair"}, dragonair:{level:55,to:"dragonite"},
+    larvitar:{level:30,to:"pupitar"}, pupitar:{level:55,to:"tyranitar"},
+    treecko:{level:16,to:"grovyle"}, grovyle:{level:36,to:"sceptile"},
+    torchic:{level:16,to:"combusken"}, combusken:{level:36,to:"blaziken"},
+    mudkip:{level:16,to:"marshtomp"}, marshtomp:{level:36,to:"swampert"},
+    riolu:{level:99,to:"lucario"},
+    goomy:{level:40,to:"sliggoo"}, sliggoo:{level:50,to:"goodra"},
+    "jangmo-o":{level:35,to:"hakamo-o"}, "hakamo-o":{level:45,to:"kommo-o"},
+    dreepy:{level:50,to:"drakloak"}, drakloak:{level:60,to:"dragapult"}
+  });
+
+  function evolutionStyle(){
+    if(document.getElementById("pokemon-evolution-style"))return;
+    const style=document.createElement("style");
+    style.id="pokemon-evolution-style";
+    style.textContent="@keyframes pokemonEvolutionGlow{0%,100%{filter:brightness(1) saturate(1)}50%{filter:brightness(2.8) saturate(.2) drop-shadow(0 0 14px #e8f8ff)}}#battleScreen.pokemon-evolving #mySprite{animation:pokemonEvolutionGlow .22s steps(2,end) 6;image-rendering:pixelated}#battleScreen.pokemon-evolving #mySprite{transform:scale(1.08)}";
+    document.head.appendChild(style);
+  }
+
+  function boundedEvolutionRequest(promise,timeoutMs,fallbackValue){
+    return new Promise(function(resolve){
+      let finished=false;
+      const timer=setTimeout(function(){if(!finished){finished=true;resolve(fallbackValue)}},timeoutMs);
+      Promise.resolve(promise).then(function(value){if(!finished){finished=true;clearTimeout(timer);resolve(value==null?fallbackValue:value)}},function(){if(!finished){finished=true;clearTimeout(timer);resolve(fallbackValue)}});
+    });
+  }
+  async function loadEvolutionChain(slug){
+    if(evolutionChainCache.has(slug))return evolutionChainCache.get(slug);
+    const pending=(async function(){
+      const species=await boundedEvolutionRequest(api("pokemon-species/"+slug),1100,null);
+      const chainUrl=species&&species.evolution_chain&&species.evolution_chain.url;
+      if(!chainUrl)throw new Error("진화 계보를 찾을 수 없습니다.");
+      const chain=await boundedEvolutionRequest(api(chainUrl),1100,null);
+      if(!chain)throw new Error("진화 계보 응답 시간이 초과되었습니다.");
+      return chain;
+    })();
+    evolutionChainCache.set(slug,pending);
+    try{return await pending}catch(error){evolutionChainCache.delete(slug);throw error}
+  }
+  function emergencyEvolvedMon(mon,slug){
+    const entry=(state.species||[]).find(function(item){return item&&item.name===slug});
+    const match=String(entry&&entry.url||"").match(/\/(\d+)\/?$/);
+    const id=Number(match&&match[1])||Number(mon.id)||1;
+    const localized=(state.speciesKorean&&state.speciesKorean[slug])||(typeof koFix!=="undefined"&&koFix[slug])||String(slug).replace(/(^|-)([a-z])/g,function(_,dash,letter){return dash+letter.toUpperCase()});
+    const boost=function(value){const number=Math.max(1,Number(value)||1);return Math.max(number+1,Math.floor(number*1.08))};
+    const oldMax=Math.max(1,Number(mon.maxHp)||1),newMax=oldMax+Math.max(1,Math.ceil(oldMax*.06));
+    return Object.assign({},mon,{slug:slug,name:localized,english:slug,id:id,maxHp:newMax,hp:Math.min(newMax,(Number(mon.hp)||0)+(newMax-oldMax)),atk:boost(mon.atk),def:boost(mon.def),spAtk:boost(mon.spAtk),spDef:boost(mon.spDef),speed:boost(mon.speed),sprite:typeof spriteURL==="function"?spriteURL({id:id}):mon.sprite,art:typeof artURL==="function"?artURL({id:id}):mon.art});
+  }
+
+  function findSpeciesNode(node,slug){
+    if(!node)return null;
+    if(node.species&&node.species.name===slug)return node;
+    for(const next of node.evolves_to||[]){const found=findSpeciesNode(next,slug);if(found)return found}
+    return null;
+  }
+
+  function hasMove(mon,slug){
+    return (mon.moves||[]).some(function(move){return (move.slug||move.id||move.name)===slug});
+  }
+
+  function conditionCanEvolve(detail,mon){
+    if(!detail||detail.trigger?.name!=="level-up")return false;
+    if(detail.min_level!=null&&Number(mon.level)<Number(detail.min_level))return false;
+    if(detail.min_happiness!=null&&Number(mon.friendship??mon.happiness??0)<Number(detail.min_happiness))return false;
+    if(detail.min_beauty!=null&&Number(mon.beauty??0)<Number(detail.min_beauty))return false;
+    if(detail.min_affection!=null&&Number(mon.affection??0)<Number(detail.min_affection))return false;
+    if(detail.gender!=null&&mon.gender!=="male"&&mon.gender!=="female")return false;
+    if(detail.gender!=null&&String(mon.gender)!==String(detail.gender===1?"female":"male"))return false;
+    if(detail.known_move&&!hasMove(mon,detail.known_move.name))return false;
+    if(detail.known_move_type&&!(mon.moves||[]).some(function(move){return move.type===detail.known_move_type.name}))return false;
+    if(detail.held_item&&String(mon.heldItem||mon.held_item||"").toLowerCase()!==detail.held_item.name)return false;
+    if(detail.location)return false;
+    if(detail.time_of_day)return false;
+    if(detail.needs_overworld_rain)return false;
+    if(detail.party_species&&!(state.party||[]).some(function(member){return member!==mon&&member.slug===detail.party_species.name}))return false;
+    if(detail.party_type&&!(state.party||[]).some(function(member){return member!==mon&&(member.types||[]).includes(detail.party_type.name)}))return false;
+    if(detail.relative_physical_stats!=null){
+      const stats=mon.baseStats||{};
+      const attack=Number(stats.attack||mon.atk||0),defense=Number(stats.defense||mon.def||0);
+      const relative=attack>defense?1:attack<defense?-1:0;
+      if(relative!==Number(detail.relative_physical_stats))return false;
+    }
+    if(detail.turn_upside_down)return false;
+    return true;
+  }
+
+  function fallbackTarget(mon){
+    const entry=FALLBACK_LEVEL_EVOLUTIONS[mon.slug];
+    return entry&&Number(mon.level)>=entry.level?entry.to:null;
+  }
+
+  async function findLevelEvolution(mon){
+    try{
+      const data=await loadEvolutionChain(mon.slug);
+      const root=data&&data.chain;
+      const node=findSpeciesNode(root,mon.slug);
+      if(!node)return fallbackTarget(mon);
+      const eligible=[];
+      for(const next of node.evolves_to||[]){
+        const details=next.evolution_details||[];
+        if(details.some(function(detail){return conditionCanEvolve(detail,mon)}))eligible.push(next.species.name);
+      }
+      if(!eligible.length)return fallbackTarget(mon);
+      const index=(Number(mon.id||0)+Number(mon.level||0))%eligible.length;
+      return eligible[index];
+    }catch(error){return fallbackTarget(mon)}
+  }
+
+  window.maybeEvolve=async function(mon){
+    if(!mon||!mon.slug||!Number.isFinite(Number(mon.level))||evolutionInProgress.has(mon))return null;
+    evolutionInProgress.add(mon);
+    try{
+      const targetSlug=await boundedEvolutionRequest(findLevelEvolution(mon),2400,fallbackTarget(mon));
+      if(!targetSlug||targetSlug===mon.slug)return null;
+      const previousName=mon.name||mon.slug;
+      const previousMaxHp=Number(mon.maxHp)||1;
+      const previousHp=Number(mon.hp)||0;
+      const previous={
+        xp:mon.xp||0,status:mon.status||null,moves:Array.isArray(mon.moves)?mon.moves:null,
+        friendship:mon.friendship,happiness:mon.happiness,nature:mon.nature,ivs:mon.ivs,evs:mon.evs,
+        ability:mon.ability,heldItem:mon.heldItem,held_item:mon.held_item,nickname:mon.nickname,
+        caught:mon.caught,originalTrainer:mon.originalTrainer,gender:mon.gender
+      };
+      let evolved=await boundedEvolutionRequest(makeMon(targetSlug,Number(mon.level)),1600,null);
+      if(!evolved||!evolved.slug)evolved=emergencyEvolvedMon(mon,targetSlug);
+      if(!evolved||!evolved.slug)return null;
+      const nextMaxHp=Number(evolved.maxHp)||previousMaxHp;
+      const hpGain=nextMaxHp-previousMaxHp;
+      Object.assign(mon,evolved);
+      Object.keys(previous).forEach(function(key){if(previous[key]!==undefined)mon[key]=previous[key]});
+      if(!previous.moves||!previous.moves.length)mon.moves=evolved.moves||[];
+      mon.maxHp=nextMaxHp;
+      mon.hp=Math.max(0,Math.min(nextMaxHp,previousHp+hpGain));
+      if(state.seen&&typeof state.seen.add==="function")state.seen.add(targetSlug);
+      if(state.caught&&typeof state.caught.add==="function")state.caught.add(targetSlug);
+      const active=state.party&&state.party[state.active]===mon&&state.enemy;
+      if(active){
+        evolutionStyle();
+        const screen=document.getElementById("battleScreen");
+        screen?.classList.add("pokemon-evolving");
+        await new Promise(function(resolve){setTimeout(resolve,1350)});
+        screen?.classList.remove("pokemon-evolving");
+      }
+      if(typeof renderParty==="function")renderParty();
+      if(typeof renderBattle==="function"&&state.enemy)renderBattle();
+      if(typeof saveGame==="function")saveGame();
+      const newName=mon.name||targetSlug;
+      const oldWithSubject=typeof battleSubjectGa==="function"?battleSubjectGa(previousName):previousName+"이(가)";
+      const newWithParticle=newName+(typeof koreanParticle==="function"?koreanParticle(newName,"으로","로"):"(으)로");
+      return "축하합니다! "+oldWithSubject+" "+newWithParticle+" 진화했다!";
+    }catch(error){
+      console.warn("포켓몬 진화 처리 중 오류:",error);
+      return null;
+    }finally{evolutionInProgress.delete(mon)}
+  };
+})();
+</script>
+
+<script id="battle-ending-recovery">
+(function(){
+  "use strict";
+  function callSafely(label,fn){try{if(typeof fn==="function")return fn()}catch(error){console.error("배틀 종료 복구 중 "+label+" 오류:",error)}return undefined}
+  function battleUiIsOpen(){
+    const screen=document.getElementById("battleScreen");
+    return !!(document.body.classList.contains("in-battle")||(screen&&!screen.classList.contains("hidden")));
+  }
+  function restoreWorld(message){
+    state.enemy=null;state.enemyTeam=[];state.enemyIndex=0;state.inAction=false;
+    state._trainerWinTransition=false;state._wildWinTransition=false;state._forcedSwitchChoosing=false;
+    const battle=document.getElementById("battleScreen"),game=document.getElementById("gameScreen");
+    if(battle){battle.classList.add("hidden");battle.classList.remove("battle-dialogue","battle-submode","pokemon-evolving")}
+    document.body.classList.remove("in-battle");
+    if(game)game.classList.remove("hidden");
+    if(typeof window.__setForestTrainerIntro==="function")callSafely("트레이너 연출",function(){window.__setForestTrainerIntro(false)});
+    if(typeof window.clearCaptureVisuals==="function")callSafely("몬스터볼 연출",window.clearCaptureVisuals);
+    if(typeof window.advanceBattleDialogue==="function")callSafely("대사 잠금 해제",window.advanceBattleDialogue);
+    callSafely("파티 갱신",window.renderParty);
+    callSafely("상태 표시 갱신",window.updateHud);
+    callSafely("맵 다시 그리기",window.drawMap);
+    if(message&&typeof window.setNotice==="function")callSafely("안내 문구",function(){window.setNotice(message)});
+    callSafely("저장",window.saveGame);
+  }
+  const baseClose=window.closeToWorld;
+  if(typeof baseClose==="function")window.closeToWorld=function(message){
+    try{return baseClose.apply(this,arguments)}
+    catch(error){console.error("월드 복귀 오류, 화면을 복구합니다:",error);restoreWorld(message||"배틀이 끝나 모험 화면으로 돌아왔어.")}
+    finally{if(!state.enemy){state.inAction=false;if(battleUiIsOpen())restoreWorld(message||"배틀이 끝나 모험 화면으로 돌아왔어.")}}
+  };
+
+  const baseWin=window.winEnemy;
+  if(typeof baseWin==="function")window.winEnemy=async function(){
+    const defeated=state.enemy;let result;
+    try{result=await baseWin.apply(this,arguments)}
+    catch(error){console.error("승리 처리 오류, 배틀 화면을 복구합니다:",error)}
+    finally{
+      if(!state.enemy){state._trainerWinTransition=false;state._wildWinTransition=false;state.inAction=false;if(battleUiIsOpen())restoreWorld("배틀이 끝났어. 모험을 계속할 수 있어!")}
+      else if(defeated&&state.enemy===defeated&&Number(defeated.hp)<=0){restoreWorld("상대 포켓몬을 쓰러뜨렸어. 배틀을 정리하고 모험으로 돌아왔어.")}
+    }
+    return result;
+  };
+
+  const baseLose=window.loseBattle;
+  if(typeof baseLose==="function")window.loseBattle=async function(){
+    let result;
+    try{result=await baseLose.apply(this,arguments)}
+    catch(error){
+      console.error("패배 처리 오류, 파티와 화면을 복구합니다:",error);
+      state.enemy=null;state.enemyTeam=[];state.enemyIndex=0;
+      if((state.party||[]).length&&state.party.every(function(mon){return Number(mon.hp)<=0})){callSafely("파티 회복",window.healParty)}
+      result=restoreWorld("포켓몬이 회복됐어. 모험을 계속하자!");
+    }
+    finally{
+      if(!state.enemy){state.inAction=false;if(battleUiIsOpen())restoreWorld("배틀이 끝났어. 모험을 계속할 수 있어!")}
+    }
+    return result;
+  };
+
+  ["useMove","foeTurn","throwBall","runAway"].forEach(function(name){
+    const original=window[name];if(typeof original!=="function")return;
+    window[name]=async function(){
+      try{return await original.apply(this,arguments)}
+      catch(error){
+        console.error(name+" 실행 오류, 배틀 입력을 복구합니다:",error);
+        if(state.enemy&&Number(state.enemy.hp)<=0){
+          const finish=window.winEnemy;
+          if(typeof finish==="function"){await finish();return}
+          restoreWorld("상대 포켓몬을 쓰러뜨려 배틀을 마쳤어.");return
+        }
+        const active=state.party&&state.party[state.active];
+        if(active&&Number(active.hp)<=0&&state.enemy&&typeof window.handlePlayerFaint==="function"){await window.handlePlayerFaint();return}
+        if(state.enemy){state.inAction=false;callSafely("배틀 화면",window.renderBattle);callSafely("배틀 메뉴",window.showBattleMainMenu);callSafely("저장",window.saveGame)}
+        else restoreWorld("배틀이 끝났어. 모험을 계속할 수 있어!");
+      }
+    };
+  });
+})();
+</script>
+
 </body></html>
+
+
