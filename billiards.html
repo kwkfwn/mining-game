@@ -79,7 +79,7 @@ input[type=text],#code{font:inherit;color:var(--fg);background:var(--panel);bord
  <div id="stage"><canvas id="c" width="900" height="480"></canvas><div id="msg"></div>
   <div id="spPop" class="hide"><div id="spBox"><canvas id="msBig" width="600" height="200"></canvas><canvas id="spBig" width="600" height="600"></canvas><h3>SPIN</h3><small>위 밀어치기 · 아래 끌어치기 · 좌우 옆회전 (더블탭: 중앙) · MASSE 각도를 올리고 좌우 회전을 주면 공이 휘어 나가요</small></div></div>
  </div>
- <div id="bottom"><span class="dk">마우스: 조준 · 오른쪽 파워 막대를 당겼다 놓기 · ←→: 미세 조준 · 스페이스: 발사</span></div>
+ <div id="bottom"><button id="fire" type="button" aria-label="발사"><i></i></button><span class="dk">←→ 조준 (Shift: 미세) · Space 누르고 있다 떼면 발사 · ↑↓ 파워 · Enter 바로 발사 · C 회전<br>터치패드: 화면 클릭 = 조준점 · 두 손가락 가로 = 조준, 세로 = 파워</span></div>
 </div>
 <div id="side"><button id="spW" type="button" aria-label="회전"><canvas id="spBtn" width="112" height="112"></canvas></button><small id="spLb">회전</small>
 <div id="rlW"><div id="rl"></div><small>미세 조준</small></div>
@@ -102,8 +102,8 @@ function stepW(w){
  for(let s=0;s<n;s++){
   for(const b of bs){
    b.x+=b.vx/n;b.y+=b.vy/n;let nx=0,ny=0,ns=0;
-   if(b.x<L+r){b.x=L+r;nx=1;ns=Math.abs(b.vx);b.vx=ns*.86}else if(b.x>R-r){b.x=R-r;nx=-1;ns=Math.abs(b.vx);b.vx=-ns*.86}
-   if(b.y<T+r){b.y=T+r;ny=1;ns=Math.abs(b.vy);b.vy=ns*.86}else if(b.y>B-r){b.y=B-r;ny=-1;ns=Math.abs(b.vy);b.vy=-ns*.86}
+   if(b.x<L+r){b.x=L+r;nx=1;ns=Math.abs(b.vx);b.vx=ns*.92}else if(b.x>R-r){b.x=R-r;nx=-1;ns=Math.abs(b.vx);b.vx=-ns*.92}
+   if(b.y<T+r){b.y=T+r;ny=1;ns=Math.abs(b.vy);b.vy=ns*.92}else if(b.y>B-r){b.y=B-r;ny=-1;ns=Math.abs(b.vy);b.vy=-ns*.92}
    if((nx||ny)&&b.k===w.k&&w.sx&&ns>.5){b.vx+=w.sx*.3*ns*ny;b.vy-=w.sx*.3*ns*nx;w.sx*=.65}
   }
   for(let i=0;i<bs.length;i++)for(let j=i+1;j<bs.length;j++){
@@ -114,7 +114,7 @@ function stepW(w){
     const rv=(a.vx-c.vx)*nx+(a.vy-c.vy)*ny;
     if(rv>0){
      const cu=a.k===w.k?a:c.k===w.k?c:null,s0=cu?sq(cu.vx*cu.vx+cu.vy*cu.vy):0,ux=s0?cu.vx/s0:0,uy=s0?cu.vy/s0:0;
-     const q=rv*.97;a.vx-=q*nx;a.vy-=q*ny;c.vx+=q*nx;c.vy+=q*ny;
+     const q=rv*.98;a.vx-=q*nx;a.vy-=q*ny;c.vx+=q*nx;c.vy+=q*ny;
      if(cu){w.ct.push(cu===a?c.k:a.k);if(!w.ys&&w.sy&&s0>.3){cu.vx+=ux*w.sy*s0*.55;cu.vy+=uy*w.sy*s0*.55;w.ys=1}}
     }
    }
@@ -122,7 +122,7 @@ function stepW(w){
  }
  if(w.mf&&w.sx){const cb=bs.find(o=>o.k===w.k);if(cb&&cb.vx*cb.vx+cb.vy*cb.vy>.01){const kk=w.sx*w.mf*.012,vx=cb.vx,vy=cb.vy;cb.vx=vx-vy*kk;cb.vy=vy+vx*kk}w.mf*=.993}
  let mv=false;
- for(const b of bs){b.vx*=.985;b.vy*=.985;if(b.vx*b.vx+b.vy*b.vy<.0036){b.vx=b.vy=0}else mv=true}
+ for(const b of bs){const s=sq(b.vx*b.vx+b.vy*b.vy);if(s<.08){b.vx=b.vy=0;continue}const f=Math.max(0,s*.997-.02)/s;b.vx*=f;b.vy*=f;mv=true}
  return mv;
 }
 function evalW(ct,m,k){const h=new Set(ct),foul=m!=='solo'&&h.has(1-k);return{foul,pt:!foul&&h.has(2)&&h.has(3)}}
@@ -182,7 +182,7 @@ function aiTurn(){
  say('컴퓨터가 생각 중…');
  setTimeout(()=>{
   if(state!=='aim'||mode!=='cpu')return;
-  const cfg=[[40,[12,19],[[0,0]],.05],[110,[9,15,21],[[0,0]],.012],[160,[8,14,21],[[0,0],[0,.8],[0,-.8],[.7,0],[-.7,0]],.002]][diff];
+  const cfg=[[40,[14,24],[[0,0]],.05],[110,[10,18,28],[[0,0]],.012],[160,[8,16,28],[[0,0],[0,.8],[0,-.8],[.7,0],[-.7,0]],.002]][diff];
   let best=-9,list=[];
   for(let a=0;a<cfg[0];a++){
    const ang=a/cfg[0]*6.2832+Math.random()*.02;
@@ -214,7 +214,7 @@ function nudge(d){if(!canAim())return;aimA=curAim()+d}
 function aimTo(e){const c=cueB();if(!c||!canAim())return;const p=pos(e),dx=p.x-c.x,dy=p.y-c.y;if(dx*dx+dy*dy>225)aimA=Math.atan2(dy,dx)}
 C.addEventListener('pointerdown',e=>{if(canAim()){C.setPointerCapture(e.pointerId);C.dn=1;C.lx=e.clientX;C.ly=e.clientY;if(e.pointerType==='mouse')aimTo(e)}});
 C.addEventListener('pointermove',e=>{
- if(e.pointerType==='mouse'){aimTo(e);return}
+ if(e.pointerType==='mouse'){if(C.dn)aimTo(e);return}
  if(!C.dn||!canAim())return;
  const dx=e.clientX-C.lx,dy=e.clientY-C.ly;C.lx=e.clientX;C.ly=e.clientY;
  const wx=portrait?dy:dx,wy=portrait?-dx:dy,a=curAim();
@@ -233,18 +233,41 @@ PG.addEventListener('pointerdown',e=>{if(!canAim())return;PG.setPointerCapture(e
 PG.addEventListener('pointermove',e=>{if(pgY==null)return;pwr=Math.max(0,Math.min(1,(e.clientY-pgY)/(PG.clientHeight*.45)));drawPg()});
 PG.addEventListener('pointerup',()=>{if(pgY==null)return;pgY=null;const p=pwr;if(p>.06&&canAim())fire();pwr=0;drawPg()});
 PG.addEventListener('pointercancel',()=>{pgY=null;pwr=0;drawPg()});
-function fire(){if(!canAim())return;const a=curAim(),s=spin,p=Math.max(.05,pwr);shoot(Math.cos(a),Math.sin(a),2+p*20,s.x,s.y,0,ms/80)}
-$('stage').addEventListener('wheel',e=>{if(!canAim())return;e.preventDefault();pwr=Math.max(0,Math.min(1,pwr+e.deltaY*.0005));drawPg()},{passive:false});
+function fire(){if(!canAim())return;const a=curAim(),s=spin,p=pwr>.05?pwr:.5;shoot(Math.cos(a),Math.sin(a),2+p*28,s.x,s.y,0,ms/80);pwr=0;drawPg()}
+const KS={};let charging=false;
+$('stage').addEventListener('wheel',e=>{if(!canAim())return;e.preventDefault();if(Math.abs(e.deltaX)>Math.abs(e.deltaY))nudge(e.deltaX*.0004);else{pwr=Math.max(0,Math.min(1,pwr+e.deltaY*.0008));drawPg()}},{passive:false});
+function spKey(e){
+ const k=e.key;let h=1;
+ if(k==='ArrowLeft')spin.x-=.1;else if(k==='ArrowRight')spin.x+=.1;else if(k==='ArrowUp')spin.y+=.1;else if(k==='ArrowDown')spin.y-=.1;
+ else if(k==='['||k===',')ms=Math.max(0,ms-5);else if(k===']'||k==='.')ms=Math.min(80,ms+5);
+ else if(k==='r'||k==='R'){spin={x:0,y:0};ms=0}
+ else if(k==='Enter'||k===' '||k==='Escape'||k==='c'||k==='C'){e.preventDefault();closeSp();return}
+ else h=0;
+ if(h){e.preventDefault();const l=sq(spin.x*spin.x+spin.y*spin.y);if(l>1){spin.x/=l;spin.y/=l}drawSp()}
+}
 addEventListener('keydown',e=>{
- if(!$('ov').classList.contains('hide')||!canAim())return;
- const t=e.target&&e.target.tagName;if(t==='INPUT'||t==='BUTTON')return;
+ if(!$('ov').classList.contains('hide'))return;
+ const t=e.target&&e.target.tagName;if(t==='INPUT')return;
+ const ae=document.activeElement;if(ae&&ae.tagName==='BUTTON')ae.blur();
+ KS.s=e.shiftKey;
+ if(!$('spPop').classList.contains('hide')){spKey(e);return}
+ if(!canAim())return;
  const k=e.key;
- if(k===' '||k==='Enter'){e.preventDefault();fire()}
- else if(k==='ArrowLeft'){e.preventDefault();nudge(e.shiftKey?-.015:-.004)}
- else if(k==='ArrowRight'){e.preventDefault();nudge(e.shiftKey?.015:.004)}
- else if(k==='ArrowUp'){e.preventDefault();pwr=Math.max(0,pwr-.03);drawPg()}
- else if(k==='ArrowDown'){e.preventDefault();pwr=Math.min(1,pwr+.03);drawPg()}
+ if(k==='ArrowLeft'||k==='a'||k==='A'){e.preventDefault();KS.l=1}
+ else if(k==='ArrowRight'||k==='d'||k==='D'){e.preventDefault();KS.r=1}
+ else if(k==='ArrowUp'||k==='w'||k==='W'){e.preventDefault();pwr=Math.min(1,pwr+.05);drawPg()}
+ else if(k==='ArrowDown'||k==='s'||k==='S'){e.preventDefault();pwr=Math.max(0,pwr-.05);drawPg()}
+ else if(k===' '){e.preventDefault();if(!e.repeat){charging=true;pwr=0;drawPg()}}
+ else if(k==='Enter'){e.preventDefault();fire()}
+ else if(k==='c'||k==='C'){e.preventDefault();$('spW').click()}
 });
+addEventListener('keyup',e=>{
+ KS.s=e.shiftKey;const k=e.key;
+ if(k==='ArrowLeft'||k==='a'||k==='A')KS.l=0;else if(k==='ArrowRight'||k==='d'||k==='D')KS.r=0;
+ else if(k===' '&&charging){charging=false;const p=pwr;if(p>.06&&canAim())fire();pwr=0;drawPg()}
+});
+addEventListener('blur',()=>{KS.l=KS.r=0;charging=false});
+$('fire').onclick=()=>{fire()};
 /* 회전 선택 (공 위에 크게 표시) */
 function ballIcon(cv,s,big){
  const x=cv.getContext('2d'),n=cv.width,R0=n/2-3;x.clearRect(0,0,n,n);
@@ -451,19 +474,24 @@ function draw(){
  const c=cueB();
  if(state==='aim'&&c){
   if(mode!=='solo'){g.strokeStyle='rgba(224,138,46,.9)';g.lineWidth=2;g.beginPath();g.arc(c.x,c.y,r+4,0,7);g.stroke()}
-  if(ai){guide(c,Math.atan2(ai.dy,ai.dx));stick(c,Math.atan2(ai.dy,ai.dx),ai.pw/22)}
+  if(ai){guide(c,Math.atan2(ai.dy,ai.dx));stick(c,Math.atan2(ai.dy,ai.dx),ai.pw/30)}
   else if(canAim()){const a=curAim();guide(c,a);stick(c,a,pwr);
    if(pwr>0){const d=r+6+pwr*70+80,tx=c.x-Math.cos(a)*d-Math.sin(a)*22,ty=c.y-Math.sin(a)*d+Math.cos(a)*22;
     g.save();g.translate(tx,ty);if(portrait)g.rotate(-Math.PI/2);g.font='bold 22px sans-serif';g.textAlign='center';g.textBaseline='middle';g.lineWidth=4;g.strokeStyle='rgba(0,0,0,.7)';g.fillStyle='#ffd48a';
     const t=Math.round(pwr*100)+'%';g.strokeText(t,0,0);g.fillText(t,0,0);g.restore()}}
  }
 }
-function loop(){
- if(state==='move'&&!stepW(wd)){
-  if(mode==='net'&&net&&turn!==net.me){state='await';if(net.pe)applyEnd(net.pe)}else if(mode!=='net'||net)endShot();
+let lastT=0,acc=0;
+function loop(now){
+ now=now||performance.now();acc=Math.min(acc+(now-(lastT||now)),100);lastT=now;
+ while(acc>=16.667){acc-=16.667;
+  if(canAim()){const sp=KS.s?.0015:.007;if(KS.l)nudge(-sp);if(KS.r)nudge(sp);if(charging){pwr=Math.min(1,pwr+.011);drawPg()}}
+  if(state==='move'&&!stepW(wd)){
+   if(mode==='net'&&net&&turn!==net.me){state='await';if(net.pe)applyEnd(net.pe)}else if(mode!=='net'||net)endShot();
+  }
  }
  const ca=canAim();
- $('side').classList.toggle('off',!ca);
+ $('side').classList.toggle('off',!ca);$('fire').classList.toggle('off',!ca);
  if(!ca&&!$('spPop').classList.contains('hide'))closeSp();
  draw();requestAnimationFrame(loop);
 }
