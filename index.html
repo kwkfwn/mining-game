@@ -338,8 +338,10 @@ var GAMES=[
    desc:"자동차와 기차를 피하고 통나무를 타고 강을 건너요! 2D 아이소메트릭과 3D 복셀 중 마음에 드는 버전을 골라 즐겨보세요.", thumb:"crossy"},
   {id:"crossy2d", title:"길건너 친구들", sub:"2D 아이소메트릭", src:"crossy2d.html", hide:1, thumb:"crossy2d", pd:"철길 위 기차까지 나오는 가볍고 빠른 캔버스 버전이에요."},
   {id:"crossy3d", title:"길건너 친구들", sub:"3D 복셀", src:"crossy3d.html", hide:1, thumb:"crossy3d", pd:"복셀 3D 화면이 계속 앞으로 흘러가요. 멈추면 독수리가 잡아가요!"}
+  {id:"stock", title:"광부 증권거래소", sub:"주식 투자 시뮬레이터", src:"stock.html", badge:"new", tags:["주식","모의투자"], cat:"finance",
+   desc:"가상 자금으로 주식을 사고팔고 포트폴리오와 투자 기록을 관리해요.", thumb:"stock"}
 ];
-var CATS=[["all","전체"],["action","액션"],["idle","방치형"],["rpg","RPG"]];
+var CATS=[["all","전체"],["action","액션"],["idle","방치형"],["rpg","RPG"],["finance","금융"]];
 var TIPS=["게임은 이 창 안에서 실행돼요. 왼쪽 위 '목록' 버튼으로 언제든 돌아올 수 있어요.","전체화면 버튼으로 더 크게 즐겨보세요.","게임 진행 상황은 이 브라우저에 저장돼요.","잠깐 멈췄다면 새로고침 버튼을 눌러보세요."];
 
 /* ============ 비밀번호 해시 (게임들과 같은 방식) ============ */
@@ -430,6 +432,7 @@ THUMBS.billiards='<svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice
 /* 길건너 친구들 카드 썸네일: 2D(왼쪽) + 3D(오른쪽) 반반 */
 (function(){ function inn(t){ return t.replace(/^<svg[^>]*>/,"").replace(/<\/svg>$/,""); }
   THUMBS.crossy='<svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice"><defs><clipPath id="czL"><polygon points="0,0 200,0 120,200 0,200"/></clipPath><clipPath id="czR"><polygon points="200,0 320,0 320,200 120,200"/></clipPath></defs><g clip-path="url(#czL)">'+inn(THUMBS.crossy2d)+'</g><g clip-path="url(#czR)">'+inn(THUMBS.crossy3d)+'</g><line x1="200" y1="0" x2="120" y2="200" stroke="#fff" stroke-width="4"/><text x="14" y="190" font-family="Arial Black,Impact,sans-serif" font-size="34" font-weight="900" fill="#ffd23f" stroke="#3a1a02" stroke-width="6" paint-order="stroke">2D</text></svg>'; })();
+THUMBS.stock='<svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="stockBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#17234a"/><stop offset="1" stop-color="#0a0e25"/></linearGradient><linearGradient id="stockGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a4"/><stop offset="1" stop-color="#e09b25"/></linearGradient></defs><rect width="320" height="200" fill="url(#stockBg)"/><g stroke="#ffffff" stroke-opacity=".1"><path d="M24 52H296M24 92H296M24 132H296M24 172H296"/><path d="M64 36V176M128 36V176M192 36V176M256 36V176"/></g><rect x="48" y="126" width="34" height="50" rx="5" fill="#3b70bd"/><rect x="100" y="103" width="34" height="73" rx="5" fill="#5f8ed6"/><rect x="152" y="82" width="34" height="94" rx="5" fill="#e0a542"/><rect x="204" y="58" width="34" height="118" rx="5" fill="url(#stockGold)"/><path d="M34 120L82 104L118 111L164 76L214 65L276 38" fill="none" stroke="#65e6a7" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="276" cy="38" r="8" fill="#65e6a7" stroke="#eafff2" stroke-width="3"/><text x="28" y="37" font-family="Arial,sans-serif" font-size="18" font-weight="900" fill="#ffe08a">MARKET</text><text x="291" y="187" text-anchor="end" font-family="Arial,sans-serif" font-size="13" font-weight="800" fill="#c8d5ff">STOCK EXCHANGE</text></svg>';
 var LOGO='<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#ff8a1e"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="15" fill="url(#lg1)" stroke="#3a1a02" stroke-width="3"/><circle cx="32" cy="22" r="9" fill="#e02828" stroke="#3a1a02" stroke-width="3"/><circle cx="29" cy="19" r="2.6" fill="#fff" opacity=".8"/><rect x="29" y="29" width="6" height="14" fill="#3a1a02"/><rect x="11" y="41" width="42" height="13" rx="6.5" fill="#1a2260" stroke="#3a1a02" stroke-width="3"/><circle cx="21" cy="47.5" r="3.4" fill="#7dff7a"/><circle cx="32" cy="47.5" r="3.4" fill="#ffe45c"/><circle cx="43" cy="47.5" r="3.4" fill="#ff7a7a"/></svg>';
 
 /* ============ 유틸 ============ */
