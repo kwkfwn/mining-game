@@ -128,28 +128,32 @@ function tgt(a){const s=a.st;
  if(s=='fly'||s=='down'||s=='ko')return FP;
  return a.cr?(a.blk?BC:CR):(a.blk?BS:ID)}
 function inp(i){if(net){const m=net.inb[i][net.f]|0;return{l:m&1,r:m&2,u:m&4,d:m&8,p:[m&16,m&32,m&64,m&128,m&256,m&512,m&1024,m&2048,m&4096]}}if(i&&!mode)return ai();const m=KM[i];return{l:K[m.l],r:K[m.r],u:K[m.u],d:K[m.d],p:m.b.concat(m.s).map(b=>PR[b])}}
-const DF=[['쉬움','#7dffa0','반응이 느리고 허술해요. 처음이라면 여기서!'],['노멀','#7ff3ea','기본 실력의 CPU예요.'],['하드','#ffd25a','반응이 빠르고 방어도 잘하고, 빈틈을 노려요.'],['익스트림','#ff3b5c','거의 완벽한 방어와 즉각 반격. 각오하세요!']];
+const DF=[['쉬움','#7dffa0','반응이 느리고 허술해요. 처음이라면 여기서!'],['노멀','#7ff3ea','기본 실력의 CPU예요.'],['하드','#ffd25a','반응이 빠르고 방어도 잘하고, 빈틈을 노려요.'],['익스트림','#ff3b5c','거의 완벽한 방어와 즉각 반격. 각오하세요!'],['지옥','#c04bff','공격 한 번도 못 합니다. 깰 수 없는 난이도.']];
 const DP=[
- {t0:24,tr:30,ap:.35,am:.55,ca:.35,cr:.6,rec:26,blk:.18,ant:0,flip:.4,sp:.06,ult:.02,pun:0,jmp:.002},
- {t0:8,tr:16,ap:.45,am:.85,ca:.55,cr:.7,rec:14,blk:.55,ant:.2,flip:0,sp:.18,ult:1,pun:0,jmp:.005},
- {t0:5,tr:9,ap:.5,am:.9,ca:.65,cr:.72,rec:10,blk:.8,ant:.38,flip:0,sp:.22,ult:1,pun:.08,jmp:.006},
- {t0:2,tr:4,ap:.55,am:.96,ca:.78,cr:.8,rec:5,blk:.97,ant:.65,flip:0,sp:.3,ult:1,pun:.3,jmp:.008}];
-let aiLv=1,di=1;try{const v=+localStorage.getItem('nk_aidiff');if(localStorage.getItem('nk_aidiff')!==null&&v>=0&&v<4)aiLv=v}catch(e){}
+ {t0:24,tr:30,ap:.35,am:.55,ca:.35,cr:.6,rec:26,blk:.18,ant:0,flip:.4,sp:.06,ult:.02,pun:0,jmp:.002,dg:0},
+ {t0:8,tr:16,ap:.45,am:.85,ca:.55,cr:.7,rec:14,blk:.55,ant:.2,flip:0,sp:.18,ult:1,pun:0,jmp:.005,dg:0},
+ {t0:5,tr:9,ap:.5,am:.9,ca:.65,cr:.72,rec:10,blk:.8,ant:.38,flip:0,sp:.22,ult:1,pun:.08,jmp:.006,dg:.7},
+ {t0:2,tr:4,ap:.55,am:.96,ca:.78,cr:.8,rec:5,blk:.97,ant:.65,flip:0,sp:.3,ult:1,pun:.3,jmp:.008,dg:.95},
+ {t0:1,tr:1,ap:.7,am:1,ca:.97,cr:1,rec:3,blk:1,ant:1,flip:0,sp:.35,ult:1,pun:1,jmp:0,perf:1,dg:1}];
+let aiLv=1,di=1;try{const v=+localStorage.getItem('nk_aidiff');if(localStorage.getItem('nk_aidiff')!==null&&v>=0&&v<5)aiLv=v}catch(e){}
 function diffOpen(){di=aiLv;sc='diff';snd('ui')}
 function diffPick(n){aiLv=di=n;try{localStorage.setItem('nk_aidiff',n)}catch(e){}start(0)}
-function diffStep(){const k=a=>PR[a];if(k('ArrowUp')||k('KeyW')){di=(di+3)%4;snd('ui')}else if(k('ArrowDown')||k('KeyS')){di=(di+1)%4;snd('ui')}else if(k('Enter')||k('Space'))diffPick(di);else if(k('Escape')){sc='menu';snd('ui')}else for(let n=0;n<4;n++)if(k('Digit'+(n+1))||k('Numpad'+(n+1)))diffPick(n)}
-function diffTap(x,y){if(y>=H-56){sc='menu';snd('ui');return}for(let n=0;n<4;n++){const ry=150+n*76;if(x>=W/2-250&&x<W/2+250&&y>=ry&&y<ry+66){di=n;diffPick(n);return}}}
+function diffStep(){const k=a=>PR[a];if(k('ArrowUp')||k('KeyW')){di=(di+4)%5;snd('ui')}else if(k('ArrowDown')||k('KeyS')){di=(di+1)%5;snd('ui')}else if(k('Enter')||k('Space'))diffPick(di);else if(k('Escape')){sc='menu';snd('ui')}else for(let n=0;n<5;n++)if(k('Digit'+(n+1))||k('Numpad'+(n+1)))diffPick(n)}
+function diffTap(x,y){if(y>=H-56){sc='menu';snd('ui');return}for(let n=0;n<5;n++){const ry=134+n*64;if(x>=W/2-250&&x<W/2+250&&y>=ry&&y<ry+56){di=n;diffPick(n);return}}}
 function diffUI(){menuUI(1);g.fillStyle='rgba(2,3,10,.97)';g.fillRect(-20,-20,W+40,H+40);
- txt('CPU 난이도 선택',W/2,88,40,'#ffe27a');txt('상대의 실력을 골라주세요',W/2,120,17,'#9aa6c0');
- DF.forEach((d,n)=>{const y=150+n*76,on=n==di,x=W/2-250;g.fillStyle=on?'#000d':'#0008';g.fillRect(x,y,500,66);g.strokeStyle=on?d[1]:'#fff3';g.lineWidth=on?3:1.5;g.strokeRect(x,y,500,66);if(on){g.fillStyle=d[1];g.fillRect(x,y,6,66)}
-  txt(String(n+1),x+34,y+43,22,on?d[1]:'#7d89a6');txt(d[0],x+64,y+32,28,on?'#fff':'#c3cbe0','left');txt(d[2],x+64,y+55,14,on?d[1]:'#8a94ad','left');
-  txt('★'.repeat(n+1)+'☆'.repeat(3-n),x+486,y+40,20,d[1],'right')});
- txt('↑ ↓  이동',W/2-190,H-22,14,'#9aa6c0');txt('Enter  선택',W/2-80,H-22,14,'#9aa6c0');txt('1 · 2 · 3 · 4  바로 시작',W/2+75,H-22,14,'#9aa6c0');txt('Esc  뒤로',W/2+220,H-22,14,'#9aa6c0')}
+ txt('CPU 난이도 선택',W/2,70,38,'#ffe27a');txt('상대의 실력을 골라주세요',W/2,102,16,'#9aa6c0');
+ DF.forEach((d,n)=>{const y=134+n*64,on=n==di,x=W/2-250;g.fillStyle=on?'#000d':'#0008';g.fillRect(x,y,500,56);g.strokeStyle=on?d[1]:'#fff3';g.lineWidth=on?3:1.5;g.strokeRect(x,y,500,56);if(on){g.fillStyle=d[1];g.fillRect(x,y,6,56)}
+  txt(String(n+1),x+34,y+37,22,on?d[1]:'#7d89a6');txt(d[0],x+64,y+29,26,on?'#fff':'#c3cbe0','left');txt(d[2],x+64,y+49,14,on?d[1]:'#8a94ad','left');
+  txt('★'.repeat(n+1)+'☆'.repeat(4-n),x+486,y+36,18,d[1],'right')});
+ txt('↑ ↓  이동',W/2-190,H-22,14,'#9aa6c0');txt('Enter  선택',W/2-80,H-22,14,'#9aa6c0');txt('1 ~ 5  바로 시작',W/2+75,H-22,14,'#9aa6c0');txt('Esc  뒤로',W/2+220,H-22,14,'#9aa6c0')}
 function ai(){const a=F[1],o=F[0],d=Math.abs(o.x-a.x),I={p:[]},P=DP[aiLv],s=a.ai||(a.ai={t:0,m:0,b:0,bt:0}),tw=o.x>a.x?'r':'l',aw=o.x>a.x?'l':'r';
  if(tsOn(a)){if(d>80)I[tw]=1;if(d<112)I.p[0]=1;return I}
+ if(o.st=='atk'&&o.mv.ub&&P.dg){if(!s.du){s.du=1;s.dgo=Math.random()<P.dg;s.cn=0;s.pd=d}
+  if(s.dgo&&o.f<=o.mv.st+o.mv.ac+2){s.cn=d<=s.pd?s.cn+1:0;s.pd=d;s.b=0;s.bt=0;if(s.cn>=3){I[tw]=1;I.u=1}else I[aw]=1;return I}}else s.du=0
  if(--s.t<=0){s.t=P.t0+Math.random()*P.tr|0;const r=Math.random();s.m=d>130?1:d>85?(r<P.ap?1:r<P.am?3:0):(r<P.ca?3:r<P.cr?2:0)}
  if(o.st=='atk'&&o.f==3&&d<o.mv.r+25){s.b=Math.random()<P.blk;s.bt=o.mv.st+o.mv.ac+4;s.lo=(o.mv.h=='l')!=(Math.random()<P.flip)}
  if(o.st=='atk'&&o.mv.st>4&&o.f==o.mv.st-1&&!a.blk&&a.pcd<=0&&d<o.mv.r+25&&Math.random()<P.ant){s.b=1;s.bt=o.mv.ac+5;s.lo=o.mv.h=='l'}
+ if(P.perf&&o.st=='atk'&&d<(o.mv.r||120)+45&&o.f<o.mv.st+o.mv.ac+2){s.b=1;s.bt=3;s.lo=o.mv.h=='l'}
  if(P.pun&&a.st=='idle'&&!(s.bt>0&&s.b)&&o.st=='atk'&&o.f>o.mv.st+o.mv.ac&&d<o.mv.r+40&&Math.random()<P.pun){I.p[Math.random()*4|0]=1;s.m=0;s.t=P.rec;return I}
  if(s.bt-->0&&s.b){I[aw]=1;I.d=s.lo}
  else if(s.m==1)I[tw]=1;else if(s.m==2)I[aw]=1;
