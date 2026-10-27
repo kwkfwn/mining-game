@@ -84,8 +84,10 @@ function drawFX(){const now=performance.now();
   g.strokeStyle=e.k?'#fff':'#7df';g.lineWidth=7*a+1;g.beginPath();g.arc(e.x,e.y,10+u*(e.k>1?80:50),0,7);g.stroke();
   if(u<.55){g.fillStyle=e.k?'#fff7b8':'#aef';g.beginPath();for(let j=0;j<12;j++){const an=j*Math.PI/6,rr=(j%2?9:e.k>1?52:34)*(1-u*1.5);g.lineTo(e.x+Math.cos(an)*rr,e.y+Math.sin(an)*rr)}g.closePath();g.fill()}}
  g.globalAlpha=1}
+const hellOf=o=>!mode&&!net&&aiLv==4&&o===F[1];
 function tryHit(a,o){const m=a.mv,d=Math.abs(o.x-a.x),rr=(RX[a.si]||[])[SK.indexOf(m)]||m.r;
- if(m.muda)return mudaHit(a,o,d,rr);
+ if(hellOf(o)&&(m.muda||d<=rr&&o.st!='down'&&o.st!='ko')){if(m.muda)return;const px=o.x-a.dir*14,py=FL-o.jy-95;a.hit=1;o.pry=0;a.st=a.jy>0?'fly':'hurt';a.mv=null;a.bl=0;a.cb=0;if(a.jy>0){a.jg=9;a.vy=3;a.vx=-a.dir*2}else{a.stun=30;a.vx=-a.dir*3}hs=12;flash=.35;zm=.03;shake=4;snd('blk');fx(px,py,2);fx(px,py-34,3,'PARRY!');sp(px,py,16,'#fff',6);sp(px,py,10,'#7df',4);return}
+ if(m.muda)return mudaHit(a,o,d,rr);
  if(d>rr||(!m.aoe&&Math.abs(a.jy-o.jy)>(m.air||m.L==2||o.st=='fly'?110:55))||(!m.aoe&&(o.x-a.x)*a.dir<-8)||o.st=='down'||o.st=='ko'||(o.st=='atk'&&o.mv.iv&&o.f<=o.mv.st+o.mv.ac)||(o.st=='fly'&&o.jy<5)||(m.h=='h'&&o.cr&&o.st!='fly')||(m.h=='l'&&o.jy>10))return;
  const bl=(o.st=='idle'||o.st=='hurt'&&o.bl)&&o.blk&&!m.ub&&(o.cr?m.h!='m':m.h!='l'),px=o.x-a.dir*14,py=FL-o.jy-(m.h=='l'?30:m.h=='h'?135:95);
  a.hit=1;
@@ -1077,7 +1079,7 @@ function mudaHit(a,o,d,rr){
 function tsEnd(){
  const T=TSD;TSD=null;if(!T)return;const a=T.a,o=T.o;a.dir=o.x>a.x?1:-1;
  const dm=Math.max(1,Math.round(T.dm/100+9*(a.pw||1)));
- o.hp=Math.max(0,o.hp-dm);a.cb=1;a.sh=T.hits;a.ct=100;a.gx=Math.min(100,a.gx+dm*.5);o.gx=Math.min(100,o.gx+dm*.6);
+ if(!hellOf(o))o.hp=Math.max(0,o.hp-dm);a.cb=1;a.sh=T.hits;a.ct=100;a.gx=Math.min(100,a.gx+dm*.5);o.gx=Math.min(100,o.gx+dm*.6);
  o.fl=4;o.bl=0;o.blk=0;o.mv=null;o.cr=0;o.stun=0;
  const px=o.x,py=FL-o.jy-90;hs=24;shake=26;flash=.9;zm=.07;TSB=110;
  snd('hit',2);snd('ko');fx(px,py,2);fx(px,py,2);if(BK(a)){sfx('how',px,py,{s:6,bl:1});sfx('sg',px,py,{s:7,bl:1})}fx(px,py-26,3,'-'+dm);sp(px,py,34,'#ffe34a',14);sp(px,py,16,'#fff',9);
