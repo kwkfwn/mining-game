@@ -320,28 +320,30 @@ document.addEventListener("keydown",function(e){
 var GAMES=[
   {id:"gems",  title:"뒷산에서 보석 캐기", sub:"", src:"gems.html", badge:"hot", tags:["광산","블랙잭","룰렛","볼파이트"], cat:"all",
    desc:"곡괭이를 들고 뒷산 광산으로! 보석을 캐서 골드로 바꾸고, 블랙잭 · 러시안 룰렛 · 반응속도 · 볼파이트 대전까지 즐기는 종합 게임이에요.", thumb:"gems"},
-  {id:"sword", title:"전설의 검 키우기", sub:"100강의 지배자", src:"sword.html", badge:"new", tags:["방치형","강화"], cat:"idle",
+  {id:"sword", title:"전설의 검 키우기", sub:"100강의 지배자", src:"sword.html", tags:["방치형","강화"], cat:"idle",
    desc:"나무 막대기를 강화해서 100강 신화의 검을 만들어요. 파괴 방지권과 차원 도약 장치로 위험을 피하며 끝까지 가보세요.", thumb:"sword"},
-  {id:"dungeon", title:"심연의 던전", sub:"로그라이트 RPG", src:"dungeon.html", badge:"new", tags:["로그라이트","RPG","장기 플레이"], cat:"rpg",
+  {id:"dungeon", title:"심연의 던전", sub:"로그라이트 RPG", src:"dungeon.html", tags:["로그라이트","RPG","장기 플레이"], cat:"rpg",
    desc:"매번 달라지는 던전을 탐험하는 로그라이트 RPG! 6가지 직업과 수십 가지 유물, 쓰러져도 남는 영혼 강화로 점점 더 깊이 내려가요. 폰과 크롬북 모두 OK!", thumb:"dungeon"},
-  {id:"pixel", title:"SUPER PIXEL BROS.", sub:"", src:"pixel.html", badge:"new", tags:["액션","플랫포머"], cat:"action",
+  {id:"pixel", title:"SUPER PIXEL BROS.", sub:"", src:"pixel.html", tags:["액션","플랫포머"], cat:"action",
    desc:"점프하고, 벽돌을 깨고, 적을 밟으며 깃발까지 달려가는 클래식 픽셀 액션 게임이에요.", thumb:"pixel"},
-  {id:"fight", title:"Round Zero", sub:"라운드 제로 · 격투 대전", src:"fight.html", badge:"new", tags:["격투","대전","온라인"], cat:"action",
+  {id:"fight", title:"Round Zero", sub:"라운드 제로 · 격투 대전", src:"fight.html", tags:["격투","대전","온라인"], cat:"action",
    desc:"철권풍 2D 격투 게임! 캐릭터 4명과 고유 필살기, 콤보 · 저글, 1P vs CPU · 2P 대전 · 방 코드로 친구와 붙는 온라인 대전까지 즐겨보세요.", thumb:"fight"},
-  {id:"pokemon",title:"포켓몬 모험",sub:"PC · 모바일 반응형",src:"pokemon_adventure.html",badge:"new",tags:["RPG","턴제 배틀","PC · 모바일"],cat:"rpg",
+  {id:"pokemon",title:"포켓몬 모험",sub:"PC · 모바일 반응형",src:"pokemon_adventure.html",tags:["RPG","턴제 배틀","PC · 모바일"],cat:"rpg",
    desc:"픽셀 필드를 탐험하고 포켓몬과 배틀하는 클래식 RPG예요. 화면 크기에 맞춰 PC와 모바일 조작·배치가 자동으로 바뀌어요.",thumb:"pokemon"},
-  {id:"pmd", title:"미궁 탐험대", sub:"턴제 로그라이크 던전", src:"pmd.html", badge:"new", tags:["로그라이크","RPG","장기 플레이"], cat:"rpg",
+  {id:"pmd", title:"미궁 탐험대", sub:"턴제 로그라이크 던전", src:"pmd.html", tags:["로그라이크","RPG","장기 플레이"], cat:"rpg",
    desc:"한 칸 움직이면 적도 한 칸! 층마다 새로 만들어지는 던전을 탐험하고, 쓰러뜨린 적을 동료로 영입하며 이야기를 따라가는 비공식 팬 게임이에요. PC와 모바일 모두 OK!", thumb:"pmd"},
-  {id:"billiards", title:"4구 당구", sub:"솔로 · 대전 · 온라인", src:"billiards.html", badge:"new", tags:["당구","대전","온라인"], cat:"action",
+  {id:"billiards", title:"4구 당구", sub:"솔로 · 대전 · 온라인", src:"billiards.html", tags:["당구","대전","온라인"], cat:"action",
    desc:"빨간 공 두 개를 모두 맞혀 점수를 내는 4구 당구! 솔로 · 2인 대전 · 컴퓨터 · 온라인 대전을 지원하고, 회전과 파워를 조절해 정교하게 쳐보세요. PC와 모바일 화면이 자동으로 바뀌어요.", thumb:"billiards"},
-  {id:"crossy", title:"길건너 친구들", sub:"2D · 3D 선택", badge:"new", tags:["아케이드","2D","3D"], cat:"action", pick:["crossy2d","crossy3d"],
+  {id:"crossy", title:"길건너 친구들", sub:"2D · 3D 선택", tags:["아케이드","2D","3D"], cat:"action", pick:["crossy2d","crossy3d"],
    desc:"자동차와 기차를 피하고 통나무를 타고 강을 건너요! 2D 아이소메트릭과 3D 복셀 중 마음에 드는 버전을 골라 즐겨보세요.", thumb:"crossy"},
   {id:"crossy2d", title:"길건너 친구들", sub:"2D 아이소메트릭", src:"crossy2d.html", hide:1, thumb:"crossy2d", pd:"철길 위 기차까지 나오는 가볍고 빠른 캔버스 버전이에요."},
   {id:"crossy3d", title:"길건너 친구들", sub:"3D 복셀", src:"crossy3d.html", hide:1, thumb:"crossy3d", pd:"복셀 3D 화면이 계속 앞으로 흘러가요. 멈추면 독수리가 잡아가요!"},
-  {id:"stock", title:"광부 증권거래소", sub:"주식 투자 시뮬레이터", src:"stock.html", badge:"new", tags:["주식","모의투자"], cat:"finance",
-   desc:"가상 자금으로 주식을 사고팔고 포트폴리오와 투자 기록을 관리해요.", thumb:"stock"}
+  {id:"stock", title:"광부 증권거래소", sub:"주식 투자 시뮬레이터", src:"stock.html", tags:["주식","모의투자"], cat:"finance",
+   desc:"가상 자금으로 주식을 사고팔고 포트폴리오와 투자 기록을 관리해요.", thumb:"stock"},
+  {id:"chess", title:"체스 · 오목", sub:"컴퓨터 · 대전 · 온라인", src:"chess.html", badge:"new", tags:["체스","오목","온라인"], cat:"board",
+   desc:"체스와 오목을 한 곳에서! 컴퓨터와 겨루거나 둘이서 두고, 온라인 매칭으로 상대를 찾아 대결해요. 체스는 캐슬링 · 앙파상 · 프로모션까지 지원해요.", thumb:"chess"}
 ];
-var CATS=[["all","전체"],["action","액션"],["idle","방치형"],["rpg","RPG"],["finance","금융"]];
+var CATS=[["all","전체"],["action","액션"],["idle","방치형"],["rpg","RPG"],["board","보드"],["finance","금융"]];
 var TIPS=["게임은 이 창 안에서 실행돼요. 왼쪽 위 '목록' 버튼으로 언제든 돌아올 수 있어요.","전체화면 버튼으로 더 크게 즐겨보세요.","게임 진행 상황은 이 브라우저에 저장돼요.","잠깐 멈췄다면 새로고침 버튼을 눌러보세요."];
 
 /* ============ 비밀번호 해시 (게임들과 같은 방식) ============ */
@@ -433,6 +435,7 @@ THUMBS.billiards='<svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice
 (function(){ function inn(t){ return t.replace(/^<svg[^>]*>/,"").replace(/<\/svg>$/,""); }
   THUMBS.crossy='<svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice"><defs><clipPath id="czL"><polygon points="0,0 200,0 120,200 0,200"/></clipPath><clipPath id="czR"><polygon points="200,0 320,0 320,200 120,200"/></clipPath></defs><g clip-path="url(#czL)">'+inn(THUMBS.crossy2d)+'</g><g clip-path="url(#czR)">'+inn(THUMBS.crossy3d)+'</g><line x1="200" y1="0" x2="120" y2="200" stroke="#fff" stroke-width="4"/><text x="14" y="190" font-family="Arial Black,Impact,sans-serif" font-size="34" font-weight="900" fill="#ffd23f" stroke="#3a1a02" stroke-width="6" paint-order="stroke">2D</text></svg>'; })();
 THUMBS.stock='<svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="stockBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#17234a"/><stop offset="1" stop-color="#0a0e25"/></linearGradient><linearGradient id="stockGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a4"/><stop offset="1" stop-color="#e09b25"/></linearGradient></defs><rect width="320" height="200" fill="url(#stockBg)"/><g stroke="#ffffff" stroke-opacity=".1"><path d="M24 52H296M24 92H296M24 132H296M24 172H296"/><path d="M64 36V176M128 36V176M192 36V176M256 36V176"/></g><rect x="48" y="126" width="34" height="50" rx="5" fill="#3b70bd"/><rect x="100" y="103" width="34" height="73" rx="5" fill="#5f8ed6"/><rect x="152" y="82" width="34" height="94" rx="5" fill="#e0a542"/><rect x="204" y="58" width="34" height="118" rx="5" fill="url(#stockGold)"/><path d="M34 120L82 104L118 111L164 76L214 65L276 38" fill="none" stroke="#65e6a7" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="276" cy="38" r="8" fill="#65e6a7" stroke="#eafff2" stroke-width="3"/><text x="28" y="37" font-family="Arial,sans-serif" font-size="18" font-weight="900" fill="#ffe08a">MARKET</text><text x="291" y="187" text-anchor="end" font-family="Arial,sans-serif" font-size="13" font-weight="800" fill="#c8d5ff">STOCK EXCHANGE</text></svg>';
+THUMBS.chess='<svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice"><rect width="320" height="200" fill="#0f1a3d"/><rect x="16" y="32" width="34" height="34" fill="#e3efe6"/><rect x="50" y="32" width="34" height="34" fill="#6b8f71"/><rect x="84" y="32" width="34" height="34" fill="#e3efe6"/><rect x="118" y="32" width="34" height="34" fill="#6b8f71"/><rect x="16" y="66" width="34" height="34" fill="#6b8f71"/><rect x="50" y="66" width="34" height="34" fill="#e3efe6"/><rect x="84" y="66" width="34" height="34" fill="#6b8f71"/><rect x="118" y="66" width="34" height="34" fill="#e3efe6"/><rect x="16" y="100" width="34" height="34" fill="#e3efe6"/><rect x="50" y="100" width="34" height="34" fill="#6b8f71"/><rect x="84" y="100" width="34" height="34" fill="#e3efe6"/><rect x="118" y="100" width="34" height="34" fill="#6b8f71"/><rect x="16" y="134" width="34" height="34" fill="#6b8f71"/><rect x="50" y="134" width="34" height="34" fill="#e3efe6"/><rect x="84" y="134" width="34" height="34" fill="#6b8f71"/><rect x="118" y="134" width="34" height="34" fill="#e3efe6"/><g fill="#fbfaf4" stroke="#1b2a24" stroke-width="1.2" stroke-linejoin="round"><rect x="55" y="125" width="24" height="5"/><polygon points="59,125 61,111 73,111 75,125"/><rect x="56" y="108" width="22" height="4"/><rect x="56" y="102" width="5" height="7"/><rect x="64.5" y="102" width="5" height="7"/><rect x="73" y="102" width="5" height="7"/></g><g fill="#1d2428" stroke="#ebf2ee" stroke-width="1.2" stroke-linejoin="round"><rect x="89" y="91" width="24" height="5"/><polygon points="93,91 95,77 107,77 109,91"/><rect x="90" y="74" width="22" height="4"/><rect x="90" y="68" width="5" height="7"/><rect x="98.5" y="68" width="5" height="7"/><rect x="107" y="68" width="5" height="7"/></g><rect x="170" y="32" width="136" height="136" rx="4" fill="#d7b67a"/><g stroke="#5a4220" stroke-width="1.2"><line x1="184" y1="46" x2="184" y2="154"/><line x1="211" y1="46" x2="211" y2="154"/><line x1="238" y1="46" x2="238" y2="154"/><line x1="265" y1="46" x2="265" y2="154"/><line x1="292" y1="46" x2="292" y2="154"/><line x1="184" y1="46" x2="292" y2="46"/><line x1="184" y1="73" x2="292" y2="73"/><line x1="184" y1="100" x2="292" y2="100"/><line x1="184" y1="127" x2="292" y2="127"/><line x1="184" y1="154" x2="292" y2="154"/></g><circle cx="184" cy="46" r="11" fill="#14191c" stroke="#000" stroke-width=".8"/><circle cx="180.5" cy="42.5" r="3" fill="#59626b"/><circle cx="211" cy="73" r="11" fill="#14191c" stroke="#000" stroke-width=".8"/><circle cx="207.5" cy="69.5" r="3" fill="#59626b"/><circle cx="238" cy="100" r="11" fill="#14191c" stroke="#000" stroke-width=".8"/><circle cx="234.5" cy="96.5" r="3" fill="#59626b"/><circle cx="265" cy="127" r="11" fill="#14191c" stroke="#000" stroke-width=".8"/><circle cx="261.5" cy="123.5" r="3" fill="#59626b"/><circle cx="238" cy="73" r="11" fill="#f4f6f7" stroke="#8d969c" stroke-width=".8"/><circle cx="211" cy="100" r="11" fill="#f4f6f7" stroke="#8d969c" stroke-width=".8"/><circle cx="265" cy="100" r="11" fill="#f4f6f7" stroke="#8d969c" stroke-width=".8"/><line x1="184" y1="46" x2="265" y2="127" stroke="#ff6a52" stroke-width="3" stroke-linecap="round" opacity=".9"/></svg>';
 var LOGO='<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#ff8a1e"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="15" fill="url(#lg1)" stroke="#3a1a02" stroke-width="3"/><circle cx="32" cy="22" r="9" fill="#e02828" stroke="#3a1a02" stroke-width="3"/><circle cx="29" cy="19" r="2.6" fill="#fff" opacity=".8"/><rect x="29" y="29" width="6" height="14" fill="#3a1a02"/><rect x="11" y="41" width="42" height="13" rx="6.5" fill="#1a2260" stroke="#3a1a02" stroke-width="3"/><circle cx="21" cy="47.5" r="3.4" fill="#7dff7a"/><circle cx="32" cy="47.5" r="3.4" fill="#ffe45c"/><circle cx="43" cy="47.5" r="3.4" fill="#ff7a7a"/></svg>';
 
 /* ============ 유틸 ============ */
@@ -694,7 +697,7 @@ function renderGrid(){
 }
 function enterPortal(){
   $("acct").hidden=true; $("gate").hidden=true; $("device").hidden=true; $("portal").hidden=false; renderWho();
-  $("run").textContent="새 게임이 추가됐어요!  \u2605  4구 당구 (온라인 지원)  \u2605  포켓몬 모험 PC · 모바일  \u2605  길건너 친구들 2D · 3D  \u2605  NEON KNUCKLE 격투 대전 (온라인 지원)  \u2605  SUPER PIXEL BROS.  \u2605  전설의 검 키우기 : 100강의 지배자  \u2605  뒷산에서 보석 캐기 업데이트  \u2605  게임은 계속 추가돼요";
+  $("run").textContent="새 게임이 추가됐어요!  \u2605  체스 · 오목 (온라인 지원)  \u2605  4구 당구 (온라인 지원)  \u2605  포켓몬 모험 PC · 모바일  \u2605  길건너 친구들 2D · 3D  \u2605  NEON KNUCKLE 격투 대전 (온라인 지원)  \u2605  SUPER PIXEL BROS.  \u2605  전설의 검 키우기 : 100강의 지배자  \u2605  뒷산에서 보석 캐기 업데이트  \u2605  게임은 계속 추가돼요";
   renderTabs(); renderGrid();
   setTimeout(function(){ GAMES.forEach(function(g){ if(!g.src) return; try{ var l=document.createElement("link"); l.rel="prefetch"; l.href=g.src; document.head.appendChild(l); }catch(e){} }); },800);
   var id=(location.hash||"").replace("#","");
