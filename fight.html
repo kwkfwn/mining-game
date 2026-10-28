@@ -27,7 +27,7 @@ p{margin:0;font-size:12px;opacity:.75;text-align:center;padding:0 10px}
 <li>상대 반대쪽(뒤)을 누르고 있으면 <b>방어</b>예요. 서서 방어는 상단·중단을, 앉아서 방어(뒤+↓)는 하단을 막아요.</li>
 <li>공격은 상단·중단·하단이 있어요. 상단은 앉으면 피하고, 하단은 서서 막을 수 없고, 앉아 막으면 중단이 들어와요.</li>
 <li>한 라운드 60초, 3판 2선승이에요. 시간이 끝나면 체력이 많은 쪽이 이겨요.</li></ul>
-<h3>패링</h3><ul><li><b>패링</b>: 상대 공격이 맞기 직전(약 0.1초)에 뒤 방향을 <b>새로 눌러서</b> 막으면 패링! 데미지·막힘 경직 없이 상대가 크게 휘청이고 내 게이지가 차요. 미리 뒤를 누르고 있으면 일반 방어가 돼요. 헛 패링은 잠깐 못 써요. 초필살기는 패링 불가.</li></ul>
+<h3>패링</h3><ul><li><b>패링</b>: 전용 키(기본 P1 <kbd>H</kbd> / P2 <kbd>P</kbd>, 키 설정에서 변경 가능)를 상대 공격이 맞기 직전(약 0.1초)에 누르면 패링! 데미지·막힘 경직 없이 상대가 크게 휘청이고 내 게이지가 차요. 뒤 방향을 누르고 있으면 일반 방어가 돼요. 헛 패링은 잠깐 못 써요. 초필살기는 패링 불가.</li></ul>
 <h3>기술</h3><ul>
 <li>기본기: LP 잽(빠른 상단) · RP 스트레이트(중단) · LK 앞차기(중단) · RK 하이킥(강한 상단, 쓰러뜨림)</li>
 <li>↓ + RP 어퍼컷(띄우기 → 공중 콤보) · ↓ + LK 로우킥(하단) · ↓ + RK 스위프(하단, 쓰러뜨림)</li>
@@ -63,7 +63,7 @@ function snd(n,v){v=v||1;try{AC=AC||new(window.AudioContext||window.webkitAudioC
 addEventListener('keydown',e=>{if(!e.repeat){K[e.code]=1;PR[e.code]=1;mkAC()}if(/^(Arrow|Space)/.test(e.code)||(kbBound(e.code)&&!e.ctrlKey&&!e.metaKey))e.preventDefault()});
 addEventListener('keyup',e=>K[e.code]=0);
 c.addEventListener('pointerdown',e=>{mkAC();if(sc=='open'){openEnd();return}const cx=e.offsetX/c.clientWidth*W,cy=e.offsetY/c.clientHeight*H;if(sc=='menu')menuClick(cx,cy);else if(sc=='lobby'&&!lb){if(cx<330&&cy<150)prof();else{const q=cx/W*3|0;q<1?mmStart():q<2?host():join()}}else if(sc=='lobby'&&mm){mmEnd()}else if(sc=='end'){if(e.offsetX<c.clientWidth/2)again();else{leaveNet();sc='menu'}}else if(sc=='lobby'){leaveNet();sc='menu'}else if(sc=='prof')profTap(cx,cy);else if(sc=='snd'||sc=='keys'||sc=='man')optTap(cx,cy);else if(sc=='sel')stgTap(cx,cy);else if(sc=='diff')diffTap(cx,cy)});
-const KM=[{l:'KeyA',r:'KeyD',u:'KeyW',d:'KeyS',b:['KeyF','KeyG','KeyR','KeyT']},{l:'ArrowLeft',r:'ArrowRight',u:'ArrowUp',d:'ArrowDown',b:['KeyK','KeyL','KeyI','KeyO']}];KM[0].s=['','','','PadSP','PadSU'];KM[1].s=['','','','',''];
+const KM=[{l:'KeyA',r:'KeyD',u:'KeyW',d:'KeyS',b:['KeyF','KeyG','KeyR','KeyT']},{l:'ArrowLeft',r:'ArrowRight',u:'ArrowUp',d:'ArrowDown',b:['KeyK','KeyL','KeyI','KeyO']}];KM[0].s=['','','','PadSP','PadSU','KeyH'];KM[1].s=['','','','','','KeyP'];
 const ID=[6,35,150,25,160,26,2,-12,-26],CR=[20,40,150,30,160,62,10,58,-12],BS=[-6,70,170,60,175,26,2,-12,-26],BC=[20,70,170,60,175,62,10,58,-12],HP=[-24,-20,20,-30,10,22,2,-12,-24],HC=[-10,-20,20,-30,10,62,10,58,-12],JP=[0,60,120,55,130,55,-30,30,-50],FP=[-20,-60,-20,-70,-30,30,40,10,50],
 PS={w0:[-2,20,160,25,160,26,2,-12,-26],a0:[12,88,92,25,160,26,2,-12,-26],w1:[-6,35,150,10,170,26,2,-12,-26],a1:[20,30,150,88,95,28,10,-18,-36],w2:[-12,30,150,25,160,70,-20,-10,-5],a2:[-8,20,150,25,160,85,80,-10,-5],w3:[-10,30,150,25,160,-20,-20,60,-60],a3:[-30,30,150,40,150,-15,-10,100,95],w4:[10,40,150,40,100,62,10,58,-12],a4:[25,30,150,135,172,55,8,40,-20],w5:[22,40,150,30,160,62,10,58,-12],a5:[18,40,150,30,160,62,88,55,-15],w6:[26,50,150,40,160,62,10,58,-12],a6:[35,70,150,60,160,80,15,65,75]},
 MV={0:{st:5,ac:3,rc:9,d:4,h:'h',r:68,hs:13,bs:5,kb:3,W:'w0',A:'a0'},1:{st:8,ac:3,rc:13,d:7,h:'m',r:76,hs:16,bs:8,kb:6,W:'w1',A:'a1'},2:{st:10,ac:4,rc:14,d:8,h:'m',r:90,hs:18,bs:9,kb:7,W:'w2',A:'a2'},3:{st:14,ac:4,rc:20,d:13,h:'h',r:98,hs:24,bs:12,kb:12,W:'w3',A:'a3',L:1},
@@ -92,7 +92,7 @@ function tryHit(a,o){const m=a.mv,d=Math.abs(o.x-a.x),rr=Math.round(((RX[a.si]||
  if(d>rr||(!m.aoe&&Math.abs(a.jy-o.jy)>(m.air||m.L==2||o.st=='fly'?110:55))||(!m.aoe&&(o.x-a.x)*a.dir<-8)||o.st=='down'||o.st=='ko'||(o.st=='atk'&&o.mv.iv&&o.f<=o.mv.st+o.mv.ac)||(o.st=='fly'&&o.jy<5)||(m.h=='h'&&o.cr&&o.st!='fly')||(m.h=='l'&&o.jy>10))return;
  const bl=(o.st=='idle'||o.st=='hurt'&&o.bl)&&o.blk&&!m.ub&&(o.cr?m.h!='m':m.h!='l'),px=o.x-a.dir*14,py=FL-o.jy-(m.h=='l'?30:m.h=='h'?135:95);
  a.hit=1;
- if(bl&&o.pry>0&&o.st=='idle'){o.pry=0;o.pcd=0;o.gx=Math.min(100,o.gx+12);a.st=a.jy>0?'fly':'hurt';a.mv=null;a.bl=0;a.cb=0;if(a.jy>0){a.jg=9;a.vy=3;a.vx=-a.dir*2}else{a.stun=30;a.vx=-a.dir*3}o.fl=0;hs=12;flash=.35;zm=.03;shake=4;snd('blk');snd('ui');fx(px,py,2);fx(px,py,0);fx(px,py-34,3,'PARRY!');if(BK(o))sfxParry(px,py);sp(px,py,16,'#fff',6);sp(px,py,10,'#7df',4);return}
+ if(o.pry>0&&o.st=='idle'&&!m.ub){o.pry=0;o.pcd=0;o.gx=Math.min(100,o.gx+12);a.st=a.jy>0?'fly':'hurt';a.mv=null;a.bl=0;a.cb=0;if(a.jy>0){a.jg=9;a.vy=3;a.vx=-a.dir*2}else{a.stun=30;a.vx=-a.dir*3}o.fl=0;hs=12;flash=.35;zm=.03;shake=4;snd('blk');snd('ui');fx(px,py,2);fx(px,py,0);fx(px,py-34,3,'PARRY!');if(BK(o))sfxParry(px,py);sp(px,py,16,'#fff',6);sp(px,py,10,'#7df',4);return}
  if(bl){o.st='hurt';o.bl=1;o.stun=m.bs;o.vx=a.dir*m.kb*.9;a.x-=a.dir*2;hs=3;a.gx=Math.min(100,a.gx+3);snd('blk');fx(px,py,0);zm=.008;if(BK(o))sfxBlock(px,py);sp(px,py,8,'#7df',4);return}
  const fl=o.st=='fly',jg=fl?o.jg+1:0,dm=Math.max(1,Math.round(m.d*(m.sup?.8:.6)*(a.pw||1)*Math.max(.3,1-.15*a.cb)));
  o.hp=Math.max(0,o.hp-dm);a.cb++;a.gx=Math.min(100,a.gx+dm*(a.gm||1));o.gx=Math.min(100,o.gx+dm*.6);a.sh=a.cb;a.ct=100;o.fl=4;o.bl=0;o.blk=0;o.mv=null;
@@ -107,9 +107,9 @@ function upd(a,o,I){
  const fw=a.dir>0?I.r:I.l,bk=a.dir>0?I.l:I.r,s=a.st;
  if(a.fl>0)a.fl--;if(a.ct>0)a.ct--;if(a.pry>0)a.pry--;if(a.pcd>0)a.pcd--;
  if(a.bt>0)a.bt--;else a.buf=null;
- a.pt=a.pt.map(v=>v>0?v-1:0);I.p.forEach((q,n)=>{if(q){a.buf=n;a.bt=9;a.pt[n]=6}});
+ a.pt=a.pt.map(v=>v>0?v-1:0);I.p.forEach((q,n)=>{if(q&&n<9){a.buf=n;a.bt=9;a.pt[n]=6}});
  if(s=='idle'){
-  a.dir=o.x>a.x?1:-1;a.cr=I.d?1:0;{const wb=a.blk;a.blk=bk&&!fw?1:0;if(a.blk&&!wb&&a.pcd<=0){a.pry=7;a.pcd=36}if(!a.blk)a.pry=0}
+  a.dir=o.x>a.x?1:-1;a.cr=I.d?1:0;a.blk=bk&&!fw?1:0;if(I.p[9]&&a.pcd<=0){a.pry=7;a.pcd=36}
   if(I.d)a.q=30;else if(a.q>0)a.q--;
   if(fw&&a.q>0){a.c=26;a.q=0}
   if(a.c>0)a.c--;
@@ -133,7 +133,7 @@ function tgt(a){const s=a.st;
 const TRN=['서 있기','앉기','서서 가드','앉아 가드','점프','CPU'];
 function trIn(){const a=F[1],I={p:[]},bk=a.dir<0?'r':'l';if(trD==5)return ai();if(trD==1||trD==3)I.d=1;if(trD==2||trD==3)I[bk]=1;if(trD==4&&t%90<3)I.u=1;return I}
 function trHud(){txt('TRAINING · 연습 모드',W/2,146,22,'#7ff3ea');txt('더미: '+TRN[trD]+'   [Z] 변경',W/2,172,16,'#ffd34d');txt('마지막 콤보 피해 '+trs.last+'  ·  최대 콤보 '+trs.mx+'HIT',W/2,194,15,'#fff');txt('[X] 위치·기록 초기화   [Esc] 나가기',W/2,214,13,'#9ff')}
-function inp(i){if(net){const m=net.inb[i][net.f]|0;return{l:m&1,r:m&2,u:m&4,d:m&8,p:[m&16,m&32,m&64,m&128,m&256,m&512,m&1024,m&2048,m&4096]}}if(i&&tr)return trIn();if(i&&!mode)return ai();const m=KM[i];return{l:K[m.l],r:K[m.r],u:K[m.u],d:K[m.d],p:m.b.concat(m.s).map(b=>PR[b])}}
+function inp(i){if(net){const m=net.inb[i][net.f]|0;return{l:m&1,r:m&2,u:m&4,d:m&8,p:[m&16,m&32,m&64,m&128,m&256,m&512,m&1024,m&2048,m&4096,m&8192]}}if(i&&tr)return trIn();if(i&&!mode)return ai();const m=KM[i];return{l:K[m.l],r:K[m.r],u:K[m.u],d:K[m.d],p:m.b.concat(m.s).map(b=>PR[b])}}
 const DF=[['쉬움','#7dffa0','반응이 느리고 허술해요. 처음이라면 여기서!'],['노멀','#7ff3ea','기본 실력의 CPU예요.'],['하드','#ffd25a','반응이 빠르고 방어도 잘하고, 빈틈을 노려요.'],['익스트림','#ff3b5c','거의 완벽한 방어와 즉각 반격. 각오하세요!'],['지옥','#c04bff','공격 한 번도 못 합니다. 깰 수 없는 난이도.']];
 const DP=[
  {t0:24,tr:30,ap:.35,am:.55,ca:.35,cr:.6,rec:26,blk:.18,ant:0,flip:.4,sp:.06,ult:.02,pun:0,jmp:.002,dg:0},
@@ -158,7 +158,8 @@ function ai(){const a=F[1],o=F[0],d=Math.abs(o.x-a.x),I={p:[]},P=DP[aiLv],s=a.ai
   if(s.dgo&&o.f<=o.mv.st+o.mv.ac+2){s.cn=d<=s.pd?s.cn+1:0;s.pd=d;s.b=0;s.bt=0;if(s.cn>=3){I[tw]=1;I.u=1}else I[aw]=1;return I}}else s.du=0
  if(--s.t<=0){s.t=P.t0+Math.random()*P.tr|0;const r=Math.random();s.m=d>130?1:d>85?(r<P.ap?1:r<P.am?3:0):(r<P.ca?3:r<P.cr?2:0)}
  if(o.st=='atk'&&o.f==3&&d<o.mv.r+25){s.b=Math.random()<P.blk;s.bt=o.mv.st+o.mv.ac+4;s.lo=(o.mv.h=='l')!=(Math.random()<P.flip)}
- if(o.st=='atk'&&o.mv.st>4&&o.f==o.mv.st-1&&!a.blk&&a.pcd<=0&&d<o.mv.r+25&&Math.random()<P.ant){s.b=1;s.bt=o.mv.ac+5;s.lo=o.mv.h=='l'}
+ if(o.st=='atk'&&o.mv.st>4&&o.f==o.mv.st-1&&!a.blk&&a.pcd<=0&&d<o.mv.r+25&&Math.random()<P.ant){s.b=1;s.bt=o.mv.ac+5;s.lo=o.mv.h=='l';I.p[9]=1}
+ if(P.perf&&o.st=='atk'&&!o.mv.ub&&o.f==o.mv.st-1&&a.pcd<=0&&d<(o.mv.r||120)+45)I.p[9]=1;
  if(P.perf&&o.st=='atk'&&d<(o.mv.r||120)+45&&o.f<o.mv.st+o.mv.ac+2){s.b=1;s.bt=3;s.lo=o.mv.h=='l'}
  if(P.pun&&a.st=='idle'&&!(s.bt>0&&s.b)&&o.st=='atk'&&o.f>o.mv.st+o.mv.ac&&d<o.mv.r+40&&Math.random()<P.pun){I.p[Math.random()*4|0]=1;s.m=0;s.t=P.rec;return I}
  if(s.bt-->0&&s.b){I[aw]=1;I.d=s.lo}
@@ -903,16 +904,16 @@ function optOpen(k){sc=k;sk=kn=kp=0;kbW=null;manY=0;if(k=='man')manBuild();snd('
 function optBack(){mi=sc=='man'&&pnMode?3:['man','snd','keys'].indexOf(sc);sc='menu';tb=1;mY=mi*54;kbW=null;snd('ui')}
 function optTap(x,y){if(x>W-240&&y<90){optBack();return}
  if(sc=='snd'){for(let i=0;i<3;i++)if(y>=142+i*84&&y<206+i*84){sk=i;if(!i)togMus();else if(x>=400&&x<=800){sdr=i;setVol(i,(x-420)/360);snd('ui')}}}
- else if(sc=='keys'){for(let n=0;n<13;n++)for(let p=0;p<2;p++){const r=ckR(n,p);if(x>=r[0]&&x<r[0]+r[2]&&y>=r[1]&&y<r[1]+r[3]){kn=n;kp=p;kbW={i:p,a:kbAct[n][0]};snd('ui')}}if(x>=520&&x<740){if(y>=390&&y<430)kbReset();else if(y>=440&&y<480)optBack()}}}
+ else if(sc=='keys'){for(let n=0;n<14;n++)for(let p=0;p<2;p++){const r=ckR(n,p);if(x>=r[0]&&x<r[0]+r[2]&&y>=r[1]&&y<r[1]+r[3]){kn=n;kp=p;kbW={i:p,a:kbAct[n][0]};snd('ui')}}if(x>=520&&x<740){if(y>=390&&y<430)kbReset();else if(y>=440&&y<480)optBack()}}}
 function optStep(){if(PR.Escape){optBack();return}
  if(sc=='man'){if(K.ArrowUp)manSc(-6);if(K.ArrowDown)manSc(6);if(PR.PageUp)manSc(-300);if(PR.PageDown)manSc(300);if(PR.Home)manSc(-1e5);if(PR.End)manSc(1e5)}
  else if(sc=='snd'){if(PR.ArrowUp)sk=(sk+2)%3;else if(PR.ArrowDown)sk=(sk+1)%3;else if(PR.ArrowLeft||PR.ArrowRight){if(sk)setVol(sk,VOL[sk==1?'m':'s']+(PR.ArrowRight?.1:-.1));else togMus();snd('hit',.5)}else if((PR.Enter||PR.Space)&&!sk)togMus()}
- else if(!kbW){if(PR.ArrowUp)kn=(kn+12)%13;else if(PR.ArrowDown)kn=(kn+1)%13;else if(PR.ArrowLeft)kp=0;else if(PR.ArrowRight)kp=1;else if(PR.Enter||PR.Space)kbW={i:kp,a:kbAct[kn][0]};else if(PR.Backspace||PR.Delete){const a=kbAct[kn][0];if(a[0]=='s'){kbSet(kp,a,'');kbSave()}}else if(PR.KeyR)kbReset()}}
+ else if(!kbW){if(PR.ArrowUp)kn=(kn+13)%14;else if(PR.ArrowDown)kn=(kn+1)%14;else if(PR.ArrowLeft)kp=0;else if(PR.ArrowRight)kp=1;else if(PR.Enter||PR.Space)kbW={i:kp,a:kbAct[kn][0]};else if(PR.Backspace||PR.Delete){const a=kbAct[kn][0];if(a[0]=='s'){kbSet(kp,a,'');kbSave()}}else if(PR.KeyR)kbReset()}}
 c.addEventListener('pointermove',e=>{const x=e.offsetX/c.clientWidth*W,y=e.offsetY/c.clientHeight*H;if(sc=='menu'){const q=menuHit(x,y);if(q>=0&&q<50&&q!=mi){mi=q;snd('ui')}}else if(sc=='snd'&&sdr&&e.buttons)setVol(sdr,(x-420)/360);else if(sc=='man'&&e.buttons)manSc(-e.movementY*H/c.clientHeight)});
 c.addEventListener('wheel',e=>{if(sc=='man'){manSc(e.deltaY*.6);e.preventDefault()}},{passive:false});
 addEventListener('pointerup',()=>{sdr=0});
 let pnMode=0;
-const PN=[['v1.6 · 2026.10.28',[' 연습 모드 추가! 메뉴의 \'연습 모드\'에서 더미를 상대로 마음껏 연습해요.','체력과 필살기 게이지가 무한이고, 타이머와 K.O.가 없어요.','더미 행동을 바꿀 수 있어요: 서 있기 / 앉기 / 서서 가드 / 앉아 가드 / 점프 / CPU. (Z 키)','마지막 콤보 피해량과 최대 콤보를 화면에서 볼 수 있어요. X 키로 위치와 기록을 초기화하고, Esc로 나가요.']],['v1.5 · 2026.10.28',[' 신규 맵 추가! \'TRAINING GROUND(훈련장)\'가 맵 선택에 생겼어요. 이제 맵은 10종이에요.','체육관 벽의 샌드백이 흔들리고, 바닥에는 거리 눈금이 그려져 있어요. 스파링하기 좋아요!']],['v1.4 · 2026.10.28',[' 밸런스 패치!','DIO: 궁극기 ZA WARUDO의 무다무다 최종 피해 비율을 약 35% 낮췄어요. (같은 타수 기준)','VOLT: 팔이 길어서 공격 사거리가 너무 길었어요. 일반기·고유기 사거리를 약 15% 줄였어요. (초필살기 제외)','VOLT: 공격 속도도 약 20% 느리게 했어요. (초필살기 제외)','KAGE: 어퍼컷 준비·마무리 동작에서 반대편을 쳐다보던 문제를 고쳤어요.']],['v1.3 · 2026.10.27',[' 궁극기 대개편! 이제 캐릭터마다 고유한 궁극기 연출과 이펙트가 있어요.','궁극기를 쓰면 이름이 뜨는 컷신이 나오고, 화면이 잠깐 멈춰요.','DIO의 \'ZA WARUDO\'는 디오 몸에서 노란 파동이 퍼지며 화면이 흑백으로 바뀌고, 시계가 돌다 멈추면서 4.5초 동안 시간이 정지해요. 연타 게이지에서 DIO가 더 많이 누르면 무다무다 성공, 상대가 더 많이 누르면 필살기 방어!','TAIGA 승룡천상(푸른 승천 기둥) · RIN 질풍난무(교차 베기) · KAGE 그림자 베기(색 반전과 그림자 촉수) · TITAN 철산붕괴(충격파와 파편) · VOLT 뇌신강림(디지털 번개) · REIKA 염무연타(불꽃 소용돌이) · ZENITH 네온 스톰(글리치) · SUPER SONIC CHAOS BURST(황금빛 폭발) · SONIC SONIC BOOM(음속 충격파) · JUPITER SUPREME THUNDER(낙뢰)','궁극기가 맞을 때 터지는 불꽃 색도 캐릭터 색으로 바뀌었어요.']],['v1.2 · 2026.10.27',[' 신규 맵 2종 추가! \'STEEL FORTRESS(강철 요새)\'와 \'NINJA MANSION(닌자 저택)\'이 맵 선택에 생겼어요. 이제 맵은 9종이에요.',' 신규 캐릭터 추가! \'SUPER SONIC\'·\'SONIC\'·\'JUPITER\'·\'DIO\' 4명이 캐릭터 선택에 등장했어요.','SONIC은 스피드형이에요. 고유기는 ↓ → + RP 로켓 킥! 점프하면서 비스듬히 내리꽂는 공중 돌진 킥이에요.','JUPITER는 밸런스형이에요. 고유기는 ↓ → + RP 번개 돌진! 앞으로 달려들며 날리는 돌진 펀치예요.','DIO는 파워형이에요. 고유기는 ↓ → + RP 흡혈 돌진! 몸을 낮춰 파고들며 연속으로 베어 올려요. 초필살기는 기를 모아 터뜨려요.','스피드형 캐릭터예요. 이동이 빠르고 공격 속도가 좋은 대신 한 방 데미지는 조금 낮아요.','고유기는 ↓ → + RP 스핀 대시! 몸을 둥글게 말아 앞으로 돌진해요.','초필살기도 스핀 대시 계열이에요.','공격 판정 범위를 넉넉하게 늘려서 공격이 더 잘 맞아요.',' 설명서 고유기 목록과 크레딧에 SUPER SONIC을 추가했어요.']],['v1.1 · 2026.10.26',[' 새 기능 \'패링\'이 생겼어요!','상대 공격이 맞기 직전에 뒤쪽 방향키를 \'딱\' 눌러 보세요. 패링에 성공하면 데미지를 안 받고, 상대가 비틀거려요!','미리 뒤를 꾹 누르고 있으면 패링이 아니라 평범한 방어예요. 타이밍이 중요해요.','패링에 성공하면 필살기 게이지도 조금 차올라요.','헛 패링을 하면 잠깐 동안 다시 쓸 수 없어요. 마구 누르면 안 돼요!','초필살기는 패링할 수 없어요.',' CPU도 가끔 패링을 해요. 조심하세요!',' 설명서에 패링 설명을 넣었어요.',' 설정 메뉴에 패치노트가 생겼어요.']]];
+const PN=[['v1.7 · 2026.10.28',[' 패링 전용 키 추가! 이제 뒤 방향 대신 패링 키로 패링해요. (기본값 P1 H / P2 P, 터치는 패링 버튼)','뒤 방향을 누르고 있으면 그냥 방어만 돼요. 패링은 높은 공격·낮은 공격 모두 받아쳐요.','키 설정에서 패링 키를 바꿀 수 있어요.']],['v1.6 · 2026.10.28',[' 연습 모드 추가! 메뉴의 \'연습 모드\'에서 더미를 상대로 마음껏 연습해요.','체력과 필살기 게이지가 무한이고, 타이머와 K.O.가 없어요.','더미 행동을 바꿀 수 있어요: 서 있기 / 앉기 / 서서 가드 / 앉아 가드 / 점프 / CPU. (Z 키)','마지막 콤보 피해량과 최대 콤보를 화면에서 볼 수 있어요. X 키로 위치와 기록을 초기화하고, Esc로 나가요.']],['v1.5 · 2026.10.28',[' 신규 맵 추가! \'TRAINING GROUND(훈련장)\'가 맵 선택에 생겼어요. 이제 맵은 10종이에요.','체육관 벽의 샌드백이 흔들리고, 바닥에는 거리 눈금이 그려져 있어요. 스파링하기 좋아요!']],['v1.4 · 2026.10.28',[' 밸런스 패치!','DIO: 궁극기 ZA WARUDO의 무다무다 최종 피해 비율을 약 35% 낮췄어요. (같은 타수 기준)','VOLT: 팔이 길어서 공격 사거리가 너무 길었어요. 일반기·고유기 사거리를 약 15% 줄였어요. (초필살기 제외)','VOLT: 공격 속도도 약 20% 느리게 했어요. (초필살기 제외)','KAGE: 어퍼컷 준비·마무리 동작에서 반대편을 쳐다보던 문제를 고쳤어요.']],['v1.3 · 2026.10.27',[' 궁극기 대개편! 이제 캐릭터마다 고유한 궁극기 연출과 이펙트가 있어요.','궁극기를 쓰면 이름이 뜨는 컷신이 나오고, 화면이 잠깐 멈춰요.','DIO의 \'ZA WARUDO\'는 디오 몸에서 노란 파동이 퍼지며 화면이 흑백으로 바뀌고, 시계가 돌다 멈추면서 4.5초 동안 시간이 정지해요. 연타 게이지에서 DIO가 더 많이 누르면 무다무다 성공, 상대가 더 많이 누르면 필살기 방어!','TAIGA 승룡천상(푸른 승천 기둥) · RIN 질풍난무(교차 베기) · KAGE 그림자 베기(색 반전과 그림자 촉수) · TITAN 철산붕괴(충격파와 파편) · VOLT 뇌신강림(디지털 번개) · REIKA 염무연타(불꽃 소용돌이) · ZENITH 네온 스톰(글리치) · SUPER SONIC CHAOS BURST(황금빛 폭발) · SONIC SONIC BOOM(음속 충격파) · JUPITER SUPREME THUNDER(낙뢰)','궁극기가 맞을 때 터지는 불꽃 색도 캐릭터 색으로 바뀌었어요.']],['v1.2 · 2026.10.27',[' 신규 맵 2종 추가! \'STEEL FORTRESS(강철 요새)\'와 \'NINJA MANSION(닌자 저택)\'이 맵 선택에 생겼어요. 이제 맵은 9종이에요.',' 신규 캐릭터 추가! \'SUPER SONIC\'·\'SONIC\'·\'JUPITER\'·\'DIO\' 4명이 캐릭터 선택에 등장했어요.','SONIC은 스피드형이에요. 고유기는 ↓ → + RP 로켓 킥! 점프하면서 비스듬히 내리꽂는 공중 돌진 킥이에요.','JUPITER는 밸런스형이에요. 고유기는 ↓ → + RP 번개 돌진! 앞으로 달려들며 날리는 돌진 펀치예요.','DIO는 파워형이에요. 고유기는 ↓ → + RP 흡혈 돌진! 몸을 낮춰 파고들며 연속으로 베어 올려요. 초필살기는 기를 모아 터뜨려요.','스피드형 캐릭터예요. 이동이 빠르고 공격 속도가 좋은 대신 한 방 데미지는 조금 낮아요.','고유기는 ↓ → + RP 스핀 대시! 몸을 둥글게 말아 앞으로 돌진해요.','초필살기도 스핀 대시 계열이에요.','공격 판정 범위를 넉넉하게 늘려서 공격이 더 잘 맞아요.',' 설명서 고유기 목록과 크레딧에 SUPER SONIC을 추가했어요.']],['v1.1 · 2026.10.26',[' 새 기능 \'패링\'이 생겼어요!','상대 공격이 맞기 직전에 뒤쪽 방향키를 \'딱\' 눌러 보세요. 패링에 성공하면 데미지를 안 받고, 상대가 비틀거려요!','미리 뒤를 꾹 누르고 있으면 패링이 아니라 평범한 방어예요. 타이밍이 중요해요.','패링에 성공하면 필살기 게이지도 조금 차올라요.','헛 패링을 하면 잠깐 동안 다시 쓸 수 없어요. 마구 누르면 안 돼요!','초필살기는 패링할 수 없어요.',' CPU도 가끔 패링을 해요. 조심하세요!',' 설명서에 패링 설명을 넣었어요.',' 설정 메뉴에 패치노트가 생겼어요.']]];
 function manBuild(){if(pnMode){const L=[],mw=W-150;let y=0;g.save();g.font=MF;PN.forEach(([v,ls])=>{y+=14;L.push([y+18,'h',v]);y+=32;ls.forEach(s=>{let l='',f=1;const fl=()=>{L.push([y+15,f?'b':'p',l]);f=0;y+=23};for(const ch of s){if(g.measureText(l+ch).width>mw&&l){fl();l=ch==' '?'':ch}else l+=ch}if(l)fl();y+=7})});g.restore();manL=L;manH=y+24;return}
 const L=[],mw=W-150;let y=0;g.save();g.font=MF;
  const add=(k,s)=>{if(k=='h'){y+=14;L.push([y+18,'h',s]);y+=32}else{let l='',f=1;const fl=()=>{L.push([y+15,f?'b':'p',l]);f=0;y+=23};for(const ch of s){if(g.measureText(l+ch).width>mw&&l){fl();l=ch==' '?'':ch}else l+=ch}if(l)fl();y+=7}};
@@ -934,7 +935,7 @@ function keysUI(){txt('이동 · 공격',50,142,16,'#7ff3ea','left',S0);txt('단
  kbAct.forEach(([a,nm],n)=>{const b=n>7,y=150+(b?n-8:n)*40;txt(nm,b?520:50,y+23,18,'#e9eefc','left',S0);
   for(let p=0;p<2;p++){const q=ckR(n,p),sel=n==kn&&p==kp,w=kbW&&kbW.i==p&&kbW.a==a;g.fillStyle=w?'#ffe27a':sel?'#e0204f':'#ffffff1a';g.fillRect(q[0],q[1],q[2],q[3]);g.strokeStyle=sel?'#fff':'#fff4';g.lineWidth=1.5;g.strokeRect(q[0],q[1],q[2],q[3]);txt(w?'…':kbName(kbGet(p,a)),q[0]+32,q[1]+22,15,w?'#000':'#fff','center',S0)}});
  [['기본값으로',390],['뒤로',440]].forEach(([s,y])=>{g.fillStyle='#ffffff1a';g.fillRect(520,y,220,40);g.strokeStyle='#fff4';g.lineWidth=1.5;g.strokeRect(520,y,220,40);txt(s,630,y+27,18,'#fff','center',S0)});
- txt('단축키 칸은 Backspace로 해제할 수 있어요',520,372,13,'#9aa6c0','left',S0);
+ txt('단축키 칸은 Backspace로 해제할 수 있어요',520,508,13,'#9aa6c0','left',S0);
  txt('↑ ↓ ← → 선택 · Enter 바꾸기 · R 기본값 · Esc 뒤로',40,H-22,14,'#9aa6c0','left',S0)}
 function optUI(){g.save();if(sc=='man'){optBG(pnMode?'패치노트':'설명서','');manUI()}else if(sc=='snd'){optBG('소리 설정','음악과 효과음을 따로 조절해요.');sndUI()}else{optBG('키 설정','칸을 고르고 새 키를 누르세요. 이미 쓰는 키면 서로 바뀌어요.');keysUI()}g.restore()}
 function menuUI(a){a=a==null?1:a;g.save();g.globalAlpha=a;mY+=(mi*54-mY)*.3;const IT=TB[tb][1];
@@ -1198,7 +1199,7 @@ addEventListener('pointerdown',()=>window.focus());window.focus();
   const mk=a=>{const d=document.createElement('div');d.style.cssText='display:grid;grid-template-columns:repeat(3,58px);gap:6px';
    a.forEach(([l,k])=>{const b=document.createElement('button');b.textContent=l;b.style.cssText='height:58px;border-radius:14px;border:2px solid #6b7bff;background:#1c2566;color:#fff;font:800 17px system-ui;touch-action:none;visibility:'+(k?'visible':'hidden');
     if(k){b.onpointerdown=e=>{e.preventDefault();const q=kbPad(k);K[q]=1;PR[q]=1};b.onpointerup=b.onpointerleave=b.onpointercancel=()=>{K[kbPad(k)]=0}}d.appendChild(b)});return d};
-  pad.append(mk([['',0],['▲','KeyW'],['',0],[' ','KeyA'],['▼','KeyS'],[' ','KeyD']]),mk([['LP','KeyF'],['RP','KeyG'],['고유','PadSP'],['LK','KeyR'],['RK','KeyT'],['초필','PadSU']]));
+  pad.append(mk([['패링','KeyH'],['▲','KeyW'],['',0],[' ','KeyA'],['▼','KeyS'],[' ','KeyD']]),mk([['LP','KeyF'],['RP','KeyG'],['고유','PadSP'],['LK','KeyR'],['RK','KeyT'],['초필','PadSU']]));
   document.body.appendChild(pad);fit()}})();
 try{if(parent!==window)parent.postMessage('gm-ready',location.origin)}catch(e){}
 const man=document.getElementById('man'),mb=document.getElementById('manBtn');
@@ -1209,7 +1210,7 @@ addEventListener('keydown',e=>{if(mo&&e.code=='Escape')tman(0)});
 addEventListener('blur',()=>{for(const k in K)K[k]=0});
 mb.insertAdjacentHTML('afterend','<button id="musBtn" tabindex="-1"> </button>');const ub=document.getElementById('musBtn');ub.onclick=()=>{MUS^=1;ub.textContent=MUS?' ':' ';ub.blur();if(!MUS)try{speechSynthesis.cancel()}catch(e){}};
 
-const kbDef=JSON.parse(JSON.stringify(KM)),kbAct=[['l','← 왼쪽'],['r','→ 오른쪽'],['u','↑ 점프'],['d','↓ 앉기'],['b0','펀치 LP'],['b1','펀치 RP'],['b2','킥 LK'],['b3','킥 RK'],['s0','어퍼컷 (↓+RP)'],['s1','로우킥 (↓+LK)'],['s2','스위프 (↓+RK)'],['s3','고유기'],['s4','초필살기']],kbNm={ArrowLeft:'←',ArrowRight:'→',ArrowUp:'↑',ArrowDown:'↓',Semicolon:';',Comma:',',Period:'.',Slash:'/',Quote:"'",BracketLeft:'[',BracketRight:']',Backslash:'\\',Minus:'-',Equal:'=',Backquote:'`',PadSP:'터치',PadSU:'터치'},kt=document.getElementById('kt');let kbW=null;
+const kbDef=JSON.parse(JSON.stringify(KM)),kbAct=[['l','← 왼쪽'],['r','→ 오른쪽'],['u','↑ 점프'],['d','↓ 앉기'],['b0','펀치 LP'],['b1','펀치 RP'],['b2','킥 LK'],['b3','킥 RK'],['s0','어퍼컷 (↓+RP)'],['s1','로우킥 (↓+LK)'],['s2','스위프 (↓+RK)'],['s3','고유기'],['s4','초필살기'],['s5','패링']],kbNm={ArrowLeft:'←',ArrowRight:'→',ArrowUp:'↑',ArrowDown:'↓',Semicolon:';',Comma:',',Period:'.',Slash:'/',Quote:"'",BracketLeft:'[',BracketRight:']',Backslash:'\\',Minus:'-',Equal:'=',Backquote:'`',PadSP:'터치',PadSU:'터치'},kt=document.getElementById('kt');let kbW=null;
 function kbName(c){return !c?'—':kbNm[c]||c.replace(/^(Key|Digit)/,'').replace(/^Numpad/,'N')}
 function kbGet(i,a){return /^[bs]\d/.test(a)?KM[i][a[0]][+a[1]]:KM[i][a]}
 function kbSet(i,a,v){if(/^[bs]\d/.test(a))KM[i][a[0]][+a[1]]=v;else KM[i][a]=v}
