@@ -1005,7 +1005,7 @@ const ULTS={
  kage:{len:52,nm:'그림자 베기',sb:'SHADOW REAPER',c:'#b080ff'},
  titan:{len:58,nm:'철산붕괴',sb:'IRON MOUNTAIN CRASH',c:'#ff9a30',sh:20},
  volt:{len:52,nm:'뇌신강림',sb:'THUNDER GOD',c:'#81e200'},
- ichi:{len:74,nm:'',sb:'',c:'#ff2a3a',sh:16},
+ ichi:{len:170,nm:'',sb:'',c:'#ff2a3a',sh:16},
  pika:{len:58,nm:'10만 볼트',sb:'THUNDER SPHERE',c:'#ffe14d',sh:18},
  reika:{len:54,nm:'염무연타',sb:'BLAZING DANCE',c:'#ff7a1a'},
  zenith:{len:52,nm:'네온 스톰',sb:'NEON GLITCH',c:'#ff3df2'},
@@ -1094,8 +1094,8 @@ const ustar=(x,y,r,col,a)=>{g.save();g.globalAlpha=a;g.fillStyle=col;g.beginPath
    g.globalAlpha=fade;g.drawImage(A.img,r[0],r[1],r[2],r[3],-r[4],-r[5],r[2],r[3]);
    g.globalCompositeOperation='lighter';g.globalAlpha=.45*fade;g.scale(1.08,1.08);g.drawImage(A.img,r[0],r[1],r[2],r[3],-r[4],-r[5],r[2],r[3]);g.restore()}
   if(p>.92)ufill('#fff',(p-.92)/.08*.9)},
- ichi(o){const{p,q,x,y,c,u}=o,S=SH[25],dr=u.dir||1,P1=.4,P2=.66,fy=y+78;
-  const say=s=>{try{const v=new SpeechSynthesisUtterance(s);v.lang='en-US';v.rate=.75;v.pitch=.45;speechSynthesis.cancel();speechSynthesis.speak(v)}catch(e){}};
+ ichi(o){const{p,q,x,y,c,u}=o,S=SH[25],dr=u.dir||1,P1=.34,P2=.64,fy=y+78;
+  const say=s=>{try{const v=new SpeechSynthesisUtterance(s);v.lang='en-US';v.rate=.6;v.pitch=.45;speechSynthesis.cancel();speechSynthesis.speak(v)}catch(e){}};
   if(!u.s1&&q>=2){u.s1=1;say('Bankai!')}if(!u.s2&&p>=P1){u.s2=1;say('Tensa Zangetsu!')}
   ufill('#05000a',.72*Math.min(1,p*6));uvig('#5a0010',.9);
   const M=S&&S.m,sp=(i,cx,cy,s,a,lt)=>{if(!M)return;const f=M.f[i];g.save();g.translate(cx,cy);g.scale(dr*s,s);g.globalAlpha=a;if(lt)g.globalCompositeOperation='lighter';g.drawImage(S.img,f[0],f[1],f[2],f[3],-f[4],-f[5],f[2],f[3]);g.restore()};
