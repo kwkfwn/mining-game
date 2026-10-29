@@ -1024,7 +1024,7 @@ function selUI(){const cols=SELC,n=CH.length,rows=Math.ceil(n/cols),gp=6,sk=10,y
   txt(net?kbName(KM[0].u)+kbName(KM[0].l)+kbName(KM[0].d)+kbName(KM[0].r)+' 로 고르고 아무 공격키로 확정':'P1 '+kbName(KM[0].u)+kbName(KM[0].l)+kbName(KM[0].d)+kbName(KM[0].r)+' · P2 '+kbName(KM[1].u)+kbName(KM[1].l)+kbName(KM[1].d)+kbName(KM[1].r)+' 로 고르고 아무 공격키로 확정',W/2,531,15,'#cfe');}
 /* ---------- 맵 선택 화면 (캐릭터 선택 뒤) · 온라인은 주사위 높은 쪽이 고름 ---------- */
 let MP=null;const MP_WHO=()=>MP?MP.who:-1;
-function mapEnter(){MP={who:net?-1:0,r:0,dt:0,tie:0,mv:0,sw:0,fin:null,ft:0,rs:0,spin:0};if(net){net.go=null;net.dv={}}if(stgPick>STG.length)stgPick=0;if(stgPick<STG.length)stg=stgPick;sc='map';snd('ui')}
+function mapEnter(){MP={who:net?-1:0,r:0,dt:0,tie:0,mv:0,sw:0,fin:null,ft:0,rs:0,spin:0};if(stgPick>STG.length)stgPick=0;if(stgPick<STG.length)stg=stgPick;sc='map';snd('ui')}
 function mapCan(){return MP&&MP.who>=0&&MP.sw>25&&!MP.fin&&(!net||net.me==MP.who)}
 function mapGo(){if(!MP||MP.fin)return;const N=STG.length;let s=stgPick;if(s>=N)s=Math.random()*N|0;if(net)net.rm.emit('map',{k:'g',p:stgPick,s});MP.fin={p:stgPick,s};MP.ft=0;snd('ui')}
 function mapDone(){const s=MP.fin.s;stg=s;try{if(!net)localStorage.setItem('nk_stage',MP.fin.p)}catch(e){}MP=null;if(net){net.go=null;net.dv={};netInit()}newRound()}
@@ -1034,6 +1034,7 @@ function mapGeo(){const n=STG.length+1,gp=6,tw=Math.min(140,((W-48-(MAPC-1)*gp)/
 function mapStep(){if(!MP)return;const N=STG.length;
  if(net&&MP.who<0){MP.dt++;
   if(MP.dt==1){MP.mv=1+Math.random()*6|0;(net.dv[MP.r]=net.dv[MP.r]||[0,0])[net.me]=MP.mv;net.rm.emit('map',{k:'d',r:MP.r,v:MP.mv});snd('ui')}
+  else if(MP.mv&&MP.dt%30==0)net.rm.emit('map',{k:'d',r:MP.r,v:MP.mv});
   const dv=net.dv[MP.r];
   if(MP.dt>=75&&dv&&dv[0]&&dv[1]){if(dv[0]!=dv[1]){MP.who=dv[0]>dv[1]?0:1;MP.sw=0;snd('ko')}else{if(++MP.tie>=55){MP.tie=0;MP.r++;MP.dt=0}}}}
  else if(MP.who>=0)MP.sw++;
