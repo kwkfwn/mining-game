@@ -331,9 +331,11 @@ function kInh(a,o,m){const u=a.f-m.st,dx=o.x-a.x,fw=(dx*a.dir)>0;
  if(u>=1&&u<=m.ac&&fw&&Math.abs(dx)<330&&o.jy<30&&o.st!='down'&&o.st!='ko'&&o.st!='fly'){o.x-=a.dir*(Math.abs(dx)>60?3.6:0);if(o.x<30)o.x=30;if(o.x>W-30)o.x=W-30}
  if(u==m.ac){if(fw&&Math.abs(dx)<125&&o.jy<40){const px=Object.assign({},a,{mv:MV.kspit,hit:0,st:'atk',f:9});tryHit(px,o);if(px.hit){['cb','gx','sh','ct','cp'].forEach(k=>{a[k]=px[k]});fx(o.x,FL-110,3,'★');kCopy(a,o);sp(o.x,FL-60,24,'#ffe86a',10);sp(o.x,FL-60,12,'#fff',8);shake=Math.max(shake,12)}}else fx(a.x+a.dir*40,FL-120,3,'...')}}
 /* 카피: 흡입으로 맞춘 상대의 고유기를 훔쳐서 3번까지 쓴다(맞거나 쓰러지면 사라짐) */
-function kCopy(a,o){if(!o.spk||!MV[o.spk]||o.spk=='ksp'||o.name=='KIRBY')return;a.kcn=o.name;a.kcu=3;a.spk=o.spk;fx(a.x,FL-200,3,'COPY! '+o.name);sp(a.x,FL-100,18,'#ffe86a',9);flash=Math.max(flash,.3)}
-function kLose(f,used){f.spk='ksp';f.kcn=null;f.kcu=0;if(!used)fx(f.x,FL-200,3,'COPY LOST')}
-function kClr(){F.forEach(f=>{if(f.name=='KIRBY'){f.spk='ksp';f.kcn=null;f.kcu=0}})}
+function kCopy(a,o){if(!o.spk||!MV[o.spk]||o.spk=='ksp'||o.name=='KIRBY')return;a.kcn=o.name;a.kcu=3;a.spk=o.spk;a.ksi=o.si;a.kaz=o.az||0;a.ksz=o.sz||1;fx(a.x,FL-200,3,'COPY! '+o.name);sp(a.x,FL-100,18,'#ffe86a',9);flash=Math.max(flash,.3)}
+function kLose(f,used){f.spk='ksp';f.kcn=null;f.kcu=0;f.ksi=null;if(!used)fx(f.x,FL-200,3,'COPY LOST')}
+function kClr(){F.forEach(f=>{if(f.name=='KIRBY'){f.spk='ksp';f.kcn=null;f.kcu=0;f.ksi=null}})}
+/* 카피 기술을 쓰는 동안 원래 주인의 공격 모션/이펙트(스프라이트 + 전용 이펙트)를 커비 뒤에 반투명하게 겹쳐 그린다 */
+function kGhost(f){const f2=Object.assign({},f,{si:f.ksi,az:f.kaz||0,sz:f.ksz||1,name:f.kcn,ttl:0});g.save();g.globalAlpha=.65;try{spr(f2)}catch(e){}g.restore()}
 function kTick(){F.forEach(f=>{if(f.name=='KIRBY'&&f.kcn&&(f.st=='hurt'||f.st=='fly'||f.st=='down'||f.st=='ko'))kLose(f)})}
 function kFx(f,hx,jy){if(f.si!=34||f.ttl)return;
  if(f.kcn&&sc=='fight'){g.save();g.globalAlpha=.9;txt('★ '+f.kcn+' ×'+f.kcu,hx,FL-jy-122,16,'#ffe86a','center');g.restore()}
@@ -443,7 +445,7 @@ function drawNFX(){const now=performance.now();
    if(u<.5){g.save();g.globalCompositeOperation='lighter';g.strokeStyle='rgba(255,200,100,'+(1-u*2)+')';g.lineWidth=4;g.beginPath();g.moveTo(cx+side*55,e.y-80);g.lineTo(e.x,e.y-90);g.stroke();g.restore()}}
   else{g.save();g.translate(e.x,e.y);g.globalCompositeOperation='lighter';g.strokeStyle='rgba(255,190,80,'+a+')';g.lineWidth=6*a+1;g.beginPath();g.arc(0,0,12+u*70,0,7);g.stroke();g.fillStyle='rgba(255,240,180,'+a+')';g.beginPath();for(let j=0;j<12;j++){const an=j*Math.PI/6,rr=(j%2?8:32)*(1-u);g.lineTo(Math.cos(an)*rr,Math.sin(an)*rr)}g.closePath();g.fill();g.restore()}}
 }
-function spr(f){const S=SH[f.si],M=S.m,R=M?((M.s&&M.s[f.az])||M.R):GR,sim=sc=='intro'||sc=='fight'||sc=='ko',al=f.ttl||!sim||hs>0||mo||(net&&net.sw)?1:AL,hx=(f.ox==null?f.x:f.ox+(f.x-f.ox)*al)+(f.fl>0&&hs>0&&!f.ttl?(Math.random()-.5)*6:0),jy=f.oy==null?f.jy:f.oy+(f.jy-f.oy)*al,z=(M?(f.az==3&&!(f.xf>0)&&M.z3||M.z):3.5)*(f.sz||1),s=f.st,pk=(a,p)=>a[Math.min(a.length-1,p*a.length|0)];let n,rn='';
+function spr(f){if(f.si==34&&f.kcn&&f.st=='atk'&&!f.ttl&&f.ksi!=null&&f.mv===MV[f.spk])kGhost(f);const S=SH[f.si],M=S.m,R=M?((M.s&&M.s[f.az])||M.R):GR,sim=sc=='intro'||sc=='fight'||sc=='ko',al=f.ttl||!sim||hs>0||mo||(net&&net.sw)?1:AL,hx=(f.ox==null?f.x:f.ox+(f.x-f.ox)*al)+(f.fl>0&&hs>0&&!f.ttl?(Math.random()-.5)*6:0),jy=f.oy==null?f.jy:f.oy+(f.jy-f.oy)*al,z=(M?(f.az==3&&!(f.xf>0)&&M.z3||M.z):3.5)*(f.sz||1),s=f.st,pk=(a,p)=>a[Math.min(a.length-1,p*a.length|0)];let n,rn='';
   if(f.xf>0&&R.xf){rn='xf';n=pk(R.xf,1-f.xf/f.xfl)}else if(s=='atk'){const m=f.mv,e=R.at[SK.indexOf(m)]||R.at[0],a=f.f;rn='at';n=a<=m.st?pk(e[0],a/(m.st+1)):a<=m.st+m.ac?pk(e[1],(a-m.st-1)/m.ac):pk(e[2],Math.min(.99,(a-m.st-m.ac-1)/m.rc));if(f.si==30&&m===MV.nrs&&a>m.st&&f.nbigT!=null&&t-f.nbigT<=a){const bp=(a-m.st-1)/m.ac;n=a<=m.st+m.ac?[64,65,66,67][Math.min(3,bp*4|0)]:[72,73][Math.min(1,(a-m.st-m.ac-1)/m.rc*2|0)]}}
   else if(s=='jump'){rn=f.vy>0?'up':'fl';n=R[rn]}
   else if(s=='hurt'){rn=f.bl?(f.cr?'cb':'bk'):f.cr?'ch':f.stun>6?'h1':'h2';n=R[rn]}
